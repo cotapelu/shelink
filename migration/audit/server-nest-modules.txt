@@ -1,0 +1,13 @@
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/database/database.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/events/events.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/files/files.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/import-export/import-export.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/notification/notification.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/persons/persons.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/project-management/project-management.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/reports/reports.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/stats/stats.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-assignment/task-assignment.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-management/task-management.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/user-management/user-management.module.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/workflow-management/workflow-management.module.ts

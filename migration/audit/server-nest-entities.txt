@@ -1,0 +1,17 @@
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/events/entities/event.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/notification/entities/notification.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/persons/entities/person.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/persons/entities/relationship.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/project-management/entities/project.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/project-management/entities/project-member.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/project-management/entities/project-milestone.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-assignment/entities/task-assignment.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-management/entities/task-attachment.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-management/entities/task-checklist-item.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-management/entities/task-comment.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-management/entities/task.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-management/entities/task-tag.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-management/entities/task-watcher.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/user-management/entities/user.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/workflow-management/entities/workflow-audit.entity.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/workflow-management/entities/workflow.entity.ts

@@ -1,0 +1,13 @@
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/events/services/event.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/notification/services/notification.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/persons/services/person.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/persons/services/relationship.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/project-management/services/project.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/reports/reports.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/stats/services/stats.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-assignment/services/task-assignment.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-management/services/task-attachment.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/task-management/services/task.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/user-management/services/user.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/workflow-management/services/workflow.service.ts
+/home/quangtynu/Qcoder/web-nextjs/server-nest/src/modules/workflow-management/services/workflow-transition.service.ts

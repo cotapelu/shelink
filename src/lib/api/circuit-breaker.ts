@@ -1,0 +1,142 @@
+/**
+ * Circuit Breaker pattern implementation
+ * Prevents cascading failures by failing fast when service is down
+ */
+
+export enum CircuitState {
+  CLOSED = 'CLOSED',     // Normal operation, requests pass through
+  OPEN = 'OPEN',         // Failure threshold exceeded, fail fast
+  HALF_OPEN = 'HALF_OPEN', // Testing if service recovered
+}
+
+export interface CircuitBreakerConfig {
+  failureThreshold: number;     // Number of failures before opening
+  resetTimeout: number;         // Time in ms before trying half-open
+  halfOpenMaxCalls: number;     // Max calls in half-open state
+  onStateChange?: (state: CircuitState) => void;
+}
+
+export class CircuitBreaker<T extends (...args: any[]) => Promise<any>> {
+  private fn: T;
+  private config: CircuitBreakerConfig;
+  private state: CircuitState = CircuitState.CLOSED;
+  private failureCount: number = 0;
+  private halfOpenCalls: number = 0;
+  private timer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor(fn: T, config: Partial<CircuitBreakerConfig> = {}) {
+    this.fn = fn;
+    this.config = {
+      failureThreshold: config.failureThreshold ?? 1,
+      resetTimeout: config.resetTimeout ?? 60000,
+      halfOpenMaxCalls: config.halfOpenMaxCalls ?? 3,
+      onStateChange: config.onStateChange,
+    };
+  }
+
+  async call(...args: Parameters<T>): Promise<ReturnType<T>> {
+    // Fast-fail if OPEN
+    if (this.state === CircuitState.OPEN) {
+      throw new Error('Circuit breaker is OPEN. Service temporarily unavailable.');
+    }
+
+    // If HALF_OPEN, check max calls
+    if (this.state === CircuitState.HALF_OPEN) {
+      if (this.halfOpenCalls >= this.config.halfOpenMaxCalls) {
+        throw new Error('Circuit breaker is HALF_OPEN and max calls exceeded.');
+      }
+      this.halfOpenCalls++;
+    }
+
+    try {
+      const result = await this.fn(...args);
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onFailure();
+      throw error;
+    }
+  }
+
+  // Alias for compatibility
+  async execute(...args: Parameters<T>): Promise<ReturnType<T>> {
+    return this.call(...args);
+  }
+
+  private onSuccess(): void {
+    if (this.state === CircuitState.HALF_OPEN) {
+      this.transitionTo(CircuitState.CLOSED);
+    }
+    this.failureCount = 0;
+    this.halfOpenCalls = 0;
+  }
+
+  private onFailure(): void {
+    this.failureCount++;
+
+    if (this.state === CircuitState.CLOSED && this.failureCount >= this.config.failureThreshold) {
+      this.transitionTo(CircuitState.OPEN);
+    } else if (this.state === CircuitState.HALF_OPEN) {
+      this.transitionTo(CircuitState.OPEN);
+    }
+  }
+
+  private transitionTo(newState: CircuitState): void {
+    if (this.state === newState) return;
+
+    // Clear any pending timer when leaving OPEN
+    if (this.state === CircuitState.OPEN && this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+
+    this.state = newState;
+
+    // Reset half-open call counter when entering HALF_OPEN
+    if (newState === CircuitState.HALF_OPEN) {
+      this.halfOpenCalls = 0;
+    }
+
+    this.config.onStateChange?.(newState);
+
+    // Log state change for observability
+    if (typeof console !== 'undefined') {
+      console.info(`[CircuitBreaker] State changed to: ${newState}`);
+    }
+
+    // When transitioning to OPEN, schedule transition to HALF_OPEN after resetTimeout
+    if (newState === CircuitState.OPEN) {
+      this.timer = setTimeout(() => {
+        this.transitionTo(CircuitState.HALF_OPEN);
+      }, this.config.resetTimeout);
+    }
+  }
+
+  getState(): CircuitState {
+    return this.state;
+  }
+
+  getFailureCount(): number {
+    return this.failureCount;
+  }
+
+  reset(): void {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+    this.failureCount = 0;
+    this.state = CircuitState.CLOSED;
+    this.halfOpenCalls = 0;
+  }
+}
+
+/**
+ * Wrap an API function with circuit breaker
+ */
+export function createCircuitBreaker<T extends (...args: any[]) => Promise<any>>(
+  fn: T,
+  config?: Partial<CircuitBreakerConfig>
+): CircuitBreaker<T> {
+  return new CircuitBreaker(fn, config);
+}

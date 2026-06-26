@@ -1,0 +1,48 @@
+.next
+.next-dev
+.next-build
+node_modules
+.npm-cache
+.env
+.env.*
+!.env.example
+storage/*
+!storage/.gitkeep
+coverage
+dist
+*.log
+.playwright-cli/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Prisma
+*.db
+*.db-journal
+
+# Backup
+*.bak
+backups/
+backup*/
+*.backup
+*.dump
+*.sql.gz
+database.dump
+storage.tar.gz
+
+# TS incremental
+tsconfig.tsbuildinfo
+
+# Claude Code session notes
+.claude-sessions/
+
+# Working scratch (outside of project scope)
+outputs/

@@ -1,0 +1,15 @@
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/about/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/dashboard/data/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/dashboard/events/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/dashboard/kinship/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/dashboard/lineage/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/dashboard/members/[id]/edit/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/dashboard/members/[id]/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/dashboard/members/new/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/dashboard/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/dashboard/stats/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/dashboard/users/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/login/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/missing-db-config/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/page.tsx
+/home/quangtynu/Qcoder/web-nextjs/client-next/app/setup/page.tsx
