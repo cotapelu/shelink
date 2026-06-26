@@ -1954,7 +1954,10 @@ model Person {
   incomingRelationships Relationship[] @relation("ToRel")
 
   // Events
-  events Event[]
+  events           Event[]
+  // Lineage relations: person as subject, and person as root
+  lineagesAsPerson Lineage[] @relation("LineagePerson")
+  lineagesAsRoot   Lineage[] @relation("LineageRoot")
 
   @@index([fullName])
   @@index([generation])
@@ -2075,6 +2078,23 @@ model TaskHistory {
   @@index([taskId])
   @@index([userId])
   @@index([createdAt])
+}
+
+model Lineage {
+  id           String   @id @default(cuid())
+  personId     String
+  rootPersonId String
+  generation   Int
+  path         String // JSON-encoded ancestor path
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  person     Person @relation("LineagePerson", fields: [personId], references: [id], onDelete: Cascade)
+  rootPerson Person @relation("LineageRoot", fields: [rootPersonId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, rootPersonId])
+  @@index([rootPersonId])
+  @@index([generation])
 }
 
 model Team {

@@ -1,0 +1,221 @@
+// AUTO-GENERATED FROM TypeORM entities
+// DO NOT EDIT DIRECTLY - Will be merged into schema.prisma
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+  BLOCKED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum WorkflowState {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model WorkTask {
+  id             String      @id @default(cuid())
+  title          String
+  description    String?
+  assigneeId     String?
+  dueDate        DateTime?
+  status         TaskStatus  @default(TODO)
+  priority       TaskPriority @default(MEDIUM)
+  projectId      String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  assignee       Person?     @relation(fields: [assigneeId], references: [id])
+  project        Project?    @relation(fields: [projectId], references: [id])
+  comments       TaskComment[]
+  tags           TaskTag[]
+  attachments    TaskAttachment[]
+  watchers       TaskWatcher[]
+  checklists     TaskChecklistItem[]
+
+  @@index([assigneeId])
+  @@index([projectId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([priority])
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  content   String
+  authorId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task      WorkTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([authorId])
+}
+
+model TaskTag {
+  id    String @id @default(cuid())
+  taskId String
+  tag   String
+
+  task  WorkTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, tag])
+  @@index([tag])
+}
+
+model TaskAttachment {
+  id        String   @id @default(cuid())
+  taskId    String
+  filename  String
+  url       String
+  size      Int?
+  mimeType  String?
+  createdAt DateTime @default(now())
+
+  task      WorkTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+}
+
+model TaskWatcher {
+  id     String @id @default(cuid())
+  taskId String
+  userId String
+
+  task   WorkTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([userId])
+}
+
+model TaskChecklistItem {
+  id        String   @id @default(cuid())
+  taskId    String
+  label     String
+  completed Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task      WorkTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  status      ProjectStatus @default(ACTIVE)
+  startDate   DateTime?
+  endDate     DateTime?
+  creatorId   String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  creator     User          @relation(fields: [creatorId], references: [id])
+  members     ProjectMember[]
+  tasks       WorkTask[]
+  workflows   Workflow[]
+
+  @@index([creatorId])
+  @@index([status])
+  @@index([startDate])
+}
+
+model ProjectMember {
+  id         String   @id @default(cuid())
+  projectId  String
+  personId   String
+  role       String   @default("member")
+  joinedAt   DateTime @default(now())
+
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  person     Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, personId])
+  @@index([personId])
+}
+
+model Workflow {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  state       WorkflowState @default(DRAFT)
+  projectId   String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  project     Project?      @relation(fields: [projectId], references: [id])
+  steps       WorkflowStep[]
+  transitions WorkflowTransition[]
+
+  @@index([projectId])
+  @@index([state])
+}
+
+model WorkflowStep {
+  id          String   @id @default(cuid())
+  workflowId  String
+  name        String
+  description String?
+  order       Int      @default(0)
+  assigneeId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  assignee    Person?  @relation(fields: [assigneeId], references: [id])
+
+  @@index([workflowId])
+  @@index([assigneeId])
+}
+
+model WorkflowTransition {
+  id        String   @id @default(cuid())
+  workflowId String
+  fromStepId String
+  toStepId   String
+  condition  String?  // JSON expression
+  createdAt  DateTime @default(now())
+
+  workflow  Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@index([fromStepId])
+  @@index([toStepId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  content   String
+  read      Boolean  @default(false)
+  href      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}

@@ -178,6 +178,195 @@ async function seedSystemSettings() {
   console.log("✓ 系统设置：默认外观已就绪");
 }
 
+// NEW: Seed Genealogy data (Persons, Relationships, Events, Lineage)
+async function seedGenealogy() {
+  // Get admin user
+  const admin = await prisma.user.findFirst({
+    where: { role: UserRole.ADMIN },
+    select: { id: true }
+  });
+  if (!admin) throw new Error("Admin user not found");
+
+  // Create sample persons
+  const person1 = await prisma.person.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000001" },
+    update: {},
+    create: {
+      id: "00000000-0000-0000-0000-000000000001",
+      fullName: "Nguyễn Văn A",
+      gender: "MALE",
+      birthYear: 1950,
+      generation: 1,
+      note: "Ông nội"
+    }
+  });
+  const person2 = await prisma.person.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000002" },
+    update: {},
+    create: {
+      id: "00000000-0000-0000-0000-000000000002",
+      fullName: "Trần Thị B",
+      gender: "FEMALE",
+      birthYear: 1955,
+      birthMonth: 3,
+      birthDay: 10,
+      generation: 1,
+      note: "Bà nội"
+    }
+  });
+  const person3 = await prisma.person.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000003" },
+    update: {},
+    create: {
+      id: "00000000-0000-0000-0000-000000000003",
+      fullName: "Nguyễn Văn C",
+      gender: "MALE",
+      birthYear: 1975,
+      generation: 2,
+      fatherId: person1.id,
+      motherId: person2.id,
+      note: "Con trai trưởng"
+    }
+  });
+  const person4 = await prisma.person.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000004" },
+    update: {},
+    create: {
+      id: "00000000-0000-0000-0000-000000000004",
+      fullName: "Lê Thị D",
+      gender: "FEMALE",
+      birthYear: 1980,
+      generation: 2,
+      note: "Con dâu"
+    }
+  });
+
+  // Relationships
+  await prisma.relationship.upsert({
+    where: { id: "rel-1" },
+    update: {},
+    create: {
+      id: "rel-1",
+      fromPersonId: person1.id,
+      toPersonId: person2.id,
+      type: "SPOUSE"
+    }
+  });
+  await prisma.relationship.upsert({
+    where: { id: "rel-2" },
+    update: {},
+    create: {
+      id: "rel-2",
+      fromPersonId: person3.id,
+      toPersonId: person4.id,
+      type: "SPOUSE"
+    }
+  });
+
+  // Events
+  await prisma.event.createMany({
+    data: [
+      {
+        personId: person1.id,
+        type: "BIRTH",
+        name: "Sinh ra",
+        eventDate: new Date(1950, 0, 15),
+        location: "Hà Nội"
+      },
+      {
+        personId: person3.id,
+        type: "BIRTH",
+        name: "Sinh ra",
+        eventDate: new Date(1975, 5, 20),
+        location: "HCM"
+      },
+      {
+        personId: person1.id,
+        type: "DEATH",
+        name: "Mất",
+        eventDate: new Date(2020, 10, 5),
+        location: "HCM"
+      }
+    ]
+  });
+
+  // Lineage (calculate simple for person3 with root=person1)
+  await prisma.lineage.create({
+    data: {
+      personId: person3.id,
+      rootPersonId: person1.id,
+      generation: 2,
+      path: JSON.stringify([person1.id])
+    }
+  });
+
+  console.log("✓ Genealogy seed: persons, relationships, events, lineage");
+}
+
+// NEW: Seed ERP data (Projects, WorkTasks, Workflows)
+async function seedERP(adminId?: string) {
+  const userId = adminId ?? (await prisma.user.findFirst({ where: { role: UserRole.ADMIN } }))?.id;
+  if (!userId) throw new Error("Admin user not found for ERP seed");
+
+  // Project
+  const project = await prisma.project.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000901" },
+    update: {},
+    create: {
+      id: "00000000-0000-0000-0000-000000000901",
+      name: "Demo Project",
+      description: "Seed project for ERP",
+      status: "ACTIVE",
+      ownerId: userId,
+      startDate: new Date()
+    }
+  });
+
+  // WorkTask
+  const task1 = await prisma.workTask.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000911" },
+    update: {},
+    create: {
+      id: "00000000-0000-0000-0000-000000000911",
+      title: "Welcome task",
+      description: "Get started with ERP",
+      status: "TODO",
+      priority: "MEDIUM",
+      projectId: project.id,
+      assigneeId: userId
+    }
+  });
+
+  const task2 = await prisma.workTask.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000912" },
+    update: {},
+    create: {
+      id: "00000000-0000-0000-0000-000000000912",
+      title: "Review project plan",
+      description: "Check milestones",
+      status: "IN_PROGRESS",
+      priority: "HIGH",
+      projectId: project.id,
+      assigneeId: userId
+    }
+  });
+
+  // Workflow
+  const workflow = await prisma.workflow.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000921" },
+    update: {},
+    create: {
+      id: "00000000-0000-0000-0000-000000000921",
+      name: "Simple Review Workflow",
+      status: "ACTIVE",
+      projectId: project.id,
+      ownerId: userId
+    }
+  });
+
+  console.log("✓ ERP seed: project, tasks, workflow");
+}
+
 async function main() {
   console.log("开始 seed...\n");
 
@@ -192,6 +381,12 @@ async function main() {
   const { seedV08Templates, seedV08SealConfigs } = await import("./seeds/v08-templates-and-seals");
   await seedV08SealConfigs(prisma);
   await seedV08Templates(prisma);
+
+  // NEW: Genealogy seed
+  await seedGenealogy();
+
+  // NEW: ERP seed
+  await seedERP();
 
   console.log("\n✓ Seed 完成");
 }

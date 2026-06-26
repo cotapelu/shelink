@@ -1,0 +1,128 @@
+// AUTO-GENERATED FROM TypeORM entities
+// DO NOT EDIT DIRECTLY - Will be merged into schema.prisma
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum RelationType {
+  PARENT_CHILD
+  SPOUSE
+  SIBLING
+  PARTNER
+  GUARDIAN
+  OTHER
+}
+
+enum EventType {
+  BIRTH
+  DEATH
+  MARRIAGE
+  DIVORCE
+  MIGRATION
+  EDUCATION
+  CAREER
+  CUSTOM
+}
+
+model Person {
+  id            String   @id @default(cuid())
+  fullName      String   @db.Text
+  gender        Gender   @default(male)
+  birthYear     Int?
+  birthMonth    Int?
+  birthDay      Int?
+  deathYear     Int?
+  deathMonth    Int?
+  deathDay      Int?
+  isDeceased    Boolean  @default(false)
+  isInLaw       Boolean  @default(false)
+  birthOrder    Int?
+  generation    Int?
+  otherNames    String?
+  avatarUrl     String?
+  note          String?
+  phoneNumber   String?
+  occupation    String?
+  currentResidence String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Self-relations (parent-child)
+  fatherId      String?
+  motherId      String?
+  father        Person?  @relation("ParentChild", fields: [fatherId], references: [id])
+  mother        Person?  @relation("ParentChild", fields: [motherId], references: [id])
+  children      Person[] @relation("ParentChild")
+
+  // Relations
+  outgoingRelationships Relationship[] @relation("RelationshipFrom")
+  incomingRelationships Relationship[] @relation("RelationshipTo")
+  events               Event[]
+  lineages             Lineage[]
+  tasks                WorkTask?      @relation(fields: [id], references: [assigneeId])
+  projects             ProjectMember[]
+
+  @@index([fullName])
+  @@index([generation])
+  @@index([gender])
+  @@index([birthYear])
+  @@index([deathYear])
+  @@index([birthOrder])
+}
+
+model Relationship {
+  id            String        @id @default(cuid())
+  fromPersonId  String
+  toPersonId    String
+  type          RelationType
+  startDate     DateTime?
+  endDate       DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  fromPerson    Person        @relation("RelationshipFrom", fields: [fromPersonId], references: [id], onDelete: Cascade)
+  toPerson      Person        @relation("RelationshipTo", fields: [toPersonId], references: [id], onDelete: Cascade)
+
+  @@unique([fromPersonId, toPersonId, type])
+  @@index([fromPersonId])
+  @@index([toPersonId])
+  @@index([type])
+}
+
+model Event {
+  id            String        @id @default(cuid())
+  personId      String
+  type          EventType
+  title         String?
+  description   String?
+  occurredAt    DateTime?
+  location      String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  person        Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([personId])
+  @@index([type])
+  @@index([occurredAt])
+}
+
+model Lineage {
+  id            String   @id @default(cuid())
+  personId      String
+  rootPersonId  String
+  generation    Int
+  path          String  // JSON-encoded ancestor path
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  person        Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  rootPerson    Person   @relation(fields: [rootPersonId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, rootPersonId])
+  @@index([rootPersonId])
+  @@index([generation])
+}
