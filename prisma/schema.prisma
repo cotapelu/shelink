@@ -449,6 +449,7 @@ model User {
   reviewedDocuments        Document[]                    @relation("DocumentReviewer")
   approvedDocuments        Document[]                    @relation("DocumentApprover")
   auditLogs                AuditLog[]
+  taskCommentsAuthored     TaskComment[]                 @relation("CommentAuthor")
   conflictDecisions        ConflictCheck[]               @relation("ConflictDecidedBy")
   // v0.5
   ownedIntakes             Intake[]                      @relation("IntakeOwner")
@@ -2039,6 +2040,7 @@ model WorkTask {
   checklistItems TaskChecklistItem[]
   tags           TaskTag[]
   watchers       TaskWatcher[]
+  comments       TaskComment[]
 
   @@index([projectId])
   @@index([creatorId])
@@ -2287,6 +2289,21 @@ model TaskWatcher {
   @@unique([taskId, userId])
   @@index([taskId])
   @@index([userId])
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  authorId  String?
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task   WorkTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author User?    @relation("CommentAuthor", fields: [authorId], references: [id])
+
+  @@index([taskId])
+  @@index([authorId])
 }
 
 model TaskAssignment {
