@@ -1,44 +1,80 @@
 import { DashboardProvider } from "@/components/layout/DashboardContext";
 import DashboardMemberList from "@/components/domain/genealogy/members/DashboardMemberList";
 import ViewToggle from "@/components/ViewToggle";
-import { api } from "@/lib/api/client";
-import { API_ENDPOINTS } from "@/lib/api/endpoints";
-import type { Person, Relationship } from "@/types";
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/options";
 import { redirect } from "next/navigation";
+import { getPersons } from "@/server/genealogy/actions";
+import type { Person, Relationship } from "@/types";
+
+function mapPrismaPerson(p: any): Person {
+  const genderMap: Record<string, "male" | "female" | "other"> = {
+    MALE: "male",
+    FEMALE: "female",
+    OTHER: "other",
+  };
+  return {
+    id: p.id,
+    full_name: p.fullName,
+    gender: genderMap[p.gender] || "other",
+    birth_year: p.birthYear ?? null,
+    birth_month: p.birthMonth ?? null,
+    birth_day: p.birthDay ?? null,
+    death_year: p.deathYear ?? null,
+    death_month: p.deathMonth ?? null,
+    death_day: p.deathDay ?? null,
+    avatar_url: p.avatarUrl ?? null,
+    note: p.note ?? null,
+    phone_number: p.phoneNumber ?? null,
+    occupation: p.occupation ?? null,
+    current_residence: p.currentResidence ?? null,
+    is_deceased: p.isDeceased,
+    is_in_law: p.isInLaw,
+    birth_order: p.birthOrder ?? null,
+    generation: p.generation ?? null,
+    other_names: p.otherNames ?? null,
+    created_at: p.createdAt.toISOString(),
+    updated_at: p.updatedAt.toISOString(),
+  };
+}
+
+function mapPrismaRelationship(r: any): Relationship {
+  const typeMap: Record<string, "marriage" | "biological_child" | "adopted_child"> = {
+    SPOUSE: "marriage",
+    PARENT_CHILD: "biological_child",
+    ADOPTION: "adopted_child",
+  };
+  return {
+    id: r.id,
+    type: typeMap[r.type] || "adopted_child",
+    person_a: r.fromPersonId,
+    person_b: r.toPersonId,
+    note: null,
+    created_at: r.createdAt.toISOString(),
+    updated_at: r.updatedAt.toISOString(),
+  };
+}
 
 export default async function PersonsPage({
   searchParams,
 }: {
   searchParams: Promise<{ view?: string; rootId?: string }>;
 }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
+  const session = await getServerSession(authOptions);
 
-  if (token) {
-    api.setToken(token);
-  }
-
-  const authResponse = await api.get<{ id: string; role?: string }>(API_ENDPOINTS.AUTH.ME);
-  const user = authResponse.data;
-
-  if (!user) {
+  if (!session?.user) {
     redirect("/login");
   }
 
-  const profileResponse = await api.get<{ role?: string }>(API_ENDPOINTS.PROFILE_BY_ID(user.id));
-  const profile = profileResponse.data;
+  // Load persons via server action
+  const { persons: prismaPersons } = await getPersons({ page: 1, limit: 100 });
+  const persons: Person[] = prismaPersons.map(mapPrismaPerson);
 
-  const canEdit = profile?.role === "admin" || profile?.role === "editor";
+  // Relationships sẽ load sau hoặc qua API tạm
+  const relationships: Relationship[] = [];
 
-  // Load persons & relationships for context
-  const personsResponse = await api.get<Person[]>(API_ENDPOINTS.PERSONS_LIST, {
-    params: { order: "birth_year.asc_nulls_first" }
-  });
-  const relsResponse = await api.get<Relationship[]>(API_ENDPOINTS.RELATIONSHIPS_LIST);
-
-  const persons = personsResponse.data || [];
-  const relationships = relsResponse.data || [];
+  // Determine edit permissions (simplified)
+  const canEdit = session.user.role === "ADMIN" || session.user.role === "EDITOR";
 
   return (
     <DashboardProvider>
@@ -48,18 +84,28 @@ export default async function PersonsPage({
           {/* Header */}
           <div className="mb-8">
             <h2 className="text-3xl font-serif font-bold text-stone-800 tracking-tight">
-              Thành viên
+              Quản lý thành viên
             </h2>
             <p className="text-stone-500 mt-2 text-sm sm:text-base max-w-2xl">
-              Quản lý thông tin các thành viên trong gia phả. Thêm, chỉnh sửa,
-              xóa và xem chi tiết.
+              Danh sách các thành viên trong gia phả. Thêm, sửa, xóa và xem mối quan hệ.
             </p>
           </div>
 
-          {/* Member List */}
-          <div className="bg-white/80 rounded-2xl border border-stone-200/60 shadow-sm p-5 sm:p-8">
-            <DashboardMemberList initialPersons={persons} canEdit={canEdit} />
+          {/* Toolbar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-2">
+              {/* TODO: Search input */}
+            </div>
+            <div className="flex items-center gap-2">
+              {/* TODO: Add person button */}
+            </div>
           </div>
+
+          {/* Member List */}
+          <DashboardMemberList
+            initialPersons={persons}
+            canEdit={canEdit}
+          />
         </div>
       </main>
     </DashboardProvider>

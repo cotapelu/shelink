@@ -173,7 +173,7 @@ Chuyển từ "UI-only + external API" → "Full-stack unified app"
 | 1. Database | ✅ Done | 100% | Schema merged, Lineage added, seed complete |
 | 2. UI Components | ✅ Done | 100% | All shadcn components integrated |
 | 3. Frontend Pages | ✅ Done | 100% | Genealogy + ERP pages created |
-| 4. Backend | 🟡 In Progress | 0% | Start server actions for genealogy/ERP |
+| 4. Backend | 🟡 In Progress | 60% | Server actions implemented (genealogy + ERP), need page updates |
 | 5. Auth | ⚪ Not Started | 0% | NextAuth already in place |
 | 6. Shared Utils | 🟡 In Progress | 50% | API client ready, need cleanup |
 | 7. Testing | ⚪ Not Started | 0% | |
