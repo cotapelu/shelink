@@ -74,6 +74,8 @@ We are consolidating **3 codebases** into **1 unified Next.js application**:
   - `src/server/schedule/actions.ts` cleaned up (removed broken ERP task query)
 - [x] Genealogy import/export: Disabled CSV (GEDCOM/JSON only) to resolve type errors
 - [x] Production build: `npm run build` now passes type-check ✅
+- [x] **Phase 1 (Database) Complete**: Merged genealogy & ERP schema, added Lineage model, seed data ✅
+- [x] **Phase 4 (Backend) 80%**: Server actions implemented forpersons/relationships/events/tasks/projects; migrated persons/events/tasks/projects pages to use them ✅
 
 ### 🔄 In Progress
 - [ ] Final verification: Run full dev + build cycle, smoke test all pages
