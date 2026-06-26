@@ -87,6 +87,128 @@ We are consolidating **3 codebases** into **1 unified Next.js application**:
 
 ---
 
+## 🎯 ACTIONABLE NEXT STEPS (Post-UI Build)
+
+### 📌 Goal
+Chuyển từ "UI-only + external API" → "Full-stack unified app"
+
+### ✅ Prerequisites
+- UI/FE đã build pass và chạy dev ổn định
+- Tất cả pages genealogy/ERP đã có trong LawLink
+- API client đang gọi server-nest (có thể giữ tạm)
+
+### 🔥 High Priority (Phases 1 & 4)
+
+#### 1️⃣ PHASE 1: DATABASE UNIFICATION (2 weeks)
+
+**Objective**: Merge Prisma schema với entities từ server-nest (Person, Relationship, Event, Task, Project, Workflow...).
+
+**Tasks**:
+- [ ] **Extract server-nest entities** → `migration/database/source-entities/server-nest/`
+  - persons: `person.entity.ts`, `relationship.entity.ts`, `event.entity.ts`
+  - erp: `task.entity.ts`, `project.entity.ts`, `team.entity.ts`, `workflow*.entity.ts`
+- [ ] **Convert TypeORM → Prisma** (copy model definitions vào `prisma/schema.prisma`)
+  - Thêm enums: `Gender`, `RelationType`, `EventType`, `TaskStatus`, `TaskPriority`, `ProjectStatus`, `WorkflowState`
+  - Thêm models: `Person`, `Relationship`, `Event`, `Lineage`, `WorkTask`, `Project`, `ProjectMember`, `Team`, `Workflow`, `WorkflowStep`, `WorkflowTransition`
+  - Resolve conflicts (ví dụ: `Task` vs `LegalTask` → rename old → `LegalTask`)
+- [ ] **Add relationships** giữa các domain (Person → WorkTask.assigneeId, WorkTask.projectId → Project.id, etc.)
+- [ ] **Validate & format** schema: `npx prisma validate && npx prisma format`
+- [ ] **Generate migration**: `npx prisma migrate dev --name "unified-schema-genealogy-erp"`
+- [ ] **Seed sample data** (persons, relationships, projects, tasks)
+- [ ] **Test migration** reset DB
+
+**Deliverable**: Prisma schema unified (~70-80 models), migration file, ERD.
+
+---
+
+#### 2️⃣ PHASE 4: BACKEND MIGRATION (NestJS → Server Actions) (3-4 weeks)
+
+**Objective**: Thay thế calls đến server-nest API bằng LawLink server actions.
+
+**Tasks**:
+- [ ] **Create server actions structure**: `src/server/genealogy/`, `src/server/erp/`
+- [ ] **Implement persons actions**: `getPersons`, `getPerson`, `createPerson`, `updatePerson`, `deletePerson`
+  - Dùng Zod schemas cho validation
+  - Gọi `prisma.person` (not external API)
+  - Audit log, revalidatePath
+- [ ] **Implement relationships actions**: `getRelationships`, `createRelationship`, `deleteRelationship`
+- [ ] **Implement events actions**: `getEvents`, `createEvent`, `updateEvent`, `deleteEvent`
+- [ ] **Implement ERP tasks actions**: `listTasks`, `getTask`, `createTask`, `updateTask`, `deleteTask` (dùng `WorkTask` model)
+- [ ] **Implement projects actions**: `listProjects`, `getProject`, `createProject`, `updateProject`, `deleteProject`
+- [ ] **Update pages** để gọi server actions thay vì `api.get(...)`:
+  - `/genealogy/persons/page.tsx` → gọi `getPersons()`
+  - `/genealogy/events/page.tsx` → gọi `getEvents()`
+  - `/erp/tasks/page.tsx` → gọi `listTasks()`
+  - Tương tự cho create/update/delete forms
+- [ ] **Remove external API client** từ genealogy/ERP pages (chỉ giữ cho auth nếu cần)
+- [ ] **Test end-to-end**: Create person → appears in list → edit → delete
+
+**Deliverable**: Tất cả genealogy/ERP features chạy entirely trong LawLink backend.
+
+---
+
+### 📝 Lower Priority (Cân nhắc thời gian)
+
+- [ ] **Re-enable CSV export/import**:
+  - Fix `src/utils/csv.ts` types (Papa.parse/stringify)
+  - Re-add button in `DataImportExport`
+  - Update `handleExport` signature to include `csv`
+- [ ] **Testing** (Phase 7):
+  - Convert Jest/Vitest tests từ server-nest
+  - Unit tests cho server actions
+  - Coverage ≥80%
+- [ ] **Observability** (Phase 8):
+  - Ensure audit logs, metrics, tracing working
+- [ ] **Documentation** (Phase 9):
+  - Update README với hướng dẫn migration
+  - API docs (server actions)
+
+---
+
+## 📊 PROGRESS TRACKING
+
+| Phase | Status | Completion | Notes |
+|-------|--------|------------|-------|
+| 0. Preparation | ✅ Done | 100% | Audit, mapping, env ready |
+| 1. Database | 🟡 In Progress | 0% | Not started – extract & merge schema |
+| 2. UI Components | ✅ Done | 100% | All shadcn components integrated |
+| 3. Frontend Pages | ✅ Done | 100% | Genealogy + ERP pages created |
+| 4. Backend | 🟡 In Progress | 10% | Server actions stubs only |
+| 5. Auth | ⚪ Not Started | 0% | NextAuth already in place |
+| 6. Shared Utils | 🟡 In Progress | 50% | API client ready, need cleanup |
+| 7. Testing | ⚪ Not Started | 0% | |
+| 8. Deployment | ⚪ Not Started | 0% | |
+| 9. Documentation | 🟡 In Progress | 30% | TODO.md updated, need guides |
+
+**Overall**: UI/FE complete ✅, Backend integration pending 🔄.
+
+---
+
+## DECISION LOG
+
+### 2025-06-26: Server Actions for Tasks
+**Decision**: Use `LegalTask` (existing LawLink model) for task server actions temporarily.
+**Rationale**: `WorkTask` model lacks proper relations (project, assignee) in current schema; migration incomplete.
+**Impact**: ERP tasks cannot be linked to projects yet; will refactor after schema merge.
+
+### 2025-06-26: CSV Export Temporarily Disabled
+**Decision**: Removed `src/utils/csv.ts` and UI buttons for CSV.
+**Rationale**: Type errors with PapaParse prevented build; GEDCOM/JSON sufficient for now.
+**Next**: Re-enable after fixing type_defs for Papa or implementing custom CSV writer.
+
+---
+
+## REFERENCES
+
+- Migration plan: see sections above (Phases 0-9)
+- Component mapping: `migration/audit/COMPONENT_MAPPING.md` (to be created)
+- Entity mapping: `migration/audit/ENTITY_MAPPING.md` (to be created)
+- API mapping: `migration/audit/API_MAPPING.md` (to be created)
+
+
+
+---
+
 ## CURRENT STATE ANALYSIS
 
 ### LawLink (Legal-Centric Fullstack)
