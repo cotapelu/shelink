@@ -1,22 +1,74 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Search, FolderOpen } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, Search, FolderOpen, Calendar, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ProjectTimeline, type TimelineTask } from "@/components/domain/erp/ProjectTimeline";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { listProjects } from "@/server/erp/actions";
+import type { WorkTask } from "@/types";
+// No Project type yet; using any for now
+
+function getStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    PLANNING: "Kế hoạch",
+    ACTIVE: "Đang thực hiện",
+    ON_HOLD: "Tạm dừng",
+    COMPLETED: "Hoàn thành",
+    CANCELLED: "Hủy",
+  };
+  return labels[status] || status;
+}
+
+function getStatusColor(status: string) {
+  switch (status) {
+    case "ACTIVE":
+      return "bg-green-100 text-green-800";
+    case "COMPLETED":
+      return "bg-blue-100 text-blue-800";
+    case "ON_HOLD":
+      return "bg-yellow-100 text-yellow-800";
+    case "CANCELLED":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-stone-100 text-stone-800";
+  }
+}
 
 export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for timeline
-  const mockTasks: TimelineTask[] = [
-    { id: "1", name: "Khảo sát yêu cầu", startDate: "2025-01-01", endDate: "2025-01-10", progress: 100, status: "completed" },
-    { id: "2", name: "Thiết kế hệ thống", startDate: "2025-01-11", endDate: "2025-01-25", progress: 100, status: "completed" },
-    { id: "3", name: "Phát triển", startDate: "2025-01-26", endDate: "2025-02-28", progress: 60, status: "in_progress" },
-    { id: "4", name: "Kiểm thử", startDate: "2025-03-01", endDate: "2025-03-15", progress: 0, status: "pending" },
-    { id: "5", name: "Triển khai", startDate: "2025-03-16", endDate: "2025-03-31", progress: 0, status: "pending" },
-  ];
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const result = await listProjects();
+        setProjects(result as any);
+      } catch (error) {
+        console.error("Failed to fetch projects:", error);
+        setProjects([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  const filteredProjects = projects.filter((p) =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <main className="flex-1 overflow-auto bg-stone-50/50 flex flex-col pt-8 relative w-full">
+        <div className="max-w-7xl mx-auto px-4 pb-8 sm:px-6 lg:px-8">
+          <p className="text-stone-500">Đang tải...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 overflow-auto bg-stone-50/50 flex flex-col pt-8 relative w-full">
@@ -50,48 +102,53 @@ export default function ProjectsPage() {
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Placeholder - will be replaced with real data from API */}
-          <div className="bg-white/80 rounded-2xl border border-stone-200/60 shadow-sm p-6">
-            <div className="flex items-start justify-between mb-4">
-              <FolderOpen className="h-8 w-8 text-amber-600" />
-              <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
-                Đang thực hiện
-              </span>
+          {filteredProjects.length === 0 ? (
+            <div className="col-span-full text-center py-12 text-stone-500">
+              Chưa có dự án nào. Tạo dự án đầu tiên!
             </div>
-            <h3 className="font-bold text-lg mb-2">Dự án mẫu 1</h3>
-            <p className="text-stone-500 text-sm mb-4">
-              Mô tả ngắn về dự án này.
-            </p>
-            <div className="flex items-center gap-2 text-xs text-stone-400">
-              <span>5 công việc</span>
-              <span>•</span>
-              <span>2 thành viên</span>
-            </div>
-          </div>
-
-          <div className="bg-white/80 rounded-2xl border border-stone-200/60 shadow-sm p-6 opacity-60 hover:opacity-100 transition-opacity">
-            <div className="flex items-start justify-between mb-4">
-              <FolderOpen className="h-8 w-8 text-stone-400" />
-              <span className="text-xs bg-stone-100 text-stone-600 px-2 py-1 rounded-full">
-                Hoàn thành
-              </span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Dự án mẫu 2</h3>
-            <p className="text-stone-500 text-sm mb-4">
-              Mô tả ngắn về dự án này.
-            </p>
-            <div className="flex items-center gap-2 text-xs text-stone-400">
-              <span>12 công việc</span>
-              <span>•</span>
-              <span>4 thành viên</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Timeline View Section */}
-        <div className="mt-8 bg-white/80 rounded-2xl border border-stone-200/60 shadow-sm p-5 sm:p-8">
-          <h3 className="text-xl font-bold mb-6">Tiến độ dự án</h3>
-          <ProjectTimeline tasks={mockTasks} />
+          ) : (
+            filteredProjects.map((project) => (
+              <Card key={project.id} className="bg-white/80 border-stone-200/60 shadow-sm">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg">{project.name}</CardTitle>
+                    <Badge className={getStatusColor(project.status)}>
+                      {getStatusLabel(project.status)}
+                    </Badge>
+                  </div>
+                  <CardDescription>{project.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm text-stone-600">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>
+                        {project.startDate
+                          ? new Date(project.startDate).toLocaleDateString("vi-VN")
+                          : "Chưa bắt đầu"}
+                        {project.endDate &&
+                          ` - ${new Date(project.endDate).toLocaleDateString("vi-VN")}`}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>0 thành viên</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <span>Chưa có công việc</span>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="border-t border-stone-100 pt-4 flex justify-end gap-2">
+                  <Button variant="outline" size="sm">
+                    Chi tiết
+                  </Button>
+                  <Button size="sm">Xem công việc</Button>
+                </CardFooter>
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </main>
