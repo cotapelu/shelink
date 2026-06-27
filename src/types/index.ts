@@ -100,4 +100,7 @@ export interface WorkTask {
   completedAt?: Date | string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
+  // Expanded
+  assignee?: { id: string; name: string; email?: string } | null;
+  project?: { id: string; name: string } | null;
 }

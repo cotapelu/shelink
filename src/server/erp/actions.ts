@@ -13,7 +13,7 @@ const CreateTaskSchema = z.object({
   description: z.string().max(2000).optional().or(z.literal('')),
   assigneeId: z.string().uuid().optional().or(z.literal('')),
   dueDate: z.coerce.date().optional(),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).default('MEDIUM'),
+  priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
   projectId: z.string().uuid().optional().or(z.literal('')),
 });
 
@@ -23,7 +23,7 @@ const UpdateTaskSchema = CreateTaskSchema.extend({
 
 const GetTasksQuerySchema = z.object({
   projectId: z.string().uuid().optional(),
-  status: z.enum(['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE', 'BLOCKED', 'CANCELLED']).optional(),
+  status: z.enum(['todo', 'in_progress', 'review', 'done', 'blocked', 'cancelled']).optional(),
   assigneeId: z.string().uuid().optional(),
   page: z.coerce.number().default(1),
   limit: z.coerce.number().default(20),
@@ -54,7 +54,14 @@ export async function listTasks(query: z.infer<typeof GetTasksQuerySchema>) {
     prisma.workTask.count({ where }),
   ]);
 
-  return { tasks: items, total, page: validated.page, totalPages: Math.ceil(total / validated.limit) };
+  // Map to frontend types (lowercase enums)
+  const tasks = items.map(t => ({
+    ...t,
+    status: (t.status as string).toLowerCase() as any,
+    priority: (t.priority as string).toLowerCase() as any,
+  }));
+
+  return { tasks, total, page: validated.page, totalPages: Math.ceil(total / validated.limit) }as any;
 }
 
 export async function getTask(id: string) {
@@ -73,7 +80,13 @@ export async function getTask(id: string) {
   });
 
   if (!task) throw new Error('Task not found');
-  return task;
+  // Map enums to lowercase for frontend
+  const mapped = {
+    ...task,
+    status: (task.status as string).toLowerCase() as any,
+    priority: (task.priority as string).toLowerCase() as any,
+  };
+  return mapped as any;
 }
 
 export async function createTask(input: z.infer<typeof CreateTaskSchema>) {
@@ -85,11 +98,18 @@ export async function createTask(input: z.infer<typeof CreateTaskSchema>) {
   // If no assignee, assign to creator
   const assigneeId = data.assigneeId || session.user.id;
 
+  // Map lowercase enums to DB enums
+  const dbData: any = {
+    ...data,
+    assigneeId,
+  };
+  if (data.priority) {
+    const priorityMap: Record<string, string> = { low: 'LOW', medium: 'MEDIUM', high: 'HIGH', urgent: 'CRITICAL' };
+    dbData.priority = priorityMap[data.priority as keyof typeof priorityMap] as any;
+  }
+
   const created = await prisma.workTask.create({
-    data: {
-      ...data,
-      assigneeId,
-    },
+    data: dbData,
   });
 
   await audit({
@@ -109,7 +129,22 @@ export async function updateTask(input: z.infer<typeof UpdateTaskSchema>) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');
 
-  const { id, ...rest } = UpdateTaskSchema.parse(input);
+  const inputParsed = UpdateTaskSchema.parse(input);
+  const { id } = inputParsed;
+  const rest: any = { ...inputParsed };
+  delete rest.id;
+
+  // Map enums
+  if (rest.priority) {
+    const priorityMap: Record<string, string> = { low: 'LOW', medium: 'MEDIUM', high: 'HIGH', urgent: 'CRITICAL' };
+    rest.priority = priorityMap[rest.priority as keyof typeof priorityMap] as any;
+  }
+  if (rest.status) {
+    const statusMap: Record<string, string> = { 
+      todo: 'TODO', in_progress: 'IN_PROGRESS', review: 'REVIEW', done: 'DONE', blocked: 'BLOCKED', cancelled: 'CANCELLED'
+    };
+    rest.status = statusMap[rest.status as keyof typeof statusMap] as any;
+  }
 
   const updated = await prisma.workTask.update({
     where: { id },
