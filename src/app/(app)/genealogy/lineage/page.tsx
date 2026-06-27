@@ -1,39 +1,72 @@
 import LineageManager from "@/components/domain/genealogy/familytree/LineageManager";
-import { api } from "@/lib/api/client";
-import { API_ENDPOINTS } from "@/lib/api/endpoints";
-import type { Person, Relationship } from "@/types";
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/options";
 import { redirect } from "next/navigation";
+import { getPersons } from "@/server/genealogy/actions";
+import { getRelationships } from "@/server/genealogy/actions";
+import type { Person, Relationship } from "@/types";
+
+function mapPrismaPerson(p: any): Person {
+  const genderMap: Record<string, "male" | "female" | "other"> = {
+    MALE: "male",
+    FEMALE: "female",
+    OTHER: "other",
+  };
+  return {
+    id: p.id,
+    full_name: p.fullName,
+    gender: genderMap[p.gender] || "other",
+    birth_year: p.birthYear ?? null,
+    birth_month: p.birthMonth ?? null,
+    birth_day: p.birthDay ?? null,
+    death_year: p.deathYear ?? null,
+    death_month: p.deathMonth ?? null,
+    death_day: p.deathDay ?? null,
+    avatar_url: p.avatarUrl ?? null,
+    note: p.note ?? null,
+    phone_number: p.phoneNumber ?? null,
+    occupation: p.occupation ?? null,
+    current_residence: p.currentResidence ?? null,
+    is_deceased: p.isDeceased,
+    is_in_law: p.isInLaw,
+    birth_order: p.birthOrder ?? null,
+    generation: p.generation ?? null,
+    other_names: p.otherNames ?? null,
+    created_at: p.createdAt.toISOString(),
+    updated_at: p.updatedAt.toISOString(),
+  };
+}
+
+function mapRelationship(r: any): Relationship {
+  return {
+    id: r.id,
+    type: r.type.toLowerCase() as any,
+    person_a: r.fromPersonId,
+    person_b: r.toPersonId,
+    note: r.note ?? null,
+    created_at: r.createdAt.toISOString(),
+    updated_at: r.updatedAt.toISOString(),
+  };
+}
 
 export default async function LineagePage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
+  const session = await getServerSession(authOptions);
 
-  if (token) {
-    api.setToken(token);
-  }
-
-  const authResponse = await api.get<{ id: string }>(API_ENDPOINTS.AUTH.ME);
-  const user = authResponse.data;
-
-  if (!user) {
+  if (!session?.user) {
     redirect("/login");
   }
 
-  const profileResponse = await api.get<{ role?: string }>(API_ENDPOINTS.PROFILE_BY_ID(user.id));
-  const profile = profileResponse.data;
-
-  if (profile?.role !== "admin") {
+  // Only admin can access lineage management
+  if (session.user.role !== "ADMIN" && session.user.role !== "LAWYER") {
     redirect("/dashboard");
   }
 
-  const personsResponse = await api.get<Person[]>(API_ENDPOINTS.PERSONS_LIST, {
-    params: { order: "birth_year.asc_nulls_first" }
-  });
-  const relsResponse = await api.get<Relationship[]>(API_ENDPOINTS.RELATIONSHIPS_LIST);
+  // Load all persons and relationships
+  const { persons: prismaPersons } = await getPersons({ page: 1, limit: 100 });
+  const relsData = await getRelationships();
 
-  const persons = personsResponse.data || [];
-  const relationships = relsResponse.data || [];
+  const persons: Person[] = prismaPersons.map(mapPrismaPerson);
+  const relationships: Relationship[] = relsData.map(mapRelationship);
 
   return (
     <main className="flex-1 overflow-auto bg-stone-50/50 flex flex-col pt-8 relative w-full">
@@ -78,18 +111,19 @@ export default async function LineagePage() {
                 </h3>
                 <p className="text-stone-500 text-xs leading-relaxed">
                   Trong danh sách anh/chị/em cùng cha, sắp xếp theo năm sinh
-                  tăng dần và gán số thứ tự 1, 2, 3... Con dâu/rể không được
-                  tính thứ tự.
+                  (nhỏ đến lớn). Được tính từ <strong>cùng một cha và cùng một
+                  mẹ</strong>.
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Manager */}
-        <div className="bg-white/80 rounded-2xl border border-stone-200/60 shadow-sm p-5 sm:p-8">
-          <LineageManager persons={persons} relationships={relationships} />
-        </div>
+        {/* Lineage Manager */}
+        <LineageManager
+          persons={persons}
+          relationships={relationships}
+        />
       </div>
     </main>
   );

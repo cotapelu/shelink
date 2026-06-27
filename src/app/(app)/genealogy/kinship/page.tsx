@@ -1,36 +1,70 @@
 import KinshipFinder from "@/components/domain/genealogy/familytree/KinshipFinder";
-import { api } from "@/lib/api/client";
-import { API_ENDPOINTS } from "@/lib/api/endpoints";
-import type { Person, Relationship } from "@/types";
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/options";
 import { redirect } from "next/navigation";
+import { getPersons } from "@/server/genealogy/actions";
+import { getRelationships } from "@/server/genealogy/actions";
+
+interface PersonNode {
+  id: string;
+  full_name: string;
+  gender: "male" | "female" | "other";
+  birth_year: number | null;
+  birth_order: number | null;
+  generation: number | null;
+  is_in_law: boolean;
+  avatar_url?: string | null;
+}
+
+interface RelEdge {
+  type: string;
+  person_a: string;
+  person_b: string;
+}
+
+function mapPerson(p: any): PersonNode {
+  const genderMap: Record<string, "male" | "female" | "other"> = {
+    MALE: "male",
+    FEMALE: "female",
+    OTHER: "other",
+  };
+  return {
+    id: p.id,
+    full_name: p.fullName,
+    gender: genderMap[p.gender] || "other",
+    birth_year: p.birthYear ?? null,
+    birth_order: p.birthOrder ?? null,
+    generation: p.generation ?? null,
+    is_in_law: p.isInLaw,
+    avatar_url: p.avatarUrl ?? null,
+  };
+}
+
+function mapRel(r: any): RelEdge {
+  return {
+    type: r.type.toLowerCase(),
+    person_a: r.fromPersonId,
+    person_b: r.toPersonId,
+  };
+}
 
 export const metadata = {
   title: "Tra cứu danh xưng",
 };
 
 export default async function KinshipPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
+  const session = await getServerSession(authOptions);
 
-  if (token) {
-    api.setToken(token);
+  if (!session?.user) {
+    redirect("/login");
   }
 
-  const authResponse = await api.get<{ id: string }>(API_ENDPOINTS.AUTH.ME);
-  const user = authResponse.data;
+  // Load data via server actions
+  const { persons: prismaPersons } = await getPersons({ page: 1, limit: 100 });
+  const relsData = await getRelationships();
 
-  if (!user) redirect("/login");
-
-  const personsResponse = await api.get<Person[]>(API_ENDPOINTS.PERSONS_LIST, {
-    params: { select: "id,full_name,gender,birth_year,birth_order,generation,is_in_law" }
-  });
-  const relsResponse = await api.get<Relationship[]>(API_ENDPOINTS.RELATIONSHIPS_LIST, {
-    params: { select: "type,person_a,person_b" }
-  });
-
-  const persons = personsResponse.data || [];
-  const relationships = relsResponse.data || [];
+  const persons: PersonNode[] = prismaPersons.map(mapPerson);
+  const relationships: RelEdge[] = relsData.map(mapRel);
 
   return (
     <div className="flex-1 w-full relative flex flex-col pb-12">
@@ -44,10 +78,7 @@ export default async function KinshipPage() {
       </div>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1">
-        <KinshipFinder
-          persons={persons ?? []}
-          relationships={relationships ?? []}
-        />
+        <KinshipFinder persons={persons} relationships={relationships} />
       </main>
     </div>
   );
