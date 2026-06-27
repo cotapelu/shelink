@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDays, Kanban, FolderOpen, BarChart3, Users } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getDashboardStats } from "@/server/erp/actions";
 
 export default function ERPDashboardPage() {
   const [stats, setStats] = useState({
@@ -12,6 +13,21 @@ export default function ERPDashboardPage() {
     overdueTasks: 0,
     activeTeams: 0,
   });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await getDashboardStats();
+        setStats(data as any);
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <main className="flex-1 overflow-auto bg-stone-50/50 flex flex-col pt-8 relative w-full">
@@ -34,7 +50,7 @@ export default function ERPDashboardPage() {
               <Kanban className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalTasks}</div>
+              <div className="text-2xl font-bold">{loading ? "..." : stats.totalTasks}</div>
             </CardContent>
           </Card>
 
@@ -44,7 +60,7 @@ export default function ERPDashboardPage() {
               <FolderOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalProjects}</div>
+              <div className="text-2xl font-bold">{loading ? "..." : stats.totalProjects}</div>
             </CardContent>
           </Card>
 
@@ -54,7 +70,7 @@ export default function ERPDashboardPage() {
               <CalendarDays className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats.overdueTasks}</div>
+              <div className="text-2xl font-bold text-red-600">{loading ? "..." : stats.overdueTasks}</div>
             </CardContent>
           </Card>
 
@@ -64,7 +80,7 @@ export default function ERPDashboardPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.activeTeams}</div>
+              <div className="text-2xl font-bold">{loading ? "..." : stats.activeTeams}</div>
             </CardContent>
           </Card>
         </div>
@@ -78,9 +94,7 @@ export default function ERPDashboardPage() {
                   <Kanban className="h-5 w-5" />
                   Công việc
                 </CardTitle>
-                <CardDescription>
-                  Xem và quản lý tất cả công việc
-                </CardDescription>
+                <CardDescription>Quản lý task, kanban board</CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -89,12 +103,10 @@ export default function ERPDashboardPage() {
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Kanban className="h-5 w-5" />
+                  <BarChart3 className="h-5 w-5" />
                   Bảng Kanban
                 </CardTitle>
-                <CardDescription>
-                  Xem công việc theo bảng thẻ
-                </CardDescription>
+                <CardDescription>Drag & drop trạng thái</CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -106,9 +118,7 @@ export default function ERPDashboardPage() {
                   <FolderOpen className="h-5 w-5" />
                   Dự án
                 </CardTitle>
-                <CardDescription>
-                  Quản lý các dự án và tiến độ
-                </CardDescription>
+                <CardDescription>Quản lý dự án và tiến độ</CardDescription>
               </CardHeader>
             </Card>
           </Link>

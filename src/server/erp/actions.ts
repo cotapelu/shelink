@@ -304,3 +304,24 @@ export async function deleteProject(id: string) {
   revalidatePath('/erp/projects');
   return { ok: true };
 }
+
+// Dashboard stats
+export async function getDashboardStats() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error('Unauthorized');
+
+  const now = new Date();
+  const [totalTasks, totalProjects, overdueTasks, activeTeams] = await Promise.all([
+    prisma.workTask.count(),
+    prisma.project.count(),
+    prisma.workTask.count({
+      where: {
+        dueDate: { lt: now },
+        status: { in: ['TODO', 'IN_PROGRESS', 'REVIEW'] },
+      },
+    }),
+    prisma.team.count(),
+  ]);
+
+  return { totalTasks, totalProjects, overdueTasks, activeTeams };
+}
