@@ -480,6 +480,9 @@ model User {
   reviewedExternalContacts ExternalContact[]             @relation("ExternalContactReviewer")
   // v0.44: 程序主办律师
   leadProcedures           MatterProcedure[]             @relation("ProcedureLeadLawyer")
+  workflowAudits           WorkflowAudit[]               @relation("UserWorkflowAudits")
+  uploadedFiles            File[]                        @relation("UserUploadedFiles")
+  generatedReports         Report[]                      @relation("UserGeneratedReports")
   createdAt                DateTime                      @default(now())
   updatedAt                DateTime                      @updatedAt
 }
@@ -1353,6 +1356,42 @@ model AuditLog {
   @@index([action, createdAt])
 }
 
+model File {
+  id           String   @id @default(cuid())
+  name         String
+  originalName String
+  mimeType     String
+  size         Int
+  path         String
+  url          String?
+  entityType   String?
+  entityId     String?
+  uploadedById String
+  uploadedAt   DateTime @default(now())
+
+  uploadedBy User @relation("UserUploadedFiles", fields: [uploadedById], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([uploadedById])
+  @@index([uploadedAt])
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  config      Json?
+  generatedBy String
+  createdAt   DateTime @default(now())
+  fileUrl     String?
+
+  generatedByUser User @relation("UserGeneratedReports", fields: [generatedBy], references: [id])
+
+  @@index([type])
+  @@index([generatedBy])
+  @@index([createdAt])
+}
+
 // ============================================================
 // 系统配置
 // ============================================================
@@ -2129,9 +2168,10 @@ model Project {
   managerId String?
   manager   User?   @relation("ProjectManager", fields: [managerId], references: [id])
 
-  tasks     WorkTask[]
-  members   ProjectMember[]
-  workflows Workflow[]
+  tasks      WorkTask[]
+  members    ProjectMember[]
+  workflows  Workflow[]
+  milestones ProjectMilestone[]
 
   @@index([name])
   @@index([status])
@@ -2154,6 +2194,22 @@ model ProjectMember {
   @@index([userId])
 }
 
+model ProjectMilestone {
+  id          String   @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  dueDate     DateTime
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([dueDate])
+}
+
 model Workflow {
   id          String         @id @default(cuid())
   name        String
@@ -2169,6 +2225,7 @@ model Workflow {
   owner       User                 @relation("WorkflowOwner", fields: [ownerId], references: [id])
   steps       WorkflowStep[]
   transitions WorkflowTransition[]
+  audits      WorkflowAudit[]      @relation("WorkflowAudits")
   tasks       WorkTask[]
 
   @@index([name])
@@ -2192,6 +2249,28 @@ model WorkflowTransition {
   @@index([order])
 }
 
+model WorkflowAudit {
+  id         String   @id @default(cuid())
+  workflowId String
+  userId     String?
+  fromStepId String?
+  toStepId   String?
+  action     String
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  workflow Workflow      @relation("WorkflowAudits", fields: [workflowId], references: [id])
+  user     User?         @relation("UserWorkflowAudits", fields: [userId], references: [id])
+  fromStep WorkflowStep? @relation("WorkflowStepFromAudits", fields: [fromStepId], references: [id])
+  toStep   WorkflowStep? @relation("WorkflowStepToAudits", fields: [toStepId], references: [id])
+
+  @@index([workflowId])
+  @@index([userId])
+  @@index([fromStepId])
+  @@index([toStepId])
+  @@index([createdAt])
+}
+
 model WorkflowStep {
   id          String     @id @default(cuid())
   workflowId  String
@@ -2204,6 +2283,9 @@ model WorkflowStep {
 
   workflow Workflow @relation(fields: [workflowId], references: [id])
   assignee User?    @relation(fields: [assigneeId], references: [id])
+
+  fromAudits WorkflowAudit[] @relation("WorkflowStepFromAudits")
+  toAudits   WorkflowAudit[] @relation("WorkflowStepToAudits")
 
   @@index([workflowId])
   @@index([assigneeId])
