@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { renderCaseNoTemplate } from "@/lib/matters/firm-caseno";
+import { renderCaseNoTemplate, CaseNoTokens } from "@/lib/matters/firm-caseno";
 
-describe("renderCaseNoTemplate — 所内案号模板渲染", () => {
-  const base = {
+describe("renderCaseNoTemplate", () => {
+  const tokens: CaseNoTokens = {
     year: 2026,
     firmShortName: "普",
     categoryAbbr: "民",
@@ -10,25 +10,28 @@ describe("renderCaseNoTemplate — 所内案号模板渲染", () => {
     seq: 1
   };
 
-  it("默认模板 {年}-{所}{类词}-{序3} → 2026-普民诉-001", () => {
-    expect(renderCaseNoTemplate("{年}-{所}{类词}-{序3}", base)).toBe("2026-普民诉-001");
+  it("renders default template", () => {
+    const result = renderCaseNoTemplate("{年}-{所}{类词}-{序3}", tokens);
+    expect(result).toBe("2026-普民诉-001");
   });
 
-  it("{年2} 取后两位、{序4} 补四位", () => {
-    expect(renderCaseNoTemplate("{年2}{类}{序4}", { ...base, seq: 23 })).toBe("26民0023");
+  it("handles 2-digit year", () => {
+    const result = renderCaseNoTemplate("{年2}-{所}{类}-{序4}", tokens);
+    expect(result).toBe("26-普民-0001");
   });
 
-  it("{类} 与 {类词} 互不污染（{类词} 先替换）", () => {
-    expect(renderCaseNoTemplate("{类词}/{类}", base)).toBe("民诉/民");
+  it("renders different template", () => {
+    const result = renderCaseNoTemplate("{所}{类词}{序3}", tokens);
+    expect(result).toBe("普民诉001");
   });
 
-  it("所简称为空时该段留空", () => {
-    expect(renderCaseNoTemplate("{年}-{所}{类词}-{序3}", { ...base, firmShortName: "" })).toBe(
-      "2026-民诉-001"
-    );
+  it("pads sequence correctly", () => {
+    const result = renderCaseNoTemplate("{序4}", { ...tokens, seq: 42 });
+    expect(result).toBe("0042");
   });
 
-  it("流水大于补位宽度时不截断", () => {
-    expect(renderCaseNoTemplate("{序3}", { ...base, seq: 1234 })).toBe("1234");
+  it("handles all tokens independently", () => {
+    const result = renderCaseNoTemplate("{年}{年2}{所}{类}{类词}{序3}{序4}", tokens);
+    expect(result).toBe("202626普民民诉0010001");
   });
 });

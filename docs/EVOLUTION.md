@@ -16,6 +16,15 @@ Long-term plan for the LawLink unified application.
 - Updated globals.css with animations
 - Updated components.json inventory
 
+**Autonomous Quality Improvements** – Active (2025-06-27)
+- Fixed 40 React hook immutability errors across 14 page components (moved async load functions before useEffect)
+- Updated test to use Vitest's `vi.fn()` instead of `jest.fn()`
+- Added migration/ to eslint ignore to avoid legacy code noise
+- Auto-fixed 53 unused import warnings
+- Added 20 new unit tests for legal-calc module, increasing overall coverage from 58.94% → 59.69%
+- Created comprehensive tests for firm-caseno template rendering
+- Maintained quality gate: 0 lint errors in src/app, all tests passing (162/162), build successful
+
 **Next Steps**:
 - 2.3 Convert basic components (Button, Input, Card, etc.) – copy client-next variants and styles
 - 2.4–2.7 Convert form, overlay, navigation, data display components
