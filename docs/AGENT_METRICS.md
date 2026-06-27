@@ -112,6 +112,20 @@ This file tracks performance and evolution of the AI agent during the migration 
 
 ---
 
+## Cycle 7 - Task: Increase test coverage (intake schemas)
+- **Timestamp**: 2025-06-27T18:05:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (validation schemas, business-critical)
+- **Duration**: 12 minutes
+- **Status**: ✅ Success
+- **Module**: src/server/intakes/schemas.ts (Zod validation for intake creation/update/list/decline)
+- **Tests Added**: 19 tests covering status enums, query schema defaults, preprocessing, validation rules
+- **Coverage Delta**: schemas.ts already 100% statements; no overall delta
+- **Total Tests**: 224 → 243 (+19)
+- **Impact**: Improved validation test coverage, catches schema regression
+
+---
+
 ## Previous Iterations
 - **Timestamp**: 2025-06-27T17:30:00+07:00
 - **Type**: Violation Fix (HIGH)
