@@ -1,79 +1,158 @@
 import { describe, it, expect } from "vitest";
-import { calcCourtFee, calcLateInterest, daysBetween, numberToChinese } from "@/lib/legal-calc";
+import {
+  calcCourtFee,
+  calcLateInterest,
+  daysBetween,
+  addDays,
+  numberToChinese
+} from "@/lib/legal-calc";
 
-describe("calcCourtFee — 财产案件分段累进", () => {
-  it("≤1万：固定50元", () => {
-    expect(calcCourtFee({ caseType: "PROPERTY", amount: 5000 }).fee).toBe(50);
+describe("calcCourtFee", () => {
+  it("PROPERTY: fee for 5,000", () => {
+    const res = calcCourtFee({ caseType: "PROPERTY", amount: 5000 });
+    expect(res.fee).toBe(50);
+    expect(res.feeSimplified).toBe(25);
   });
 
-  it("10万：×2.5%-200 = 2300", () => {
-    expect(calcCourtFee({ caseType: "PROPERTY", amount: 100_000 }).fee).toBe(2300);
+  it("PROPERTY: fee for 50,000", () => {
+    const res = calcCourtFee({ caseType: "PROPERTY", amount: 50000 });
+    // 50,000 <= 100,000: 50000 * 0.025 - 200 = 1050
+    expect(res.fee).toBe(1050);
+    expect(res.feeSimplified).toBe(525);
   });
 
-  it("100万：×1%+3800 = 13800", () => {
-    expect(calcCourtFee({ caseType: "PROPERTY", amount: 1_000_000 }).fee).toBe(13800);
+  it("PROPERTY: fee for 150,000", () => {
+    const res = calcCourtFee({ caseType: "PROPERTY", amount: 150000 });
+    // 150,000 <= 200,000: 150000 * 0.02 + 300 = 3300
+    expect(res.fee).toBe(3300);
   });
 
-  it("简易程序减半", () => {
-    const r = calcCourtFee({ caseType: "PROPERTY", amount: 100_000 });
-    expect(r.feeSimplified).toBe(Math.round(r.fee / 2));
+  it("PROPERTY: fee for 300,000", () => {
+    const res = calcCourtFee({ caseType: "PROPERTY", amount: 300000 });
+    // 300,000 <= 500,000: 300000 * 0.015 + 1300 = 5800
+    expect(res.fee).toBe(5800);
   });
-});
 
-describe("calcCourtFee — 其他案件类型", () => {
-  it("劳动争议固定10元", () => {
-    const r = calcCourtFee({ caseType: "LABOR" });
-    expect(r.fee).toBe(10);
-    expect(r.feeSimplified).toBe(5);
+  it("DIVORCE: fee without extra property", () => {
+    const res = calcCourtFee({ caseType: "DIVORCE", amount: 100000 });
+    // base 300, no extra (<=200k)
+    expect(res.fee).toBe(300);
+    expect(res.note).toContain("300");
+  });
+
+  it("DIVORCE: fee with extra property", () => {
+    const res = calcCourtFee({ caseType: "DIVORCE", amount: 500_000 });
+    // base 300 + (500000 - 200000) * 0.005 = 300 + 1500 = 1800
+    expect(res.fee).toBe(1800);
+    expect(res.note).toContain("财产分割");
+  });
+
+  it("LABOR: fixed fee", () => {
+    const res = calcCourtFee({ caseType: "LABOR" });
+    expect(res.fee).toBe(10);
+    expect(res.feeSimplified).toBe(5);
+  });
+
+  it("IP: fixed fee", () => {
+    const res = calcCourtFee({ caseType: "IP" });
+    expect(res.fee).toBe(1000);
+  });
+
+  it("OTHER: fixed fee", () => {
+    const res = calcCourtFee({ caseType: "OTHER" });
+    expect(res.fee).toBe(100);
   });
 });
 
 describe("calcLateInterest", () => {
-  it("逾期30天计算", () => {
-    const r = calcLateInterest({
+  it("calculates interest correctly", () => {
+    const due = new Date("2024-01-01");
+    const paid = new Date("2024-02-01"); // 31 days
+    const res = calcLateInterest({
       principal: 100_000,
-      dueDate: new Date("2025-01-01"),
-      paidDate: new Date("2025-01-31"),
+      dueDate: due,
+      paidDate: paid,
+      lprPercent: 3.45,
+      extraPercent: 5
     });
-    expect(r.daysLate).toBe(30);
-    expect(r.interest).toBeGreaterThan(0);
-    expect(r.totalToPay).toBe(100_000 + r.interest);
+    // yearlyRate = (3.45 + 5) / 100 = 0.0845
+    // interest = 100000 * 0.0845 * 31 / 365 ≈ 718.xx
+    expect(res.daysLate).toBe(31);
+    expect(res.yearlyRate).toBeCloseTo(0.0845, 4);
+    expect(res.interest).toBeGreaterThan(700);
+    expect(res.interest).toBeLessThan(800);
+    expect(res.totalToPay).toBeGreaterThan(100_700);
   });
 
-  it("未逾期：0天、0利息", () => {
-    const r = calcLateInterest({
+  it("no interest if paid on time", () => {
+    const due = new Date("2024-01-01");
+    const res = calcLateInterest({
       principal: 100_000,
-      dueDate: new Date("2025-01-31"),
-      paidDate: new Date("2025-01-01"),
+      dueDate: due,
+      paidDate: due
     });
-    expect(r.daysLate).toBe(0);
-    expect(r.interest).toBe(0);
+    expect(res.daysLate).toBe(0);
+    expect(res.interest).toBe(0);
+    expect(res.totalToPay).toBe(100_000);
   });
 });
 
 describe("daysBetween", () => {
-  it("基本天数差", () => {
-    expect(daysBetween(new Date("2025-01-01"), new Date("2025-01-11"))).toBe(10);
+  it("calculates days between two dates", () => {
+    const a = new Date("2024-01-01");
+    const b = new Date("2024-01-10");
+    expect(daysBetween(a, b)).toBe(9);
+    expect(daysBetween(b, a)).toBe(-9);
   });
 
-  it("排除周末", () => {
-    // 2025-01-06 (Mon) → 2025-01-10 (Fri) = 4 工作日
-    expect(daysBetween(new Date("2025-01-06"), new Date("2025-01-10"), true)).toBe(4);
+  it("excludes weekends when requested", () => {
+    // Fri Jan 5 to Mon Jan 8: 3 calendar days, 1 weekday (Mon)
+    const a = new Date("2024-01-05"); // Fri
+    const b = new Date("2024-01-08"); // Mon
+    expect(daysBetween(a, b, true)).toBe(1);
+  });
+});
+
+describe("addDays", () => {
+  it("adds positive days", () => {
+    const d = new Date("2024-01-01");
+    const result = addDays(d, 10);
+    expect(result.getDate()).toBe(11);
+    expect(result.getMonth()).toBe(0); // Jan
+  });
+
+  it("subtracts days with negative", () => {
+    const d = new Date("2024-01-10");
+    const result = addDays(d, -5);
+    expect(result.getDate()).toBe(5);
   });
 });
 
 describe("numberToChinese", () => {
-  it("整数", () => {
-    expect(numberToChinese(10000)).toBe("壹万元整");
-  });
-
-  it("带角分", () => {
-    const result = numberToChinese(123.45);
-    expect(result).toContain("壹佰贰拾叁元");
-    expect(result).toContain("肆角伍分");
-  });
-
-  it("零元", () => {
+  it("converts 0", () => {
     expect(numberToChinese(0)).toBe("零元整");
+  });
+
+  it("converts small numbers", () => {
+    expect(numberToChinese(123)).toBe("壹佰贰拾叁元整");
+    expect(numberToChinese(105)).toBe("壹佰零伍元整");
+    expect(numberToChinese(1005)).toBe("壹仟零伍元整");
+  });
+
+  it("converts decimal amounts", () => {
+    const res = numberToChinese(123.45);
+    expect(res).toContain("壹佰贰拾叁元");
+    expect(res).toContain("肆角");
+    expect(res).toContain("伍分");
+  });
+
+  it("handles negative", () => {
+    expect(numberToChinese(-100)).toBe("负壹佰元整");
+  });
+
+  it("handles large numbers (亿)", () => {
+    const res = numberToChinese(123_456_789);
+    expect(res).toContain("亿");
+    expect(res).toContain("万");
   });
 });
