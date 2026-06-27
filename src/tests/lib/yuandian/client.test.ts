@@ -208,4 +208,71 @@ describe("searchPtalCases", () => {
   });
 
   // Timeout test requires more complex mocking; skipped for unit test scope
+
+  it("throws when all params empty/undefined", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open",
+      caseDetailHost: "https://www.chineselaw.com"
+    });
+
+    await expect(searchPtalCases({ ay: [] as any, qw: "", xzqh_p: [] as any, wszl: [] as any, ajlb: undefined, ja_start: undefined, ja_end: undefined })).rejects.toThrow("至少填写一个检索条件");
+  });
+
+  it("excludes empty arrays and undefined from body", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open",
+      caseDetailHost: "https://www.chineselaw.com"
+    });
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: "success", data: { total: 0, lst: [] } })
+    });
+
+    // Only qw is non-empty after trim; ay empty, xzqh empty, wszl empty
+    await searchPtalCases({ ay: [], qw: "query ", xzqh_p: [] as any, wszl: [] as any });
+
+    const body = JSON.parse((global.fetch as any).mock.calls[0][1].body);
+    expect(body.ay).toBeUndefined();
+    expect(body.xzqh_p).toBeUndefined();
+    expect(body.wszl).toBeUndefined();
+    expect(body.qw).toBe("query");
+  });
+
+  it("includes ja_start and ja_end in body", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open",
+      caseDetailHost: "https://www.chineselaw.com"
+    });
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: "success", data: { total: 0, lst: [] } })
+    });
+
+    await searchPtalCases({ qw: "test", ja_start: "2024-01-01", ja_end: "2024-01-31" });
+
+    const body = JSON.parse((global.fetch as any).mock.calls[0][1].body);
+    expect(body.ja_start).toBe("2024-01-01");
+    expect(body.ja_end).toBe("2024-01-31");
+  });
+
+  it("propagates JSON parse error", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open",
+      caseDetailHost: "https://www.chineselaw.com"
+    });
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => { throw new Error("JSON parse failed"); }
+    });
+
+    await expect(searchPtalCases({ qw: "test" })).rejects.toThrow("JSON parse failed");
+  });
 });
