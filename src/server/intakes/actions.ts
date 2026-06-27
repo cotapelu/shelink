@@ -17,7 +17,7 @@ import {
 import { seedDefaultFolders } from "@/lib/default-folders";
 import { notifyRoleApprovers } from "@/server/notifications/approval";
 
-function emptyToNull<T extends Record<string, unknown>>(obj: T): T {
+export function emptyToNull<T extends Record<string, unknown>>(obj: T): T {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(obj)) {
     out[k] = v === "" ? null : v;
@@ -25,14 +25,14 @@ function emptyToNull<T extends Record<string, unknown>>(obj: T): T {
   return out as T;
 }
 
-function requireApprover(role: string) {
+export function requireApprover(role: string) {
   if (role !== "ADMIN" && role !== "PRINCIPAL_LAWYER") {
     throw new Error("仅管理员或主任律师可审批收案");
   }
 }
 
 /** 按 {委托方} 与 {对方} {案由} 自动生成标题 — 案由本身通常已含"纠纷"二字 */
-function generateTitle(
+export function generateTitle(
   clientName: string | null,
   opposingNames: string[],
   causeName: string | null
@@ -44,7 +44,7 @@ function generateTitle(
   return `${left}与${right}${cause}`.replace(/\s+/g, "");
 }
 
-function clientTypeToPartyType(type: ClientType): PartyType {
+export function clientTypeToPartyType(type: ClientType): PartyType {
   if (type === "INDIVIDUAL") return "NATURAL_PERSON";
   if (type === "COMPANY") return "COMPANY";
   return "OTHER_ORG";
@@ -69,7 +69,7 @@ type IntakeConflictGateInput = {
   }[];
 };
 
-function normalizeConflictQuery(q: {
+export function normalizeConflictQuery(q: {
   role?: string | null;
   name?: string | null;
   idNumber?: string | null;
@@ -83,11 +83,11 @@ function normalizeConflictQuery(q: {
   return { role: q.role, name, idNumber };
 }
 
-function conflictQueryKey(q: IntakeConflictQuery) {
+export function conflictQueryKey(q: IntakeConflictQuery) {
   return `${q.role}|${q.name}|${q.idNumber}`;
 }
 
-function formatConflictQuery(q: IntakeConflictQuery) {
+export function formatConflictQuery(q: IntakeConflictQuery) {
   const roleLabel: Record<IntakeConflictRole, string> = {
     CLIENT_PARTY: "委托方",
     OPPOSING_PARTY: "对方",
@@ -96,7 +96,7 @@ function formatConflictQuery(q: IntakeConflictQuery) {
   return `${roleLabel[q.role]}「${q.name || q.idNumber}」`;
 }
 
-function buildExpectedConflictQueries(intake: IntakeConflictGateInput) {
+export function buildExpectedConflictQueries(intake: IntakeConflictGateInput) {
   const queries: IntakeConflictQuery[] = [];
   const clientQuery = normalizeConflictQuery({
     role: "CLIENT_PARTY",
@@ -117,7 +117,7 @@ function buildExpectedConflictQueries(intake: IntakeConflictGateInput) {
   return queries;
 }
 
-function getCheckedConflictQueries(payload: Prisma.JsonValue) {
+export function getCheckedConflictQueries(payload: Prisma.JsonValue) {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return [];
   const queries = (payload as { queries?: unknown }).queries;
   if (!Array.isArray(queries)) return [];
@@ -135,7 +135,7 @@ function getCheckedConflictQueries(payload: Prisma.JsonValue) {
     .filter((q): q is IntakeConflictQuery => !!q);
 }
 
-function assertConflictReviewAllowsConversion(intake: IntakeConflictGateInput) {
+export function assertConflictReviewAllowsConversion(intake: IntakeConflictGateInput) {
   const expectedQueries = buildExpectedConflictQueries(intake);
   if (expectedQueries.length === 0) {
     throw new Error("请先补充委托方或相对方，再运行利益冲突检索");

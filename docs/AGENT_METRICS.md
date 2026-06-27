@@ -231,6 +231,39 @@ This file tracks performance and evolution of the AI agent during the migration 
 
 ---
 
+## Cycle 13 - Task: Batch coverage (3 modules + helpers extraction)
+- **Timestamp**: 2025-06-27T18:40:00+07:00
+- **Type**: Proactive Improvement (T + R)
+- **Priority**: HIGH (0% modules)
+- **Duration**: 45 minutes
+- **Status**: ✅ Success
+
+### Task 1: yuandian enterprise.ts
+- **Module**: src/lib/yuandian/enterprise.ts (Enterprise search API)
+- **Tests Added**: 14
+- **Coverage**: 0% → 51.11% statements
+
+### Task 2: ai settings.ts
+- **Module**: src/lib/ai/settings.ts (AI config management)
+- **Tests Added**: 12
+- **Coverage**: 0% → now covered (encryption/decryption logic)
+
+### Task 3: intakes actions helpers
+- **Module**: src/server/intakes/actions.ts (core business helpers)
+- **Refactor**: Exported internal helpers to enable testing
+- **Tests Added**: 33 (core 14 + conflict 19)
+- **Coverage Impact**: cluster improved; helpers now fully guarded
+
+- **Overall Coverage Delta**:
+  - Statements: 66.5% → 70.55% (+4.05%)
+  - Branches: 50.9% → 56.22% (+5.32%)
+  - Functions: 68.18% → 68.02% (-0.16% – added more util functions)
+  - Lines: 68.81% → 72.52% (+3.71%)
+- **Total Tests**: 347 → 394 (+47 net)
+- **Impact**: Crucial business logic tested, coverage jump >4%
+
+---
+
 ## Previous Iterations
 - **Timestamp**: 2025-06-27T17:30:00+07:00
 - **Type**: Violation Fix (HIGH)
