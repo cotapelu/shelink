@@ -264,6 +264,33 @@ This file tracks performance and evolution of the AI agent during the migration 
 
 ---
 
+## Cycle 14 - Task: Batch coverage (reports queries + permissions)
+- **Timestamp**: 2025-06-27T19:00:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (low coverage modules)
+- **Duration**: 30 minutes
+- **Status**: ✅ Success
+
+### Task 1: server/reports queries.ts
+- **Module**: src/server/reports/queries.ts (reporting data aggregation)
+- **Tests Added**: 14
+- **Coverage Impact**: 24.63% → ~85.5% statements
+
+### Task 2: lib/permissions index.ts
+- **Module**: src/lib/permissions/index.ts (access control filters & assertions)
+- **Tests Added**: 19
+- **Coverage Impact**: 43.9% → ~90%+ statements
+
+- **Overall Coverage Delta**:
+  - Statements: 70.55% → 75.87% (+5.32%)
+  - Branches: 56.22% → 57.96% (+1.74%)
+  - Functions: 68.02% → 78.57% (+10.55%)
+  - Lines: 72.52% → 76.1% (+3.58%)
+- **Total Tests**: 394 → 427 (+33)
+- **Impact**: Critical reporting and permission modules guarded, significant function coverage increase
+
+---
+
 ## Previous Iterations
 - **Timestamp**: 2025-06-27T17:30:00+07:00
 - **Type**: Violation Fix (HIGH)
