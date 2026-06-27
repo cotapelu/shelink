@@ -175,14 +175,14 @@ Chuyển từ "UI-only + external API" → "Full-stack unified app"
 | 1. Database | ✅ Done | 100% | Schema merged, Lineage added, seed complete |
 | 2. UI Components | ✅ Done | 100% | All shadcn components integrated |
 | 3. Frontend Pages | ✅ Done | 100% | Genealogy + ERP pages structure created |
-| 4. Backend | ✅ Done | 90% | Core server actions implemented; 9/11 pages migrated (persons, events, kinship, lineage, stats, users, tasks, board, projects). Remaining: genealogy/erp dashboards |
+| 4. Backend | ✅ Done | 100% | All server actions implemented; all genealogy/ERP pages migrated |
 | 5. Auth | ✅ Done | 100% | NextAuth in place |
 | 6. Shared Utils | ✅ Done | 80% | API client retained but unused by genealogy/ERP |
 | 7. Testing | ⚠️ Todo | 0% | Unit + E2E tests needed |
 | 8. Deployment | ⚠️ Todo | 0% | Docker, CI/CD pending |
 | 9. Documentation | ✅ Done | 95% | TODO.md, HANDOFF.md complete |
 
-**Overall**: UI/FE complete ✅, Database unified ✅, Backend integration pending 🔄.
+**Overall**: Migration 100% complete ✅ (UI + Database + Backend). Testing & deployment pending.
 
 ---
 
