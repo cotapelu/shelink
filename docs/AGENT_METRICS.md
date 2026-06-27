@@ -140,6 +140,20 @@ This file tracks performance and evolution of the AI agent during the migration 
 
 ---
 
+## Cycle 9 - Task: Add reports query unit tests
+- **Timestamp**: 2025-06-27T18:14:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (reporting module, 0% coverage)
+- **Duration**: 15 minutes
+- **Status**: ✅ Success
+- **Module**: src/server/reports/queries.ts (reporting aggregation logic)
+- **Tests Added**: 11 tests covering periodPresets, customPeriod validation, type checks
+- **Coverage Impact**: No delta (queries.ts remains ~25% from integration tests), but guards pure date utilities
+- **Total Tests**: 247 → 258 (+11)
+- **Impact**: Pure functions tested, date logic validated
+
+---
+
 ## Previous Iterations
 - **Timestamp**: 2025-06-27T17:30:00+07:00
 - **Type**: Violation Fix (HIGH)
