@@ -10,10 +10,6 @@ export default function ExpressPage() {
   const [trackings, setTrackings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadTrackings();
-  }, []);
-
   const loadTrackings = async () => {
     try {
       const data = await listExpressTrackings();
@@ -24,6 +20,10 @@ export default function ExpressPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadTrackings();
+  }, []);
 
   return (
     <div className="container mx-auto py-8">

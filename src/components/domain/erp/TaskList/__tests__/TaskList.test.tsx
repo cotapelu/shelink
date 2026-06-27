@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import TaskList from '../TaskList';
 import { Task } from '@/lib/types';
 
@@ -41,7 +42,7 @@ describe('TaskList', () => {
   });
 
   it('calls onEdit when edit button clicked', () => {
-    const onEdit = jest.fn();
+    const onEdit = vi.fn();
     render(<TaskList tasks={mockTasks} onEdit={onEdit} />);
     const editButtons = screen.getAllByTestId('edit-button');
     fireEvent.click(editButtons[0]);
@@ -49,7 +50,7 @@ describe('TaskList', () => {
   });
 
   it('calls onDelete when delete button clicked', () => {
-    const onDelete = jest.fn();
+    const onDelete = vi.fn();
     render(<TaskList tasks={mockTasks} onDelete={onDelete} />);
     const deleteButtons = screen.getAllByTestId('delete-button');
     fireEvent.click(deleteButtons[0]);

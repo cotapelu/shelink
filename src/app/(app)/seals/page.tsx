@@ -11,10 +11,6 @@ export default function SealsPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadRequests();
-  }, []);
-
   const loadRequests = async () => {
     try {
       const data = await listSealRequests();
@@ -25,6 +21,10 @@ export default function SealsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadRequests();
+  }, []);
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {

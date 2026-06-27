@@ -11,10 +11,6 @@ export default function IntakesPage() {
   const [intakes, setIntakes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadIntakes();
-  }, []);
-
   const loadIntakes = async () => {
     try {
       const data = await listIntakes();
@@ -25,6 +21,10 @@ export default function IntakesPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadIntakes();
+  }, []);
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {

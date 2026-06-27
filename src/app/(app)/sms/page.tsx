@@ -10,10 +10,6 @@ export default function SmsPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadMessages();
-  }, []);
-
   const loadMessages = async () => {
     try {
       const data = await listSmsMessages();
@@ -24,6 +20,10 @@ export default function SmsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadMessages();
+  }, []);
 
   return (
     <div className="container mx-auto py-8">

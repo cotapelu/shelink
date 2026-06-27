@@ -14,10 +14,6 @@ export default function KinshipPage() {
   const [relationship, setRelationship] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadPersons();
-  }, []);
-
   const loadPersons = async () => {
     try {
       const data = await getPersons({ page: 1, limit: 1000 });
@@ -26,6 +22,10 @@ export default function KinshipPage() {
       toast.error('Lỗi khi tải danh sách người: ' + e.message);
     }
   };
+
+  useEffect(() => {
+    loadPersons();
+  }, []);
 
   const calculateKinship = () => {
     if (!personA || !personB) {

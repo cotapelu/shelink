@@ -11,10 +11,6 @@ export default function EventsPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadEvents();
-  }, []);
-
   const loadEvents = async () => {
     try {
       const data = await getEvents();
@@ -25,6 +21,10 @@ export default function EventsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
 
   return (
     <div className="container mx-auto py-8">

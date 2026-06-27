@@ -9,10 +9,6 @@ export default function StatsPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
   const loadStats = async () => {
     try {
       const data = await getGenealogyStats();
@@ -23,6 +19,10 @@ export default function StatsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadStats();
+  }, []);
 
   if (loading) return <p>Đang tải...</p>;
 

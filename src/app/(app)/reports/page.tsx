@@ -10,10 +10,6 @@ export default function ReportsPage() {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadReports();
-  }, []);
-
   const loadReports = async () => {
     try {
       const data = await listReports();
@@ -24,6 +20,10 @@ export default function ReportsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadReports();
+  }, []);
 
   return (
     <div className="container mx-auto py-8">

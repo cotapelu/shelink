@@ -14,10 +14,6 @@ export default function PersonDetailPage() {
   const [person, setPerson] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (id) loadPerson();
-  }, [id]);
-
   const loadPerson = async () => {
     try {
       const data = await getPerson(id);
@@ -28,6 +24,10 @@ export default function PersonDetailPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (id) loadPerson();
+  }, [id]);
 
   if (loading) return <p>Đang tải...</p>;
   if (!person) return <p>Không tìm thấy</p>;

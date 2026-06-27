@@ -10,10 +10,6 @@ export default function LineagePage() {
   const [lineages, setLineages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadLineages();
-  }, []);
-
   const loadLineages = async () => {
     try {
       const data = await listLineages();
@@ -24,6 +20,10 @@ export default function LineagePage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadLineages();
+  }, []);
 
   return (
     <div className="container mx-auto py-8">

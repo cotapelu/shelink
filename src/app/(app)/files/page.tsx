@@ -10,10 +10,6 @@ export default function FilesPage() {
   const [files, setFiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadFiles();
-  }, []);
-
   const loadFiles = async () => {
     try {
       const data = await listFiles();
@@ -24,6 +20,10 @@ export default function FilesPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadFiles();
+  }, []);
 
   const download = (url: string, name: string) => {
     const a = document.createElement('a');

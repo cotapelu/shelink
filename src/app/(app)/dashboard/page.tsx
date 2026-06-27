@@ -10,10 +10,6 @@ export default function DashboardPage() {
   const [genealogyStats, setGenealogyStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
   const loadStats = async () => {
     try {
       const [dash, gene] = await Promise.all([
@@ -28,6 +24,10 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadStats();
+  }, []);
 
   if (loading) return <p>Đang tải...</p>;
 
