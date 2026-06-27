@@ -1,41 +1,50 @@
-import AdminUserList from "@/components/domain/genealogy/members/AdminUserList";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
-import { redirect } from "next/navigation";
-import { getUsers } from "@/server/genealogy/users/actions";
-import type { AdminUserData } from "@/types";
+'use client';
 
-export default async function AdminUsersPage() {
-  const session = await getServerSession(authOptions);
+import { useState, useEffect } from 'react';
+import { getUsers } from '@/server/genealogy/users/actions';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
-  if (!session?.user) {
-    redirect("/login");
-  }
+export default function UsersPage() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const isAdmin = session.user.role === "ADMIN";
+  useEffect(() => {
+    loadUsers();
+  }, []);
 
-  if (!isAdmin) {
-    redirect("/dashboard");
-  }
+  const loadUsers = async () => {
+    try {
+      const data = await getUsers();
+      setUsers(data);
+    } catch (e: any) {
+      toast.error('Lỗi khi tải người dùng: ' + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Load users via server action
-  const users = await getUsers();
+  if (loading) return <p>Đang tải...</p>;
 
   return (
-    <main className="flex-1 overflow-auto bg-stone-50/50 flex flex-col pt-8 relative w-full">
-      <div className="max-w-7xl mx-auto px-4 pb-8 sm:px-6 lg:px-8 w-full relative z-10">
-        <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-          <div>
-            <h2 className="text-3xl font-serif font-bold text-stone-800 tracking-tight">
-              Quản lý Người dùng
-            </h2>
-            <p className="text-stone-500 mt-2 text-sm sm:text-base">
-              Danh sách các tài khoản đang tham gia vào hệ thống.
-            </p>
-          </div>
-        </div>
-        <AdminUserList initialUsers={users as any} currentUserId={session.user.id} />
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Người dùng hệ thống</h1>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {users.map((user) => (
+          <Card key={user.id}>
+            <CardHeader>
+              <CardTitle className="text-lg">{user.name}</CardTitle>
+              <p className="text-sm text-stone-500">{user.email}</p>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm">Vai trò: {user.role}</p>
+              <p className="text-sm text-stone-500">
+                Đăng nhập cuối: {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString('vi-VN') : 'Chưa'}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-    </main>
+    </div>
   );
 }

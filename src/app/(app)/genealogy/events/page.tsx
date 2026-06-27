@@ -1,90 +1,57 @@
-import { DashboardProvider } from "@/components/layout/DashboardContext";
-import EventsList from "@/components/domain/genealogy/events/EventsList";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
-import { redirect } from "next/navigation";
-import { getPersons } from "@/server/genealogy/actions";
-import { getEvents } from "@/server/genealogy/actions";
-import type { Person } from "@/types";
-import { CustomEventRecord } from "@/utils/eventHelpers";
+'use client';
 
-function mapPrismaPerson(p: any): Person {
-  const genderMap: Record<string, "male" | "female" | "other"> = {
-    MALE: "male",
-    FEMALE: "female",
-    OTHER: "other",
+import { useState, useEffect } from 'react';
+import { getEvents } from '@/server/genealogy/actions';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { formatDisplayDate } from '@/utils/dateHelpers';
+
+export default function EventsPage() {
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  const loadEvents = async () => {
+    try {
+      const data = await getEvents();
+      setEvents(data);
+    } catch (e: any) {
+      toast.error('Lỗi khi tải sự kiện: ' + e.message);
+    } finally {
+      setLoading(false);
+    }
   };
-  return {
-    id: p.id,
-    full_name: p.fullName,
-    gender: genderMap[p.gender] || "other",
-    birth_year: p.birthYear ?? null,
-    birth_month: p.birthMonth ?? null,
-    birth_day: p.birthDay ?? null,
-    death_year: p.deathYear ?? null,
-    death_month: p.deathMonth ?? null,
-    death_day: p.deathDay ?? null,
-    avatar_url: p.avatarUrl ?? null,
-    note: p.note ?? null,
-    phone_number: p.phoneNumber ?? null,
-    occupation: p.occupation ?? null,
-    current_residence: p.currentResidence ?? null,
-    is_deceased: p.isDeceased,
-    is_in_law: p.isInLaw,
-    birth_order: p.birthOrder ?? null,
-    generation: p.generation ?? null,
-    other_names: p.otherNames ?? null,
-    created_at: p.createdAt.toISOString(),
-    updated_at: p.updatedAt.toISOString(),
-  };
-}
-
-function mapPrismaEventToCustom(e: any): CustomEventRecord {
-  return {
-    id: e.id,
-    name: e.name || e.type,
-    content: e.description,
-    event_date: e.eventDate.toISOString().split("T")[0],
-    location: e.location,
-    created_by: null,
-  };
-}
-
-export const metadata = {
-  title: "Sự kiện gia phả",
-};
-
-export default async function EventsPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect("/login");
-  }
-
-  // Load all persons for events computation
-  const { persons: prismaPersons } = await getPersons({ page: 1, limit: 100 });
-  const persons: Person[] = prismaPersons.map(mapPrismaPerson);
-
-  // Load events
-  const eventsData = await getEvents();
-  const customEvents: CustomEventRecord[] = eventsData.map(mapPrismaEventToCustom);
 
   return (
-    <DashboardProvider>
-      <div className="flex-1 w-full relative flex flex-col pb-12">
-        <div className="w-full relative z-20 py-6 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-stone-800">
-            Sự kiện gia phả
-          </h1>
-          <p className="text-stone-500 mt-1 text-sm">
-            Sinh nhật, ngày giỗ (âm lịch) và các sự kiện tuỳ chỉnh
-          </p>
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Sự kiện gia phả</h1>
+      {loading ? (
+        <p>Đang tải...</p>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {events.map((event) => (
+            <Card key={event.id}>
+              <CardHeader>
+                <CardTitle className="text-lg">{event.title}</CardTitle>
+                <p className="text-sm text-stone-500">{event.type}</p>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-2">{event.description}</p>
+                <p className="text-sm text-stone-500">
+                  {formatDisplayDate(event.year, event.month, event.day)}
+                </p>
+                <p className="text-sm text-stone-500">
+                  Người liên quan: {event.person?.fullName}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1">
-          <EventsList persons={persons} customEvents={customEvents} />
-        </main>
-      </div>
-    </DashboardProvider>
+      )}
+    </div>
   );
 }

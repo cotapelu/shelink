@@ -1,67 +1,118 @@
-import MemberForm from "@/components/domain/genealogy/members/MemberForm";
-import { api } from "@/lib/api/client";
-import { API_ENDPOINTS } from "@/lib/api/endpoints";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+'use client';
 
-export default async function NewMemberPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { createPerson } from '@/server/genealogy/actions';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
-  if (token) {
-    api.setToken(token);
-  }
+export default function NewPersonPage() {
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    fullName: '',
+    gender: 'MALE',
+    birthYear: '',
+    birthMonth: '',
+    birthDay: '',
+    birthPlace: '',
+    occupation: '',
+    currentResidence: '',
+    phoneNumber: '',
+    note: '',
+    isDeceased: false,
+    isInLaw: false,
+  });
+  const [saving, setSaving] = useState(false);
 
-  const authResponse = await api.get<{ id: string }>(API_ENDPOINTS.AUTH.ME);
-  const user = authResponse.data;
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const profileResponse = await api.get<{ role?: string }>(API_ENDPOINTS.PROFILE_BY_ID(user.id));
-  const profile = profileResponse.data;
-
-  const isAdmin = profile?.role === "admin";
-  const canEdit = profile?.role === "admin" || profile?.role === "editor";
-
-  // If user cannot edit, reject access
-  if (!canEdit) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-stone-800">
-            Truy cập bị từ chối
-          </h1>
-          <p className="text-stone-600 mt-2">
-            Bạn không có quyền thêm thành viên.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const data = {
+        ...formData,
+        birthYear: formData.birthYear ? Number(formData.birthYear) : null,
+        birthMonth: formData.birthMonth ? Number(formData.birthMonth) : null,
+        birthDay: formData.birthDay ? Number(formData.birthDay) : null,
+      } as any;
+      await createPerson(data);
+      toast.success('Tạo thành công');
+      router.push('/genealogy/persons');
+    } catch (e: any) {
+      toast.error('Lỗi: ' + e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="flex-1 w-full relative flex flex-col pb-8">
-      {/* Decorative background blurs */}
-      {/* <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-100/40 rounded-full blur-[100px] pointer-events-none" /> */}
-      {/* <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-stone-200/40 rounded-full blur-[100px] pointer-events-none" /> */}
-
-      <div className="w-full relative z-20 py-4 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto flex items-center justify-between">
-        <h1 className="text-xl sm:text-2xl font-serif font-bold text-stone-800">
-          Thêm Thành Viên Mới
-        </h1>
-        <a
-          href="/dashboard"
-          className="px-4 py-2 bg-stone-100/80 text-stone-700 rounded-lg hover:bg-stone-200 hover:text-stone-900 font-medium text-sm transition-all shadow-sm"
-        >
-          Hủy
-        </a>
-      </div>
-
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10 w-full flex-1">
-        <MemberForm isAdmin={isAdmin} />
-      </main>
+    <div className="container mx-auto py-8">
+      <Button variant="outline" className="mb-4" onClick={() => router.back()}>
+        ← Quay lại
+      </Button>
+      <Card>
+        <CardHeader>
+          <CardTitle>Thêm thành viên mới</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="grid gap-4 max-w-2xl">
+            <div>
+              <label className="block text-sm font-medium mb-1">Họ tên *</label>
+              <Input required value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Giới tính</label>
+              <select
+                value={formData.gender}
+                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                className="w-full border rounded p-2"
+              >
+                <option value="MALE">Nam</option>
+                <option value="FEMALE">Nữ</option>
+                <option value="OTHER">Khác</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Năm sinh</label>
+                <Input type="number" value={formData.birthYear} onChange={(e) => setFormData({ ...formData, birthYear: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Tháng sinh</label>
+                <Input type="number" min={1} max={12} value={formData.birthMonth} onChange={(e) => setFormData({ ...formData, birthMonth: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Ngày sinh</label>
+                <Input type="number" min={1} max={31} value={formData.birthDay} onChange={(e) => setFormData({ ...formData, birthDay: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Nơi sinh</label>
+              <Input value={formData.birthPlace} onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Nghề nghiệp</label>
+              <Input value={formData.occupation} onChange={(e) => setFormData({ ...formData, occupation: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Nơi cư trú</label>
+              <Input value={formData.currentResidence} onChange={(e) => setFormData({ ...formData, currentResidence: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Số điện thoại</label>
+              <Input value={formData.phoneNumber} onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Ghi chú</label>
+              <textarea className="w-full border rounded p-2" value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={3} />
+            </div>
+            <Button type="submit" disabled={saving}>
+              {saving ? 'Đang lưu...' : 'Lưu'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -67,7 +67,7 @@ const GetPersonsQuerySchema = z.object({
 });
 
 // Actions
-export async function getPersons(query: z.infer<typeof GetPersonsQuerySchema>) {
+export async function getPersons(query?: z.infer<typeof GetPersonsQuerySchema>) {
   const validated = GetPersonsQuerySchema.parse(query);
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');

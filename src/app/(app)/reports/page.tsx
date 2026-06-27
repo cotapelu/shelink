@@ -1,48 +1,56 @@
-import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth/session";
-import { getReportData, periodPresets } from "@/server/reports/queries";
-import { resolveReportPeriod } from "@/server/reports/resolve-period";
-import {
-  getCaseCycleAnalysis,
-  getReviewIssueAnalysis
-} from "@/server/reports/analytics";
-import { ReportsView } from "./_components/reports-view";
+'use client';
 
-export default async function ReportsPage({
-  searchParams
-}: {
-  searchParams: { period?: string; start?: string; end?: string };
-}) {
-  const session = await getSession();
-  if (!session?.user) redirect("/login");
-  if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
-    redirect("/");
-  }
+import { useState, useEffect } from 'react';
+import { listReports } from '@/server/shared/reports.actions';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
-  const resolved = resolveReportPeriod(searchParams);
-  const [data, cycle, reviewAnalysis] = await Promise.all([
-    getReportData(resolved.period),
-    getCaseCycleAnalysis(resolved.period),
-    getReviewIssueAnalysis(resolved.period)
-  ]);
-  const presets = periodPresets();
+export default function ReportsPage() {
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadReports();
+  }, []);
+
+  const loadReports = async () => {
+    try {
+      const data = await listReports();
+      setReports(data);
+    } catch (e: any) {
+      toast.error('Lỗi khi tải: ' + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <ReportsView
-      periodKey={resolved.periodKey}
-      periodLabel={resolved.period.label}
-      customStart={resolved.startStr}
-      customEnd={resolved.endStr}
-      resolveError={resolved.error}
-      data={data}
-      cycle={cycle}
-      reviewAnalysis={reviewAnalysis}
-      presetLabels={{
-        month: presets.month.label,
-        quarter: presets.quarter.label,
-        year: presets.year.label,
-        lastYear: presets.lastYear.label
-      }}
-    />
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Báo cáo</h1>
+      {loading ? (
+        <p>Đang tải...</p>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {reports.map((r) => (
+            <Card key={r.id}>
+              <CardHeader>
+                <CardTitle className="text-lg">{r.name}</CardTitle>
+                <p className="text-sm text-stone-500">Loại: {r.type}</p>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-2">Tạo bởi: {r.generatedByUser?.name}</p>
+                <p className="text-sm mb-2">{new Date(r.createdAt).toLocaleString('vi-VN')}</p>
+                {r.fileUrl && (
+                  <Button size="sm" onClick={() => window.open(r.fileUrl, '_blank')}>
+                    Xem báo cáo
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

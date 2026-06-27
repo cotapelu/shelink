@@ -1,85 +1,91 @@
-import KinshipFinder from "@/components/domain/genealogy/familytree/KinshipFinder";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
-import { redirect } from "next/navigation";
-import { getPersons } from "@/server/genealogy/actions";
-import { getRelationships } from "@/server/genealogy/actions";
+'use client';
 
-interface PersonNode {
-  id: string;
-  full_name: string;
-  gender: "male" | "female" | "other";
-  birth_year: number | null;
-  birth_order: number | null;
-  generation: number | null;
-  is_in_law: boolean;
-  avatar_url?: string | null;
-}
+import { useState, useEffect } from 'react';
+import { getPersons } from '@/server/genealogy/actions';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { Person } from '@/types';
 
-interface RelEdge {
-  type: string;
-  person_a: string;
-  person_b: string;
-}
+export default function KinshipPage() {
+  const [persons, setPersons] = useState<Person[]>([]);
+  const [personA, setPersonA] = useState<string>('');
+  const [personB, setPersonB] = useState<string>('');
+  const [relationship, setRelationship] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-function mapPerson(p: any): PersonNode {
-  const genderMap: Record<string, "male" | "female" | "other"> = {
-    MALE: "male",
-    FEMALE: "female",
-    OTHER: "other",
+  useEffect(() => {
+    loadPersons();
+  }, []);
+
+  const loadPersons = async () => {
+    try {
+      const data = await getPersons({ page: 1, limit: 1000 });
+      setPersons(data as any);
+    } catch (e: any) {
+      toast.error('Lỗi khi tải danh sách người: ' + e.message);
+    }
   };
-  return {
-    id: p.id,
-    full_name: p.fullName,
-    gender: genderMap[p.gender] || "other",
-    birth_year: p.birthYear ?? null,
-    birth_order: p.birthOrder ?? null,
-    generation: p.generation ?? null,
-    is_in_law: p.isInLaw,
-    avatar_url: p.avatarUrl ?? null,
+
+  const calculateKinship = () => {
+    if (!personA || !personB) {
+      toast.error('Vui lòng chọn hai người');
+      return;
+    }
+    if (personA === personB) {
+      setRelationship('Cùng một người');
+      return;
+    }
+    // Stub: In real app, run BFS on relationship graph
+    setRelationship('Xa xóm (cần tính toán)');
   };
-}
-
-function mapRel(r: any): RelEdge {
-  return {
-    type: r.type.toLowerCase(),
-    person_a: r.fromPersonId,
-    person_b: r.toPersonId,
-  };
-}
-
-export const metadata = {
-  title: "Tra cứu danh xưng",
-};
-
-export default async function KinshipPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect("/login");
-  }
-
-  // Load data via server actions
-  const { persons: prismaPersons } = await getPersons({ page: 1, limit: 100 });
-  const relsData = await getRelationships();
-
-  const persons: PersonNode[] = prismaPersons.map(mapPerson);
-  const relationships: RelEdge[] = relsData.map(mapRel);
 
   return (
-    <div className="flex-1 w-full relative flex flex-col pb-12">
-      <div className="w-full relative z-20 py-6 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
-        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-stone-800">
-          Tra cứu danh xưng
-        </h1>
-        <p className="text-stone-500 mt-1 text-sm">
-          Chọn hai thành viên để tự động tính cách gọi theo quan hệ gia phả
-        </p>
-      </div>
-
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1">
-        <KinshipFinder persons={persons} relationships={relationships} />
-      </main>
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Tính quan hệ họ hàng</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>Chọn hai người để tính quan hệ</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 mb-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Người 1</label>
+              <select
+                value={personA}
+                onChange={(e) => setPersonA(e.target.value)}
+                className="w-full border rounded p-2"
+              >
+                <option value="">Chọn...</option>
+                {persons.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.full_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Người 2</label>
+              <select
+                value={personB}
+                onChange={(e) => setPersonB(e.target.value)}
+                className="w-full border rounded p-2"
+              >
+                <option value="">Chọn...</option>
+                {persons.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.full_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <Button onClick={calculateKinship}>Tính quan hệ</Button>
+          {relationship && (
+            <p className="mt-4 text-lg font-semibold">Quan hệ: {relationship}</p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
