@@ -32,6 +32,16 @@ Long-term plan for the LawLink unified application.
 - All quality gates remain green (typecheck, lint, build)
 - Next target: Increase branch coverage for server/intakes/actions (currently ~18%) and lib/yuandian/client (~49%)
 
+**Cycle 22 Update**:
+- Focused on yuandian client vector search – added 11 tests
+- Coverage jumped to: statements 88%, branches 68%
+- All 495 tests passing
+
+**Cycle 23 Update**:
+- Targeted server/intakes/actions.listIntakes – added 10 tests
+- Module coverage: statements ~80%, branches ~45% (from 61%/18%)
+- Overall tests: 505; branch coverage ~70%+
+
 **Next Steps**:
 - 2.3 Convert basic components (Button, Input, Card, etc.) – copy client-next variants and styles
 - 2.4–2.7 Convert form, overlay, navigation, data display components
