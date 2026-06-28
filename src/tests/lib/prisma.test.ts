@@ -48,4 +48,24 @@ describe("prisma singleton", () => {
     expect(prodPrisma).toBeInstanceOf(PrismaClient);
     vi.unstubAllEnvs();
   });
+
+  it("uses existing global prisma instance (singleton returns existing)", async () => {
+    const mockPrisma = { $disconnect: vi.fn() } as any;
+    const globalForPrisma = globalThis as unknown as { prisma: any };
+    globalForPrisma.prisma = mockPrisma;
+    // Reset module cache to force re-evaluation
+    vi.resetModules();
+    const { prisma: importedPrisma } = await import('@/lib/prisma');
+    expect(importedPrisma).toBe(mockPrisma);
+  });
+
+  it("does not set global in production mode (if branch)", async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const globalForPrisma = globalThis as unknown as { prisma: any };
+    globalForPrisma.prisma = undefined;
+    vi.resetModules();
+    await import('@/lib/prisma');
+    expect(globalForPrisma.prisma).toBeUndefined();
+    vi.unstubAllEnvs();
+  });
 });

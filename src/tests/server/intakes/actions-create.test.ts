@@ -158,6 +158,33 @@ describe('createIntake', () => {
     expect(createArg.data.title).toBe('Auto Title');
   });
 
+  it('generates auto title when title is whitespace only', async () => {
+    const input = {
+      clientId: 'c1234567890123456789012345',
+      category: 'CIVIL_COMMERCIAL' as any,
+      parties: [{
+        role: 'OPPOSING_PARTY' as const,
+        name: 'Opponent',
+        ordinal: 1,
+        partyType: 'NATURAL_PERSON' as const,
+        idNumber: '1234567890',
+        standing: 'PLAINTIFF' as const
+      }],
+      title: '   ', // whitespace only
+      counterclaim: false,
+      coUserIds: [] as string[],
+      ourStanding: 'PLAINTIFF' as any
+    };
+
+    (prisma.client.findUnique as any).mockResolvedValue({ id: 'c1234567890123456789012345', name: 'Client' });
+
+    await createIntake(input);
+
+    expect(helpers.generateTitle).toHaveBeenCalledWith('Client', ["Opponent"], null);
+    const createArg = (prisma.intake.create as any).mock.calls[0][0];
+    expect(createArg.data.title).toBe('Auto Title');
+  });
+
   it('handles causeId lookup for title generation', async () => {
     const input = {
       clientId: 'c1234567890123456789012345',

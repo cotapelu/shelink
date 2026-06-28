@@ -93,6 +93,46 @@ describe("searchEnterpriseCandidates", () => {
     await expect(searchEnterpriseCandidates("Test")).rejects.toThrow(YuandianApiError);
   });
 
+  it("handles network error (fetch rejects)", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open"
+    });
+    (global.fetch as any).mockRejectedValue(new Error("Network failure"));
+
+    await expect(searchEnterpriseCandidates("Test")).rejects.toThrow();
+  });
+
+  it("handles JSON parse error", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open"
+    });
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => { throw new Error("Invalid JSON"); }
+    });
+
+    await expect(searchEnterpriseCandidates("Test")).rejects.toThrow();
+  });
+
+  it("returns empty array when data field missing", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open"
+    });
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: "success" }) // no data
+    });
+
+    const result = await searchEnterpriseCandidates("Test");
+    expect(result).toEqual([]);
+  });
+
   it("returns data array on success", async () => {
     (getYuandianSettings as any).mockResolvedValue({
       configured: true,
@@ -127,6 +167,7 @@ describe("searchEnterpriseCandidates", () => {
     const result = await searchEnterpriseCandidates("Test");
     expect(result).toEqual([]);
   });
+
 });
 
 describe("getEnterpriseBaseInfo", () => {
@@ -175,6 +216,35 @@ describe("getEnterpriseBaseInfo", () => {
     expect(result!.status).toBe("存续");
     expect(result!.businessScope).toBe("软件开发");
     expect(result!.establishedDate).toBe("2020-01-01");
+  });
+
+  it("handles non-string values by converting to empty string", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open"
+    });
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        status: "success",
+        data: {
+          id: "ent123",
+          企业名称: "测试公司",
+          统一社会信用代码: "91110000XXXXXX",
+          法定代表人: null,
+          注册资本: "100万",
+          注册地址: "北京",
+          经营状态: "存续",
+          经营范围: "软件开发",
+          成立日期: "2020-01-01"
+        }
+      })
+    });
+
+    const result = await getEnterpriseBaseInfo("ent123");
+    expect(result).not.toBeNull();
+    expect(result!.legalRep).toBe("");
   });
 
   it("returns null when data is null", async () => {
@@ -235,4 +305,18 @@ describe("getEnterpriseBaseInfo", () => {
 
     await expect(getEnterpriseBaseInfo("id")).rejects.toThrow(YuandianApiError);
   });
+
+  it("handles non-success status (status!=success)", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open"
+    });
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: "error", message: "Fail", code: 100 })
+    });
+
+    await expect(getEnterpriseBaseInfo("id")).rejects.toThrow(YuandianApiError);
+  });  
 });
