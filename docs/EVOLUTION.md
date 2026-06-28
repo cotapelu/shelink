@@ -65,8 +65,9 @@ Long-term plan for the LawLink unified application.
 - **Build**: ✅ Success
 - **Issue**: createIntake lacked tests (complex, many branches); createNotification had 0% branch coverage.
 - **Fix**: Added comprehensive tests covering client resolution (existing/new), validation, parties, and side effects. Rewrote createNotification tests to cover default priority and optional fields.
-- **Verification**: All 526 tests pass; build successful.
-- **Impact**: Main business logic heavily guarded; branch coverage now 80.2% (past 80% milestone)
+- **Verification**: All 534 tests pass; build successful.
+- **Impact**: Branch coverage increased to 82.34%; server/reports/queries fully guarded, createIntake/convert extended.
+- **Coverage**: Statements 94.22%, Branches 82.34%, Functions 93.67%, Lines 96.04%
 ---
 
 **Next Steps**:

@@ -511,6 +511,32 @@ This file tracks performance and evolution of the AI agent during the migration 
 - **Verification**: All 526 tests pass; build successful.
 - **Impact**: Main business logic heavily guarded; branch coverage now 80.2% (past 80% milestone)
 
+## Cycle 26 - Task: Expand coverage for reports, createIntake, convertIntakeToMatter
+- **Timestamp**: 2026-06-28T09:20:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (increase branch coverage toward 85%)
+- **Duration**: 25 minutes
+- **Status**: ✅ Success
+- **Files Modified**:
+  - src/tests/server/reports/queries-client-receivable.test.ts (new)
+  - src/tests/server/intakes/actions-create.test.ts (enhanced)
+  - src/tests/server/intakes/actions-convert.test.ts (enhanced)
+- **Test Delta**: +8 tests (total 534)
+- **Coverage Impact**:
+  - Statements: +0.71% (93.51% → 94.22%)
+  - Branches: +2.14% (80.2% → 82.34%)
+  - Functions: ~0% (93.67%)
+  - Lines: +0.83% (95.21% → 96.04%)
+- **Typecheck**: 0 errors
+- **Build**: ✅ Success
+- **Issue**: server/reports/queries.ts branch coverage 73% due to untested client receivable; createIntake missing title/contact/cause branches; convertIntakeToMatter missing fee/document branches.
+- **Fix**:
+  - Added client receivable test covering client aggregation with mixed fee types, null clients, sorting.
+  - Added createIntake tests: auto-title, causeId lookup, contact creation and dedup.
+  - Added convertIntakeToMatter tests: fee billing creation, document update.
+- **Verification**: All 534 tests pass; build successful.
+- **Impact**: server/reports/queries.ts now ~97% branch; createIntake/convertIntakeToMatter branches covered; overall branch coverage 82.34%.
+
 ---
 
 ## Previous Iterations
