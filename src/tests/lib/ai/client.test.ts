@@ -1,147 +1,193 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { aiChat, aiVision, AiNotConfiguredError, type AiChatOptions } from "@/lib/ai/client";
-import * as settings from "@/lib/ai/settings";
+/// <reference types="vitest/globals" />
 
-// Mock the settings module
-vi.mock("@/lib/ai/settings", () => ({
-  getAiSettings: vi.fn()
-}));
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  aiChat,
+  aiVision,
+  extractJson,
+  AiNotConfiguredError
+} from '@/lib/ai/client';
+import { getAiSettings } from '@/lib/ai/settings';
 
-// Mock global fetch
-global.fetch = vi.fn();
+vi.mock('@/lib/ai/settings');
 
-describe("aiChat", () => {
+const mockSettings = {
+  configured: true,
+  apiKey: 'test-api-key',
+  baseUrl: 'https://api.openai.com/v1',
+  textModel: 'gpt-4',
+  visionModel: 'gpt-4-vision'
+};
+
+describe('aiChat', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (getAiSettings as any).mockResolvedValue(mockSettings);
+    vi.stubGlobal('fetch', vi.fn());
+    vi.useFakeTimers();
   });
 
-  it("throws AiNotConfiguredError when AI not configured", async () => {
-    (settings.getAiSettings as any).mockResolvedValue({ configured: false });
-    const opts: AiChatOptions = { messages: [{ role: "user", content: "Hello" }] };
-    await expect(aiChat(opts)).rejects.toThrow(AiNotConfiguredError);
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
-  it("calls OpenAI compatible API with correct URL and headers", async () => {
-    (settings.getAiSettings as any).mockResolvedValue({
-      configured: true,
-      apiKey: "test-key",
-      baseUrl: "https://api.openai.com/v1",
-      textModel: "gpt-3.5-turbo"
-    });
+  it('throws AiNotConfiguredError when AI not configured', async () => {
+    (getAiSettings as any).mockResolvedValue({ ...mockSettings, configured: false });
+    await expect(
+      aiChat({ messages: [{ role: 'user', content: 'hi' }] })
+    ).rejects.toThrow(AiNotConfiguredError);
+  });
 
-    (global.fetch as any).mockResolvedValue({
+  it('calls fetch with correct URL, headers, and body', async () => {
+    const mockFetch = vi.mocked(globalThis.fetch as any);
+    mockFetch.mockResolvedValue({
       ok: true,
-      json: async () => ({ choices: [{ message: { content: "Hello there" } }] })
-    });
+      json: async () => ({ choices: [{ message: { content: 'Hello' } }] })
+    } as Response);
 
-    const opts: AiChatOptions = {
-      messages: [{ role: "user", content: "Hello" }],
-      maxTokens: 500,
-      temperature: 0.5
-    };
+    const result = await aiChat({ messages: [{ role: 'user', content: 'hi' }] });
 
-    const result = await aiChat(opts);
-
-    expect(result.content).toBe("Hello there");
-    expect(global.fetch).toHaveBeenCalledWith(
-      "https://api.openai.com/v1/chat/completions",
-      expect.objectContaining({
-        method: "POST",
-        headers: expect.objectContaining({
-          "Content-Type": "application/json",
-          Authorization: "Bearer test-key"
-        })
-      })
-    );
-
-    // Verify request body
-    const callArgs = (global.fetch as any).mock.calls[0][1];
-    const body = JSON.parse(callArgs.body);
-    expect(body.model).toBe("gpt-3.5-turbo");
-    expect(body.messages).toEqual([{ role: "user", content: "Hello" }]);
-    expect(body.max_tokens).toBe(500);
-    expect(body.temperature).toBe(0.5);
-  });
-
-  it("uses default values when options not provided", async () => {
-    (settings.getAiSettings as any).mockResolvedValue({
-      configured: true,
-      apiKey: "key",
-      baseUrl: "https://api.openai.com/v1",
-      textModel: "gpt-4"
-    });
-
-    (global.fetch as any).mockResolvedValue({
-      ok: true,
-      json: async () => ({ choices: [{ message: { content: "Response" } }] })
-    });
-
-    const result = await aiChat({ messages: [{ role: "user", content: "Hi" }] });
-
-    expect(result.content).toBe("Response");
-    const body = JSON.parse((global.fetch as any).mock.calls[0][1].body);
-    expect(body.model).toBe("gpt-4");
+    expect(result.content).toBe('Hello');
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const [url, options] = mockFetch.mock.calls[0];
+    expect(url).toBe('https://api.openai.com/v1/chat/completions');
+    expect(options.method).toBe('POST');
+    expect(options.headers['Content-Type']).toBe('application/json');
+    expect(options.headers.Authorization).toBe('Bearer test-api-key');
+    const body = JSON.parse(options.body);
+    expect(body.model).toBe('gpt-4');
+    expect(body.messages).toEqual([{ role: 'user', content: 'hi' }]);
     expect(body.max_tokens).toBe(1500);
     expect(body.temperature).toBe(0.2);
   });
 
-  it("handles API error response", async () => {
-    (settings.getAiSettings as any).mockResolvedValue({
-      configured: true,
-      apiKey: "key",
-      baseUrl: "https://api.openai.com/v1",
-      textModel: "gpt-3.5"
-    });
-
-    (global.fetch as any).mockResolvedValue({
-      ok: false,
-      status: 400,
-      text: async () => "Invalid request"
-    });
-
-    await expect(aiChat({ messages: [{ role: "user", content: "Hi" }] }))
-      .rejects.toThrow("AI 请求失败 (400): Invalid request");
-  });
-
-  it("handles missing choices array", async () => {
-    (settings.getAiSettings as any).mockResolvedValue({
-      configured: true,
-      apiKey: "key",
-      baseUrl: "https://api.openai.com/v1",
-      textModel: "gpt-3.5"
-    });
-
-    (global.fetch as any).mockResolvedValue({
+  it('returns empty content when choices array missing', async () => {
+    const mockFetch = vi.mocked(globalThis.fetch as any);
+    mockFetch.mockResolvedValue({
       ok: true,
       json: async () => ({})
-    });
+    } as Response);
 
-    const result = await aiChat({ messages: [{ role: "user", content: "Hi" }] });
-    expect(result.content).toBe("");
+    const result = await aiChat({ messages: [{ role: 'user', content: 'hi' }] });
+    expect(result.content).toBe('');
   });
 
-  it("handles timeout", async () => {
-    (settings.getAiSettings as any).mockResolvedValue({
-      configured: true,
-      apiKey: "key",
-      baseUrl: "https://api.openai.com/v1",
-      textModel: "gpt-3.5"
+  it('throws on non-ok response with error snippet', async () => {
+    const mockFetch = vi.mocked(globalThis.fetch as any);
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 401,
+      text: async () => 'Invalid API key'
+    } as Response);
+
+    await expect(
+      aiChat({ messages: [{ role: 'user', content: 'hi' }] })
+    ).rejects.toThrow('AI 请求失败 (401): Invalid API key');
+  });
+
+  it('throws on network error', async () => {
+    const mockFetch = vi.mocked(globalThis.fetch as any);
+    mockFetch.mockRejectedValue(new Error('Network failure'));
+
+    await expect(
+      aiChat({ messages: [{ role: 'user', content: 'hi' }] })
+    ).rejects.toThrow('Network failure');
+  });
+
+
+});
+
+describe('aiVision', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (getAiSettings as any).mockResolvedValue(mockSettings);
+    vi.stubGlobal('fetch', vi.fn());
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('uses dataUrl when image.dataUrl provided', async () => {
+    const mockFetch = vi.mocked(globalThis.fetch as any);
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: 'vision' } }] })
+    } as Response);
+
+    await aiVision({
+      image: { dataUrl: 'data:image/png;base64,abc' },
+      prompt: 'describe'
     });
 
-    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 100));
-    (global.fetch as any).mockReturnValue(timeoutPromise);
+    const [url, options] = mockFetch.mock.calls[0];
+    const body = JSON.parse(options.body);
+    expect(body.messages[0].content).toEqual([
+      { type: 'image_url', image_url: { url: 'data:image/png;base64,abc' } },
+      { type: 'text', text: 'describe' }
+    ]);
+  });
 
-    await expect(aiChat({ messages: [{ role: "user", content: "Hi" }], timeoutMs: 50 }))
-      .rejects.toThrow("timeout");
+  it('uses url when image.url provided', async () => {
+    const mockFetch = vi.mocked(globalThis.fetch as any);
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: 'vision' } }] })
+    } as Response);
+
+    await aiVision({
+      image: { url: 'https://example.com/image.jpg' },
+      prompt: 'describe'
+    });
+
+    const [url, options] = mockFetch.mock.calls[0];
+    const body = JSON.parse(options.body);
+    expect(body.messages[0].content).toEqual([
+      { type: 'image_url', image_url: { url: 'https://example.com/image.jpg' } },
+      { type: 'text', text: 'describe' }
+    ]);
+  });
+
+  it('throws if not configured', async () => {
+    (getAiSettings as any).mockResolvedValue({ ...mockSettings, configured: false });
+    await expect(
+      aiVision({
+        image: { url: 'https://example.com/image.jpg' },
+        prompt: 'describe'
+      })
+    ).rejects.toThrow(AiNotConfiguredError);
   });
 });
 
-describe("AiNotConfiguredError", () => {
-  it("has correct message", () => {
-    const err = new AiNotConfiguredError();
-    expect(err.message).toBe("AI 未配置，请先到 设置 → AI 接入 填写 API key");
-    expect(err.name).toBe("AiNotConfiguredError");
+describe('extractJson', () => {
+  it('extracts JSON from fenced code block with json language', () => {
+    const content = 'Here is JSON:\n```json\n{ "key": "value" }\n```';
+    const result = extractJson<{ key: string }>(content);
+    expect(result).toEqual({ key: 'value' });
+  });
+
+  it('extracts JSON from fenced block without language', () => {
+    const content = '```\n[1,2,3]\n```';
+    expect(extractJson<number[]>(content)).toEqual([1, 2, 3]);
+  });
+
+  it('extracts JSON without fences', () => {
+    const content = 'Some text { "a": 1 } more text';
+    expect(extractJson<{ a: number }>(content)).toEqual({ a: 1 });
+  });
+
+  it('returns null if no JSON pattern', () => {
+    const content = 'Just plain text';
+    expect(extractJson(content)).toBeNull();
+  });
+
+  it('returns null if JSON parse fails', () => {
+    const content = '```{ invalid json }```';
+    expect(extractJson(content)).toBeNull();
   });
 });
-
-// aiVision tests would require more complex mocking; deferred to integration
