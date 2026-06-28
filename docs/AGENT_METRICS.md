@@ -400,6 +400,24 @@ This file tracks performance and evolution of the AI agent during the migration 
 
 ---
 
+## Cycle 20 - Task: Increase permissions module coverage
+- **Timestamp**: 2026-06-28T07:53:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (security-critical access control)
+- **Duration**: 8 minutes
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/lib/permissions/assert-functions.test.ts (new)
+- **Test Delta**: +17 tests (total 478)
+- **Coverage Impact**: lib/permissions/index.ts increased from 43.9% → ~70%+ statements (estimate)
+- **Typecheck**: 0 errors (added reference directive)
+- **Build**: ✅ Success
+- **Issue**: Access control assertion functions lacked tests.
+- **Fix**: Added comprehensive tests for all assertCan* functions covering owner, member, and manager scenarios, including error paths.
+- **Verification**: All 478 tests pass; build successful.
+- **Impact**: Access control logic now well-tested; security posture improved.
+
+---
+
 ## Previous Iterations
 
 - **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models added.
