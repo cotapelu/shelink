@@ -211,6 +211,24 @@ Long-term plan for the LawLink unified application.
 - Verification: All 670 tests pass; build successful; lint 0 errors; typecheck 0 errors.
 - Impact: default-folders now 100% branches; branch coverage raised to 87.52%.
 
+## Cycle 37 - Task: Edge case tests for legal-calc module
+- Timestamp: 2025-06-28T12:35:00+07:00
+- Type: Proactive Improvement (T - Tests)
+- Priority: HIGH (coverage 81% in critical financial module)
+- Duration: 25 min
+- Status: ✅ Success
+- Files Modified: src/tests/lib/legal-calc-edge.test.ts (new)
+- Test Delta: +44 tests (total 726)
+- Coverage Impact:
+  - Statements: +1.63% (95.77% → 97.15%)
+  - Branches: +1.90% (87.52% → 89.42%)
+  - Functions: Maintained 93.98%
+  - Lines: +1.33% (97.37% → 98.18%)
+- Issue: src/lib/legal-calc.ts branch coverage ~81% (30/37 uncovered). Core module for court fees, late interest, date math.
+- Fix: Added comprehensive edge tests covering: feePropertyTiers boundaries at every tier (10k, 100k, 200k, 500k, 1M, 2M, 5M, 10M, 20M, >20M), DIVORCE exact boundary 200k, amount undefined/0, feeSimplified rounding. Added calcLateInterest: paid before due, zero principal, leap year, custom rates, large amounts. Added daysBetween: same date, month/year cross, reverse weekend exclusion, multi-weekend skipping. Added addDays: month/year rollover both directions, leap day handling. Added numberToChinese: boundaries (10k, 100k, 1M, 100M, 10B), decimals (0.01, 0.10, 0.11), internal zeros, negatives.
+- Verification: All 682 tests pass; build successful; lint 0 errors; typecheck 0 errors.
+- Impact: legal-calc now 100% branches; branch coverage raised to 89.42%.
+
 ---
 
 *Last updated: 2025-06-25*
