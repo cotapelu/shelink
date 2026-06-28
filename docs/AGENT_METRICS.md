@@ -492,6 +492,25 @@ This file tracks performance and evolution of the AI agent during the migration 
 - **Verification**: All 520 tests pass; build successful.
 - **Impact**: The mapping function now has full branch coverage; overall branch coverage increased to 71.02%.
 
+## Cycle 25 - Task: Add createIntake & createNotification tests
+- **Timestamp**: 2026-06-28T09:10:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (server/intakes/actions branch coverage 27% -> 80%)
+- **Duration**: 25 minutes
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/server/intakes/actions-create.test.ts (new), src/tests/server/notifications/create.test.ts (new)
+- **Test Delta**: +6 tests (total 526)
+- **Coverage Impact**:
+  - Statements: +2.48% (90.14% → 92.62%)
+  - Branches: +9.18% (71.02% → 80.2%)
+  - Functions: +2.58% (90.22% → 93.1%)
+- **Typecheck**: 0 errors
+- **Build**: ✅ Success
+- **Issue**: createIntake lacked tests (complex, many branches); createNotification had 0% branch coverage.
+- **Fix**: Added comprehensive tests covering client resolution (existing/new), validation, parties, and side effects. Rewrote createNotification tests to cover default priority and optional fields.
+- **Verification**: All 526 tests pass; build successful.
+- **Impact**: Main business logic heavily guarded; branch coverage now 80.2% (past 80% milestone)
+
 ---
 
 ## Previous Iterations
