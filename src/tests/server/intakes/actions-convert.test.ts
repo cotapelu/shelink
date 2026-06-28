@@ -236,6 +236,63 @@ describe("convertIntakeToMatter", () => {
     });
   });
 
+  it("handles coUserIds containing ownerId and missing clientId", async () => {
+    (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
+    const mockIntake: any = {
+      id: "i1",
+      title: "Case Title",
+      category: "CIVIL_COMMERCIAL",
+      ownerUserId: "u2",
+      causeId: "c1",
+      causeFreeText: "free",
+      clientId: null,
+      firstProcedureType: "FIRST_INSTANCE",
+      ourStanding: "PLAINTIFF",
+      claimAmount: 100000,
+      counterclaim: false,
+      coUserIds: ["u2", "u3"],
+      client: null,
+      parties: [],
+      conflictChecks: [],
+      documents: []
+    };
+    (prisma.intake.findUnique as any).mockResolvedValue(mockIntake);
+
+    let capturedTx: any = null;
+    (prisma.$transaction as any).mockImplementation(async (cb: any) => {
+      const tx = {
+        matter: { create: vi.fn().mockResolvedValue({ id: "m1", internalCode: "IC", firmCaseNo: "FCN" }) },
+        procedure: { create: vi.fn().mockResolvedValue({ id: "p1" }) },
+        party: { create: vi.fn().mockResolvedValue({ id: "pa1" }), createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        billing: { create: vi.fn().mockResolvedValue({ id: "b1" }) },
+        matterMember: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        document: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        matterProcedure: { create: vi.fn().mockResolvedValue({ id: "mp1" }) },
+        procedureParty: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        intake: { update: vi.fn().mockResolvedValue({ id: "i1" }) },
+        timelineEvent: { create: vi.fn().mockResolvedValue({ id: "te1" }) },
+        documentFolder: { createMany: vi.fn().mockResolvedValue({ count: 0 }) }
+      } as any;
+      capturedTx = tx;
+      return await cb(tx);
+    });
+
+    await convertIntakeToMatter("i1");
+
+    expect(capturedTx).not.toBeNull();
+    // Verify nested members.create includes LEAD for owner and CO_LEAD for non-owner co-users
+    const matterCreateArgs = (capturedTx.matter.create as any).mock.calls[0][0];
+    const membersCreate = matterCreateArgs.data.members.create;
+    expect(membersCreate).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ userId: "u2", role: "LEAD" }),
+        expect.objectContaining({ userId: "u3", role: "CO_LEAD" })
+      ])
+    );
+    // clientLinks should be undefined (not set) when intake.clientId is null
+    expect(matterCreateArgs.data.clientLinks).toBeUndefined();
+  });
+
   it("skips procedureParty creation when no client standing and no party standing", async () => {
     (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
     const mockIntake = {

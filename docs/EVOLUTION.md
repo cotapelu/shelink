@@ -229,6 +229,40 @@ Long-term plan for the LawLink unified application.
 - Verification: All 682 tests pass; build successful; lint 0 errors; typecheck 0 errors.
 - Impact: legal-calc now 100% branches; branch coverage raised to 89.42%.
 
+## Cycle 38 - Task: Increase branch coverage for AI recommend-cause
+- Timestamp: 2025-06-28T12:45:00+07:00
+- Type: Proactive Improvement (T - Tests)
+- Priority: HIGH (coverage 89%)
+- Duration: 20 min
+- Status: ✅ Success
+- Files Modified: src/tests/server/ai/recommend-cause.test.ts
+- Test Delta: +10 tests (total 692)
+- Coverage Impact:
+  - Statements: Maintained ~97.9%
+  - Branches: +0.89% (89.42% → 90.31%)
+  - Functions: Maintained 93.98%
+- Issue: server/ai/recommend-cause.ts branch coverage 89.47% (17/19 branches). Missing categoryHint default and AiNotConfiguredError rethrow.
+- Fix: Added tests: categoryHint default for LABOR_ARBITRATION; rethrow AiNotConfiguredError; parameterized test covering all MatterCategory values; corrected generic error propagation.
+- Verification: All 692 tests pass; lint 0; typecheck 0; build success.
+- Impact: Pushed overall branches to >90% target.
+
+## Cycle 39 - Task: Increase branch coverage for intakes/actions (convertIntakeToMatter)
+- Timestamp: 2025-06-28T12:55:00+07:00
+- Type: Proactive Improvement (T - Tests)
+- Priority: HIGH (core business logic)
+- Duration: 20 min
+- Status: ✅ Success
+- Files Modified: src/tests/server/intakes/actions-convert.test.ts
+- Test Delta: +1 test (total 693)
+- Coverage Impact:
+  - Statements: Maintained ~98.1%
+  - Branches: Maintained 90.31%
+  - Functions: +1 (95.08%)
+- Issue: server/intakes/actions.ts branch coverage 80.82% (4 uncovered branches: coUserIds filter outcomes, clientLinks false branch).
+- Fix: Added test covering: coUserIds containing ownerId (tests filter false for owner, true for others) and clientId null (clientLinks undefined).
+- Verification: All 693 tests pass; lint 0; typecheck 0; build success.
+- Impact: intakes/actions.ts coverage rose to 95.74%; maintain overall 90.31% branches.
+
 ---
 
 *Last updated: 2025-06-25*
