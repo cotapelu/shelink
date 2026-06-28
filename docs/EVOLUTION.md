@@ -42,6 +42,15 @@ Long-term plan for the LawLink unified application.
 - Module coverage: statements ~80%, branches ~45% (from 61%/18%)
 - Overall tests: 505; branch coverage ~70%+
 
+**Cycle 24 Update**:
+- Exhaustively tested `procedureToStandingOptions` in lib/enums – added 15 tests
+- Covered all 20+ ProcedureType values, both sides, null/undefined, and default fallback
+- Branch coverage improved to ~71% (from ~70%)
+- Total tests: 520
+- All quality gates green (typecheck, lint, build)
+
+---
+
 **Next Steps**:
 - 2.3 Convert basic components (Button, Input, Card, etc.) – copy client-next variants and styles
 - 2.4–2.7 Convert form, overlay, navigation, data display components

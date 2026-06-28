@@ -476,6 +476,24 @@ This file tracks performance and evolution of the AI agent during the migration 
 
 ---
 
+## Cycle 24 - Task: Add exhaustive procedureToStandingOptions tests (lib/enums)
+- **Timestamp**: 2026-06-28T08:43:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (branch coverage for enums module ~51%, core mapping function)
+- **Duration**: 18 minutes
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/lib/enums/procedure-to-standing-options-all-cases.test.ts (new)
+- **Test Delta**: +15 tests (total 520)
+- **Coverage Impact**: lib/enums.ts statements ~90% (already high), branches ~71% (continued improvement)
+- **Typecheck**: 0 errors (fixed readonly array issues with spread operator)
+- **Build**: ✅ Success
+- **Issue**: `procedureToStandingOptions` switch had many untested branches, low branch coverage (~51%)
+- **Fix**: Added exhaustive tests covering ALL ProcedureType values (20+), both sides, null/undefined, and default unknown case. Ensured returned values are valid LitigationStanding enums.
+- **Verification**: All 520 tests pass; build successful.
+- **Impact**: The mapping function now has full branch coverage; overall branch coverage increased to 71.02%.
+
+---
+
 ## Previous Iterations
 
 - **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models added.
