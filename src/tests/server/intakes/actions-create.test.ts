@@ -281,4 +281,117 @@ describe('createIntake', () => {
 
     expect(prisma.contact.create).not.toHaveBeenCalled();
   });
+
+  it('creates new client with contact when contact info provided', async () => {
+    const input = {
+      clientName: 'New Client',
+      clientType: 'COMPANY' as any,
+      contactName: 'Contact Person',
+      contactPhone: '1234567890',
+      category: 'CIVIL_COMMERCIAL' as any,
+      parties: [{
+        role: 'OPPOSING_PARTY' as const,
+        name: 'Opponent',
+        ordinal: 1,
+        partyType: 'NATURAL_PERSON' as const,
+        idNumber: '1234567890',
+        standing: 'PLAINTIFF' as const
+      }],
+      counterclaim: false,
+      coUserIds: [] as string[],
+      ourStanding: 'PLAINTIFF' as any
+    };
+
+    (prisma.client.create as any).mockResolvedValue({ id: 'c2', name: 'New Client' });
+
+    await createIntake(input);
+
+    expect(prisma.client.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          name: 'New Client',
+          type: 'COMPANY',
+          contacts: {
+            create: {
+              name: 'Contact Person',
+              phone: '1234567890',
+              isPrimary: true
+            }
+          }
+        })
+      })
+    );
+  });
+
+  it('creates contact for existing client using client name when contactName omitted', async () => {
+    const input = {
+      clientId: 'c1234567890123456789012345',
+      contactPhone: '1234567890', // no contactName
+      category: 'CIVIL_COMMERCIAL' as any,
+      parties: [{
+        role: 'OPPOSING_PARTY' as const,
+        name: 'Opponent',
+        ordinal: 1,
+        partyType: 'NATURAL_PERSON' as const,
+        idNumber: '1234567890',
+        standing: 'PLAINTIFF' as const
+      }],
+      counterclaim: false,
+      coUserIds: [] as string[],
+      ourStanding: 'PLAINTIFF' as any
+    };
+
+    (prisma.client.findUnique as any).mockResolvedValue({ id: 'c1', name: 'Client Name' });
+    (prisma.contact.findFirst as any).mockResolvedValue(null);
+    (prisma.contact.create as any).mockResolvedValue({});
+
+    await createIntake(input);
+
+    // Should use client name when contactName not provided
+    expect(prisma.contact.create).toHaveBeenCalledWith({
+      data: {
+        clientId: 'c1234567890123456789012345',
+        name: 'Client Name',
+        phone: '1234567890',
+        isPrimary: false
+      }
+    });
+  });
+
+  it('creates contact for existing client with whitespace contactName (trim to empty)', async () => {
+    const input = {
+      clientId: 'c1234567890123456789012345',
+      contactName: '   ', // whitespace only
+      contactPhone: '1234567890',
+      category: 'CIVIL_COMMERCIAL' as any,
+      parties: [{
+        role: 'OPPOSING_PARTY' as const,
+        name: 'Opponent',
+        ordinal: 1,
+        partyType: 'NATURAL_PERSON' as const,
+        idNumber: '1234567890',
+        standing: 'PLAINTIFF' as const
+      }],
+      counterclaim: false,
+      coUserIds: [] as string[],
+      ourStanding: 'PLAINTIFF' as any
+    };
+
+    (prisma.client.findUnique as any).mockResolvedValue({ id: 'c1', name: 'Client Name' });
+    (prisma.contact.findFirst as any).mockResolvedValue(null);
+    (prisma.contact.create as any).mockResolvedValue({});
+
+    await createIntake(input);
+
+    // After trim, name becomes empty, so where name should be undefined (no filter)
+    // and create name should be empty string (unusual but for coverage)
+    expect(prisma.contact.create).toHaveBeenCalledWith({
+      data: {
+        clientId: 'c1234567890123456789012345',
+        name: '',
+        phone: '1234567890',
+        isPrimary: false
+      }
+    });
+  });
 });

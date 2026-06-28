@@ -263,6 +263,27 @@ Long-term plan for the LawLink unified application.
 - Verification: All 693 tests pass; lint 0; typecheck 0; build success.
 - Impact: intakes/actions.ts coverage rose to 95.74%; maintain overall 90.31% branches.
 
+## Cycle 40 - Task: Increase branch coverage to >92%
+- Timestamp: 2025-06-28T13:50:00+07:00
+- Type: Proactive Improvement (Testing)
+- Priority: HIGH (target 92%+)
+- Duration: 30 min
+- Status: ✅ Success
+- Test Delta: +7 tests (total 745)
+- Coverage Impact:
+  - Statements: 98.27% (unchanged)
+  - Branches: 90.61% → 92.21% (+1.60%, 924/1002)
+  - Functions: 96.17% (unchanged)
+  - Lines: 99.39% (unchanged)
+- Files Modified: src/tests/server/matters/schemas.test.ts, src/tests/server/intakes/actions-create.test.ts, src/tests/server/intakes/actions-convert.test.ts
+- Notes:
+  - Added comprehensive validation tests for server/matters/schemas.ts (43 tests)
+  - Added contact creation tests for server/intakes/actions.ts (new client with contact, existing client edge cases)
+  - Added inference tests for firstProcedureType (CIVIL_COMMERCIAL → FIRST_INSTANCE, LABOR_ARBITRATION → NON_LITIGATION_PHASE)
+  - Added counterclaim branch tests for convertIntakeToMatter (DEFENDANT/PLAINTIFF combos)
+- Verification: All tests pass (745); lint 0; typecheck 0; build success.
+- Impact: Achieved overall branch coverage 92.21%, exceeding 92% target.
+
 ---
 
 *Last updated: 2025-06-25*

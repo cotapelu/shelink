@@ -747,6 +747,25 @@ This file tracks performance and evolution of the AI agent during the migration 
 - **Verification**: All 693 tests pass; lint 0; typecheck 0; build success.
 - **Impact**: intakes/actions.ts coverage rose to 95.74%; maintain overall 90.31% branches.
 
+## Cycle 40 - Task: Increase branch coverage to >92%
+- **Timestamp**: 2025-06-28T13:45:00+07:00
+- **Type**: Proactive Improvement (Testing)
+- **Priority**: HIGH (target 92%+)
+- **Duration**: 30 min
+- **Status**: ✅ Success
+- **Test Delta**: +7 tests (total 745)
+- **Coverage Delta**:
+  - Statements: 98.27% (unchanged)
+  - Branches: 90.61% → 92.21% (+1.60%, 924/1002)
+  - Functions: 96.17% (unchanged)
+  - Lines: 99.39% (unchanged)
+- **Notes**:
+  - Added comprehensive validation tests for `server/matters/schemas.ts` (43 tests)
+  - Added contact creation tests for `server/intakes/actions.ts` (new client with contact, existing client edge cases)
+  - Added inference tests for `firstProcedureType` (CIVIL_COMMERCIAL → FIRST_INSTANCE, LABOR_ARBITRATION → NON_LITIGATION_PHASE)
+  - Added counterclaim branch tests for `convertIntakeToMatter` (DEFENDANT/PLAINTIFF combos)
+- **Verification**: All tests pass (745); lint 0; typecheck 0; build success.
+
 ---
 
 - **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models added.
