@@ -193,6 +193,24 @@ Long-term plan for the LawLink unified application.
 - Introduce Redis for caching and rate limiting.
 - Add OpenTelemetry for distributed tracing.
 
+## Cycle 36 - Task: Increase branch coverage for default-folders module
+- Timestamp: 2025-06-28T12:35:00+07:00
+- Type: Proactive Improvement (T - Tests)
+- Priority: CRITICAL (coverage 14%)
+- Duration: 25 min
+- Status: ✅ Success
+- Files Modified: src/tests/lib/default-folders.test.ts (new)
+- Test Delta: +32 tests (total 670)
+- Coverage Impact:
+  - Statements: +0.85% (95.26% → 96.11%)
+  - Branches: +1.80% (85.72% → 87.52%)
+  - Functions: +0.54% (93.44% → 93.98%)
+  - Lines: +0.50% (96.87% → 97.37%)
+- Issue: src/lib/default-folders.ts branch coverage only 14.29% (3/21). Module provides default folder templates for matters; critical for data integrity.
+- Fix: Added comprehensive tests covering: DEFAULT_FOLDERS_BY_CATEGORY keys/arrays, non-litigation structure; seedDefaultFolders folder creation orderIndex/isDefault; suggestFolderByTemplateCategory for all 8 template categories across litigation (CIVIL, ADMIN, CRIMINAL) and non-litigation (NON_LIT, COUNSEL, PROJECT) plus edge categories (LABOR, COMMERCIAL_ARBI).
+- Verification: All 670 tests pass; build successful; lint 0 errors; typecheck 0 errors.
+- Impact: default-folders now 100% branches; branch coverage raised to 87.52%.
+
 ---
 
 *Last updated: 2025-06-25*
