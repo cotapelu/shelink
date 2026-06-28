@@ -235,4 +235,136 @@ describe("convertIntakeToMatter", () => {
       data: { matterId: "m1" }
     });
   });
+
+  it("skips procedureParty creation when no client standing and no party standing", async () => {
+    (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
+    const mockIntake = {
+      id: "i1",
+      title: "Case",
+      category: "CIVIL_COMMERCIAL",
+      ownerUserId: "u2",
+      causeId: "c1",
+      causeFreeText: "free",
+      clientId: null,
+      firstProcedureType: "FIRST_INSTANCE",
+      ourStanding: undefined,
+      claimAmount: null,
+      counterclaim: false,
+      coUserIds: [],
+      client: null,
+      parties: [
+        {
+          role: "OPPOSING_PARTY" as const,
+          name: "Opp",
+          standing: null,
+          ordinal: 1,
+          partyType: "NATURAL_PERSON" as const,
+          idNumber: "123456",
+          phone: "",
+          address: "",
+          legalRep: "",
+          contactName: "",
+          enterpriseSocialCode: "",
+          enterpriseName: "",
+          notes: ""
+        }
+      ],
+      conflictChecks: [],
+      documents: []
+    };
+    (prisma.intake.findUnique as any).mockResolvedValue(mockIntake);
+
+    let capturedTx: any = null;
+    (prisma.$transaction as any).mockImplementation(async (cb: any) => {
+      const tx = {
+        matter: { create: vi.fn().mockResolvedValue({ id: "m1", internalCode: "IC", firmCaseNo: "FCN" }) },
+        procedure: { create: vi.fn().mockResolvedValue({ id: "p1" }) },
+        party: { create: vi.fn().mockResolvedValue({ id: "p1" }), createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        billing: { create: vi.fn() },
+        matterMember: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        document: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        matterProcedure: { create: vi.fn().mockResolvedValue({ id: "mp1" }) },
+        procedureParty: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        intake: { update: vi.fn().mockResolvedValue({ id: "i1" }) },
+        timelineEvent: { create: vi.fn().mockResolvedValue({ id: "te1" }) },
+        documentFolder: { createMany: vi.fn().mockResolvedValue({ count: 0 }) }
+      };
+      capturedTx = tx;
+      return await cb(tx);
+    });
+
+    await convertIntakeToMatter("i1");
+
+    expect(capturedTx.procedureParty.createMany).not.toHaveBeenCalled();
+  });
+
+  it("creates procedureParty entries from parties with standing", async () => {
+    (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
+    const mockIntake = {
+      id: "i1",
+      title: "Case",
+      category: "CIVIL_COMMERCIAL",
+      ownerUserId: "u2",
+      causeId: "c1",
+      causeFreeText: "free",
+      clientId: null,
+      firstProcedureType: "FIRST_INSTANCE",
+      ourStanding: undefined,
+      claimAmount: null,
+      counterclaim: false,
+      coUserIds: [],
+      client: null,
+      parties: [
+        {
+          role: "OPPOSING_PARTY" as const,
+          name: "Opp",
+          standing: "PLAINTIFF" as const,
+          ordinal: 1,
+          partyType: "NATURAL_PERSON" as const,
+          idNumber: "123456",
+          phone: "",
+          address: "",
+          legalRep: "",
+          contactName: "",
+          enterpriseSocialCode: "",
+          enterpriseName: "",
+          notes: ""
+        }
+      ],
+      conflictChecks: [],
+      documents: []
+    };
+    (prisma.intake.findUnique as any).mockResolvedValue(mockIntake);
+
+    let capturedTx: any = null;
+    (prisma.$transaction as any).mockImplementation(async (cb: any) => {
+      const tx = {
+        matter: { create: vi.fn().mockResolvedValue({ id: "m1", internalCode: "IC", firmCaseNo: "FCN" }) },
+        procedure: { create: vi.fn().mockResolvedValue({ id: "p1" }) },
+        party: { create: vi.fn().mockResolvedValue({ id: "p1" }), createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        billing: { create: vi.fn() },
+        matterMember: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        document: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        matterProcedure: { create: vi.fn().mockResolvedValue({ id: "mp1" }) },
+        procedureParty: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        intake: { update: vi.fn().mockResolvedValue({ id: "i1" }) },
+        timelineEvent: { create: vi.fn().mockResolvedValue({ id: "te1" }) },
+        documentFolder: { createMany: vi.fn().mockResolvedValue({ count: 0 }) }
+      };
+      capturedTx = tx;
+      return await cb(tx);
+    });
+
+    await convertIntakeToMatter("i1");
+
+    expect(capturedTx.procedureParty.createMany).toHaveBeenCalledWith({
+      data: expect.arrayContaining([
+        expect.objectContaining({
+          standing: "PLAINTIFF",
+          partyId: "p1"
+        })
+      ]),
+      skipDuplicates: true
+    });
+  });
 });
