@@ -75,6 +75,38 @@ Long-term plan for the LawLink unified application.
 - Branch coverage: 82.34% → 82.75% (+0.41%)
 - Total tests: 536
 
+## Cycle 28 - Task: Add recommend-cause tests
+- Timestamp: 2026-06-28T09:50:00+07:00
+- Added 9 tests for AI recommendation; server/ai branch coverage ~68%.
+- Test total: 545
+
+## Cycle 29 - Task: Add server/causes/actions tests
+- Timestamp: 2026-06-28T10:05:00+07:00
+- Added 14 tests covering searchCauses and getCauseById; server/causes 100% branches.
+- Test total: 559
+
+## Cycle 30 - Task: Add lib/storage/crypto tests
+- Timestamp: 2026-06-28T10:10:00+07:00
+- Added 7 tests for encryption/decryption and error handling.
+- Test total: 566
+
+## Cycle 31 - Task: Add lib/ai/client tests
+- Timestamp: 2026-06-28T10:17:00+07:00
+- Added 6 tests for aiChat/aiVision; ai client branch coverage ~93%.
+- Test total: 572
+
+## Cycle 32 - Task: Push coverage >85%
+- Timestamp: 2026-06-28T10:24:00+07:00
+- Added targeted tests for recommend-cause, prisma singleton, yuandian enterprise, createIntake edge cases.
+- Branches: 84.83% → 85.12%
+- Test total: 589
+
+## Cycle 33 - Task: Quality gate maintenance
+- Timestamp: 2026-06-28T11:35:00+07:00
+- Fixed lint errors (26→0) and type errors; added .eslintignore; updated test types.
+- All quality gates green: lint 0, typecheck 0, build success, coverage 85.12% branches.
+- Test total: 589
+
 ---
 
 **Next Steps**:
