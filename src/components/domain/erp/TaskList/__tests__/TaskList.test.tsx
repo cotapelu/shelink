@@ -1,16 +1,19 @@
+/// <reference types="vitest/globals" />
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, it, expect } from 'vitest';
+import '@testing-library/jest-dom/vitest';
 import TaskList from '../TaskList';
-import { Task } from '@/lib/types';
+import { WorkTask, TaskStatus, TaskPriority } from '@/types';
 
-const mockTasks: Task[] = [
+const mockTasks: WorkTask[] = [
   {
     id: '1',
     title: 'Task 1',
     description: 'Description 1',
-    status: 'todo',
-    priority: 'medium',
+    status: TaskStatus.IN_PROGRESS,
+    priority: TaskPriority.MEDIUM,
     creatorId: 'user-1',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -19,8 +22,8 @@ const mockTasks: Task[] = [
     id: '2',
     title: 'Task 2',
     description: 'Description 2',
-    status: 'in-progress',
-    priority: 'high',
+    status: TaskStatus.IN_PROGRESS,
+    priority: TaskPriority.HIGH,
     creatorId: 'user-2',
     createdAt: new Date(),
     updatedAt: new Date(),

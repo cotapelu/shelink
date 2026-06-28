@@ -216,12 +216,12 @@ describe("invoiceRequestStatusLabel & Color", () => {
 
 describe("procedureToStandingOptions", () => {
   it("returns all standings for null procedure", () => {
-    const result = procedureToStandingOptions(null);
+    const result = procedureToStandingOptions(null, 'ours');
     expect(result.length).toBeGreaterThan(10);
   });
 
   it("returns all standings for unknown procedure", () => {
-    const result = procedureToStandingOptions("UNKNOWN" as any);
+    const result = procedureToStandingOptions("UNKNOWN" as any, 'ours');
     expect(result.length).toBeGreaterThan(10);
   });
 

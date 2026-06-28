@@ -27,29 +27,25 @@ describe("prisma singleton", () => {
   });
 
   it("sets log configuration correctly in non-production", () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "development";
+    vi.stubEnv('NODE_ENV', 'development');
     // Re-import to get new instance with dev logs
     const globalForPrisma = globalThis as unknown as { prisma: any };
     globalForPrisma.prisma = undefined;
     const newPrisma = globalForPrisma.prisma ?? new PrismaClient({
-      log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"]
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error']
     });
     expect(newPrisma).toBeInstanceOf(PrismaClient);
-    // Clean up
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
   });
 
   it("does not cache in production mode", () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
+    vi.stubEnv('NODE_ENV', 'production');
     const globalForPrisma = globalThis as unknown as { prisma: any };
     globalForPrisma.prisma = undefined;
     const prodPrisma = globalForPrisma.prisma ?? new PrismaClient({
-      log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"]
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error']
     });
     expect(prodPrisma).toBeInstanceOf(PrismaClient);
-    // After this test, prodPrisma should be set to global unless cleared
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
   });
 });

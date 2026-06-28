@@ -636,5 +636,6 @@ export async function convertIntakeToMatter(intakeId: string) {
   revalidatePath("/intakes");
   revalidatePath(`/intakes/${intake.id}`);
   revalidatePath("/matters");
+  revalidatePath(`/matters/${matter.id}`);
   return { ok: true, matterId: matter.id, internalCode };
 }

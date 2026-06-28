@@ -56,7 +56,7 @@ describe("getLawyerWeeklyDigest", () => {
   });
 
   it("fetches all counts correctly", async () => {
-    (prisma.matter.count as any).mockImplementation(({ where }) => {
+    (prisma.matter.count as any).mockImplementation(({ where }: { where: any }) => {
       if (where.createdAt) return 5;
       if (where.closedAt) return 3;
       if (where.archivedAt) return 2;

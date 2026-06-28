@@ -101,7 +101,7 @@ describe("getReportData", () => {
   };
 
   it("fetches all KPIs and breakdowns", async () => {
-    (prisma.matter.count as any).mockImplementation(({ where }) => {
+    (prisma.matter.count as any).mockImplementation(({ where }: { where: any }) => {
       if (where.createdAt) return 10; // newIntake
       if (where.status === "IN_PROGRESS") return 5;
       if (where.closedAt) return 3;
@@ -143,7 +143,7 @@ describe("getReportData", () => {
 
   it("aggregates lawyer outputs correctly", async () => {
     (prisma.matter.count as any).mockResolvedValue(0);
-    (prisma.matter.groupBy as any).mockImplementation(async ({ where }) => {
+    (prisma.matter.groupBy as any).mockImplementation(async ({ where }: { where: any }) => {
       if (where.ownerId) {
         // lawyerOwnedRaw - not used in this test directly
         return [];

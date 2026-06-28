@@ -36,7 +36,7 @@ describe("getIntakeById", () => {
     (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
     (prisma.intake.findUnique as any).mockResolvedValue(mockIntakeFull);
 
-    const result = await getIntakeById("i1");
+    const result = (await getIntakeById("i1"))!;
 
     expect(requireSession).toHaveBeenCalled();
     expect(prisma.intake.findFirst).not.toHaveBeenCalled(); // no visibility check
@@ -109,7 +109,7 @@ describe("getIntakeById", () => {
     (prisma.intake.findFirst as any).mockResolvedValue({ id: "i1" });
     (prisma.intake.findUnique as any).mockResolvedValue({ ...mockIntakeFull, documents: [] });
 
-    const result = await getIntakeById("i1");
+    const result = (await getIntakeById("i1"))!;
     expect(result.documents).toEqual([]);
   });
 });

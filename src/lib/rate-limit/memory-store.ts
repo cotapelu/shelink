@@ -80,7 +80,7 @@ export function checkRateLimit(key: string, capacity: number, refillRate: number
  */
 export function getRemainingTokens(key: string, capacity: number, refillRate: number): number {
   const now = Date.now();
-  let record = store.get(key);
+  const record = store.get(key);
 
   if (!record) {
     return capacity; // full bucket for new identifier

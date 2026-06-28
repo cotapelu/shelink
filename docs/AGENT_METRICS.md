@@ -333,6 +333,33 @@ This file tracks performance and evolution of the AI agent during the migration 
 - **Total Tests**: ~437 → ~470 (+33)
 - **Impact**: Improved code organization, testability, and maintainability; helpers fully covered
 
+## Cycle 17 - Task: Fix critical test failures & type errors
+- **Timestamp**: 2026-06-28T07:29:38+07:00
+- **Type**: Violation Fix (CRITICAL)
+- **Priority**: CRITICAL (breaking tests, typecheck failures)
+- **Duration**: 14 minutes
+- **Status**: ✅ Success
+- **Files Modified**:
+  - src/components/domain/erp/TaskList/__tests__/TaskList.test.tsx (added proper imports, used enums)
+  - src/tests/lib/prisma.test.ts (use vi.stubEnv)
+  - src/tests/lib/enums.test.ts (added missing side parameter)
+  - src/tests/server/intakes/actions-get.test.ts (fixed null assertion)
+  - src/tests/server/intakes/actions-convert.test.ts (typed cb param)
+  - src/tests/server/reports/queries.test.ts (typed where param)
+  - src/tests/server/reports/weekly.test.ts (typed where param)
+  - src/tests/server/intakes/actions-decline.test.ts (added afterEach import)
+  - src/lib/rate-limit/memory-store.ts (changed let to const)
+  - src/server/intakes/actions.ts (added revalidatePath for matter detail)
+- **Test Delta**: Fixed 1 failing test; total tests 444 (all passing)
+- **Coverage Delta**: N/A (no new tests added)
+- **Typecheck**: 0 errors
+- **Lint**: 0 errors in src (migration/ ignored)
+- **Build**: ✅ Success
+- **Issue**: Tests broken due to Vitest global types, nullable assertions, implicit any, missing revalidatePath.
+- **Fix**: Added proper imports and type annotations; fixed NODE_ENV stubbing; added missing revalidation call.
+- **Verification**: `npm test` all 444 tests pass; `npm run typecheck` passes; `npm run build` succeeds.
+- **Impact**: Restored test suite reliability and fixed routing revalidation for matter detail page.
+
 ---
 
 ## Previous Iterations
