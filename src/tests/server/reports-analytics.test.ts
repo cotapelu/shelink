@@ -41,6 +41,84 @@ describe("getCaseCycleAnalysis", () => {
     expect(r).toEqual([]);
   });
 
+  it("过滤 closedAt 为 null 的记录", async () => {
+    const d = (offset: number) => {
+      const dt = new Date(2026, 0, 1);
+      dt.setDate(dt.getDate() + offset);
+      return dt;
+    };
+    matterFindManyMock.mockResolvedValue([
+      { category: "CIVIL_COMMERCIAL", createdAt: d(0), closedAt: null },
+      { category: "CIVIL_COMMERCIAL", createdAt: d(0), closedAt: d(10) }
+    ]);
+    const r = await getCaseCycleAnalysis(period);
+    expect(r).toHaveLength(1);
+    expect(r[0].count).toBe(1);
+  });
+
+  it("过滤 createdAt >= closedAt 的脏数据", async () => {
+    const d = (offset: number) => {
+      const dt = new Date(2026, 0, 1);
+      dt.setDate(dt.getDate() + offset);
+      return dt;
+    };
+    matterFindManyMock.mockResolvedValue([
+      { category: "CIVIL_COMMERCIAL", createdAt: d(20), closedAt: d(10) },
+      { category: "CIVIL_COMMERCIAL", createdAt: d(0), closedAt: d(10) }
+    ]);
+    const r = await getCaseCycleAnalysis(period);
+    expect(r[0].count).toBe(1);
+    expect(r[0].minDays).toBe(10);
+  });
+
+  it("单条记录的中位数等于天数", async () => {
+    const d = (offset: number) => {
+      const dt = new Date(2026, 0, 1);
+      dt.setDate(dt.getDate() + offset);
+      return dt;
+    };
+    matterFindManyMock.mockResolvedValue([
+      { category: "CIVIL_COMMERCIAL", createdAt: d(0), closedAt: d(15) }
+    ]);
+    const r = await getCaseCycleAnalysis(period);
+    expect(r[0].medianDays).toBe(15);
+  });
+
+  it("三记录：奇数中位数取中间", async () => {
+    const d = (offset: number) => {
+      const dt = new Date(2026, 0, 1);
+      dt.setDate(dt.getDate() + offset);
+      return dt;
+    };
+    matterFindManyMock.mockResolvedValue([
+      { category: "CIVIL_COMMERCIAL", createdAt: d(0), closedAt: d(10) },
+      { category: "CIVIL_COMMERCIAL", createdAt: d(0), closedAt: d(20) },
+      { category: "CIVIL_COMMERCIAL", createdAt: d(0), closedAt: d(30) }
+    ]);
+    const r = await getCaseCycleAnalysis(period);
+    expect(r[0].medianDays).toBe(20);
+  });
+
+  it("多 category 各自统计最小值/最大值", async () => {
+    const d = (offset: number) => {
+      const dt = new Date(2026, 0, 1);
+      dt.setDate(dt.getDate() + offset);
+      return dt;
+    };
+    matterFindManyMock.mockResolvedValue([
+      { category: "CIVIL_COMMERCIAL", createdAt: d(0), closedAt: d(10) },
+      { category: "CIVIL_COMMERCIAL", createdAt: d(0), closedAt: d(50) },
+      { category: "ADMINISTRATIVE", createdAt: d(0), closedAt: d(20) }
+    ]);
+    const r = await getCaseCycleAnalysis(period);
+    const civil = r.find(x => x.category === "CIVIL_COMMERCIAL")!;
+    const admin = r.find(x => x.category === "ADMINISTRATIVE")!;
+    expect(civil.minDays).toBe(10);
+    expect(civil.maxDays).toBe(50);
+    expect(admin.minDays).toBe(20);
+    expect(admin.maxDays).toBe(20);
+  });
+
   it("民事 5 条计算 avg/median/min/max", async () => {
     const d = (offset: number) => {
       const dt = new Date(2026, 0, 1);
@@ -119,6 +197,74 @@ describe("getReviewIssueAnalysis", () => {
     expect(r.totalItems).toBe(0);
     expect(r.topIssues).toEqual([]);
     expect(r.bySeverity).toEqual({ HIGH: 0, MEDIUM: 0, LOW: 0 });
+  });
+
+  it("itemsJson 非数组时回退为空", async () => {
+    reviewFindManyMock.mockResolvedValue([
+      { id: "r1", documentId: "d1", itemsJson: null },
+      { id: "r2", documentId: "d2", itemsJson: undefined },
+      { id: "r3", documentId: "d3", itemsJson: "string" },
+      { id: "r4", documentId: "d4", itemsJson: { foo: "bar" } }
+    ]);
+    const r = await getReviewIssueAnalysis(period);
+    expect(r.recordCount).toBe(4);
+    expect(r.documentCount).toBe(4);
+    expect(r.totalItems).toBe(0);
+  });
+
+  it("忽略无效 severity 和 type", async () => {
+    reviewFindManyMock.mockResolvedValue([
+      {
+        id: "r1",
+        documentId: "d1",
+        itemsJson: [
+          { type: "RISK", severity: "CRITICAL", title: "A" },
+          { type: "BUG", severity: "HIGH", title: "B" },
+          { type: "MISSING", severity: "MEDIUM", title: "C" }
+        ]
+      }
+    ]);
+    const r = await getReviewIssueAnalysis(period);
+    // valid: HIGH severity (B), MEDIUM severity (C); CRITICAL ignored
+    expect(r.bySeverity).toEqual({ HIGH: 1, MEDIUM: 1, LOW: 0 });
+    // valid: RISK type (A), MISSING type (C); BUG ignored
+    expect(r.byType).toEqual({ MISSING: 1, RISK: 1, ISSUE: 0, SUGGESTION: 0 });
+    expect(r.totalItems).toBe(3); // all three items counted in totalItems
+  });
+
+  it("重复同一 document 只计一次 documentCount", async () => {
+    reviewFindManyMock.mockResolvedValue([
+      { id: "r1", documentId: "d1", itemsJson: [{ type: "RISK", severity: "HIGH", title: "A" }] },
+      { id: "r2", documentId: "d1", itemsJson: [{ type: "RISK", severity: "HIGH", title: "B" }] }
+    ]);
+    const r = await getReviewIssueAnalysis(period);
+    expect(r.documentCount).toBe(1);
+    expect(r.recordCount).toBe(2);
+  });
+
+  it("同一 title 跨 records 累加 occurrences 和 severityCounts", async () => {
+    reviewFindManyMock.mockResolvedValue([
+      { id: "r1", documentId: "d1", itemsJson: [{ type: "RISK", severity: "HIGH", title: "X" }] },
+      { id: "r2", documentId: "d2", itemsJson: [{ type: "RISK", severity: "MEDIUM", title: "X" }] }
+    ]);
+    const r = await getReviewIssueAnalysis(period);
+    expect(r.totalItems).toBe(2);
+    expect(r.topIssues[0].title).toBe("X");
+    expect(r.topIssues[0].occurrences).toBe(2);
+    expect(r.topIssues[0].severityCounts).toEqual({ HIGH: 1, MEDIUM: 1, LOW: 0 });
+  });
+
+  it("大量不同 title 验证 top 10 截断", async () => {
+    const items = Array.from({ length: 15 }, (_, i) => ({
+      type: "ISSUE" as const,
+      severity: "LOW" as const,
+      title: `issue-${i}`
+    }));
+    reviewFindManyMock.mockResolvedValue([
+      { id: "r1", documentId: "d1", itemsJson: items }
+    ]);
+    const r = await getReviewIssueAnalysis(period);
+    expect(r.topIssues).toHaveLength(10);
   });
 
   it("聚合 severity / type / topIssues", async () => {

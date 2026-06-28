@@ -96,6 +96,28 @@ describe('aiChat', () => {
     ).rejects.toThrow('Network failure');
   });
 
+  it('handles response with choices but missing message content', async () => {
+    const mockFetch = vi.mocked(globalThis.fetch as any);
+    mockFetch.mockResolvedValue({ ok: true, json: async () => ({ choices: [{}] }) } as Response);
+    const result = await aiChat({ messages: [{ role: 'user', content: 'hi' }] });
+    expect(result.content).toBe('');
+  });
+
+  it('uses custom model, maxTokens, temperature', async () => {
+    const mockFetch = vi.mocked(globalThis.fetch as any);
+    mockFetch.mockResolvedValue({ ok: true, json: async () => ({ choices: [{ message: { content: 'ok' } }] }) } as Response);
+    await aiChat({
+      messages: [{ role: 'user', content: 'hi' }],
+      model: 'gpt-4-turbo',
+      maxTokens: 500,
+      temperature: 0.5
+    });
+    const [, options] = mockFetch.mock.calls[0];
+    const body = JSON.parse(options.body);
+    expect(body.model).toBe('gpt-4-turbo');
+    expect(body.max_tokens).toBe(500);
+    expect(body.temperature).toBe(0.5);
+  });
 
 });
 
@@ -162,6 +184,24 @@ describe('aiVision', () => {
       })
     ).rejects.toThrow(AiNotConfiguredError);
   });
+
+  it('uses custom model and timeout', async () => {
+    const mockFetch = vi.mocked(globalThis.fetch as any);
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: 'vision' } }] })
+    } as Response);
+    await aiVision({
+      image: { url: 'https://example.com/image.jpg' },
+      prompt: 'describe',
+      model: 'gpt-4-vision-preview',
+      timeoutMs: 5000
+    });
+    const [, options] = mockFetch.mock.calls[0];
+    const body = JSON.parse(options.body);
+    expect(body.model).toBe('gpt-4-vision-preview');
+  });
+
 });
 
 describe('extractJson', () => {

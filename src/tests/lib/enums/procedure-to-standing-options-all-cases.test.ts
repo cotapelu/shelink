@@ -43,7 +43,7 @@ describe('procedureToStandingOptions (full branch coverage)', () => {
   });
 
   it('returns all standings for unknown procedure (default case)', () => {
-    // @ts-ignore - testing unknown value
+    // @ts-expect-error - testing unknown value
     const result = procedureToStandingOptions('UNKNOWN_PROCEDURE', 'ours');
     expect([...result].sort()).toEqual([...allStandings].sort());
   });
