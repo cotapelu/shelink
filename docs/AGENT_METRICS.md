@@ -659,6 +659,24 @@ This file tracks performance and evolution of the AI agent during the migration 
 - **Verification**: All 599 tests pass; build successful; lint 0 errors; typecheck 0 errors.
 - **Impact**: analytics module now 100% branches.
 
+## Cycle 35 - Task: Test invoice-matter-search finance module
+- **Timestamp**: 2025-06-28T12:20:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (finance module 0% coverage)
+- **Duration**: 15 min
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/server/finance/invoice-matter-search.test.ts (new)
+- **Test Delta**: +7 tests (total 606)
+- **Coverage Impact**:
+  - Statements: Maintained 95.26%
+  - Branches: +0.10% (85.62% → 85.72%)
+  - Functions: Maintained 93.44%
+  - Lines: Maintained 96.87%
+- **Issue**: server/finance/invoice-matter-search.ts had 0% branch coverage (critical finance module).
+- **Fix**: Added 7 tests covering: empty query returns associationWhere only, combined AND with searchWhere, query trimming, limit logic (12/10), and search field composition.
+- **Verification**: All 606 tests pass; build successful; lint 0 errors; typecheck 0 errors.
+- **Impact**: invoice-matter-search now 100% branches.
+
 ---
 
 - **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models added.
