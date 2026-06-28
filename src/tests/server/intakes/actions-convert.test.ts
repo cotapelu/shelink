@@ -128,4 +128,111 @@ describe("convertIntakeToMatter", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/matters");
     expect(revalidatePath).toHaveBeenCalledWith("/matters/m1");
   });
+
+  it("creates billing when feeAmount and feeType provided", async () => {
+    (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
+    const mockIntake = {
+      id: "i1",
+      title: "Case Title",
+      category: "CIVIL_COMMERCIAL",
+      ownerUserId: "u2",
+      causeId: "c1",
+      causeFreeText: "free",
+      clientId: "cl1",
+      firstProcedureType: "FIRST_INSTANCE",
+      ourStanding: "PLAINTIFF",
+      claimAmount: 100000,
+      counterclaim: false,
+      coUserIds: [],
+      feeAmount: 5000,
+      feeType: "FIXED",
+      client: { id: "cl1", name: "Client" },
+      parties: [],
+      conflictChecks: [],
+      documents: []
+    };
+    (prisma.intake.findUnique as any).mockResolvedValue(mockIntake);
+
+    let capturedTx: any = null;
+    (prisma.$transaction as any).mockImplementation(async (cb: any) => {
+      const tx = {
+        matter: { create: vi.fn().mockResolvedValue({ id: "m1", internalCode: "IC", firmCaseNo: "FCN" }) },
+        procedure: { create: vi.fn().mockResolvedValue({ id: "p1" }) },
+        party: { create: vi.fn().mockResolvedValue({ id: "pa1" }), createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        billing: { create: vi.fn().mockResolvedValue({ id: "b1" }) },
+        matterMember: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        document: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        matterProcedure: { create: vi.fn().mockResolvedValue({ id: "mp1" }) },
+        procedureParty: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        intake: { update: vi.fn().mockResolvedValue({ id: "i1" }) },
+        timelineEvent: { create: vi.fn().mockResolvedValue({ id: "te1" }) },
+        documentFolder: { createMany: vi.fn().mockResolvedValue({ count: 0 }) }
+      };
+      capturedTx = tx;
+      return await cb(tx);
+    });
+
+    await convertIntakeToMatter("i1");
+
+    expect(capturedTx).not.toBeNull();
+    expect(capturedTx.billing.create).toHaveBeenCalledWith({
+      data: {
+        matterId: "m1",
+        title: "委托代理合同 - 固定收费",
+        contractAmount: 5000,
+        schedule: undefined,
+        status: "ACTIVE"
+      }
+    });
+  });
+
+  it("updates documents when intake has documents", async () => {
+    (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
+    const mockIntake = {
+      id: "i1",
+      title: "Case Title",
+      category: "CIVIL_COMMERCIAL",
+      ownerUserId: "u2",
+      causeId: "c1",
+      causeFreeText: "free",
+      clientId: "cl1",
+      firstProcedureType: "FIRST_INSTANCE",
+      ourStanding: "PLAINTIFF",
+      claimAmount: 100000,
+      counterclaim: false,
+      coUserIds: [],
+      client: { id: "cl1", name: "Client" },
+      parties: [],
+      conflictChecks: [],
+      documents: [{ id: "d1" }, { id: "d2" }]
+    };
+    (prisma.intake.findUnique as any).mockResolvedValue(mockIntake);
+
+    let capturedTx: any = null;
+    (prisma.$transaction as any).mockImplementation(async (cb: any) => {
+      const tx = {
+        matter: { create: vi.fn().mockResolvedValue({ id: "m1", internalCode: "IC", firmCaseNo: "FCN" }) },
+        procedure: { create: vi.fn().mockResolvedValue({ id: "p1" }) },
+        party: { create: vi.fn().mockResolvedValue({ id: "pa1" }), createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        billing: { create: vi.fn() },
+        matterMember: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        document: { updateMany: vi.fn().mockResolvedValue({ count: 2 }) },
+        matterProcedure: { create: vi.fn().mockResolvedValue({ id: "mp1" }) },
+        procedureParty: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        intake: { update: vi.fn().mockResolvedValue({ id: "i1" }) },
+        timelineEvent: { create: vi.fn().mockResolvedValue({ id: "te1" }) },
+        documentFolder: { createMany: vi.fn().mockResolvedValue({ count: 0 }) }
+      };
+      capturedTx = tx;
+      return await cb(tx);
+    });
+
+    await convertIntakeToMatter("i1");
+
+    expect(capturedTx).not.toBeNull();
+    expect(capturedTx.document.updateMany).toHaveBeenCalledWith({
+      where: { intakeId: "i1" },
+      data: { matterId: "m1" }
+    });
+  });
 });
