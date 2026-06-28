@@ -537,6 +537,21 @@ This file tracks performance and evolution of the AI agent during the migration 
 - **Verification**: All 534 tests pass; build successful.
 - **Impact**: server/reports/queries.ts now ~97% branch; createIntake/convertIntakeToMatter branches covered; overall branch coverage 82.34%.
 
+## Cycle 27 - Task: Extend convertIntakeToMatter test coverage
+- **Timestamp**: 2026-06-28T09:45:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (branch coverage gain)
+- **Duration**: 15 minutes
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/server/intakes/actions-convert.test.ts (enhanced)
+- **Test Delta**: +2 tests (total 536)
+- **Coverage Impact**:
+  - Branches: +0.41% (82.34% → 82.75%)
+  - Statements: remain ~94.22%
+- **Issue**: Missing branches in convertIntakeToMatter: procedurePartyRows empty case, party with standing case.
+- **Fix**: Added tests for skip procedureParty creation and creation from parties with standing.
+- **Verification**: All 536 tests pass; build successful.
+
 ---
 
 ## Previous Iterations

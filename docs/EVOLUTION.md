@@ -68,6 +68,13 @@ Long-term plan for the LawLink unified application.
 - **Verification**: All 534 tests pass; build successful.
 - **Impact**: Branch coverage increased to 82.34%; server/reports/queries fully guarded, createIntake/convert extended.
 - **Coverage**: Statements 94.22%, Branches 82.34%, Functions 93.67%, Lines 96.04%
+
+**Cycle 27 Update**:
+- Extended convertIntakeToMatter tests covering procedureParty edge cases
+- Added tests: skip when no client standing/parties standing, create from parties with standing
+- Branch coverage: 82.34% → 82.75% (+0.41%)
+- Total tests: 536
+
 ---
 
 **Next Steps**:
