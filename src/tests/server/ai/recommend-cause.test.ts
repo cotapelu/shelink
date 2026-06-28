@@ -45,7 +45,7 @@ describe('recommendCause', () => {
       { name: 'B', reason: 'r2', confidence: 'HIGH' },
       { name: 'C', reason: 'r3', confidence: 'HIGH' }
     ]);
-    (searchCauses as any).mockImplementation(async ({ query }) => {
+    (searchCauses as any).mockImplementation(async ({ query }: { query?: string }) => {
       if (query === 'A') return [{ id: 'c1', name: 'A', level: 3 }];
       if (query === 'B') return [{ id: 'c2', name: 'B', level: 3 }];
       if (query === 'C') return [{ id: 'c3', name: 'C', level: 3 }];
@@ -96,7 +96,7 @@ describe('recommendCause', () => {
       { name: 'C', reason: 'r3', confidence: 'HIGH' },
       { name: 'D', reason: 'r4', confidence: 'HIGH' }
     ]);
-    (searchCauses as any).mockImplementation(async ({ query }) => {
+    (searchCauses as any).mockImplementation(async ({ query }: { query?: string }) => {
       if (query === 'A') return [{ id: 'c1', name: 'A', level: 3 }];
       if (query === 'B') return [{ id: 'c2', name: 'B', level: 3 }];
       if (query === 'C') return [{ id: 'c3', name: 'C', level: 3 }];
@@ -138,5 +138,75 @@ describe('recommendCause', () => {
     expect(result).toHaveLength(2);
     expect(result[0].confidence).toBe('HIGH');
     expect(result[1].confidence).toBe('LOW');
+  });
+
+  it('propagates searchCauses errors', async () => {
+    (aiChat as any).mockResolvedValue({ content: '[{"name":"A","reason":"r","confidence":"HIGH"}]' });
+    (extractJson as any).mockReturnValue([{ name: 'A', reason: 'r', confidence: 'HIGH' }]);
+    (searchCauses as any).mockRejectedValue(new Error('DB failure'));
+
+    await expect(recommendCause({ category: 'CIVIL_COMMERCIAL', situation: 'This is a test situation that is long enough' }))
+      .rejects.toThrow('DB failure');
+  });
+
+  it('filters out null resolutions while keeping valid ones', async () => {
+    (aiChat as any).mockResolvedValue({ content: '[{"name":"A","reason":"r1","confidence":"HIGH"},{"name":"B","reason":"r2","confidence":"HIGH"}]' });
+    (extractJson as any).mockReturnValue([
+      { name: 'A', reason: 'r1', confidence: 'HIGH' },
+      { name: 'B', reason: 'r2', confidence: 'HIGH' }
+    ]);
+    (searchCauses as any).mockImplementation(async ({ query }: { query?: string }) => {
+      if (query === 'A') return []; // resolves to null
+      if (query === 'B') return [{ id: 'c2', name: 'B', level: 3 }];
+      return [];
+    });
+
+    const result = await recommendCause({ category: 'CIVIL_COMMERCIAL', situation: 'This is a test situation that is long enough' });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].cause.id).toBe('c2');
+  });
+
+  it('filters out candidates without name', async () => {
+    (aiChat as any).mockResolvedValue({ content: '[{"reason":"r1","confidence":"HIGH"}]' });
+    (extractJson as any).mockReturnValue([{ reason: 'r1', confidence: 'HIGH' }]); // no name
+
+    await expect(recommendCause({ category: 'CIVIL_COMMERCIAL', situation: 'This is a test situation that is long enough' }))
+      .rejects.toThrow('AI 推荐的案由都不在案由库中');
+    expect(searchCauses).not.toHaveBeenCalled();
+  });
+
+  it('normalizes missing confidence to MEDIUM', async () => {
+    (aiChat as any).mockResolvedValue({ content: '[{"name":"A","reason":"r"}]' });
+    (extractJson as any).mockReturnValue([{ name: 'A', reason: 'r' }]); // no confidence
+    (searchCauses as any).mockResolvedValue([{ id: 'c1', name: 'A', level: 3 }]);
+
+    const result = await recommendCause({ category: 'CIVIL_COMMERCIAL', situation: 'This is a test situation that is long enough' });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].confidence).toBe('MEDIUM');
+  });
+
+  it('skips exact match if level < 3 and falls back to leaf', async () => {
+    (aiChat as any).mockResolvedValue({ content: '[{"name":"X","reason":"r","confidence":"HIGH"}]' });
+    (extractJson as any).mockReturnValue([{ name: 'X', reason: 'r', confidence: 'HIGH' }]);
+    (searchCauses as any).mockResolvedValue([
+      { id: 'c1', name: 'X', level: 2 },
+      { id: 'c2', name: 'Y', level: 3 }
+    ]);
+
+    const result = await recommendCause({ category: 'CIVIL_COMMERCIAL', situation: 'This is a test situation that is long enough' });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].cause.id).toBe('c2');
+  });
+
+  it('filters out candidates with whitespace-only name after trim', async () => {
+    (aiChat as any).mockResolvedValue({ content: '[{"name":"   ","reason":"r","confidence":"HIGH"}]' });
+    (extractJson as any).mockReturnValue([{ name: '   ', reason: 'r', confidence: 'HIGH' }]);
+    (searchCauses as any).mockResolvedValue([]); // resolveCauseId returns null after trim
+
+    await expect(recommendCause({ category: 'CIVIL_COMMERCIAL', situation: 'This is a test situation that is long enough' }))
+      .rejects.toThrow('AI 推荐的案由都不在案由库中');
   });
 });

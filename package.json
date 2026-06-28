@@ -10,7 +10,7 @@
     "dev": "NEXT_DIST_DIR=.next-dev next dev",
     "build": "NEXT_DIST_DIR=.next-build next build",
     "start": "NEXT_DIST_DIR=.next-build next start",
-    "lint": "eslint .",
+    "lint": "eslint src/",
     "typecheck": "NEXT_DIST_DIR=.next-dev next typegen && tsc --noEmit",
     "prisma:validate": "prisma validate",
     "prisma:generate": "prisma generate",

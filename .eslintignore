@@ -1,0 +1,6 @@
+# Ignore non-application code
+migration/
+prisma/seeds/
+node_modules/
+.next/
+coverage/
