@@ -436,6 +436,28 @@ This file tracks performance and evolution of the AI agent during the migration 
 
 ---
 
+## Cycle 22 - Task: Increase yuandian client coverage
+- **Timestamp**: 2026-06-28T08:18:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (external API client)
+- **Duration**: 10 minutes
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/lib/yuandian/vector-search.test.ts (new)
+- **Test Delta**: +11 tests (total 495)
+- **Coverage Delta**:
+  - Statements: 84.01% → 88.18% (+4.17%)
+  - Branches: 64.08% → 67.65% (+3.57%)
+  - Functions: 86.2% → 89.65%
+  - Lines: 85.65% → 89.5%
+- **Typecheck**: 0 errors
+- **Build**: ✅ Success
+- **Issue**: Yuandian vector search function had limited branch coverage.
+- **Fix**: Added extensive tests covering config validation, query non-empty, filter building, return_num clamping, HTTP errors, response codes, empty data handling.
+- **Verification**: All 495 tests pass; build successful.
+- **Impact**: External API integration now better tested; branch coverage increased to ~68%.
+
+---
+
 ## Previous Iterations
 
 - **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models added.
