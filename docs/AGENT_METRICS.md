@@ -875,6 +875,37 @@ This file tracks performance and evolution of the AI agent during the migration 
   - Added: top_k default to 10, clamp max 50, clamp min 1, qw whitespace handling (no search_mode)
 - **Verification**: All 773 tests pass; build success; typecheck 0; lint 0 errors.
 
+## Cycle 49 - Task: Test coverage improvements (yuandian/enterprise edge cases, intakes/actions feeType fallback)
+- **Timestamp**: 2025-06-29T08:10:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (low coverage modules)
+- **Duration**: 25 min
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/lib/yuandian-enterprise.test.ts, src/tests/server/intakes/actions-convert.test.ts
+- **Test Delta**: +4 tests (total 779)
+- **Coverage Delta**:
+  - Overall Branches: 93.91% → 94.01% (+0.10%, 941→942/1002)
+  - yuandian/enterprise Branches: 86.45% (unchanged)
+  - intakes/actions Branches: 90.67% → 91.19% (+0.52%)
+- **Notes**:
+  - Added enterprise tests: non-success status, invalid top array items, defense-in-depth filtering.
+  - Added feeType fallback test for billing title (HOURLY -> raw feeType).
+- **Verification**: All 779 tests pass; build success; typecheck 0; lint 0 errors.
+
+## Cycle 50 - Task: i18n - translate Chinese comments to English in yuandian modules
+- **Timestamp**: 2025-06-29T08:25:00+07:00
+- **Type**: Proactive Improvement (D - Documentation)
+- **Priority**: MEDIUM (maintainability)
+- **Duration**: 20 min
+- **Status**: ✅ Success
+- **Files Modified**: src/lib/yuandian/client.ts, src/lib/yuandian/enterprise.ts
+- **Test Delta**: 0
+- **Coverage Delta**: none
+- **Notes**:
+  - Translated JSDoc, inline comments, and type field comments to English.
+  - Improves readability for international developers.
+- **Verification**: All 779 tests pass; build success; typecheck 0; lint 0 errors.
+
 ---
 
 - **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models.
