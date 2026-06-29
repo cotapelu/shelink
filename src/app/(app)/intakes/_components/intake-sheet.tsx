@@ -253,6 +253,7 @@ export function IntakeSheet({
   const coUserIds = watch("coUserIds");
   const receivedAt = watch("receivedAt");
   const jurisdiction = watch("jurisdiction") ?? "";
+  const watchedFirstAgency = watch("firstAgency");
   // 争议解决机构按管辖地匹配
   const agencyOpts = useMemo(() => agencyOptions(jurisdiction), [jurisdiction]);
 
@@ -267,6 +268,9 @@ export function IntakeSheet({
   const watchedParties = watch("parties");
   const watchedTitle = watch("title");
   const watchedCauseFree = watch("causeFreeText");
+  const watchedClaimAmount = watch("claimAmount");
+  const watchedClaimDescription = watch("claimDescription");
+  const watchedCauseId = watch("causeId");
   useEffect(() => {
     if (titleTouched) return;
     const list = (watchedParties ?? []) as { role?: string; name?: string }[];
@@ -310,7 +314,7 @@ export function IntakeSheet({
   // 顾问 / 非诉 / 专项：默认只留委托方一行（相对方按需添加）
   // 诉讼/仲裁：确保至少有一个相对方行
   useEffect(() => {
-    const cur = (watch("parties") ?? []) as { role?: string }[];
+    const cur = (watchedParties ?? []) as { role?: string }[];
     if (kind === "counsel" || kind === "project") {
       for (let i = cur.length - 1; i >= 1; i--) removeParty(i);
     } else if (!cur.some((x) => x.role === "OPPOSING_PARTY")) {
@@ -344,7 +348,7 @@ export function IntakeSheet({
   function handleProcedureChange(p: ProcedureType) {
     setValue("firstProcedureType", p, { shouldDirty: true });
     setValue("ourStanding", undefined);
-    const currentAgency = watch("firstAgency");
+    const currentAgency = watchedFirstAgency;
     if (!currentAgency || currentAgency.length === 0) {
       setValue("firstAgency", suggestHandlingAgency(p));
     }
@@ -467,16 +471,16 @@ export function IntakeSheet({
         });
         thirdAdded++;
       }
-      if (res.cause && !watch("causeFreeText")) {
+      if (res.cause && !watchedCauseFree) {
         setValue("causeFreeText", res.cause, { shouldDirty: true });
       }
-      if (typeof res.claimAmount === "number" && !watch("claimAmount")) {
+      if (typeof res.claimAmount === "number" && !watchedClaimAmount) {
         setValue("claimAmount", res.claimAmount, { shouldDirty: true });
       }
-      if (res.claimDescription && !watch("claimDescription")) {
+      if (res.claimDescription && !watchedClaimDescription) {
         setValue("claimDescription", res.claimDescription, { shouldDirty: true });
       }
-      if (res.court && !watch("firstAgency")) {
+      if (res.court && !watchedFirstAgency) {
         setValue("firstAgency", res.court, { shouldDirty: true });
       }
       toast.success(
@@ -492,7 +496,7 @@ export function IntakeSheet({
       if (oppPartyNames) situationParts.push(`对方当事人：${oppPartyNames}`);
       if (res.court) situationParts.push(`管辖：${res.court}`);
       const situationText = situationParts.join("\n");
-      if (situationText && !watch("causeId")) {
+      if (situationText && !watchedCauseId) {
         triggerCauseRecommendation(category, situationText);
       }
     } catch (err) {
@@ -561,7 +565,7 @@ export function IntakeSheet({
       if (res.info) {
         setValue("parties.0.address", res.info.address, { shouldDirty: true });
         setValue("parties.0.legalRep", res.info.legalRep, { shouldDirty: true });
-        if (res.info.legalRep && !watch("parties.0.contactName")) {
+        if (res.info.legalRep && !(watchedParties[0]?.contactName)) {
           setValue("parties.0.contactName", res.info.legalRep, { shouldDirty: true });
         }
         toast.success(
@@ -1022,7 +1026,7 @@ export function IntakeSheet({
                       value={jurisdiction}
                       onChange={(v) => {
                         setValue("jurisdiction", v, { shouldDirty: true });
-                        const cur = watch("firstAgency");
+                        const cur = watchedFirstAgency;
                         if (cur && !agencyOptions(v).includes(cur)) {
                           setValue("firstAgency", "", { shouldDirty: true });
                         }
@@ -1031,7 +1035,7 @@ export function IntakeSheet({
                   </Field>
                   <Field label="争议解决机构">
                     <Select
-                      value={watch("firstAgency") || ""}
+                      value={watchedFirstAgency || ""}
                       onValueChange={(v) => setValue("firstAgency", v, { shouldDirty: true })}
                       disabled={agencyOpts.length === 0}
                     >
