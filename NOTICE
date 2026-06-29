@@ -1,32 +1,42 @@
- Licensing Information
+ Licensing Attribution
  =====================
 
- This project is a derivative work based on an original MIT-licensed project.
+ This project is a derivative work of an original MIT-licensed project.
 
- ORIGINAL WORK:
- ---------------
+ --------------------------------------------------------------------
+ ORIGINAL WORK (MIT License)
+ --------------------------------------------------------------------
  Copyright (c) 2026 叶森 (Sen Ye)
- License: MIT License (see LICENSE file)
 
- MODIFICATIONS AND ADDITIONS BY COTAPELU:
- ----------------------------------------
+ The original project was licensed under the MIT License.
+ This derivative work retains the original copyright attribution.
+
+ --------------------------------------------------------------------
+ DERIVATIVE WORK (Apache License 2.0)
+ --------------------------------------------------------------------
  Copyright 2026 COTAPELU
- License: Apache License, Version 2.0
 
- All files in the src/ directory (unless otherwise noted) contain
- modifications to the original work and are dual-licensed:
+ All modifications, additions, and the current codebase are licensed
+ under the Apache License, Version 2.0.
 
- - The original portions (where applicable) remain under MIT License
- - The modifications and additions are licensed under Apache 2.0
+ --------------------------------------------------------------------
+ LICENSE FILES
+ --------------------------------------------------------------------
+ - LICENSE: Apache License, Version 2.0 (full text)
+ - NOTICE: This attribution and provenance information
 
- In practice, since extensive modifications have been made throughout
- the codebase, the entire project may be considered a derivative work
- licensed under Apache 2.0, with attribution to the original author.
+ --------------------------------------------------------------------
+ SPDX INFORMATION
+ --------------------------------------------------------------------
+ SPDX-License-Identifier: Apache-2.0
+ SPDX-FileCopyrightText: 2026 叶森 (Sen Ye) (original work)
+ SPDX-FileCopyrightText: 2026 COTAPELU (modifications)
 
- For full license texts:
- - MIT License: see LICENSE file (original license)
- - Apache 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ --------------------------------------------------------------------
+ SUMMARY
+ --------------------------------------------------------------------
+ While the original work was MIT-licensed, this derivative work
+ relicenses all modifications and the combined work under Apache 2.0,
+ with full attribution to the original author.
 
- SPDX Identifiers:
- - Original: MIT
- - Modifications: Apache-2.0
+ For the complete Apache License 2.0 text, see the LICENSE file.
