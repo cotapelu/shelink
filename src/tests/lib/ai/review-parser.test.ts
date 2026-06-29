@@ -106,4 +106,58 @@ describe("parseReviewItems", () => {
     const result = parseReviewItems("content");
     expect(result).toEqual([]);
   });
+
+  it("handles extractJson throwing", () => {
+    (extractJson as any).mockImplementation(() => {
+      throw new Error("JSON parse error");
+    });
+    expect(() => parseReviewItems("content")).toThrow("JSON parse error");
+  });
+
+  it("filters when title is non-string (null)", () => {
+    (extractJson as any).mockReturnValue([
+      { type: "MISSING", severity: "HIGH", title: null, detail: "Has detail" }
+    ]);
+    const result = parseReviewItems("content");
+    expect(result).toEqual([]);
+  });
+
+  it("filters when detail is non-string (undefined)", () => {
+    (extractJson as any).mockReturnValue([
+      { type: "ISSUE", severity: "MEDIUM", title: "Has title", detail: undefined }
+    ]);
+    const result = parseReviewItems("content");
+    expect(result).toEqual([]);
+  });
+
+  it("falls back when type is undefined (non-string)", () => {
+    (extractJson as any).mockReturnValue([
+      { severity: "HIGH", title: "T", detail: "D" }
+    ]);
+    const result = parseReviewItems("content");
+    expect(result[0].type).toBe("ISSUE");
+  });
+
+  it("falls back when severity is boolean (non-string)", () => {
+    (extractJson as any).mockReturnValue([
+      { type: "MISSING", severity: true, title: "T", detail: "D" }
+    ]);
+    const result = parseReviewItems("content");
+    expect(result[0].severity).toBe("MEDIUM");
+  });
+
+  it("handles empty array input", () => {
+    (extractJson as any).mockReturnValue([]);
+    const result = parseReviewItems("content");
+    expect(result).toEqual([]);
+  });
+
+  it("preserves order for equal severity (sort stability)", () => {
+    (extractJson as any).mockReturnValue([
+      { type: "MISSING", severity: "HIGH", title: "A", detail: "D" },
+      { type: "RISK", severity: "HIGH", title: "B", detail: "D" }
+    ]);
+    const result = parseReviewItems("content");
+    expect(result.map(i => i.title)).toEqual(["A", "B"]);
+  });
 });

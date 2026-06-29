@@ -766,6 +766,21 @@ This file tracks performance and evolution of the AI agent during the migration 
   - Added counterclaim branch tests for `convertIntakeToMatter` (DEFENDANT/PLAINTIFF combos)
 - **Verification**: All tests pass (745); lint 0; typecheck 0; build success.
 
+## Cycle 41 - Task: Increase branch coverage for lib/ai/review-parser
+- **Timestamp**: 2026-06-29T07:08:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (security-adjacent module, 77.77% → >95%)
+- **Duration**: 8 minutes
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/lib/ai/review-parser.test.ts
+- **Test Delta**: +8 tests (total 753)
+- **Coverage Delta**:
+  - Overall Branches: 92.21% → 92.61% (+0.40%, 924→928/1002)
+  - lib/ai Branches: 93.02% → 97.67% (+4.65%)
+- **Notes**:
+  - Added tests: extractJson throws, non-string type/severity/title/detail filtering, undefined handling, empty array, sort stability.
+- **Verification**: All 753 tests pass; build success; typecheck 0; lint 0 errors.
+
 ---
 
 - **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models added.
