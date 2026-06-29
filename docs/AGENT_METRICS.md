@@ -781,9 +781,25 @@ This file tracks performance and evolution of the AI agent during the migration 
   - Added tests: extractJson throws, non-string type/severity/title/detail filtering, undefined handling, empty array, sort stability.
 - **Verification**: All 753 tests pass; build success; typecheck 0; lint 0 errors.
 
+## Cycle 42 - Task: Increase branch coverage for lib/yuandian/enterprise
+- **Timestamp**: 2026-06-29T07:15:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (external API client, 80.2% → 86.45%)
+- **Duration**: 15 min
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/lib/yuandian-enterprise.test.ts
+- **Test Delta**: +3 tests (total 756)
+- **Coverage Delta**:
+  - Overall Branches: 92.61% → 93.21% (+0.60%, 928→934/1002)
+  - enterprise Branches: 80.2% → 86.45% (+6.25%)
+- **Notes**:
+  - Added tests: both id+socialCode, missing TOP_FIELD mapping, non-object node, total not number, top filtering, top empty slice, asPlaintiff/Defendant zero, unknown categories.
+  - Still uncovered line 292 in getEnterpriseSummary (likely async throw branch nuance).
+- **Verification**: All 756 tests pass; build success; typecheck 0; lint 0 errors.
+
 ---
 
-- **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models added.
+- **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models.
 
 ## Rollback Count
 

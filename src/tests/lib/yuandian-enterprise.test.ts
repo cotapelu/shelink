@@ -155,6 +155,219 @@ describe("getEnterpriseSummary", () => {
     expect(url).toContain("tyshxydm=91110000XXXX");
     expect(url).not.toContain("id=");
   });
+
+  it("both id and socialCode provided → both params present", async () => {
+    fetchMock.mockResolvedValue(jsonRes(aggData()));
+    await getEnterpriseSummary({ id: "id1", socialCode: "code1" }, configured);
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toContain("id=id1");
+    expect(url).toContain("tyshxydm=code1");
+  });
+
+  it("handles category with missing TOP_FIELD mapping (top remains undefined)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        失信被执行人统计: { 总数: 1 },
+        被执行人统计: { 总数: 2 },
+        股权冻结统计: { 总数: 3 },
+        严重违法统计: { 总数: 4 },
+        经营异常统计: { 总数: 5 },
+        // litigation and auxiliary keys not provided → should be filtered out
+        法院公告统计: { 总数: 5, 起诉方: 1, 应诉方: 4, 省份: [{ key: "北京", count: 5 }] } // 省份 not in TOP_FIELD_BY_CATEGORY for 法院公告
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    expect(r).not.toBeNull();
+    const court = r!.litigation.find(s => s.category === "法院公告");
+    expect(court).toBeDefined();
+    expect(court!.top).toBeUndefined(); // because topField mapping not found
+  });
+
+  it("handles node that is not an object in pickStat (returns null)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        失信被执行人统计: null, // should be filtered out
+        被执行人统计: "not an object", // should be filtered out
+        股权冻结统计: { 总数: 3 },
+        严重违法统计: { 总数: 4 },
+        经营异常统计: { 总数: 5 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    expect(r).not.toBeNull();
+    expect(r!.coreRisks.length).toBe(3); // only 股权冻结, 严重违法, 经营异常
+    expect(r!.coreRisks.find(c => c.category === "失信被执行人")).toBeUndefined();
+  });
+
+  it("handles total not a number (defaults to 0)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        失信被执行人统计: { 总数: "five" }, // not a number
+        被执行人统计: { 总数: 2 },
+        股权冻结统计: { 总数: 3 },
+        严重违法统计: { 总数: 4 },
+        经营异常统计: { 总数: 5 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    expect(r).not.toBeNull();
+    const dishou = r!.coreRisks.find(c => c.category === "失信被执行人");
+    expect(dishou).toBeDefined();
+    expect(dishou!.total).toBe(0);
+  });
+
+  it("handles top array items that are not proper objects (filtered)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        失信被执行人统计: { 总数: 1, 执行法院: [1, 2, 3] as any }, // non-object items
+        被执行人统计: { 总数: 2 },
+        股权冻结统计: { 总数: 3 },
+        严重违法统计: { 总数: 4 },
+        经营异常统计: { 总数: 5 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    expect(r).not.toBeNull();
+    const dishou = r!.coreRisks.find(c => c.category === "失信被执行人");
+    expect(dishou!.top).toEqual([]); // all filtered, empty array
+  });
+
+  it("handles top array with valid items (extracts up to 5)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        失信被执行人统计: { 总数: 1, 执行法院: [
+          { key: "Court A", count: 10 },
+          { key: "Court B", count: 5 },
+          { key: "Court C", count: 3 }
+        ]},
+        被执行人统计: { 总数: 2 },
+        股权冻结统计: { 总数: 3 },
+        严重违法统计: { 总数: 4 },
+        经营异常统计: { 总数: 5 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    const dishou = r!.coreRisks.find(c => c.category === "失信被执行人");
+    expect(dishou!.top).toEqual([
+      { key: "Court A", count: 10 },
+      { key: "Court B", count: 5 },
+      { key: "Court C", count: 3 }
+    ]);
+  });
+
+  it("handles top array empty after slice (returns empty)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        失信被执行人统计: { 总数: 1, 执行法院: [] }, // empty array
+        被执行人统计: { 总数: 2 },
+        股权冻结统计: { 总数: 3 },
+        严重违法统计: { 总数: 4 },
+        经营异常统计: { 总数: 5 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    const dishou = r!.coreRisks.find(c => c.category === "失信被执行人");
+    expect(dishou!.top).toEqual([]);
+  });
+
+  it("handles asPlaintiff/asDefendant with zero value (kept)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        法院公告统计: { 总数: 5, 起诉方: 0, 应诉方: 0 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    const court = r!.litigation.find(s => s.category === "法院公告");
+    expect(court!.asPlaintiff).toBe(0);
+    expect(court!.asDefendant).toBe(0);
+  });
+
+  it("filters unknown categories not in CORE_RISK_KEYS", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        // include an unknown category (should be ignored)
+        未知统计: { 总数: 99 },
+        失信被执行人统计: { 总数: 1 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    expect(r!.coreRisks.length).toBe(1);
+    expect(r!.coreRisks[0].category).toBe("失信被执行人");
+  });
+
+  it("handles asPlaintiff/asDefendant undefined when missing", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        法院公告统计: { 总数: 5 } // no 起诉方/应诉方
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    const court = r!.litigation.find(s => s.category === "法院公告");
+    expect(court!.asPlaintiff).toBeUndefined();
+    expect(court!.asDefendant).toBeUndefined();
+  });
+
+  it("handles response with missing auxiliary keys (all filtered)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        // only core risks and litigation
+        失信被执行人统计: { 总数: 1 },
+        被执行人统计: { 总数: 2 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    expect(r!.auxiliary).toEqual([]);
+  });
 });
 
 describe("computeRiskLevel（通过聚合响应间接验证）", () => {
