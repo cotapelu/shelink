@@ -40,7 +40,7 @@ try {
   // Dynamic import to avoid SSR issues
   if (typeof window === 'undefined') {
     // Server-side: use AsyncLocalStorage if available (Node.js 16+)
-    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+     
     const { AsyncLocalStorage } = require('async_hooks');
     asyncLocalStorage = new (AsyncLocalStorage as any)();
   }

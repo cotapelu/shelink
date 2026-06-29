@@ -70,7 +70,7 @@ function nextSolarForLunar(
   const currentLunarYear = todaySolar.getLunar().getYear();
 
   // Try this lunar year and the next two (to handle leap months & edge cases)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const LunarClass = Lunar as any;
   for (let offset = 0; offset <= 2; offset++) {
     try {

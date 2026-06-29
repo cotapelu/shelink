@@ -105,15 +105,7 @@ export async function getClientById(id: string) {
       matters: {
         where: { deletedAt: null },
         orderBy: { updatedAt: "desc" },
-        take: 50,
-        select: {
-          id: true,
-          internalCode: true,
-          title: true,
-          category: true,
-          status: true,
-          updatedAt: true
-        }
+        take: 50
       }
     }
   });
@@ -149,7 +141,7 @@ export async function getClientFinanceSummary(clientId: string) {
   const [billings, fees, matterCount] = await Promise.all([
     prisma.billing.findMany({
       where: { matter: matterWhere },
-      include: { matter: { select: { id: true, internalCode: true, title: true } } },
+      include: { matter: true },
       orderBy: { createdAt: "desc" }
     }),
     prisma.feeEntry.findMany({
@@ -171,16 +163,9 @@ export async function getClientFinanceSummary(clientId: string) {
     contractTotal,
     receivable,
     received,
-    pending: Math.max(0, receivable - received),
+    outstanding: Math.max(0, receivable - received),
     matterCount,
-    billings: billings.map((b) => ({
-      id: b.id,
-      title: b.title,
-      status: b.status,
-      contractAmount: Number(b.contractAmount),
-      signedAt: b.signedAt,
-      matter: b.matter
-    }))
+    billings
   };
 }
 
