@@ -167,6 +167,21 @@ describe("conflict query utilities", () => {
       expect(() => assertConflictReviewAllowsConversion(intake)).not.toThrow();
     });
 
+    it("throws if conclusion is PENDING", () => {
+      const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({ conclusion: "PENDING", queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] }})]);
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("还没有结论");
+    });
+
+    it("throws if conclusion is NEED_INFO", () => {
+      const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({ conclusion: "NEED_INFO", queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] }})]);
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("信息不足");
+    });
+
+    it("throws if conclusion is SAME_SUBJECT", () => {
+      const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({ conclusion: "SAME_SUBJECT", queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] }})]);
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("存在利益冲突");
+    });
+
     it("throws if conclusion is unknown value", () => {
       const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({ conclusion: "UNKNOWN" as any, queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] }})]);
       expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("结论异常");

@@ -844,6 +844,22 @@ This file tracks performance and evolution of the AI agent during the migration 
   - Uncovered lines remain: 65, 300, 451, 592 (need further tests)
 - **Verification**: All 766 tests pass; build success; typecheck 0; lint 0 errors.
 
+## Cycle 47 - Task: Increase branch coverage for server/intakes/helpers
+- **Timestamp**: 2026-06-29T07:30:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (business logic, 90.41% → 93.15%)
+- **Duration**: 8 min
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/server/intakes/helpers.test.ts
+- **Test Delta**: +3 tests (total 769)
+- **Coverage Delta**:
+  - Overall Branches: 93.71% → 93.91% (+0.20%, 939→941/1002)
+  - helpers Branches: 90.41% → 93.15% (+2.74%)
+- **Notes**:
+  - Added tests for PENDING, NEED_INFO, SAME_SUBJECT conclusions to cover each branch.
+  - Remaining uncovered lines: 46, 80, 114-115, 159.
+- **Verification**: All 769 tests pass; build success; typecheck 0; lint 0 errors.
+
 ---
 
 - **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models.
