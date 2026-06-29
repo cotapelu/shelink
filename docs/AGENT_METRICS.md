@@ -906,6 +906,17 @@ This file tracks performance and evolution of the AI agent during the migration 
   - Improves readability for international developers.
 - **Verification**: All 779 tests pass; build success; typecheck 0; lint 0 errors.
 
+## Cycle 51 - Task: Remove dead crypto module (security FIXME)
+- **Timestamp**: 2026-06-29T19:20:00+07:00
+- **Type**: Violation Fix (CRITICAL)
+- **Priority**: CRITICAL
+- **Duration**: ~5 minutes
+- **Status**: ✅ Success
+- **Test Delta**: 0 tests (total 787)
+- **Coverage Delta**: None (maintained: 98.61% Stmt, 94.04% Branch, 96.17% Func, 99.69% Lines)
+- **Security**: Removed dead code `src/lib/crypto/crypto.ts` containing static salt fallback (FIXME) – eliminates potential encryption vulnerability
+- **Notes**: File was unused; deletion safe; all quality gates green post-removal.
+
 ---
 
 - **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models.
