@@ -17,6 +17,7 @@ Strengths, weaknesses, and fragile areas observed during migration.
 - **Self-referencing models**: Person father/mother required explicit relation names and reverse arrays; easy to forget. Should define both directions at once.
 - **Migration generation**: Accidentally generated migration from empty schema instead of incremental, causing duplicate enum creation. Need to ensure DB is at latest migration before generating diff.
 - **Submodule management**: Occasionally confused about staging changes in submodule vs parent; need to remember to commit inside LawLink first, then update parent gitlink.
+- **Test coverage regression**: Creating new UI modules without accompanying unit tests leads to immediate coverage drop. Must add tests concurrently with component creation to maintain ≥80% coverage.
 
 ## Fragile Modules
 
