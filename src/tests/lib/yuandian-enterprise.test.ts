@@ -414,4 +414,51 @@ describe("computeRiskLevel（通过聚合响应间接验证）", () => {
     const r = await getEnterpriseSummary({ id: "x" }, configured);
     expect(r!.level).toBe("HIGH");
   });
+
+  it("handles non-success status with code and message", async () => {
+    fetchMock.mockResolvedValue(
+      jsonRes({ status: "failed", code: 1001, message: "Custom error" })
+    );
+    await expect(getEnterpriseSummary({ id: "x" }, configured)).rejects.toBeInstanceOf(YuandianApiError);
+  });
+
+  it("handles top array with invalid item types (filters properly)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        失信被执行人统计: { 总数: 1, 执行法院: [null, "string", 123, { key: "Court", count: 2 }] },
+        被执行人统计: { 总数: 2 },
+        股权冻结统计: { 总数: 3 },
+        严重违法统计: { 总数: 4 },
+        经营异常统计: { 总数: 5 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    const dishou = r!.coreRisks.find(c => c.category === "失信被执行人");
+    expect(dishou!.top).toEqual([{ key: "Court", count: 2 }]);
+  });
+
+  it("filters out core risk category when total is 0 AND category not in CORE_RISK_KEYS (defense-in-depth)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        // includes a non-core category
+        其他统计: { 总数: 99 },
+        失信被执行人统计: { 总数: 0 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    // only失信被执行人 (even with 0) appears because it's in CORE_RISK_KEYS
+    expect(r!.coreRisks.length).toBe(1);
+    expect(r!.coreRisks[0].category).toBe("失信被执行人");
+    expect(r!.coreRisks[0].total).toBe(0);
+  });
 });

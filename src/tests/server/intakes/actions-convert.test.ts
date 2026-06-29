@@ -789,4 +789,58 @@ describe("convertIntakeToMatter", () => {
     );
   });
 
+  it("uses feeType fallback when feeType not in label map", async () => {
+    (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
+    const mockIntake = {
+      id: "i1",
+      title: "Case Title",
+      category: "CIVIL_COMMERCIAL",
+      ownerUserId: "u2",
+      causeId: "c1",
+      causeFreeText: "free",
+      clientId: "cl1",
+      client: { id: "cl1", name: "Client", type: "COMPANY", idNumber: "code" },
+      firstProcedureType: "FIRST_INSTANCE",
+      ourStanding: "PLAINTIFF",
+      claimAmount: 100000,
+      counterclaim: false,
+      coUserIds: [],
+      parties: [],
+      conflictChecks: [],
+      documents: [],
+      feeAmount: 5000,
+      feeType: "HOURLY"
+    };
+    (prisma.intake.findUnique as any).mockResolvedValue(mockIntake);
+
+    let capturedTx: any = null;
+    (prisma.$transaction as any).mockImplementation(async (cb: any) => {
+      const tx = {
+        matter: { create: vi.fn().mockResolvedValue({ id: "m1", internalCode: "IC", firmCaseNo: "FCN" }) },
+        procedure: { create: vi.fn().mockResolvedValue({ id: "p1" }) },
+        party: { create: vi.fn().mockResolvedValue({ id: "pa1" }), createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        billing: { create: vi.fn().mockResolvedValue({ id: "b1" }) },
+        matterMember: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        document: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        matterProcedure: { create: vi.fn().mockResolvedValue({ id: "mp1" }) },
+        procedureParty: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        intake: { update: vi.fn().mockResolvedValue({ id: "i1" }) },
+        timelineEvent: { create: vi.fn().mockResolvedValue({ id: "te1" }) },
+        documentFolder: { createMany: vi.fn().mockResolvedValue({ count: 0 }) }
+      };
+      capturedTx = tx;
+      return await cb(tx);
+    });
+
+    await convertIntakeToMatter("i1");
+
+    expect(capturedTx.billing.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          title: `委托代理合同 - HOURLY`
+        })
+      })
+    );
+  });
+
 });
