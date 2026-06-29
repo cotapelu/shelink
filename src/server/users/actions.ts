@@ -35,9 +35,9 @@ const userRoleSchema = z.enum([
 ]);
 
 const userCreateSchema = z.object({
-  name: z.string().min(1, "姓名必填").max(40),
-  email: z.string().email("邮箱格式不正确"),
-  password: z.string().min(8, "密码至少 8 位").max(128),
+  name: z.string().min(1, "Họ tên bắt buộc").max(40),
+  email: z.string().email("Địa chỉ email không hợp lệ"),
+  password: z.string().min(8, "Mật khẩu ít nhất 8 ký tự").max(128),
   role: userRoleSchema,
   phone: z.string().max(30).optional().or(z.literal(""))
 });
@@ -65,7 +65,7 @@ export type ChangeMyPasswordInput = z.infer<typeof changeMyPasswordSchema>;
 async function requireAdmin() {
   const session = await requireSession();
   if (session.user.role !== "ADMIN") {
-    throw new Error("仅管理员可执行");
+    throw new Error("Chỉ admin được thực hiện");
   }
   return session;
 }
@@ -89,8 +89,8 @@ export async function listUsers() {
 }
 
 /**
- * 任意登录用户都可调：拿活跃同事列表，用于收案/案件团队选择。
- * 默认排除 FINANCE/ADMIN 系统角色（仍可选，做"全部"切换时再开放）。
+ * Bất kỳ user đã đăng nhập nào cũng gọi được: Lấy danh sách đồng nghiệp đang hoạt động, dùng để chọn khi nhận vụ án/tạo team.
+ * Mặc định loại trừ vai trò hệ thống FINANCE/ADMIN (vẫn có thể chọn, khi chuyển sang chế độ "Tất cả").
  */
 export async function listActiveColleagues() {
   await requireSession();
@@ -106,7 +106,7 @@ export async function createUser(input: UserCreateInput) {
   const data = userCreateSchema.parse(input);
 
   const existing = await prisma.user.findUnique({ where: { email: data.email } });
-  if (existing) throw new Error("邮箱已被使用");
+  if (existing) throw new Error("Email đã được sử dụng");
 
   const passwordHash = await bcrypt.hash(data.password, 12);
   const created = await prisma.user.create({
@@ -136,7 +136,7 @@ export async function updateUserRole(input: UserUpdateRoleInput) {
   const session = await requireAdmin();
   const data = userUpdateRoleSchema.parse(input);
   if (data.id === session.user.id) {
-    throw new Error("不能修改自己的角色");
+    throw new Error("Không thể sửa vai trò của chính mình");
   }
 
   await prisma.user.update({
@@ -159,10 +159,10 @@ export async function updateUserRole(input: UserUpdateRoleInput) {
 export async function toggleUserActive(id: string) {
   const session = await requireAdmin();
   if (id === session.user.id) {
-    throw new Error("不能禁用自己");
+    throw new Error("Không thể vô hiệu hóa chính mình");
   }
   const current = await prisma.user.findUnique({ where: { id }, select: { active: true } });
-  if (!current) throw new Error("用户不存在");
+  if (!current) throw new Error("User không tồn tại");
 
   await prisma.user.update({
     where: { id },
@@ -211,10 +211,10 @@ export async function changeMyPassword(input: ChangeMyPasswordInput) {
     where: { id: session.user.id },
     select: { passwordHash: true }
   });
-  if (!me) throw new Error("用户不存在");
+  if (!me) throw new Error("User không tồn tại");
 
   const matches = await bcrypt.compare(data.currentPassword, me.passwordHash);
-  if (!matches) throw new Error("当前密码不正确");
+  if (!matches) throw new Error("Mật khẩu hiện tại không đúng");
 
   const passwordHash = await bcrypt.hash(data.newPassword, 12);
   await prisma.user.update({
@@ -232,17 +232,17 @@ export async function changeMyPassword(input: ChangeMyPasswordInput) {
   return { ok: true };
 }
 
-/** v0.43：保存 / 清除个人头像（base64 data URL 内联存 User.avatar，约 256KB 上限） */
+/** v0.43: Lưu / xóa avatar cá nhân (base64 data URL lưu trực tiếp trong User.avatar, giới hạn ~256KB) */
 const AVATAR_MAX_CHARS = 256 * 1024;
 export async function saveMyAvatar(input: { avatar: string | null }) {
   const session = await requireSession();
   let avatar = input.avatar;
   if (typeof avatar === "string" && avatar.length > 0) {
     if (!/^data:image\/(png|jpeg|jpg|webp|svg\+xml);base64,/.test(avatar)) {
-      throw new Error("头像必须是 PNG / JPG / WebP / SVG 图片");
+      throw new Error("Avatar phải là ảnh PNG / JPG / WebP / SVG");
     }
     if (avatar.length > AVATAR_MAX_CHARS) {
-      throw new Error("头像体积过大，请控制在约 180KB 以内");
+      throw new Error("Avatar quá lớn, vui lòng giới hạn khoảng 180KB");
     }
   } else {
     avatar = null;

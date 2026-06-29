@@ -29,25 +29,25 @@ export const cooperationStatusSchema = z.enum([
 export const clientGenderSchema = z.enum(["MALE", "FEMALE"]);
 
 export const contactInputSchema = z.object({
-  name: z.string().min(1, "联系人姓名必填").max(40),
+  name: z.string().min(1, "Họ tên liên hệ bắt buộc").max(40),
   title: z.string().max(40).optional().or(z.literal("")),
   phone: z.string().max(30).optional().or(z.literal("")),
-  email: z.string().email("邮箱格式不正确").optional().or(z.literal("")),
+  email: z.string().email("Email không hợp lệ").optional().or(z.literal("")),
   wechat: z.string().max(40).optional().or(z.literal("")),
   isPrimary: z.boolean().default(false),
   notes: z.string().max(500).optional().or(z.literal(""))
 });
 
 export const clientCreateSchema = z.object({
-  name: z.string().min(1, "客户名称必填").max(120),
+  name: z.string().min(1, "Tên khách hàng bắt buộc").max(120),
   type: clientTypeSchema,
   idNumber: z.string().max(50).optional().or(z.literal("")),
   address: z.string().max(200).optional().or(z.literal("")),
   legalRep: z.string().max(40).optional().or(z.literal("")),
   phone: z.string().max(30).optional().or(z.literal("")),
-  email: z.string().email("邮箱格式不正确").optional().or(z.literal("")),
+  email: z.string().email("Email không hợp lệ").optional().or(z.literal("")),
   source: z.string().max(80).optional().or(z.literal("")),
-  // v0.39: 案件云式补充字段（internalCode 系统生成，不收用户输入）
+  // v0.39: Bổ sung trường case cloud (internalCode hệ thống sinh, không nhập từ user)
   cooperationStatus: cooperationStatusSchema.default("SIGNED"),
   industry: z.string().max(60).optional().or(z.literal("")),
   gender: clientGenderSchema.optional().or(z.literal("")),

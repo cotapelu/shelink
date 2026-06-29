@@ -37,7 +37,7 @@ import {
   type ClientListQuery
 } from "./schemas";
 
-// 空字符串归 null（Prisma 不接受 "" 给可空字段）
+// Chuỗi rỗng chuyển thành null (Prisma không chấp nhận "" cho field nullable)
 function emptyToNull<T extends Record<string, unknown>>(obj: T): T {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(obj)) {
@@ -86,7 +86,7 @@ export async function listClients(input: Partial<ClientListQuery> = {}) {
 
 export async function getClientById(id: string) {
   const session = await requireSession();
-  // 权限检查：manager/finance 看全部，其他人需有关联案件
+  // Kiểm tra quyền: manager/finance xem tất cả, người khác phải có vụ án liên quan
   if (!isManager(session.user.role) && session.user.role !== "FINANCE") {
     const accessible = await prisma.client.findFirst({
       where: {
@@ -96,7 +96,7 @@ export async function getClientById(id: string) {
       },
       select: { id: true }
     });
-    if (!accessible) throw new Error("客户不存在");
+    if (!accessible) throw new Error("Khách hàng không tồn tại");
   }
   const client = await prisma.client.findFirst({
     where: { id, deletedAt: null },
@@ -129,7 +129,7 @@ export async function getClientById(id: string) {
   return client;
 }
 
-// v0.37: 客户财务汇总 —— 跨该客户名下所有案件聚合合同/应收/已收
+// v0.37: Tổng hợp tài chính khách hàng —— Tổng hợp hợp đồng/có thu/đã thu xuyên qua tất cả vụ án của khách hàng
 export async function getClientFinanceSummary(clientId: string) {
   const session = await requireSession();
   // 权限：与 getClientById 一致
@@ -142,7 +142,7 @@ export async function getClientFinanceSummary(clientId: string) {
       },
       select: { id: true }
     });
-    if (!accessible) throw new Error("客户不存在");
+    if (!accessible) throw new Error("Khách hàng không tồn tại");
   }
 
   const matterWhere = { primaryClientId: clientId, deletedAt: null };
@@ -238,7 +238,7 @@ export async function createClient(input: ClientCreateInput) {
 export async function updateClient(input: ClientUpdateInput) {
   const session = await requireSession();
   if (!isManager(session.user.role)) {
-    throw new Error("仅管理员或主办律师可编辑客户信息");
+    throw new Error("Chỉ admin hoặc luật sư phụ trách được sửa thông tin khách hàng");
   }
   const data = clientUpdateSchema.parse(input);
   const { id, contacts, gender, ...rest } = data;
@@ -284,7 +284,7 @@ export async function updateClient(input: ClientUpdateInput) {
 export async function softDeleteClient(id: string) {
   const session = await requireSession();
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
-    throw new Error("只有管理员或主办律师可以删除客户");
+    throw new Error("Chỉ admin hoặc luật sư phụ trách được xóa khách hàng");
   }
 
   await prisma.client.update({
@@ -307,7 +307,7 @@ export async function softDeleteClient(id: string) {
 export async function addContact(clientId: string, input: ContactInput) {
   const session = await requireSession();
   if (!isManager(session.user.role)) {
-    throw new Error("仅管理员或主办律师可编辑联系人");
+    throw new Error("Chỉ admin hoặc luật sư phụ trách được sửa liên hệ");
   }
   const data = contactInputSchema.parse(input);
   const created = await prisma.contact.create({
@@ -327,7 +327,7 @@ export async function addContact(clientId: string, input: ContactInput) {
 export async function deleteContact(id: string) {
   const session = await requireSession();
   if (!isManager(session.user.role)) {
-    throw new Error("仅管理员或主办律师可删除联系人");
+    throw new Error("Chỉ admin hoặc luật sư phụ trách được xóa liên hệ");
   }
   const contact = await prisma.contact.findUnique({ where: { id } });
   if (!contact) return { ok: false };

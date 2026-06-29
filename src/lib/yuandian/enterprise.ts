@@ -18,10 +18,10 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * YuanDian Open Platform - Enterprise Information API (server-side only)
+ * YuanDian Open Platform - Enterprise Information API (chỉ server-side)
  *
  * Endpoint: GET {baseUrl}/{routeKey}?param=value, header X-API-Key.
- * Reuses encryption key reading from settings.ts.
+ * Dùng chung encryption key từ settings.ts.
  */
 import { getYuandianSettings, type ResolvedYuandianSettings } from "./settings";
 import { YuandianNotConfiguredError, YuandianApiError } from "./client";

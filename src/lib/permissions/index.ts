@@ -25,9 +25,9 @@ export function isManager(role: string): boolean {
   return role === "ADMIN" || role === "PRINCIPAL_LAWYER";
 }
 
-// ============ 案件可见性 ============
+// ============ QUYỀN TRUY CẬP VỤ ÁN ============
 
-/** 列表查询用：返回 Prisma where 片段，AND 到现有 where */
+/** Dùng cho list query: trả về Prisma where片段, AND vào where hiện tại */
 export function matterVisibilityFilter(
   userId: string,
   role: string
@@ -45,7 +45,7 @@ export function matterVisibilityFilter(
   return { members: { some: { userId } } };
 }
 
-/** 操作/关联案件用：不因 ADMIN / PRINCIPAL_LAWYER / FINANCE 角色放大全所范围 */
+/** Dùng cho operations/association: không mở rộng scope toàn firm do vai trò ADMIN/PRINCIPAL_LAWYER/FINANCE */
 export function matterAssociationFilter(userId: string): Prisma.MatterWhereInput {
   return {
     OR: [
@@ -55,7 +55,7 @@ export function matterAssociationFilter(userId: string): Prisma.MatterWhereInput
   };
 }
 
-/** 单条访问断言：查不到或无权限一律 throw "案件不存在"（避免泄露 ID） */
+/** Assertion single access: nếu không thấy hoặc không có quyền, luôn throw "Vụ án không tồn tại" (tránh leak ID) */
 export async function assertCanAccessMatter(
   userId: string,
   role: string,
@@ -66,7 +66,7 @@ export async function assertCanAccessMatter(
       where: { id: matterId, deletedAt: null },
       select: { id: true }
     });
-    if (!exists) throw new Error("案件不存在");
+    if (!exists) throw new Error("Vụ án không tồn tại");
     return;
   }
   const row = await prisma.matter.findFirst({
@@ -77,10 +77,10 @@ export async function assertCanAccessMatter(
     },
     select: { id: true }
   });
-  if (!row) throw new Error("案件不存在");
+  if (!row) throw new Error("Vụ án không tồn tại");
 }
 
-/** 操作/关联断言：只允许主办或案件成员，不因管理角色放开 */
+/** Assertion cho operations/association: chỉ cho phép host hoặc member, không open do vai trò quản lý */
 export async function assertCanAssociateMatter(
   userId: string,
   matterId: string
@@ -93,10 +93,10 @@ export async function assertCanAssociateMatter(
     },
     select: { id: true }
   });
-  if (!row) throw new Error("案件不存在或无权关联");
+  if (!row) throw new Error("Vụ án không tồn tại hoặc không có quyền liên kết");
 }
 
-/** 案件处理断言：只允许主办或案件成员，不因管理角色放开 */
+/** Assertion cho matter handling: chỉ cho phép host hoặc member, không open do vai trò quản lý */
 export async function assertCanHandleMatter(
   userId: string,
   matterId: string
@@ -109,14 +109,14 @@ export async function assertCanHandleMatter(
     },
     select: { id: true }
   });
-  if (!row) throw new Error("案件不存在或无权处理");
+  if (!row) throw new Error("Vụ án không tồn tại hoặc không có quyền xử lý");
 }
 
-/** 主办/协办断言：用于归档、团队、核心信息、文书生成等较敏感处理 */
+/** Host/Assistant assertion: dùng cho lưu trữ, team, thông tin chính, tạo văn bản... */
 export async function assertCanLeadMatter(
   userId: string,
   matterId: string,
-  message = "仅案件主办/协办可操作"
+  message = "Chỉ host/assistant của vụ án có thể thao tác"
 ): Promise<void> {
   const row = await prisma.matter.findFirst({
     where: {
@@ -132,11 +132,11 @@ export async function assertCanLeadMatter(
   if (!row) throw new Error(message);
 }
 
-/** 当前主办律师断言：用于变更承办团队、删除案件等所有权级操作 */
+/** Assertion cho current host lawyer: dùng cho thay đổi team, xóa vụ án, các operation level ownership */
 export async function assertCanOwnMatter(
   userId: string,
   matterId: string,
-  message = "仅案件主办律师可操作"
+  message = "Chỉ host lawyer của vụ án có thể thao tác"
 ): Promise<void> {
   const row = await prisma.matter.findFirst({
     where: {
@@ -149,7 +149,7 @@ export async function assertCanOwnMatter(
   if (!row) throw new Error(message);
 }
 
-/** 修改断言：只允许主办或案件成员，不因管理角色放开 */
+/** Assertion modification: chỉ cho phép host hoặc member, không open do vai trò quản lý */
 export async function assertCanModifyMatter(
   userId: string,
   _role: string,
@@ -163,10 +163,10 @@ export async function assertCanModifyMatter(
     },
     select: { id: true }
   });
-  if (!matter) throw new Error("案件不存在");
+  if (!matter) throw new Error("Vụ án không tồn tại");
 }
 
-// ============ 收案可见性 ============
+// ============ INTÁKE VISIBILITY ============
 
 export function intakeVisibilityFilter(
   userId: string,
@@ -182,9 +182,9 @@ export function intakeVisibilityFilter(
   };
 }
 
-// ============ 客户可见性 ============
+// ============ CLIENT VISIBILITY ============
 
-/** 客户通过关联的案件判断可见性；manager/finance 看全部 */
+/** Client visibility determined by associated matters; manager/finance see all */
 export function clientVisibilityFilter(
   userId: string,
   role: string
@@ -198,10 +198,10 @@ export function clientVisibilityFilter(
   };
 }
 
-// ============ 通用断言 ============
+// ============ COMMON ASSERTIONS ============
 
 export function assertManagerOrRole(role: string, ...allowed: string[]): void {
   if (isManager(role)) return;
   if (allowed.includes(role)) return;
-  throw new Error("权限不足");
+  throw new Error("Không đủ quyền");
 }

@@ -18,9 +18,9 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.20: 律所报表 xlsx 导出
+ * v0.20: Xuất báo cáo xlsx cho律所
  *
- * 3 个 sheet：案件清单（本期新收）/ 收款明细（本期 RECEIVED）/ 律师产出（本期聚合）
+ * 3 sheet: Danh sách vụ án (Nhận mới kỳ này) / Chi tiết thu (RECEIVED kỳ này) / Sản lượng luật sư (Tập hợp kỳ này)
  */
 import ExcelJS from "exceljs";
 import { prisma } from "@/lib/prisma";
@@ -54,18 +54,18 @@ export async function buildReportWorkbook(period: ReportPeriod): Promise<Buffer>
     orderBy: { createdAt: "asc" }
   });
 
-  const sheetMatters = wb.addWorksheet("案件清单");
+  const sheetMatters = wb.addWorksheet("Danh sách vụ án");
   sheetMatters.columns = [
-    { header: "案件编号", key: "code", width: 14 },
-    { header: "标题", key: "title", width: 36 },
-    { header: "类别", key: "category", width: 8 },
-    { header: "案由", key: "cause", width: 18 },
-    { header: "客户", key: "client", width: 18 },
-    { header: "主办律师", key: "owner", width: 10 },
-    { header: "状态", key: "status", width: 10 },
-    { header: "收案日期", key: "createdAt", width: 12 },
-    { header: "结案日期", key: "closedAt", width: 12 },
-    { header: "归档日期", key: "archivedAt", width: 12 }
+    { header: "Mã vụ án", key: "code", width: 14 },
+    { header: "Tiêu đề", key: "title", width: 36 },
+    { header: "Loại", key: "category", width: 8 },
+    { header: "Nguyên cáo", key: "cause", width: 18 },
+    { header: "Khách hàng", key: "client", width: 18 },
+    { header: "Luật sư phụ trách", key: "owner", width: 10 },
+    { header: "Trạng thái", key: "status", width: 10 },
+    { header: "Ngày nhận", key: "createdAt", width: 12 },
+    { header: "Ngày kết thúc", key: "closedAt", width: 12 },
+    { header: "Ngày lưu trữ", key: "archivedAt", width: 12 }
   ];
   for (const m of matters) {
     sheetMatters.addRow({
@@ -83,7 +83,7 @@ export async function buildReportWorkbook(period: ReportPeriod): Promise<Buffer>
   }
   sheetMatters.getRow(1).font = { bold: true };
 
-  // Sheet 2: 收款明细
+  // Sheet 2: Chi tiết thu
   const receivedFees = await prisma.feeEntry.findMany({
     where: {
       type: "RECEIVED",
@@ -106,17 +106,17 @@ export async function buildReportWorkbook(period: ReportPeriod): Promise<Buffer>
     },
     orderBy: { occurredAt: "asc" }
   });
-  const sheetFees = wb.addWorksheet("收款明细");
+  const sheetFees = wb.addWorksheet("Chi tiết thu");
   sheetFees.columns = [
-    { header: "收款日期", key: "occurredAt", width: 12 },
-    { header: "金额", key: "amount", width: 14 },
-    { header: "客户", key: "client", width: 18 },
-    { header: "案件编号", key: "matterCode", width: 14 },
-    { header: "案件标题", key: "matterTitle", width: 36 },
-    { header: "主办律师", key: "owner", width: 10 },
-    { header: "付款方", key: "payer", width: 18 },
-    { header: "发票号", key: "invoiceNo", width: 18 },
-    { header: "收款方式", key: "method", width: 12 }
+    { header: "Ngày thu", key: "occurredAt", width: 12 },
+    { header: "Số tiền", key: "amount", width: 14 },
+    { header: "Khách hàng", key: "client", width: 18 },
+    { header: "Mã vụ án", key: "matterCode", width: 14 },
+    { header: "Tiêu đề vụ án", key: "matterTitle", width: 36 },
+    { header: "Luật sư phụ trách", key: "owner", width: 10 },
+    { header: "Bên trả", key: "payer", width: 18 },
+    { header: "Số hóa đơn", key: "invoiceNo", width: 18 },
+    { header: "Hình thức thu", key: "method", width: 12 }
   ];
   for (const f of receivedFees) {
     sheetFees.addRow({
@@ -134,14 +134,14 @@ export async function buildReportWorkbook(period: ReportPeriod): Promise<Buffer>
   sheetFees.getRow(1).font = { bold: true };
   sheetFees.getColumn("amount").numFmt = "#,##0.00";
 
-  // Sheet 3: 律师产出（来自 getReportData 已聚合的数据，避免重算）
+  // Sheet 3: Sản lượng luật sư (dữ liệu đã tổng hợp từ getReportData, tránh tính lại)
   const data = await getReportData(period);
-  const sheetLawyer = wb.addWorksheet("律师产出");
+  const sheetLawyer = wb.addWorksheet("Sản lượng luật sư");
   sheetLawyer.columns = [
-    { header: "律师", key: "name", width: 12 },
-    { header: "本期新收", key: "owned", width: 12 },
-    { header: "本期已结", key: "closed", width: 12 },
-    { header: "本期收款金额", key: "received", width: 18 }
+    { header: "Luật sư", key: "name", width: 12 },
+    { header: "Nhận mới kỳ này", key: "owned", width: 12 },
+    { header: "Đã kết thúc kỳ này", key: "closed", width: 12 },
+    { header: "Số thu kỳ này", key: "received", width: 18 }
   ];
   for (const row of data.byLawyer) {
     sheetLawyer.addRow({
@@ -154,13 +154,13 @@ export async function buildReportWorkbook(period: ReportPeriod): Promise<Buffer>
   sheetLawyer.getRow(1).font = { bold: true };
   sheetLawyer.getColumn("received").numFmt = "#,##0.00";
 
-  // Sheet 4: 客户应收（顺手补一份，律师常用）
-  const sheetClient = wb.addWorksheet("客户应收");
+  // Sheet 4: Công nợ khách hàng (bổ sung thêm, luật sư thường dùng)
+  const sheetClient = wb.addWorksheet("Công nợ khách hàng");
   sheetClient.columns = [
-    { header: "客户", key: "name", width: 24 },
-    { header: "应收金额", key: "receivable", width: 14 },
-    { header: "已收金额", key: "received", width: 14 },
-    { header: "应收余额", key: "balance", width: 14 }
+    { header: "Khách hàng", key: "name", width: 24 },
+    { header: "Có thu", key: "receivable", width: 14 },
+    { header: "Đã thu", key: "received", width: 14 },
+    { header: "Còn thiếu", key: "balance", width: 14 }
   ];
   for (const row of data.byClientReceivable) {
     sheetClient.addRow({

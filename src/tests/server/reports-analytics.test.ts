@@ -18,10 +18,10 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.22: 报表 analytics 聚合算法测试（纯函数路径）
+ * v0.22: Báo cáo analytics thuật toán tập hợp (pure function path)
  *
- * getCaseCycleAnalysis / getReviewIssueAnalysis 本身依赖 prisma，重写一个纯函数
- * 版本不现实；这里通过 mock prisma 测算法（中位数、空数据、JS 端聚合）。
+ * getCaseCycleAnalysis / getReviewIssueAnalysis phụ thuộc prisma, rewrite thành pure function
+ * Phiên bản không thực tế; ở đây test thuật toán thông qua mock prisma (trung vị, dữ liệu rỗng, aggregation phía JS).
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 

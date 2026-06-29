@@ -18,15 +18,15 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.42 律所信息 / 编号体系配置（项 1 + 项 11）
+ * v0.42 Cấu hình thông tin律所 / Hệ thống mã số (Mục 1 + Mục 11)
  *
- * 单 SystemSetting key `firmProfile`，value 为 JSON：
- *   - firmName / firmSubtitle / logoDataUrl：侧栏品牌（默认 LawLink / 律师工作台）
- *   - matterCodePrefix：内部编号前缀（internalCode 的 LL 段，默认 LL）
- *   - firmShortName / caseNoTemplate / categoryWords：所内案号模板与各段映射
+ * Single SystemSetting key `firmProfile`, value là JSON:
+ *   - firmName / firmSubtitle / logoDataUrl: Thương hiệu sidebar (mặc định LawLink / Lawyer Workspace)
+ *   - matterCodePrefix: Tiền tố mã nội bộ (phần LL của internalCode, mặc định LL)
+ *   - firmShortName / caseNoTemplate / categoryWords: Template mã số nội bộ và ánh xạ từng phần
  *
- * 沿用 src/lib/ai/settings.ts 的「单 key + 类型化读写」范式。logo 直接以
- * base64 data URL 内联存储（律所 logo 体积小），避免引入额外存储/服务路由。
+ * Theo dõi mẫu "single key + typed CRUD" từ src/lib/ai/settings.ts. Logo lưu trực tiếp
+ * dưới dạng base64 data URL (logo律所 nhỏ), tránh thêm storage/route phụ thuộc.
  */
 import type { MatterCategory } from "@prisma/client";
 
@@ -34,19 +34,19 @@ import { prisma } from "@/lib/prisma";
 
 const FIRM_PROFILE_KEY = "firmProfile";
 
-/** {类词} 默认映射：可在设置页逐类编辑 */
+/** {Từ loại} ánh xạ mặc định: Có thể chỉnh sửa từng loại trong trang cài đặt */
 export const CATEGORY_WORD_DEFAULTS: Record<MatterCategory, string> = {
-  CIVIL_COMMERCIAL: "民诉",
-  LABOR_ARBITRATION: "劳仲",
-  COMMERCIAL_ARBITRATION: "商仲",
-  CRIMINAL: "刑辩",
-  ADMINISTRATIVE: "行诉",
-  NON_LITIGATION: "非诉",
-  LEGAL_COUNSEL: "顾问",
-  SPECIAL_PROJECT: "专项"
+  CIVIL_COMMERCIAL: "Dân sự",
+  LABOR_ARBITRATION: "Lao động & Trọng tài",
+  COMMERCIAL_ARBITRATION: "Thương mại & Trọng tài",
+  CRIMINAL: "Hình sự",
+  ADMINISTRATIVE: "Hành chính",
+  NON_LITIGATION: "Phi tố tụng",
+  LEGAL_COUNSEL: "Tư vấn",
+  SPECIAL_PROJECT: "Dự án đặc biệt"
 };
 
-/** {类} 单字简称（固定，不可编辑） */
+/** {Loại} từ viết tắt 1 ký tự (cố định, không chỉnh sửa được) */
 export const CATEGORY_ABBR: Record<MatterCategory, string> = {
   CIVIL_COMMERCIAL: "民",
   LABOR_ARBITRATION: "劳",
@@ -70,7 +70,7 @@ export interface FirmProfile {
 
 export const FIRM_PROFILE_DEFAULTS: FirmProfile = {
   firmName: "LawLink",
-  firmSubtitle: "律师工作台",
+  firmSubtitle: "Không gian làm việc luật sư",
   logoDataUrl: null,
   matterCodePrefix: "LL",
   firmShortName: "",
@@ -94,8 +94,8 @@ export async function getFirmProfile(): Promise<FirmProfile> {
 
 export async function saveFirmProfile(patch: Partial<FirmProfile>): Promise<FirmProfile> {
   const current = await getFirmProfile();
-  // 显式逐字段合并：undefined 表示「不改」（对象展开会把 undefined 一并覆盖，故不用 spread）。
-  // logoDataUrl 特殊：undefined=保留，null=清除。
+  // Merge từng field rõ ràng: undefined nghĩa là "không đổi" (spread object sẽ ghi đè undefined, nên dùng ??).
+  // logoDataUrl đặc biệt: undefined = giữ nguyên, null = xóa.
   const next: FirmProfile = {
     firmName: patch.firmName ?? current.firmName,
     firmSubtitle: patch.firmSubtitle ?? current.firmSubtitle,

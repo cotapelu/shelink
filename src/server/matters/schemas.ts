@@ -100,7 +100,7 @@ export const partyRoleSchema = z.enum([
   "OTHER"
 ]);
 
-// v0.27 / v0.30: 当事人主体类型（自然人填身份证号，其余主体填统一社会信用代码）
+// v0.27 / v0.30: Loại chủ thể của party (natural person điền số ID, các thể nhân khác điền unified social credit code)
 export const partyTypeSchema = z.enum([
   "NATURAL_PERSON",
   "ORGANIZATION", // 旧数据兼容
@@ -116,13 +116,13 @@ export const partyTypeSchema = z.enum([
 export const partyInputSchema = z
   .object({
     role: partyRoleSchema,
-    // v0.5: 具体诉讼地位（按首程序联动）
+    // v0.5: Litigation standing cụ thể (theo首 procedure)
     standing: litigationStandingSchema.optional(),
     ordinal: z.number().int().min(1).default(1),
-    // v0.27: 主体类型决定必填字段
+    // v0.27: Loại chủ thể quyết định field bắt buộc
     partyType: partyTypeSchema.default("NATURAL_PERSON"),
-    name: z.string().min(1, "当事人姓名/名称必填").max(120),
-    // 自然人路径必填：身份证号；公司路径必填：enterpriseSocialCode（superRefine 校验）
+    name: z.string().min(1, "Tên/loại party bắt buộc").max(120),
+    // Với NATURAL_PERSON bắt buộc có idNumber; với entity bắt buộc có enterpriseSocialCode (superRefine validate)
     idNumber: z.string().max(50).optional().or(z.literal("")),
     enterpriseSocialCode: z.string().max(50).optional().or(z.literal("")),
     enterpriseName: z.string().max(120).optional().or(z.literal("")),
@@ -138,7 +138,7 @@ export const partyInputSchema = z
         ctx.addIssue({
           path: ["idNumber"],
           code: z.ZodIssueCode.custom,
-          message: "自然人需填写身份证号码（用于利益冲突检索）"
+          message: "Cá nhân phải cung cấp số CMND/CCCD (dùng để kiểm tra xung đột)"
         });
       }
     } else {
@@ -146,7 +146,7 @@ export const partyInputSchema = z
         ctx.addIssue({
           path: ["enterpriseSocialCode"],
           code: z.ZodIssueCode.custom,
-          message: "公司/组织需填写统一社会信用代码"
+          message: "Công ty/tổ chức phải cung cấp unified social credit code"
         });
       }
     }

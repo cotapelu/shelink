@@ -34,14 +34,14 @@ import {
 
 describe("parseCategoryLabel", () => {
   it("maps all category labels to values", () => {
-    expect(parseCategoryLabel("民商诉讼")).toBe("CIVIL_COMMERCIAL");
-    expect(parseCategoryLabel("劳动仲裁")).toBe("LABOR_ARBITRATION");
-    expect(parseCategoryLabel("商事仲裁")).toBe("COMMERCIAL_ARBITRATION");
-    expect(parseCategoryLabel("刑事诉讼")).toBe("CRIMINAL");
-    expect(parseCategoryLabel("行政诉讼")).toBe("ADMINISTRATIVE");
-    expect(parseCategoryLabel("非诉项目")).toBe("NON_LITIGATION");
-    expect(parseCategoryLabel("常年顾问")).toBe("LEGAL_COUNSEL");
-    expect(parseCategoryLabel("法律专项")).toBe("SPECIAL_PROJECT");
+    expect(parseCategoryLabel("Dân sự - Thương mại")).toBe("CIVIL_COMMERCIAL");
+    expect(parseCategoryLabel("Lao động & Trọng tài")).toBe("LABOR_ARBITRATION");
+    expect(parseCategoryLabel("Thương mại & Trọng tài")).toBe("COMMERCIAL_ARBITRATION");
+    expect(parseCategoryLabel("Hình sự")).toBe("CRIMINAL");
+    expect(parseCategoryLabel("Hành chính")).toBe("ADMINISTRATIVE");
+    expect(parseCategoryLabel("Phi tố tụng")).toBe("NON_LITIGATION");
+    expect(parseCategoryLabel("Tư vấn")).toBe("LEGAL_COUNSEL");
+    expect(parseCategoryLabel("Dự án đặc biệt")).toBe("SPECIAL_PROJECT");
   });
 
   it("returns null for unknown text", () => {
@@ -50,19 +50,19 @@ describe("parseCategoryLabel", () => {
   });
 
   it("trims whitespace", () => {
-    expect(parseCategoryLabel(" 民商诉讼 ")).toBe("CIVIL_COMMERCIAL");
+    expect(parseCategoryLabel(" Dân sự - Thương mại ")).toBe("CIVIL_COMMERCIAL");
   });
 });
 
 describe("parseStatusLabel", () => {
   it("maps status labels", () => {
-    expect(parseStatusLabel("办理中")).toBe("IN_PROGRESS");
-    expect(parseStatusLabel("已结案")).toBe("CLOSED");
-    expect(parseStatusLabel("已归档")).toBe("ARCHIVED");
+    expect(parseStatusLabel("Đang xử lý")).toBe("IN_PROGRESS");
+    expect(parseStatusLabel("Đã kết thúc")).toBe("CLOSED");
+    expect(parseStatusLabel("Đã lưu trữ")).toBe("ARCHIVED");
   });
 
-  it("handles special case '结案'", () => {
-    expect(parseStatusLabel("结案")).toBe("CLOSED");
+  it("handles special case '已结案'", () => {
+    expect(parseStatusLabel("已结案")).toBe("CLOSED");
   });
 
   it("returns null for unknown", () => {
@@ -78,6 +78,7 @@ describe("parseClientType", () => {
   });
 
   it("detects COMPANY", () => {
+    expect(parseClientType("Công ty")).toBe("COMPANY");
     expect(parseClientType("企业")).toBe("COMPANY");
     expect(parseClientType("公司")).toBe("COMPANY");
     expect(parseClientType("单位")).toBe("COMPANY");
@@ -95,6 +96,7 @@ describe("parsePartyType", () => {
   });
 
   it("detects COMPANY", () => {
+    expect(parsePartyType("Công ty")).toBe("COMPANY");
     expect(parsePartyType("企业")).toBe("COMPANY");
     expect(parsePartyType("公司")).toBe("COMPANY");
     expect(parsePartyType("单位")).toBe("COMPANY");
@@ -198,8 +200,8 @@ describe("validateRow", () => {
     clientIdNumber: "1234567890",
     opposingName: "Opponent Inc",
     opposingIdNumber: "0987654321",
-    category: "民商诉讼",
-    status: "办理中"
+    category: "Dân sự - Thương mại",
+    status: "Đang xử lý"
   };
 
   it("accepts minimal valid row", () => {
@@ -217,50 +219,50 @@ describe("validateRow", () => {
   it("requires clientName", () => {
     const row = { ...minimalValidRow, clientName: "" };
     const result = validateRow(row);
-    expect(result.errors).toContain("缺少客户名称");
+    expect(result.errors).toContain("Thiếu tên khách hàng");
     expect(result.normalized).toBeNull();
   });
 
   it("requires clientIdNumber", () => {
     const row = { ...minimalValidRow, clientIdNumber: "" };
     const result = validateRow(row);
-    expect(result.errors).toContain("缺少客户证件号");
+    expect(result.errors).toContain("Thiếu số căn cước khách hàng");
   });
 
   it("requires opposingName", () => {
     const row = { ...minimalValidRow, opposingName: "" };
     const result = validateRow(row);
-    expect(result.errors).toContain("缺少相对方名称");
+    expect(result.errors).toContain("Thiếu tên đối phương");
   });
 
   it("requires opposingIdNumber", () => {
     const row = { ...minimalValidRow, opposingIdNumber: "" };
     const result = validateRow(row);
-    expect(result.errors).toContain("缺少相对方证件号");
+    expect(result.errors).toContain("Thiếu số căn cước đối phương");
   });
 
   it("validates category label", () => {
     const row = { ...minimalValidRow, category: "Invalid Category" };
     const result = validateRow(row);
-    expect(result.errors).toContain("案件类型「Invalid Category」无法识别");
+    expect(result.errors).toContain(`Loại vụ án「Invalid Category」không nhận diện được`);
   });
 
   it("validates status label", () => {
     const row = { ...minimalValidRow, status: "Pending" };
     const result = validateRow(row);
-    expect(result.errors).toContain("案件状态「Pending」无法识别（办理中/已结案/已归档）");
+    expect(result.errors).toContain(`Trạng thái vụ án「Pending」không nhận diện được (Đang xử lý/Đã kết thúc/Đã lưu trữ)`);
   });
 
   it("validates intake date format", () => {
     const row = { ...minimalValidRow, intakeDate: "invalid-date" };
     const result = validateRow(row);
-    expect(result.errors.some(e => e.includes("收案日期"))).toBe(true);
+    expect(result.errors.some(e => e.includes("Ngày nhận vụ án"))).toBe(true);
   });
 
   it("validates amount", () => {
     const row = { ...minimalValidRow, claimAmount: "not-a-number" };
     const result = validateRow(row);
-    expect(result.errors.some(e => e.includes("标的额"))).toBe(true);
+    expect(result.errors.some(e => e.includes("Giá trị yêu cầu"))).toBe(true);
   });
 
   it("parses clientType correctly", () => {
@@ -281,8 +283,8 @@ describe("validateRow", () => {
       clientIdNumber: "  123  ",
       opposingName: "  Opp  ",
       opposingIdNumber: "  456  ",
-      category: " 民商诉讼 ",
-      status: "办理中"
+      category: " Dân sự - Thương mại ",
+      status: "Đang xử lý"
     };
     const result = validateRow(row);
     expect(result.normalized?.clientName).toBe("Client");
@@ -297,8 +299,8 @@ describe("validateRow", () => {
       clientIdNumber: "123",
       opposingName: "Opp",
       opposingIdNumber: "456",
-      category: "民商诉讼",
-      status: "办理中",
+      category: "Dân sự - Thương mại",
+      status: "Đang xử lý",
       ownerEmail: "",
       cause: "",
       claimAmount: "",

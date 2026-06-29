@@ -18,7 +18,7 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * 枚举展示中文映射。前端用这里的 label，DB/API 用枚举值。
+ * Enum display Vietnamese mappings. Frontend uses these labels, DB/API uses enum values.
  */
 import type {
   ClientType,
@@ -37,17 +37,17 @@ import type {
 } from "@prisma/client";
 
 export const clientTypeLabel: Record<ClientType, string> = {
-  INDIVIDUAL: "自然人",
-  COMPANY: "公司",
-  ORGANIZATION: "其他组织"
+  INDIVIDUAL: "Cá nhân",
+  COMPANY: "Công ty",
+  ORGANIZATION: "Tổ chức khác"
 };
 
 // v0.39: 客户合作状态
 export const cooperationStatusLabel: Record<ClientCooperationStatus, string> = {
-  POTENTIAL: "潜在",
-  NEGOTIATING: "洽谈中",
-  SIGNED: "已签约",
-  TERMINATED: "已终止"
+  POTENTIAL: "Tiềm năng",
+  NEGOTIATING: "Đang đàm phán",
+  SIGNED: "Đã ký hợp đồng",
+  TERMINATED: "Đã chấm dứt"
 };
 
 export const COOPERATION_STATUS_OPTIONS: ClientCooperationStatus[] = [
@@ -59,23 +59,23 @@ export const COOPERATION_STATUS_OPTIONS: ClientCooperationStatus[] = [
 
 // v0.39: 客户性别（个人客户）
 export const genderLabel: Record<ClientGender, string> = {
-  MALE: "男",
-  FEMALE: "女"
+  MALE: "Nam",
+  FEMALE: "Nữ"
 };
 
 export const GENDER_OPTIONS: ClientGender[] = ["MALE", "FEMALE"];
 
 // v0.30: 当事人主体类型。自然人填身份证号，其余主体填统一社会信用代码。
 export const partyTypeLabel: Record<PartyType, string> = {
-  NATURAL_PERSON: "自然人",
-  COMPANY: "公司",
-  PARTNERSHIP: "合伙企业",
-  INDIVIDUAL_BUSINESS: "个体工商户",
-  INSTITUTION: "事业单位",
-  SOCIAL_ORG: "社会组织",
-  GOVERNMENT: "政府机关",
-  OTHER_ORG: "其他组织",
-  ORGANIZATION: "其他组织" // 旧数据兼容
+  NATURAL_PERSON: "Cá nhân",
+  COMPANY: "Công ty",
+  PARTNERSHIP: "Hợp danh",
+  INDIVIDUAL_BUSINESS: "Hộ kinh doanh cá thể",
+  INSTITUTION: "Đơn vị sự nghiệp",
+  SOCIAL_ORG: "Tổ chức xã hội",
+  GOVERNMENT: "Cơ quan nhà nước",
+  OTHER_ORG: "Tổ chức khác",
+  ORGANIZATION: "Tổ chức khác" // Compatible với dữ liệu cũ
 };
 
 // 录入下拉的主体类型顺序（不含旧的 ORGANIZATION）
@@ -92,11 +92,11 @@ export const PARTY_TYPE_OPTIONS: PartyType[] = [
 
 // v0.30: 需向律协备案与否
 export const barFilingLabel: Record<BarFilingType, string> = {
-  NONE: "否",
-  COLLECTIVE: "需要，涉集体案件",
-  SENSITIVE: "需要，涉敏感案件",
-  MAJOR: "需要，涉重大案件",
-  OTHER: "需要，其他特殊案件"
+  NONE: "Không",
+  COLLECTIVE: "Cần, liên quan tập thể",
+  SENSITIVE: "Cần, liên quan nhạy cảm",
+  MAJOR: "Cần, liên quan lớn",
+  OTHER: "Cần, trường hợp khác"
 };
 
 export const BAR_FILING_OPTIONS: BarFilingType[] = [
@@ -118,33 +118,36 @@ export function matterCategoryKind(c: MatterCategory): CategoryKind {
   return "litigation";
 }
 
-// 非诉 / 专项 业务类型（可微调）
+// Dịch vụ nghiệp vụ cho dự án (có thể điều chỉnh)
 export const PROJECT_BUSINESS_TYPES: string[] = [
-  "尽职调查",
-  "合同审查 / 起草",
-  "投融资",
-  "并购重组",
-  "改制上市",
-  "破产清算",
-  "知识产权",
-  "合规体系",
-  "招投标",
-  "行政许可 / 审批",
-  "其他"
+  "Due diligence - Tư vấn pháp lý",
+  "Hợp đồng - Soạn thảo/Review",
+  "Đầu tư - Tài chính",
+  "M&A - Sáp nhập mua bán",
+  "IPO - Niêm yết/đấu giá",
+  "Phá sản - Tái cấu trúc",
+  "Sở hữu trí tuệ",
+  "Tuân thủ - Compliance",
+  "Đấu thầu",
+  "Giấy phép - Phê duyệt hành chính",
+  "Khác"
 ];
 
-// 顾问类型
-export const COUNSEL_TYPES: string[] = ["常年法律顾问", "专项法律顾问"];
+// Loại tư vấn
+export const COUNSEL_TYPES: string[] = [
+  "Luật sư tư vấn thường xuyên",
+  "Luật sư tư vấn dự án đặc biệt"
+];
 
 export const matterCategoryLabel: Record<MatterCategory, string> = {
-  CIVIL_COMMERCIAL: "民商诉讼",
-  LABOR_ARBITRATION: "劳动仲裁",
-  COMMERCIAL_ARBITRATION: "商事仲裁",
-  CRIMINAL: "刑事诉讼",
-  ADMINISTRATIVE: "行政诉讼",
-  NON_LITIGATION: "非诉项目",
-  LEGAL_COUNSEL: "常年顾问",
-  SPECIAL_PROJECT: "法律专项"
+  CIVIL_COMMERCIAL: "Dân sự - Thương mại",
+  LABOR_ARBITRATION: "Lao động & Trọng tài",
+  COMMERCIAL_ARBITRATION: "Thương mại & Trọng tài",
+  CRIMINAL: "Hình sự",
+  ADMINISTRATIVE: "Hành chính",
+  NON_LITIGATION: "Phi tố tụng",
+  LEGAL_COUNSEL: "Tư vấn",
+  SPECIAL_PROJECT: "Dự án đặc biệt"
 };
 
 export const matterCategoryColor: Record<MatterCategory, string> = {
@@ -160,103 +163,103 @@ export const matterCategoryColor: Record<MatterCategory, string> = {
 
 // v0.17: 案件类别单字图标（用于列表卡片标题前）
 export const matterCategoryShort: Record<MatterCategory, string> = {
-  CIVIL_COMMERCIAL: "民",
-  LABOR_ARBITRATION: "劳",
-  COMMERCIAL_ARBITRATION: "商",
-  CRIMINAL: "刑",
-  ADMINISTRATIVE: "行",
-  NON_LITIGATION: "非",
-  LEGAL_COUNSEL: "顾",
-  SPECIAL_PROJECT: "专"
+  CIVIL_COMMERCIAL: "D",
+  LABOR_ARBITRATION: "L",
+  COMMERCIAL_ARBITRATION: "A",
+  CRIMINAL: "H",
+  ADMINISTRATIVE: "H",
+  NON_LITIGATION: "P",
+  LEGAL_COUNSEL: "V",
+  SPECIAL_PROJECT: "Đ"
 };
 
 export const matterStatusLabel: Record<MatterStatus, string> = {
-  PENDING_ACCEPTANCE: "待启动",
-  IN_PROGRESS: "办理中",
-  ON_HOLD: "暂停",
-  CLOSED: "已结案",
-  ARCHIVED: "已归档"
+  PENDING_ACCEPTANCE: "Chờ khởi động",
+  IN_PROGRESS: "Đang xử lý",
+  ON_HOLD: "Tạm dừng",
+  CLOSED: "Đã kết thúc",
+  ARCHIVED: "Đã lưu trữ"
 };
 
 export const intakeStatusLabel: Record<IntakeStatus, string> = {
-  INTAKE: "已咨询",
-  PENDING_CONFIRMATION: "待确认",
-  CONVERTED: "已转化",
-  DECLINED: "不接案",
-  NEEDS_REVISION: "待补正"
+  INTAKE: "Đã tư vấn",
+  PENDING_CONFIRMATION: "Chờ xác nhận",
+  CONVERTED: "Đã chuyển đổi",
+  DECLINED: "Từ chối",
+  NEEDS_REVISION: "Chờ bổ sung"
 };
 
 export const userRoleLabel: Record<UserRole, string> = {
-  ADMIN: "系统管理员",
-  PRINCIPAL_LAWYER: "主办律师",
-  LAWYER: "经办律师",
-  ASSISTANT: "助理",
-  FINANCE: "财务"
+  ADMIN: "Quản trị viên",
+  PRINCIPAL_LAWYER: "Luật sư chính",
+  LAWYER: "Luật sư",
+  ASSISTANT: "Trợ lý",
+  FINANCE: "Tài chính"
 };
 
 export const litigationStandingLabel: Record<LitigationStanding, string> = {
-  PLAINTIFF: "原告",
-  JOINT_PLAINTIFF: "共同原告",
-  DEFENDANT: "被告",
-  JOINT_DEFENDANT: "共同被告",
-  THIRD_PARTY: "第三人",
-  COUNTERCLAIM_PLAINTIFF: "反诉原告",
-  COUNTERCLAIM_DEFENDANT: "反诉被告",
-  APPELLANT: "上诉人",
-  APPELLEE: "被上诉人",
-  RETRIAL_APPLICANT: "再审申请人",
-  RETRIAL_RESPONDENT: "再审被申请人",
-  ENFORCEMENT_APPLICANT: "申请执行人",
-  EXECUTED_PERSON: "被执行人",
-  CRIMINAL_DEFENDANT: "刑事被告人",
-  CRIMINAL_VICTIM: "被害人",
-  PRIVATE_PROSECUTOR: "自诉人",
-  CRIMINAL_INCIDENTAL_PLAINTIFF: "刑事附带民事原告",
-  ARBITRATION_CLAIMANT: "仲裁申请人",
-  ARBITRATION_RESPONDENT: "仲裁被申请人",
-  ADMIN_PLAINTIFF: "行政原告",
-  ADMIN_DEFENDANT: "行政被告",
-  ADMIN_RECONSIDERATION_APPLICANT: "复议申请人",
-  ADMIN_RECONSIDERATION_RESPONDENT: "复议被申请人",
-  NON_LITIGATION_PARTY: "项目当事人"
+  PLAINTIFF: "Nguyên đơn",
+  JOINT_PLAINTIFF: "Cùng nguyên đơn",
+  DEFENDANT: "Bị đơn",
+  JOINT_DEFENDANT: "Cùng bị đơn",
+  THIRD_PARTY: "Người thứ ba",
+  COUNTERCLAIM_PLAINTIFF: "Nguyên đơn phản tố",
+  COUNTERCLAIM_DEFENDANT: "Bị đơn phản tố",
+  APPELLANT: "Người kháng cáo",
+  APPELLEE: "Bị kháng cáo",
+  RETRIAL_APPLICANT: "Người xin xét xử lại",
+  RETRIAL_RESPONDENT: "Bị xin xét xử lại",
+  ENFORCEMENT_APPLICANT: "Người yêu cầu thi hành",
+  EXECUTED_PERSON: "Bị thi hành",
+  CRIMINAL_DEFENDANT: "Bị cáo",
+  CRIMINAL_VICTIM: "Người bị hại",
+  PRIVATE_PROSECUTOR: "Người tự prosecution",
+  CRIMINAL_INCIDENTAL_PLAINTIFF: "Nguyên đơn dân sự kèm hình sự",
+  ARBITRATION_CLAIMANT: "Người khởi kiện trọng tài",
+  ARBITRATION_RESPONDENT: "Bị khởi kiện trọng tài",
+  ADMIN_PLAINTIFF: "Nguyên đơn hành chính",
+  ADMIN_DEFENDANT: "Bị đơn hành chính",
+  ADMIN_RECONSIDERATION_APPLICANT: "Người xin tái xem xét hành chính",
+  ADMIN_RECONSIDERATION_RESPONDENT: "Bị xin tái xem xét hành chính",
+  NON_LITIGATION_PARTY: "Bên liên quan dự án"
 };
 
 export const procedureTypeLabel: Record<ProcedureType, string> = {
-  FIRST_INSTANCE: "一审",
-  SECOND_INSTANCE: "二审",
-  RETRIAL_REVIEW: "再审审查",
-  RETRIAL: "再审",
-  REMAND_FIRST: "重审一审",
-  REMAND_SECOND: "重审二审",
-  PROSECUTORIAL_SUPERVISION: "检察监督",
-  COMMERCIAL_ARBITRATION: "商事仲裁",
-  LABOR_ARBITRATION: "劳动仲裁",
-  ARBITRATION_SET_ASIDE: "撤销仲裁裁决",
-  ARBITRATION_ENFORCEMENT_REVIEW: "不予执行仲裁审查",
-  ENFORCEMENT: "强制执行",
-  ENFORCEMENT_OBJECTION: "执行异议",
-  INVESTIGATION: "侦查",
-  PROSECUTION_REVIEW: "审查起诉",
-  DEATH_PENALTY_REVIEW: "死刑复核",
-  CRIMINAL_ENFORCEMENT: "刑罚执行",
-  COMMUTATION_PAROLE_REVIEW: "减刑假释审查",
-  ADMIN_RECONSIDERATION: "行政复议",
-  ADMIN_NON_LITIGATION_ENFORCEMENT: "非诉行政执行",
-  NON_LITIGATION_PHASE: "非诉阶段",
-  CUSTOM: "自定义"
+  FIRST_INSTANCE: "Tòa sơ thẩm",
+  SECOND_INSTANCE: "Tòa phúc thẩm",
+  RETRIAL_REVIEW: "Xét xử phúc thẩm",
+  RETRIAL: "Xét xử giám đốc thẩm",
+  REMAND_FIRST: "Trả về xét xử lần 1",
+  REMAND_SECOND: "Trả về xét xử lần 2",
+  PROSECUTORIAL_SUPERVISION: "Giám sát tố tụng",
+  COMMERCIAL_ARBITRATION: "Trọng tài thương mại",
+  LABOR_ARBITRATION: "Trọng tài lao động",
+  ARBITRATION_SET_ASIDE: "Hủy phán quyết trọng tài",
+  ARBITRATION_ENFORCEMENT_REVIEW: "Xem xét thi hành trọng tài",
+  ENFORCEMENT: "Thi hành án",
+  ENFORCEMENT_OBJECTION: "Phản đối thi hành",
+  INVESTIGATION: "Điều tra",
+  PROSECUTION_REVIEW: "Xét xử phúc thẩm",
+  DEATH_PENALTY_REVIEW: "Xét xử án tử hình",
+  CRIMINAL_ENFORCEMENT: "Thi hành hình sự",
+  COMMUTATION_PAROLE_REVIEW: "Xét xét giảm án/tha tù",
+  ADMIN_RECONSIDERATION: "Tái xem xét hành chính",
+  ADMIN_NON_LITIGATION_ENFORCEMENT: "Thi hành hành chính phi tố tụng",
+  NON_LITIGATION_PHASE: "Giai đoạn phi tố tụng",
+  CUSTOM: "Tùy chỉnh"
 };
 
 export const feeTypeLabel: Record<FeeType, string> = {
-  FIXED: "固定收费",
-  CONTINGENCY: "风险代理",
-  TIMED: "计时收费"
+  FIXED: "Cố định",
+  CONTINGENCY: "Phụ thuộc kết quả",
+  TIMED: "Theo thời gian"
 };
 
 export const invoiceRequestStatusLabel: Record<InvoiceRequestStatus, string> = {
-  PENDING: "待财务处理",
-  APPROVED: "已批准",
-  ISSUED: "已开具",
-  REJECTED: "已驳回"
+  PENDING: "Chờ tài chính xử lý",
+  APPROVED: "Đã duyệt",
+  ISSUED: "Đã xuất hóa đơn",
+  REJECTED: "Đã từ chối"
 };
 
 export const invoiceRequestStatusColor: Record<InvoiceRequestStatus, string> = {

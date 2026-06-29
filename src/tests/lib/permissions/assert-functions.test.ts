@@ -68,7 +68,7 @@ describe('assertCanAccessMatter', () => {
   it('throws if matter does not exist for manager', async () => {
     (prisma.matter.findFirst as any).mockResolvedValue(null);
 
-    await expect(assertCanAccessMatter('u1', 'ADMIN', 'm1')).rejects.toThrow('案件不存在');
+    await expect(assertCanAccessMatter('u1', 'ADMIN', 'm1')).rejects.toThrow('Vụ án không tồn tại');
   });
 
   it('allows non-manager if matches visibility filter', async () => {
@@ -92,7 +92,7 @@ describe('assertCanAccessMatter', () => {
   it('throws if non-manager fails visibility filter', async () => {
     (prisma.matter.findFirst as any).mockResolvedValue(null);
 
-    await expect(assertCanAccessMatter('u1', 'LAWYER', 'm1')).rejects.toThrow('案件不存在');
+    await expect(assertCanAccessMatter('u1', 'LAWYER', 'm1')).rejects.toThrow('Vụ án không tồn tại');
   });
 });
 
@@ -122,7 +122,7 @@ describe('assertCanAssociateMatter', () => {
   it('throws if not owner or member', async () => {
     (prisma.matter.findFirst as any).mockResolvedValue(null);
 
-    await expect(assertCanAssociateMatter('u1', 'm1')).rejects.toThrow('案件不存在或无权关联');
+    await expect(assertCanAssociateMatter('u1', 'm1')).rejects.toThrow('Vụ án không tồn tại hoặc không có quyền liên kết');
   });
 });
 
@@ -152,7 +152,7 @@ describe('assertCanHandleMatter', () => {
   it('throws if not owner or member', async () => {
     (prisma.matter.findFirst as any).mockResolvedValue(null);
 
-    await expect(assertCanHandleMatter('u1', 'm1')).rejects.toThrow('案件不存在或无权处理');
+    await expect(assertCanHandleMatter('u1', 'm1')).rejects.toThrow('Vụ án không tồn tại hoặc không có quyền xử lý');
   });
 });
 
@@ -182,7 +182,7 @@ describe('assertCanLeadMatter', () => {
   it('throws if not lead/co-lead/owner', async () => {
     (prisma.matter.findFirst as any).mockResolvedValue(null);
 
-    await expect(assertCanLeadMatter('u1', 'm1')).rejects.toThrow('仅案件主办/协办可操作');
+    await expect(assertCanLeadMatter('u1', 'm1')).rejects.toThrow('Chỉ host/assistant của vụ án có thể thao tác');
   });
 
   it('uses custom message when provided', async () => {
@@ -215,7 +215,7 @@ describe('assertCanOwnMatter', () => {
   it('throws if not owner', async () => {
     (prisma.matter.findFirst as any).mockResolvedValue(null);
 
-    await expect(assertCanOwnMatter('u1', 'm1')).rejects.toThrow('仅案件主办律师可操作');
+    await expect(assertCanOwnMatter('u1', 'm1')).rejects.toThrow('Chỉ host lawyer của vụ án có thể thao tác');
   });
 
   it('uses custom message when provided', async () => {
@@ -251,6 +251,6 @@ describe('assertCanModifyMatter', () => {
   it('throws if matter not found or no permission', async () => {
     (prisma.matter.findFirst as any).mockResolvedValue(null);
 
-    await expect(assertCanModifyMatter('u1', 'LAWYER', 'm1')).rejects.toThrow('案件不存在');
+    await expect(assertCanModifyMatter('u1', 'LAWYER', 'm1')).rejects.toThrow('Vụ án không tồn tại');
   });
 });

@@ -73,11 +73,11 @@ const EXPORT_TABS: MattersExportTab[] = [
 ];
 
 const TAB_LABEL: Record<MattersExportTab, string> = {
-  all: "全部案件",
-  intake: "待审批",
-  active: "进行中",
-  revision: "待补正",
-  archived: "已归档"
+  all: "Tất cả vụ án",
+  intake: "Chờ duyệt",
+  active: "Đang xử lý",
+  revision: "Chờ bổ sung",
+  archived: "Đã lưu trữ"
 };
 
 const TAB_FILE_KEY: Record<MattersExportTab, string> = {
@@ -196,42 +196,42 @@ type IntakeExportRow = Prisma.IntakeGetPayload<{ include: typeof intakeInclude }
 type MatterExportRow = Prisma.MatterGetPayload<{ include: typeof matterInclude }>;
 
 const partyRoleLabel: Record<PartyRole, string> = {
-  CLIENT_PARTY: "委托方",
-  OPPOSING_PARTY: "对方",
-  THIRD_PARTY: "第三人",
-  CO_LITIGANT: "共同当事人",
-  AGENT: "代理人",
-  WITNESS: "证人",
-  OTHER: "其他"
+  CLIENT_PARTY: "Khách hàng",
+  OPPOSING_PARTY: "Đối phương",
+  THIRD_PARTY: "Người thứ ba",
+  CO_LITIGANT: "Cùng bên kiện",
+  AGENT: "Đại diện",
+  WITNESS: "Nhân chứng",
+  OTHER: "Khác"
 };
 
 const memberRoleLabel: Record<MatterMemberRole, string> = {
-  LEAD: "主办",
-  CO_LEAD: "协办",
-  ASSISTANT: "助理"
+  LEAD: "Chủ vụ",
+  CO_LEAD: "Hỗ trợ",
+  ASSISTANT: "Trợ lý"
 };
 
 const procedureStatusLabel: Record<ProcedureStatus, string> = {
-  PENDING: "未开始",
-  IN_PROGRESS: "进行中",
-  CONCLUDED: "已结束"
+  PENDING: "Chưa bắt đầu",
+  IN_PROGRESS: "Đang xử lý",
+  CONCLUDED: "Đã kết thúc"
 };
 
 const procedureEngagementLabel: Record<ProcedureEngagement, string> = {
-  ENGAGED: "承办",
-  INFORMATIONAL: "仅登记"
+  ENGAGED: "Tham gia",
+  INFORMATIONAL: "Chỉ đăng ký"
 };
 
 const procedureOutcomeLabel: Record<ProcedureOutcome, string> = {
-  WON: "胜诉",
-  PARTIAL_WON: "部分胜诉",
-  LOST: "败诉",
-  MEDIATED: "调解",
-  WITHDRAWN: "撤诉",
-  DISMISSED: "驳回",
-  COMPLETED: "完成",
-  TRANSFERRED: "移送",
-  OTHER: "其他"
+  WON: "Thắng kiện",
+  PARTIAL_WON: "Thắng một phần",
+  LOST: "Thua kiện",
+  MEDIATED: "Hòa giải",
+  WITHDRAWN: "Rút đơn",
+  DISMISSED: "Bị bác",
+  COMPLETED: "Hoàn thành",
+  TRANSFERRED: "Chuyển tới",
+  OTHER: "Khác"
 };
 
 export function resolveMattersExportParams(searchParams: URLSearchParams): MattersExportParams {
@@ -309,7 +309,7 @@ async function addIntakesSheet(
   const coUserNames = await loadUserNameMap(rows.flatMap((row) => row.coUserIds));
   const groups = groupRowsByCategory(rows, params.category);
   if (groups.length === 0) {
-    const sheet = wb.addWorksheet("无数据");
+    const sheet = wb.addWorksheet("Không có dữ liệu");
     sheet.columns = intakeColumnsForKind("litigation");
     polishSheet(sheet, ["money", "feeAmount"]);
     return 0;
@@ -344,7 +344,7 @@ async function addMattersSheet(
   );
   const groups = groupRowsByCategory(rows, params.category);
   if (groups.length === 0) {
-    const sheet = wb.addWorksheet("无数据");
+    const sheet = wb.addWorksheet("Không có dữ liệu");
     sheet.columns = matterColumnsForKind("litigation", 1);
     polishSheet(sheet, ["claimAmount", "sourceClaimAmount", "sourceFeeAmount"]);
     return 0;
@@ -510,62 +510,62 @@ async function loadUserNameMap(ids: string[]) {
 
 function intakeColumnsForKind(kind: MatterCategoryKind): Partial<ExcelJS.Column>[] {
   const commonStart: Partial<ExcelJS.Column>[] = [
-    { header: "收案ID", key: "id", width: 24 },
-    { header: "标题", key: "title", width: 36 },
-    { header: "收案分类", key: "category", width: 12 },
-    { header: "收案状态", key: "status", width: 12 },
-    { header: "收案时间", key: "receivedAt", width: 12 },
-    { header: "案由", key: "cause", width: 18 },
-    { header: "自由案由", key: "causeFreeText", width: 18 },
-    { header: "案情描述", key: "description", width: 36 },
-    { header: "委托方", key: "client", width: 20 },
-    { header: "委托方类型", key: "clientType", width: 12 },
-    { header: "委托方证件/代码", key: "clientIdNumber", width: 22 },
-    { header: "委托方地址", key: "clientAddress", width: 28 },
-    { header: "法定代表人", key: "clientLegalRep", width: 14 },
-    { header: "联系人", key: "contactName", width: 14 },
-    { header: "联系电话", key: "contactPhone", width: 16 },
-    { header: "客户档案联系人", key: "clientContacts", width: 28 },
-    { header: "主办律师", key: "owner", width: 12 },
-    { header: "共同律师", key: "coUsers", width: 24 }
+    { header: "Intake ID", key: "id", width: 24 },
+    { header: "Tiêu đề", key: "title", width: 36 },
+    { header: "Phân loại", key: "category", width: 12 },
+    { header: "Trạng thái", key: "status", width: 12 },
+    { header: "Ngày nhận", key: "receivedAt", width: 12 },
+    { header: "Nguyên cáo", key: "cause", width: 18 },
+    { header: "Nguyên cáo tự do", key: "causeFreeText", width: 18 },
+    { header: "Mô tả vụ án", key: "description", width: 36 },
+    { header: "Khách hàng", key: "client", width: 20 },
+    { header: "Loại khách hàng", key: "clientType", width: 12 },
+    { header: "Số ID khách hàng", key: "clientIdNumber", width: 22 },
+    { header: "Địa chỉ khách hàng", key: "clientAddress", width: 28 },
+    { header: "Đại diện pháp lý", key: "clientLegalRep", width: 14 },
+    { header: "Người liên hệ", key: "contactName", width: 14 },
+    { header: "Điện thoại", key: "contactPhone", width: 16 },
+    { header: "Liên hệ trong hồ sơ", key: "clientContacts", width: 28 },
+    { header: "Luật sư phụ trách", key: "owner", width: 12 },
+    { header: "Luật sư cùng tham gia", key: "coUsers", width: 24 }
   ];
   const litigationColumns: Partial<ExcelJS.Column>[] = [
-    { header: "首次程序", key: "firstProcedureType", width: 14 },
-    { header: "争议解决机构", key: "firstAgency", width: 24 },
-    { header: "管辖地", key: "jurisdiction", width: 18 },
-    { header: "我方地位", key: "ourStanding", width: 14 },
-    { header: "标的金额", key: "money", width: 14 },
-    { header: "标的描述", key: "claimDescription", width: 24 },
-    { header: "律协备案", key: "barFiling", width: 18 },
-    { header: "是否反诉", key: "counterclaim", width: 10 },
-    { header: "当事人", key: "parties", width: 44 }
+    { header: "Thủ tục đầu tiên", key: "firstProcedureType", width: 14 },
+    { header: "Cơ quan giải quyết", key: "firstAgency", width: 24 },
+    { header: "Có thẩm quyền", key: "jurisdiction", width: 18 },
+    { header: "Vị trí của tôi", key: "ourStanding", width: 14 },
+    { header: "Giá trị yêu cầu", key: "money", width: 14 },
+    { header: "Mô tả yêu cầu", key: "claimDescription", width: 24 },
+    { header: "Lưu trữ hội luật sư", key: "barFiling", width: 18 },
+    { header: "Có khiếu nại ngược", key: "counterclaim", width: 10 },
+    { header: "Các bên liên quan", key: "parties", width: 44 }
   ];
   const projectColumns: Partial<ExcelJS.Column>[] = [
-    { header: "业务类型", key: "businessType", width: 16 },
-    { header: "服务范围", key: "serviceScope", width: 28 },
-    { header: "交付成果", key: "deliverables", width: 24 },
-    { header: "服务起", key: "serviceStart", width: 12 },
-    { header: "服务止", key: "serviceEnd", width: 12 },
-    { header: "相关方", key: "parties", width: 44 }
+    { header: "Loại dịch vụ", key: "businessType", width: 16 },
+    { header: "Phạm vi dịch vụ", key: "serviceScope", width: 28 },
+    { header: "Kết quả bàn giao", key: "deliverables", width: 24 },
+    { header: "Dịch vụ bắt đầu", key: "serviceStart", width: 12 },
+    { header: "Dịch vụ kết thúc", key: "serviceEnd", width: 12 },
+    { header: "Các bên liên quan", key: "parties", width: 44 }
   ];
   const counselColumns: Partial<ExcelJS.Column>[] = [
-    { header: "顾问类型", key: "counselType", width: 16 },
-    { header: "服务范围", key: "serviceScope", width: 28 },
-    { header: "服务起", key: "serviceStart", width: 12 },
-    { header: "服务止", key: "serviceEnd", width: 12 },
-    { header: "相关方", key: "parties", width: 44 }
+    { header: "Loại tư vấn", key: "counselType", width: 16 },
+    { header: "Phạm vi dịch vụ", key: "serviceScope", width: 28 },
+    { header: "Dịch vụ bắt đầu", key: "serviceStart", width: 12 },
+    { header: "Dịch vụ kết thúc", key: "serviceEnd", width: 12 },
+    { header: "Các bên liên quan", key: "parties", width: 44 }
   ];
   const commonEnd: Partial<ExcelJS.Column>[] = [
-    { header: "收费方式", key: "feeType", width: 14 },
-    { header: "律师费金额", key: "feeAmount", width: 14 },
-    { header: "风险代理条款", key: "contingencyTerms", width: 26 },
-    { header: "付款节点", key: "feeSchedule", width: 26 },
-    { header: "费用备注", key: "feeNote", width: 24 },
-    { header: "附件", key: "documents", width: 36 },
-    { header: "转化案件", key: "matter", width: 28 },
-    { header: "不接案/补正原因", key: "declinedReason", width: 30 },
-    { header: "创建时间", key: "createdAt", width: 18 },
-    { header: "更新时间", key: "updatedAt", width: 18 }
+    { header: "Hình thức thu phí", key: "feeType", width: 14 },
+    { header: "Số tiền luật sư", key: "feeAmount", width: 14 },
+    { header: "Điều khoản phụ thuộc", key: "contingencyTerms", width: 26 },
+    { header: "Các mốc thanh toán", key: "feeSchedule", width: 26 },
+    { header: "Ghi chú phí", key: "feeNote", width: 24 },
+    { header: "Tài liệu đính kèm", key: "documents", width: 36 },
+    { header: "Vụ án chuyển đổi", key: "matter", width: 28 },
+    { header: "Lý do từ chối/bổ sung", key: "declinedReason", width: 30 },
+    { header: "Ngày tạo", key: "createdAt", width: 18 },
+    { header: "Ngày cập nhật", key: "updatedAt", width: 18 }
   ];
   const typedColumns =
     kind === "litigation"
@@ -581,92 +581,92 @@ function matterColumnsForKind(
   maxProcedures: number
 ): Partial<ExcelJS.Column>[] {
   const commonStart: Partial<ExcelJS.Column>[] = [
-    { header: "系统编号", key: "internalCode", width: 16 },
-    { header: "所内案号", key: "firmCaseNo", width: 18 },
-    { header: "案件名称", key: "title", width: 38 },
-    { header: "案件分类", key: "category", width: 12 },
-    { header: "案件状态", key: "status", width: 12 },
-    { header: "收案时间", key: "intakeDate", width: 12 },
-    { header: "首次立案/受理", key: "firstAcceptedAt", width: 12 },
-    { header: "结案时间", key: "closedAt", width: 12 },
-    { header: "归档时间", key: "archivedAt", width: 12 },
-    { header: "主客户", key: "primaryClient", width: 20 },
-    { header: "主客户类型", key: "primaryClientType", width: 12 },
-    { header: "主客户证件/代码", key: "primaryClientIdNumber", width: 22 },
-    { header: "主客户地址", key: "primaryClientAddress", width: 28 },
-    { header: "主客户法定代表人", key: "primaryClientLegalRep", width: 16 },
-    { header: "主客户联系人", key: "primaryClientContacts", width: 28 },
-    { header: "其他客户", key: "otherClients", width: 30 },
-    { header: "主办律师", key: "owner", width: 12 },
-    { header: "团队成员", key: "members", width: 30 }
+    { header: "Mã hệ thống", key: "internalCode", width: 16 },
+    { header: "Mã nội bộ", key: "firmCaseNo", width: 18 },
+    { header: "Tên vụ án", key: "title", width: 38 },
+    { header: "Phân loại", key: "category", width: 12 },
+    { header: "Trạng thái", key: "status", width: 12 },
+    { header: "Ngày nhận", key: "intakeDate", width: 12 },
+    { header: "Lần đầu nộp đơn/bắt đầu", key: "firstAcceptedAt", width: 12 },
+    { header: "Ngày kết thúc", key: "closedAt", width: 12 },
+    { header: "Ngày lưu trữ", key: "archivedAt", width: 12 },
+    { header: "Khách hàng chính", key: "primaryClient", width: 20 },
+    { header: "Loại khách hàng chính", key: "primaryClientType", width: 12 },
+    { header: "Số ID khách hàng chính", key: "primaryClientIdNumber", width: 22 },
+    { header: "Địa chỉ khách hàng chính", key: "primaryClientAddress", width: 28 },
+    { header: "Đại diện pháp lý", key: "primaryClientLegalRep", width: 16 },
+    { header: "Liên hệ khách hàng chính", key: "primaryClientContacts", width: 28 },
+    { header: "Khách hàng khác", key: "otherClients", width: 30 },
+    { header: "Luật sư phụ trách", key: "owner", width: 12 },
+    { header: "Thành viên team", key: "members", width: 30 }
   ];
   const litigationColumns: Partial<ExcelJS.Column>[] = [
-    { header: "案由", key: "cause", width: 18 },
-    { header: "自由案由", key: "causeFreeText", width: 18 },
-    { header: "标的金额", key: "claimAmount", width: 14 },
-    { header: "我方地位", key: "ourStanding", width: 14 },
-    { header: "反诉原告", key: "counterclaimAsPlaintiff", width: 10 },
-    { header: "反诉被告", key: "counterclaimAsDefendant", width: 10 },
-    { header: "律协备案", key: "barFiling", width: 18 },
-    { header: "案件当事人", key: "parties", width: 48 }
+    { header: "Nguyên cáo", key: "cause", width: 18 },
+    { header: "Nguyên cáo tự do", key: "causeFreeText", width: 18 },
+    { header: "Giá trị yêu cầu", key: "claimAmount", width: 14 },
+    { header: "Vị trí của tôi", key: "ourStanding", width: 14 },
+    { header: "Nguyên cáo ngược", key: "counterclaimAsPlaintiff", width: 10 },
+    { header: "Bị cáo ngược", key: "counterclaimAsDefendant", width: 10 },
+    { header: "Lưu trữ hội luật sư", key: "barFiling", width: 18 },
+    { header: "Các bên liên quan", key: "parties", width: 48 }
   ];
   const projectColumns: Partial<ExcelJS.Column>[] = [
-    { header: "业务类型", key: "businessType", width: 16 },
-    { header: "服务范围", key: "serviceScope", width: 28 },
-    { header: "交付成果", key: "deliverables", width: 24 },
-    { header: "服务起", key: "serviceStart", width: 12 },
-    { header: "服务止", key: "serviceEnd", width: 12 },
-    { header: "相关方", key: "parties", width: 48 },
-    { header: "阶段/程序摘要", key: "procedureSummary", width: 42 }
+    { header: "Loại hình dự án", key: "businessType", width: 16 },
+    { header: "Phạm vi dịch vụ", key: "serviceScope", width: 28 },
+    { header: "Đầu ra", key: "deliverables", width: 24 },
+    { header: "Bắt đầu dịch vụ", key: "serviceStart", width: 12 },
+    { header: "Kết thúc dịch vụ", key: "serviceEnd", width: 12 },
+    { header: "Các bên liên quan", key: "parties", width: 48 },
+    { header: "Tóm tắt thủ tục/giai đoạn", key: "procedureSummary", width: 42 }
   ];
   const counselColumns: Partial<ExcelJS.Column>[] = [
-    { header: "顾问类型", key: "counselType", width: 16 },
-    { header: "服务范围", key: "serviceScope", width: 28 },
-    { header: "服务起", key: "serviceStart", width: 12 },
-    { header: "服务止", key: "serviceEnd", width: 12 },
-    { header: "相关方", key: "parties", width: 48 },
-    { header: "阶段/程序摘要", key: "procedureSummary", width: 42 }
+    { header: "Loại tư vấn", key: "counselType", width: 16 },
+    { header: "Phạm vi dịch vụ", key: "serviceScope", width: 28 },
+    { header: "Bắt đầu dịch vụ", key: "serviceStart", width: 12 },
+    { header: "Kết thúc dịch vụ", key: "serviceEnd", width: 12 },
+    { header: "Các bên liên quan", key: "parties", width: 48 },
+    { header: "Tóm tắt thủ tục/giai đoạn", key: "procedureSummary", width: 42 }
   ];
   const commonEnd: Partial<ExcelJS.Column>[] = [
-    { header: "关联实体", key: "relatedEntities", width: 36 },
-    { header: "关联案件", key: "relatedMatters", width: 36 },
-    { header: "案件附件", key: "documents", width: 36 },
-    { header: "自定义字段", key: "customValues", width: 30 },
-    { header: "来源收案标题", key: "intakeTitle", width: 34 },
-    { header: "来源收案状态", key: "intakeStatus", width: 12 },
-    { header: "来源收案时间", key: "sourceReceivedAt", width: 12 },
-    { header: "来源收案案情", key: "sourceDescription", width: 34 },
-    { header: "来源收费方式", key: "sourceFeeType", width: 14 },
-    { header: "来源律师费金额", key: "sourceFeeAmount", width: 14 },
-    { header: "来源付款节点", key: "sourceFeeSchedule", width: 26 },
-    { header: "来源费用备注", key: "sourceFeeNote", width: 24 },
-    { header: "来源共同律师", key: "sourceCoUsers", width: 24 },
-    { header: "来源附件", key: "sourceDocuments", width: 36 },
-    { header: "创建时间", key: "createdAt", width: 18 },
-    { header: "更新时间", key: "updatedAt", width: 18 }
+    { header: "Thực thể liên kết", key: "relatedEntities", width: 36 },
+    { header: "Vụ án liên kết", key: "relatedMatters", width: 36 },
+    { header: "Tài liệu vụ án", key: "documents", width: 36 },
+    { header: "Trường tùy chỉnh", key: "customValues", width: 30 },
+    { header: "Tiêu đề intake nguồn", key: "intakeTitle", width: 34 },
+    { header: "Trạng thái intake nguồn", key: "intakeStatus", width: 12 },
+    { header: "Ngày nhận nguồn", key: "sourceReceivedAt", width: 12 },
+    { header: "Mô tả vụ án nguồn", key: "sourceDescription", width: 34 },
+    { header: "Hình thức thu phí nguồn", key: "sourceFeeType", width: 14 },
+    { header: "Số tiền luật sư nguồn", key: "sourceFeeAmount", width: 14 },
+    { header: "Các mốcthanh toán nguồn", key: "sourceFeeSchedule", width: 26 },
+    { header: "Ghi chú phí nguồn", key: "sourceFeeNote", width: 24 },
+    { header: "Luật sư cùng nguồn", key: "sourceCoUsers", width: 24 },
+    { header: "Tài liệu nguồn", key: "sourceDocuments", width: 36 },
+    { header: "Ngày tạo", key: "createdAt", width: 18 },
+    { header: "Ngày cập nhật", key: "updatedAt", width: 18 }
   ];
   const litigationSourceColumns: Partial<ExcelJS.Column>[] = [
-    { header: "来源收案首次程序", key: "sourceFirstProcedureType", width: 14 },
-    { header: "来源争议解决机构", key: "sourceFirstAgency", width: 24 },
-    { header: "来源管辖地", key: "sourceJurisdiction", width: 18 },
-    { header: "来源我方地位", key: "sourceOurStanding", width: 14 },
-    { header: "来源标的金额", key: "sourceClaimAmount", width: 14 },
-    { header: "来源标的描述", key: "sourceClaimDescription", width: 24 },
-    { header: "来源律协备案", key: "sourceBarFiling", width: 18 },
-    { header: "来源是否反诉", key: "sourceCounterclaim", width: 12 }
+    { header: "Nguồn: Thủ tục đầu tiên", key: "sourceFirstProcedureType", width: 14 },
+    { header: "Nguồn: Cơ quan giải quyết", key: "sourceFirstAgency", width: 24 },
+    { header: "Nguồn: Có thẩm quyền", key: "sourceJurisdiction", width: 18 },
+    { header: "Nguồn: Vị trí của tôi", key: "sourceOurStanding", width: 14 },
+    { header: "Nguồn: Giá trị yêu cầu", key: "sourceClaimAmount", width: 14 },
+    { header: "Nguồn: Mô tả yêu cầu", key: "sourceClaimDescription", width: 24 },
+    { header: "Nguồn: Lưu trữ hội luật sư", key: "sourceBarFiling", width: 18 },
+    { header: "Nguồn: Có khiếu nại ngược", key: "sourceCounterclaim", width: 12 }
   ];
   const projectSourceColumns: Partial<ExcelJS.Column>[] = [
-    { header: "来源业务类型", key: "sourceBusinessType", width: 16 },
-    { header: "来源服务范围", key: "sourceServiceScope", width: 28 },
-    { header: "来源交付成果", key: "sourceDeliverables", width: 24 },
-    { header: "来源服务起", key: "sourceServiceStart", width: 12 },
-    { header: "来源服务止", key: "sourceServiceEnd", width: 12 }
+    { header: "Nguồn: Loại hình", key: "sourceBusinessType", width: 16 },
+    { header: "Nguồn: Phạm vi dịch vụ", key: "sourceServiceScope", width: 28 },
+    { header: "Nguồn: Đầu ra", key: "sourceDeliverables", width: 24 },
+    { header: "Nguồn: Dịch vụ bắt đầu", key: "sourceServiceStart", width: 12 },
+    { header: "Nguồn: Dịch vụ kết thúc", key: "sourceServiceEnd", width: 12 }
   ];
   const counselSourceColumns: Partial<ExcelJS.Column>[] = [
-    { header: "来源顾问类型", key: "sourceCounselType", width: 16 },
-    { header: "来源服务范围", key: "sourceServiceScope", width: 28 },
-    { header: "来源服务起", key: "sourceServiceStart", width: 12 },
-    { header: "来源服务止", key: "sourceServiceEnd", width: 12 }
+    { header: "Nguồn: Loại tư vấn", key: "sourceCounselType", width: 16 },
+    { header: "Nguồn: Phạm vi dịch vụ", key: "sourceServiceScope", width: 28 },
+    { header: "Nguồn: Dịch vụ bắt đầu", key: "sourceServiceStart", width: 12 },
+    { header: "Nguồn: Dịch vụ kết thúc", key: "sourceServiceEnd", width: 12 }
   ];
   const typedColumns =
     kind === "litigation"
@@ -683,27 +683,27 @@ function matterColumnsForKind(
   const procedureColumns: Partial<ExcelJS.Column>[] = [];
   for (let i = 1; i <= maxProcedures; i += 1) {
     procedureColumns.push(
-      { header: `程序${i}-类型`, key: `procedure${i}Type`, width: 14 },
-      { header: `程序${i}-标签`, key: `procedure${i}Label`, width: 16 },
-      { header: `程序${i}-参与方式`, key: `procedure${i}Engagement`, width: 12 },
-      { header: `程序${i}-状态`, key: `procedure${i}Status`, width: 12 },
-      { header: `程序${i}-案号`, key: `procedure${i}CaseNumber`, width: 24 },
-      { header: `程序${i}-管辖地`, key: `procedure${i}Jurisdiction`, width: 18 },
-      { header: `程序${i}-办理机关`, key: `procedure${i}HandlingAgency`, width: 24 },
-      { header: `程序${i}-合议庭/部门`, key: `procedure${i}Panel`, width: 20 },
-      { header: `程序${i}-经办人`, key: `procedure${i}Handler`, width: 16 },
-      { header: `程序${i}-我方地位`, key: `procedure${i}OurStanding`, width: 14 },
-      { header: `程序${i}-主办律师`, key: `procedure${i}LeadLawyer`, width: 14 },
-      { header: `程序${i}-外部代理`, key: `procedure${i}ExternalLead`, width: 10 },
-      { header: `程序${i}-立案/受理`, key: `procedure${i}AcceptedAt`, width: 12 },
-      { header: `程序${i}-裁决/结案`, key: `procedure${i}ConcludedAt`, width: 12 },
-      { header: `程序${i}-结果`, key: `procedure${i}Outcome`, width: 12 },
-      { header: `程序${i}-结果说明`, key: `procedure${i}OutcomeNote`, width: 26 },
-      { header: `程序${i}-主审/仲裁员/执行法官`, key: `procedure${i}PresidingJudge`, width: 22 },
-      { header: `程序${i}-联系方式`, key: `procedure${i}PresidingJudgeContact`, width: 18 },
-      { header: `程序${i}-助理`, key: `procedure${i}JudgeAssistant`, width: 16 },
-      { header: `程序${i}-助理联系方式`, key: `procedure${i}JudgeAssistantContact`, width: 18 },
-      { header: `程序${i}-程序当事人`, key: `procedure${i}Parties`, width: 48 }
+      { header: `Thủ tục ${i}-Loại`, key: `procedure${i}Type`, width: 14 },
+      { header: `Thủ tục ${i}-Nhãn`, key: `procedure${i}Label`, width: 16 },
+      { header: `Thủ tục ${i}-Cách tham gia`, key: `procedure${i}Engagement`, width: 12 },
+      { header: `Thủ tục ${i}-Trạng thái`, key: `procedure${i}Status`, width: 12 },
+      { header: `Thủ tục ${i}-Số vụ án`, key: `procedure${i}CaseNumber`, width: 24 },
+      { header: `Thủ tục ${i}-Có thẩm quyền`, key: `procedure${i}Jurisdiction`, width: 18 },
+      { header: `Thủ tục ${i}-Cơ quan xử lý`, key: `procedure${i}HandlingAgency`, width: 24 },
+      { header: `Thủ tục ${i}-Ban xét xử/Phòng ban`, key: `procedure${i}Panel`, width: 20 },
+      { header: `Thủ tục ${i}-Người xử lý`, key: `procedure${i}Handler`, width: 16 },
+      { header: `Thủ tục ${i}-Vị trí của tôi`, key: `procedure${i}OurStanding`, width: 14 },
+      { header: `Thủ tục ${i}-Luật sư phụ trách`, key: `procedure${i}LeadLawyer`, width: 14 },
+      { header: `Thủ tục ${i}-Đại diện bên ngoài`, key: `procedure${i}ExternalLead`, width: 10 },
+      { header: `Thủ tục ${i}-Nộp đơn/Bắt đầu`, key: `procedure${i}AcceptedAt`, width: 12 },
+      { header: `Thủ tục ${i}-Phán quyết/Kết thúc`, key: `procedure${i}ConcludedAt`, width: 12 },
+      { header: `Thủ tục ${i}-Kết quả`, key: `procedure${i}Outcome`, width: 12 },
+      { header: `Thủ tục ${i}-Giải thích kết quả`, key: `procedure${i}OutcomeNote`, width: 26 },
+      { header: `Thủ tục ${i}-Thẩm phán/Trọng tài viên/Thực thi judge`, key: `procedure${i}PresidingJudge`, width: 22 },
+      { header: `Thủ tục ${i}-Thông tin liên hệ`, key: `procedure${i}PresidingJudgeContact`, width: 18 },
+      { header: `Thủ tục ${i}-Trợ lý`, key: `procedure${i}JudgeAssistant`, width: 16 },
+      { header: `Thủ tục ${i}-Thông tin liên hệ trợ lý`, key: `procedure${i}JudgeAssistantContact`, width: 18 },
+      { header: `Thủ tục ${i}-Các bên liên quan`, key: `procedure${i}Parties`, width: 48 }
     );
   }
 

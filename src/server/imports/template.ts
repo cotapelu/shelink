@@ -18,30 +18,30 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.42 批F：案件批量导入 xlsx 模板生成。
- * 第 1 行表头（必填列带 *），第 2 行示例，另一 sheet 写填写说明。
+ * v0.42 Batch F: Tạo template xlsx cho import hàng loạt vụ án.
+ * Dòng 1: header (cột có * là bắt buộc), dòng 2: ví dụ, sheet khác ghi hướng dẫn điền.
  */
 import ExcelJS from "exceljs";
 
 import { IMPORT_COLUMNS } from "@/lib/imports/matter-import";
 
-export const IMPORT_SHEET_NAME = "案件导入";
+export const IMPORT_SHEET_NAME = "Tải lên mẫu";
 
 const EXAMPLE: Record<string, string> = {
-  clientName: "张三",
+  clientName: "Nguyễn Văn A",
   clientIdNumber: "110101199001011234",
-  clientType: "个人",
-  opposingName: "某某科技有限公司",
+  clientType: "Cá nhân",
+  opposingName: "Công ty TNHH ABC",
   opposingIdNumber: "91110000MA01XXXX1A",
-  opposingType: "企业",
-  category: "民商诉讼",
-  status: "办理中",
+  opposingType: "Doanh nghiệp",
+  category: "Dân sự thương mại",
+  status: "Đang xử lý",
   ownerEmail: "lawyer@example.com",
   intakeDate: "2026-05-30",
-  cause: "买卖合同纠纷",
+  cause: "Tranh chấp hợp đồng mua bán",
   claimAmount: "120000",
-  clientPhone: "13800000000",
-  jurisdiction: "北京市朝阳区"
+  clientPhone: "0900000000",
+  jurisdiction: "Quận Hai Bà Trưng, Hà Nội"
 };
 
 export async function buildMatterImportTemplate(): Promise<Buffer> {
@@ -56,7 +56,7 @@ export async function buildMatterImportTemplate(): Promise<Buffer> {
     width: Math.max(12, c.header.length * 2 + 4)
   }));
 
-  // 表头样式：必填浅红、选填浅灰
+  // Header style: bắt buộc light red, không bắt buộc light gray
   const headerRow = sheet.getRow(1);
   headerRow.font = { bold: true };
   headerRow.alignment = { vertical: "middle" };
@@ -70,26 +70,26 @@ export async function buildMatterImportTemplate(): Promise<Buffer> {
   });
   headerRow.height = 20;
 
-  // 示例行
+  // Dòng ví dụ
   sheet.addRow(IMPORT_COLUMNS.reduce<Record<string, string>>((acc, c) => {
     acc[c.key] = EXAMPLE[c.key] ?? "";
     return acc;
   }, {}));
 
-  // 说明 sheet
+  // Sheet ghi chú
   const notes = wb.addWorksheet("填写说明");
   notes.columns = [
     { header: "列", key: "h", width: 16 },
     { header: "说明", key: "d", width: 60 }
   ];
   notes.getRow(1).font = { bold: true };
-  notes.addRow({ h: "必填列", d: "表头带 * 的为必填：客户名称/证件号、相对方名称/证件号、案件类型、案件状态" });
+  notes.addRow({ h: "Cột bắt buộc", d: "Có dấu * ở header: Tên khách hàng/Số ID, Tên đối phương/Số ID, Loại vụ án, Trạng thái vụ án" });
   for (const c of IMPORT_COLUMNS) {
     if (c.hint) notes.addRow({ h: c.header, d: c.hint });
   }
-  notes.addRow({ h: "首程序", d: "「办理中」的案件按案件类型自动生成首程序（诉讼→一审、其他→非诉/仲裁阶段）；已结案/已归档不建程序" });
-  notes.addRow({ h: "利益冲突", d: "客户与相对方的名称+证件号会写入当事人库，导入后即可被冲突检索命中" });
-  notes.addRow({ h: "示例行", d: "第 2 行为示例，正式导入前请删除或覆盖" });
+  notes.addRow({ h: "Thủ tục đầu tiên", d: "Với trạng thái 'Đang xử lý', tự động tạo thủ tục đầu tiên theo loại vụ án (Dân sự → First Instance, khác → Non-litigation/Arbitration Phase); Trạng thái Đã kết thúc/Đã lưu trữ không tạo" });
+  notes.addRow({ h: "Xung đột lợi ích", d: "Tên + mã số của khách hàng và đối phương sẽ được lưu vào CSDL các bên, sau khi import có thể được tìm thấy bởi tính năng kiểm tra xung đột" });
+  notes.addRow({ h: "Dòng ví dụ", d: "Dòng 2 là ví dụ, trước khi import chính thức hãy xóa hoặc thay thế" });
 
   const out = await wb.xlsx.writeBuffer();
   return Buffer.from(out);

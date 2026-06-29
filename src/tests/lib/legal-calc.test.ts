@@ -63,7 +63,7 @@ describe("calcCourtFee", () => {
     const res = calcCourtFee({ caseType: "DIVORCE", amount: 500_000 });
     // base 300 + (500000 - 200000) * 0.005 = 300 + 1500 = 1800
     expect(res.fee).toBe(1800);
-    expect(res.note).toContain("财产分割");
+    expect(res.note).toContain("tài sản");
   });
 
   it("LABOR: fixed fee", () => {

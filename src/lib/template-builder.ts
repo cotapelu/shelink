@@ -18,20 +18,20 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.8 内置 8 个开源模板的 docx 文件动态生成（首批 ★ 模板）
+ * v0.8 Tạo file docx động cho 8 template open source (lô đầu tiên ★ templates)
  *
- * 用 docx 库构造 docx Buffer，docxtemplater 占位符使用 {{var}} 语法。
- * 律所部署后可在 /settings/templates 上传自定义模板替换。
+ * Dùng thư viện docx để tạo Buffer, docxtemplater dùng cú pháp {{var}}.
+ * Sau deploy, upload custom template tại /settings/templates.
  *
- * 8 个：
- *   1. 民事案件收案登记表
- *   2. 刑事案件收案登记表
- *   3. 法律服务风险告知书
- *   4. 委托代理合同（个人）
- *   5. 委托代理合同（单位）
- *   6. 授权委托书（个人）
- *   7. 民事起诉状
- *   8. 民事答辩状
+ * 8 templates:
+ *  1. Biểu mẫu đăng ký nhận vụ án dân sự
+ *  2. Biểu mẫu đăng ký nhận vụ án hình sự
+ *  3. Thông báo rủi ro dịch vụ pháp lý
+ *  4. Hợp đồng ủy quyền (Cá nhân)
+ *  5. Hợp đồng ủy quyền (Công ty)
+ *  6. Giấy ủy quyền (Cá nhân)
+ *  7. Trang trình tố dân sự
+ *  8. Biện luận dân sự
  */
 import {
   Document,
@@ -178,7 +178,7 @@ async function pack(children: (Paragraph | Table)[]): Promise<Buffer> {
 }
 
 // ============================================================
-// 模板 1: 民事案件收案登记表
+// Template 1: Biểu mẫu đăng ký nhận vụ án dân sự
 // ============================================================
 const T1_VARS = [
   "firm.name",
@@ -199,21 +199,21 @@ const T1_VARS = [
 async function buildT1(): Promise<Buffer> {
   return pack([
     body("{{firm.name}}", { align: AlignmentType.CENTER, bold: true }),
-    title("民事案件收案登记表"),
+    title("Biểu mẫu đăng ký nhận vụ án dân sự"),
     body("案件编号：{{matter.code}}", { align: AlignmentType.RIGHT }),
     blank(),
     kvTable([
-      ["收案日期", "{{matter.intakeDate}}"],
-      ["案由", "{{matter.causeText}}"],
-      ["案件类型", "民事案件"],
-      ["委托人", "{{client.name}}"],
-      ["委托人住址", "{{client.address}}"],
-      ["联系电话", "{{client.phone}}"],
-      ["对方当事人", "{{opposing.name}}"],
-      ["对方住址", "{{opposing.address}}"],
-      ["受理法院", "{{proceeding.court}}"],
-      ["涉案标的", "{{matter.claimAmount}}"],
-      ["主办律师", "{{lawyer.name}}"]
+      ["Ngày nhận vụ án", "{{matter.intakeDate}}"],
+      ["Vụ án", "{{matter.causeText}}"],
+      ["Loại vụ án", "Dân sự"],
+      ["Người ủy quyền", "{{client.name}}"],
+      ["Địa chỉ người ủy quyền", "{{client.address}}"],
+      ["Số điện thoại", "{{client.phone}}"],
+      ["Bên đối phương", "{{opposing.name}}"],
+      ["Địa chỉ đối phương", "{{opposing.address}}"],
+      ["Tòa án tiếp nhận", "{{proceeding.court}}"],
+      ["Giá trị yêu cầu", "{{matter.claimAmount}}"],
+      ["Luật sư phụ trách", "{{lawyer.name}}"]
     ]),
     blank(),
     body("登记日期：{{todayCN}}", { align: AlignmentType.RIGHT })
@@ -239,23 +239,23 @@ const T2_VARS = [
 async function buildT2(): Promise<Buffer> {
   return pack([
     body("{{firm.name}}", { align: AlignmentType.CENTER, bold: true }),
-    title("刑事案件收案登记表"),
+    title("Biểu mẫu đăng ký nhận vụ án hình sự"),
     body("案件编号：{{matter.code}}", { align: AlignmentType.RIGHT }),
     blank(),
     kvTable([
-      ["收案日期", "{{matter.intakeDate}}"],
-      ["涉嫌罪名", "{{matter.causeText}}"],
-      ["委托人(家属)", "{{client.name}}"],
-      ["与被告人关系", ""],
-      ["联系电话", "{{client.phone}}"],
-      ["被告人姓名", "{{opposing.name}}"],
-      ["羁押/居所地点", "{{opposing.address}}"],
-      ["案件阶段", "侦查 / 审查起诉 / 一审 / 二审 / 再审"],
-      ["办理机关", ""],
-      ["主办律师", "{{lawyer.name}}"]
+      ["Ngày nhận vụ án", "{{matter.intakeDate}}"],
+      ["Tội danh bị cáo buộc", "{{matter.causeText}}"],
+      ["Người ủy quyền (gia đình)", "{{client.name}}"],
+      ["Mối quan hệ với bị cáo", ""],
+      ["Số điện thoại", "{{client.phone}}"],
+      ["Tên bị cáo", "{{opposing.name}}"],
+      ["Địa điểm giam giữ/trú", "{{opposing.address}}"],
+      ["Giai đoạn vụ án", "Điều tra / Xét xử phúc thẩm / Tòa sơ thẩm / Tòa phúc thẩm / Xét xử giám đốc thẩm"],
+      ["Cơ quan xử lý", ""],
+      ["Luật sư phụ trách", "{{lawyer.name}}"]
     ]),
     blank(),
-    body("登记日期：{{todayCN}}", { align: AlignmentType.RIGHT })
+    body("Ngày đăng ký：{{todayCN}}", { align: AlignmentType.RIGHT })
   ]);
 }
 
@@ -266,27 +266,27 @@ const T3_VARS = ["firm.name", "client.name", "matter.causeText", "lawyer.name", 
 
 async function buildT3(): Promise<Buffer> {
   return pack([
-    title("法律服务风险告知书"),
-    body("致：{{client.name}}", { bold: true }),
+    title("Thông báo rủi ro dịch vụ pháp lý"),
+    body("Gửi：{{client.name}}", { bold: true }),
     blank(),
     body(
-      "本所及本所律师在接受您的委托办理 {{matter.causeText}} 一案前，依据《律师法》《律师执业行为规范》等相关规定，将以下法律服务风险事项明确告知您，请仔细阅读：",
+      "Văn phòng luật sư và luật sư của chúng tôi khi nhận ủy quyền của quý khách xử lý vụ án {{matter.causeText}}, theo quy định của Luật sư, Quy tắc hành nghề, sẽ thông báo các rủi ro sau, xem kỹ：",
       { indent: true }
     ),
     blank(),
-    body("一、法律服务结果的不确定性。法律事务的处理受案件事实、证据、法律适用、司法裁量、对方当事人行为等多种因素影响，律师无法承诺任何确定的结果。", { indent: true }),
-    body("二、案件结果不取决于代理费金额。律师收费与办案投入相关，与诉讼结果无对应关系。", { indent: true }),
-    body("三、证据材料的真实性责任。委托人提供的证据材料须真实、合法。如因证据虚假或瑕疵导致不利后果，由委托人自行承担。", { indent: true }),
-    body("四、诉讼时效与举证期限。委托人应当在法律规定的诉讼时效内主张权利，在举证期限内提交全部证据，逾期可能丧失相应权利。", { indent: true }),
-    body("五、判决的执行风险。即使获得胜诉判决，因对方履行能力等原因，仍可能存在执行不能或执行不到位的风险。", { indent: true }),
-    body("六、和解与调解的可能性。律师将根据案件情况评估和解、调解方案，是否接受由委托人最终决定。", { indent: true }),
-    body("七、其他事项。", { indent: true }),
+    body("1. Bất định về kết quả dịch vụ pháp lý. Kết quả xử lý vụ án phụ thuộc vào nhiều yếu tố như sự kiện, bằng chứng, áp dụng pháp luật, phán đoán tòa, hành vi đối phương... Luật sư không thể hứa hẹn kết quả chắc chắn.", { indent: true }),
+    body("2. Kết quả vụ án không phụ thuộc vào số phí ủy quyền. Phí luật sư liên quan đến nỗ lực xử lý, không tương ứng với kết quả tố tụng.", { indent: true }),
+    body("3. Trách nhiệm tính chân thực bằng chứng. Người ủy quyền phải cung cấp bằng chứng chân thực, hợp pháp. Nếu do bằng chứng sai hoặc khuyết tật dẫn đến hậu quả bất lợi, người ủy quyền tự chịu trách nhiệm.", { indent: true }),
+    body("4. Thời hiệu kiện và hạn chứng cứ. Người ủy quyền phải đưa ra yêu cầu trong thời hiệu pháp luật và nộp toàn bộ bằng chứng trước hạn chứng cứ, quá hạn có thể mất quyền.", { indent: true }),
+    body("5. Rủi ro thi hành án. Ngay cả khi thắng kiện, do đối phương không có khả năng thi hành, có thể không thể thi hành hoặc thi hành không đủ.", { indent: true }),
+    body("6. Khả năng hòa giải và điều trung. Luật sư sẽ đánh giá phương án hòa giải/điều trung theo tình hình, quyết định cuối cùng thuộc về người ủy quyền.", { indent: true }),
+    body("7. Các vấn đề khác.", { indent: true }),
     blank(),
-    body("委托人(签字)：________________"),
+    body("Người ủy quyền (ký tên)：________________"),
     blank(),
     body("承办律师：{{lawyer.name}}"),
-    body("律师事务所：{{firm.name}}"),
-    body("告知日期：{{todayCN}}")
+    body("Văn phòng luật sư：{{firm.name}}"),
+    body("Ngày thông báo：{{todayCN}}")
   ]);
 }
 
@@ -308,46 +308,46 @@ const T4_VARS = [
 
 async function buildT4(): Promise<Buffer> {
   return pack([
-    title("委托代理合同"),
-    body("(适用于自然人委托)"),
+    title("Hợp đồng ủy quyền"),
+    body("(Áp dụng cho cá nhân ủy quyền)"),
     blank(),
-    body("甲方(委托人)：{{client.name}}"),
-    body("身份证号：{{client.idNumber}}"),
-    body("住址：{{client.address}}"),
-    body("联系电话：{{client.phone}}"),
+    body("Bên gửi (Người ủy quyền)：{{client.name}}"),
+    body("Số CMND/CCCD：{{client.idNumber}}"),
+    body("Nơi cư trú：{{client.address}}"),
+    body("Điện thoại：{{client.phone}}"),
     blank(),
-    body("乙方(受托人)：{{firm.name}}"),
-    body("地址：{{firm.address}}"),
-    body("电话：{{firm.phone}}"),
+    body("Bên nhận (Người được ủy quyền)：{{firm.name}}"),
+    body("Địa chỉ：{{firm.address}}"),
+    body("Điện thoại：{{firm.phone}}"),
     blank(),
-    body("甲乙双方根据《中华人民共和国民法典》《中华人民共和国律师法》之规定，经协商一致，签订本委托代理合同：", { indent: true }),
+    body("Hai bên theo Bộ luật Dân sự, Luật Luật sư, sau khi thỏa thuận, ký kết hợp đồng ủy quyền này:", { indent: true }),
     blank(),
-    body("第一条 委托事项及代理权限", { bold: true }),
-    body("甲方委托乙方指派律师就 {{matter.causeText}} 一案为甲方提供法律服务。代理权限为：________________(一般代理 / 特别代理：包括代为承认、放弃、变更诉讼请求，代为和解，代为提起反诉或上诉等)。", { indent: true }),
+    body("Điều 1. Nội dung ủy quyền và quyền hạn đại diện", { bold: true }),
+    body("Bên gửi ủy quyền cho Bên nhận cử luật sư cung cấp dịch vụ pháp lý cho vụ án {{matter.causeText}}. Quyền hạn đại diện: ________________ (đại diện thông thường / đại diện đặc biệt: bao gồm thay mặt thừa nhận, từ bỏ, thay đổi yêu cầu tố tụng, thay mặt hòa giải, thay mặt khởi kiện phản tố hoặc kháng cáo, v.v.).", { indent: true }),
     blank(),
-    body("第二条 委托代理事项的范围", { bold: true }),
-    body("(一审 / 二审 / 再审 / 仲裁 / 执行)", { indent: true }),
+    body("Điều 2. Phạm vi dịch vụ ủy quyền", { bold: true }),
+    body("(Sơ thẩm / Phúc thẩm / Giám đốc thẩm / Trọng tài / Thi hành án)", { indent: true }),
     blank(),
-    body("第三条 律师费及支付方式", { bold: true }),
-    body("代理费金额：人民币________元(大写：________________元整)。", { indent: true }),
-    body("支付方式：________________。", { indent: true }),
+    body("Điều 3. Phí luật sư và phương thức thanh toán", { bold: true }),
+    body("Số phí ủy quyền: ________ đồng (bằng chữ: ________________ đồng).", { indent: true }),
+    body("Cách thanh toán: ________________.", { indent: true }),
     blank(),
-    body("第四条 其他费用", { bold: true }),
-    body("案件办理过程中产生的诉讼费、保全费、鉴定费、差旅费等，由甲方另行承担。", { indent: true }),
+    body("Điều 4. Chi phí khác", { bold: true }),
+    body("Các chi phí tố tụng, bảo tồn, thẩm định, đi lại... phát sinh trong quá trình xử lý vụ án do Bên gửi chịu.", { indent: true }),
     blank(),
-    body("第五条 双方权利义务", { bold: true }),
-    body("略", { indent: true }),
+    body("Điều 5. Quyền và nghĩa vụ của các bên", { bold: true }),
+    body("Bỏ qua", { indent: true }),
     blank(),
-    body("第六条 合同的解除与终止", { bold: true }),
-    body("略", { indent: true }),
+    body("Điều 6. Chấm dứt hợp đồng", { bold: true }),
+    body("Bỏ qua", { indent: true }),
     blank(),
-    body("第七条 争议解决", { bold: true }),
-    body("因本合同发生的争议，由双方协商解决；协商不成的，提交乙方所在地有管辖权的人民法院诉讼解决。", { indent: true }),
+    body("Điều 7. Giải quyết tranh chấp", { bold: true }),
+    body("Tranh chấp phát sinh từ hợp đồng này, hai bên sẽ thương lượng; nếu không thành, đưa ra tòa có thẩm quyền tại nơi Bên nhận đóng trụ sở để giải quyết.", { indent: true }),
     blank(),
     body("本合同一式两份，甲乙双方各执一份，自双方签字盖章之日起生效。", { indent: true }),
     blank(),
     blank(),
-    body("甲方(签字)：________________            乙方(盖章)："),
+    body("Bên gửi (ký tên)：________________            Bên nhận (đóng dấu)："),
     blank(),
     body("                                            承办律师：{{lawyer.name}}"),
     blank(),
@@ -373,46 +373,46 @@ const T5_VARS = [
 
 async function buildT5(): Promise<Buffer> {
   return pack([
-    title("委托代理合同"),
-    body("(适用于法人或非法人组织委托)"),
+    title("Hợp đồng ủy quyền"),
+    body("(Áp dụng cho pháp nhân hoặc tổ chức không phải pháp nhân)"),
     blank(),
-    body("甲方(委托人)：{{client.name}}"),
-    body("统一社会信用代码：{{client.idNumber}}"),
-    body("住所地：{{client.address}}"),
-    body("法定代表人/负责人：________________"),
-    body("联系电话：{{client.phone}}"),
+    body("Bên A (Người ủy quyền): {{client.name}}"),
+    body("Mã số thuế: {{client.idNumber}}"),
+    body("Địa chỉ trụ sở: {{client.address}}"),
+    body("Người đại diện pháp luật/người phụ trách: ________________"),
+    body("Điện thoại: {{client.phone}}"),
     blank(),
-    body("乙方(受托人)：{{firm.name}}"),
-    body("地址：{{firm.address}}"),
-    body("电话：{{firm.phone}}"),
+    body("Bên B (Người nhận ủy quyền): {{firm.name}}"),
+    body("Địa chỉ: {{firm.address}}"),
+    body("Điện thoại: {{firm.phone}}"),
     blank(),
-    body("甲乙双方就以下事项签订本委托代理合同：", { indent: true }),
+    body("Hai bên ký kết hợp đồng ủy quyền này về các vấn đề sau:", { indent: true }),
     blank(),
-    body("第一条 委托事项", { bold: true }),
-    body("甲方委托乙方指派律师就 {{matter.causeText}} 一案为甲方提供法律服务。", { indent: true }),
+    body("Điều 1. Vấn đề ủy quyền", { bold: true }),
+    body("Bên A ủy quyền cho Bên B chỉ định luật sư để cung cấp dịch vụ pháp lý cho Bên A trong vụ án {{matter.causeText}}.", { indent: true }),
     blank(),
-    body("第二条 代理权限", { bold: true }),
-    body("特别代理(含代为承认、放弃、变更诉讼请求，代为和解，代为提起反诉或上诉)。", { indent: true }),
+    body("Điều 2. Quyền ủy quyền", { bold: true }),
+    body("Đại diện đặc biệt (bao gồm thừa nhận, từ bỏ, thay đổi yêu cầu kiện; hòa giải; khởi kiện counter hoặc phúc thẩm).", { indent: true }),
     blank(),
-    body("第三条 律师费", { bold: true }),
-    body("代理费金额：人民币________元(大写：________________元整)。", { indent: true }),
-    body("支付方式：分期 / 一次性 / 风险代理 / 按小时计费。", { indent: true }),
+    body("Điều 3. Phí luật sư", { bold: true }),
+    body("Số tiền phí: RMB ________ (viết bằng chữ: ________________).", { indent: true }),
+    body("Phương thức thanh toán: Trả góp / Một lần / Phí rủi ro / Theo giờ.", { indent: true }),
     blank(),
-    body("第四条 履行期间", { bold: true }),
-    body("自本合同签订之日起至本案代理事项处理完毕(取得生效法律文书或双方书面终止)。", { indent: true }),
+    body("Điều 4. Thời gian thực hiện", { bold: true }),
+    body("Từ ngày ký hợp đồng cho đến khi hoàn tất xử lý vấn đề ủy quyền (có văn bản pháp lý hiệu lực hoặc chấm dứt bằng văn bản từ cả hai bên).", { indent: true }),
     blank(),
-    body("第五条 保密条款", { bold: true }),
-    body("乙方对甲方提供的资料及案件信息负有保密义务。", { indent: true }),
+    body("Điều 5. Điều khoản bảo mật", { bold: true }),
+    body("Bên B có nghĩa vụ bảo mật tài liệu và thông tin vụ án do Bên A cung cấp.", { indent: true }),
     blank(),
-    body("第六条 争议解决", { bold: true }),
-    body("协商不成提交乙方所在地有管辖权的人民法院。", { indent: true }),
+    body("Điều 6. Giải quyết tranh chấp", { bold: true }),
+    body("Nếu thương lượng không thành, đưa ra tòa án có thẩm quyền tại nơi Bên B đóng trụ sở.", { indent: true }),
     blank(),
     blank(),
-    body("甲方(盖章)：                                    乙方(盖章)："),
+    body("Bên A (đóng dấu):                                    Bên B (đóng dấu):"),
     blank(),
-    body("法定代表人/负责人：________________              承办律师：{{lawyer.name}}"),
+    body("Người đại diện pháp luật/người phụ trách: ________________             Luật sư phụ trách: {{lawyer.name}}"),
     blank(),
-    body("签订日期：{{todayCN}}", { align: AlignmentType.RIGHT })
+    body("Ngày ký: {{todayCN}}", { align: AlignmentType.RIGHT })
   ]);
 }
 
@@ -431,25 +431,25 @@ const T6_VARS = [
 
 async function buildT6(): Promise<Buffer> {
   return pack([
-    title("授权委托书"),
+    title("Giấy ủy quyền"),
     blank(),
-    body("委托人：{{client.name}}"),
-    body("身份证号：{{client.idNumber}}"),
+    body("Người ủy quyền: {{client.name}}"),
+    body("Số CMND/CCCD: {{client.idNumber}}"),
     blank(),
-    body("受委托人：{{lawyer.name}}，{{firm.name}}律师。"),
+    body("Người nhận ủy quyền: {{lawyer.name}}, {{firm.name}} luật sư."),
     blank(),
-    body("现委托上列受委托人在我与 {{opposing.name}} {{matter.causeText}} 一案中，作为我的诉讼代理人。", { indent: true }),
+    body("Tôi ủy quyền cho các người nhận ủy quyền trên để làm đại diện tố tụng của tôi trong vụ án {{matter.causeText}} giữa tôi và {{opposing.name}}.", { indent: true }),
     blank(),
-    body("代理权限为(请勾选)：", { bold: true }),
-    body("☐ 一般代理。"),
-    body("☐ 特别代理。包括：代为承认、放弃、变更诉讼请求；代为提起反诉、上诉；代为申请执行；代为和解、调解；代为签收法律文书。"),
+    body("Quyền đại diện (vui lòng đánh dấu):", { bold: true }),
+    body("☐ Đại diện thông thường."),
+    body("☐ Đại diện đặc biệt. Bao gồm: thừa nhận, từ bỏ, thay đổi yêu cầu kiện; khởi kiện counter, phúc thẩm; xin thi hành án; hòa giải, điều trị; ký nhận văn bản pháp lý."),
     blank(),
-    body("委托期限：自签署之日起至本案代理事项终结。"),
+    body("Thời hạn ủy quyền: Từ ngày ký cho đến khi kết thúc vấn đề ủy quyền vụ án."),
     blank(),
     blank(),
-    body("委托人(签字按印)：________________"),
+    body("Người ủy quyền (ký và đóng dấu): ________________"),
     blank(),
-    body("受委托人(签字)：{{lawyer.name}}"),
+    body("Người nhận ủy quyền (ký): {{lawyer.name}}"),
     blank(),
     body("{{todayCN}}", { align: AlignmentType.RIGHT })
   ]);
@@ -475,39 +475,39 @@ const T7_VARS = [
 
 async function buildT7(): Promise<Buffer> {
   return pack([
-    title("民事起诉状"),
+    title("Đơn kiện dân sự"),
     blank(),
-    body("原告：{{client.name}}"),
-    body("身份证号：{{client.idNumber}}"),
-    body("住址：{{client.address}}"),
-    body("联系电话：{{client.phone}}"),
+    body("Nguyên đơn: {{client.name}}"),
+    body("Số CMND/CCCD: {{client.idNumber}}"),
+    body("Nơi cư trú: {{client.address}}"),
+    body("Điện thoại: {{client.phone}}"),
     blank(),
-    body("被告：{{opposing.name}}"),
-    body("身份证号 / 统一社会信用代码：{{opposing.idNumber}}"),
-    body("住址：{{opposing.address}}"),
+    body("Bị đơn: {{opposing.name}}"),
+    body("Số CMND/CCCD / Mã số thuế: {{opposing.idNumber}}"),
+    body("Nơi cư trú: {{opposing.address}}"),
     blank(),
-    body("案由：{{matter.causeText}}", { bold: true }),
-    body("诉讼标的金额：{{matter.claimAmount}}", { bold: true }),
+    body("Lý do vụ án: {{matter.causeText}}", { bold: true }),
+    body("Giá trị yêu cầu: {{matter.claimAmount}}", { bold: true }),
     blank(),
-    body("诉讼请求：", { bold: true }),
-    body("1. ________________；", { indent: true }),
-    body("2. ________________；", { indent: true }),
-    body("3. 本案诉讼费、保全费等由被告承担。", { indent: true }),
+    body("Yêu cầu tố tụng:", { bold: true }),
+    body("1. ________________;", { indent: true }),
+    body("2. ________________;", { indent: true }),
+    body("3. Chi phí tố tụng, bảo tồn v.v. do bị đơn gánh chịu.", { indent: true }),
     blank(),
-    body("事实与理由：", { bold: true }),
+    body("Sự kiện và lý do:", { bold: true }),
     body("________________________________________________________________________", { indent: true }),
     body("________________________________________________________________________", { indent: true }),
     body("________________________________________________________________________", { indent: true }),
     blank(),
-    body("综上，根据《中华人民共和国民法典》《中华人民共和国民事诉讼法》之规定，请求贵院依法判决，以维护原告合法权益。", { indent: true }),
+    body("Tóm lại, căn cứ theo Bộ luật Dân sự và Luật Tố tụng Dân sự Trung Quốc, yêu cầu tòa án xét xử theo pháp luật để bảo vệ quyền lợi hợp pháp của nguyên đơn.", { indent: true }),
     blank(),
     blank(),
-    body("此致"),
+    body("Kính gửi"),
     body("{{proceeding.court}}", { bold: true }),
     blank(),
     blank(),
-    body("起诉人(签字)：________________"),
-    body("                                                            代理律师：{{lawyer.name}}"),
+    body("Người khởi kiện (ký): ________________"),
+    body("                                                             Luật sư đại diện: {{lawyer.name}}"),
     blank(),
     body("{{todayCN}}", { align: AlignmentType.RIGHT })
   ]);
@@ -532,39 +532,39 @@ const T8_VARS = [
 
 async function buildT8(): Promise<Buffer> {
   return pack([
-    title("民事答辩状"),
+    title("Bản đáp lời dân sự"),
     blank(),
-    body("答辩人：{{client.name}}"),
-    body("身份证号：{{client.idNumber}}"),
-    body("住址：{{client.address}}"),
-    body("联系电话：{{client.phone}}"),
+    body("Người đáp lời: {{client.name}}"),
+    body("Số CMND/CCCD: {{client.idNumber}}"),
+    body("Nơi cư trú: {{client.address}}"),
+    body("Điện thoại: {{client.phone}}"),
     blank(),
-    body("被答辩人：{{opposing.name}}"),
-    body("住址：{{opposing.address}}"),
+    body("Người bị đáp lời: {{opposing.name}}"),
+    body("Nơi cư trú: {{opposing.address}}"),
     blank(),
-    body("案由：{{matter.causeText}}", { bold: true }),
-    body("案号：{{proceeding.caseNo}}", { bold: true }),
+    body("Lý do vụ án: {{matter.causeText}}", { bold: true }),
+    body("Số vụ án: {{proceeding.caseNo}}", { bold: true }),
     blank(),
-    body("针对被答辩人的起诉，答辩人答辩如下：", { indent: true, bold: true }),
+    body("Đáp lại đơn kiện của người bị đáp lời, người đáp lời trả lời như sau:", { indent: true, bold: true }),
     blank(),
-    body("一、关于诉讼请求", { bold: true }),
+    body("1. Về yêu cầu tố tụng", { bold: true }),
     body("________________________________________________________________________", { indent: true }),
     blank(),
-    body("二、关于事实部分", { bold: true }),
+    body("2. Về phần sự kiện", { bold: true }),
     body("________________________________________________________________________", { indent: true }),
     blank(),
-    body("三、关于法律适用", { bold: true }),
+    body("3. Về áp dụng pháp luật", { bold: true }),
     body("________________________________________________________________________", { indent: true }),
     blank(),
-    body("综上，请求贵院依法驳回被答辩人的诉讼请求，以维护答辩人合法权益。", { indent: true }),
+    body("Tóm lại, yêu cầu tòa án bác bỏ yêu cầu tố tụng của người bị đáp lời để bảo vệ quyền lợi hợp pháp của người đáp lời.", { indent: true }),
     blank(),
     blank(),
-    body("此致"),
+    body("Kính gửi"),
     body("{{proceeding.court}}", { bold: true }),
     blank(),
     blank(),
-    body("答辩人(签字)：________________"),
-    body("                                                            代理律师：{{lawyer.name}}"),
+    body("Người đáp lời (ký): ________________"),
+    body("                                                             Luật sư đại diện: {{lawyer.name}}"),
     blank(),
     body("{{todayCN}}", { align: AlignmentType.RIGHT })
   ]);
@@ -598,7 +598,7 @@ async function buildT9(): Promise<Buffer> {
       alignment: AlignmentType.CENTER,
       spacing: { before: 240, after: 240 },
       children: [
-        new TextRun({ text: "卷    宗", font: FONT_TITLE, size: 72, bold: true })
+        new TextRun({ text: "HỒ SƠ", font: FONT_TITLE, size: 72, bold: true })
       ]
     }),
     blank(),
@@ -611,23 +611,23 @@ async function buildT9(): Promise<Buffer> {
       ]
     }),
     blank(),
-    body("{{client.name}} 诉 {{opposing.name}}", { align: AlignmentType.CENTER }),
+    body("{{client.name}} kiện {{opposing.name}}", { align: AlignmentType.CENTER }),
     blank(),
     blank(),
     blank(),
     kvTable([
-      ["归档编号", "{{archive.archiveNo}}"],
-      ["案件编号", "{{matter.code}}"],
-      ["案件类别", "{{matter.category}}"],
-      ["案由", "{{matter.causeText}}"],
-      ["结案方式", "{{archive.closedReasonCN}}"],
-      ["结案日期", "{{archive.completedAtCN}}"],
-      ["归档日期", "{{archive.archivedAtCN}}"],
-      ["承办律师", "{{lawyer.name}}"]
+      ["Số lưu trữ", "{{archive.archiveNo}}"],
+      ["Số vụ án", "{{matter.code}}"],
+      ["Loại vụ án", "{{matter.category}}"],
+      ["Lý do vụ án", "{{matter.causeText}}"],
+      ["Cách thức kết thúc", "{{archive.closedReasonCN}}"],
+      ["Ngày kết thúc", "{{archive.completedAtCN}}"],
+      ["Ngày lưu trữ", "{{archive.archivedAtCN}}"],
+      ["Luật sư phụ trách", "{{lawyer.name}}"]
     ]),
     blank(),
     blank(),
-    body("本卷宗自归档日起按律所规定保存，未经许可不得借阅、复制或转交。", { align: AlignmentType.CENTER })
+    body("Hồ sơ này được lưu trữ theo quy định của văn phòng từ ngày lưu trữ, không được mượn, sao chép hoặc chuyển giao mà không có sự cho phép.", { align: AlignmentType.CENTER })
   ]);
 }
 
@@ -645,7 +645,7 @@ const T10_VARS = [
 ];
 
 function docCatalogHeaderRow(): TableRow {
-  const headers = ["序号", "材料名称", "类别", "上传日期", "页数", "备注"];
+  const headers = ["STT", "Tên tài liệu", "Loại", "Ngày tải lên", "Số trang", "Ghi chú"];
   return new TableRow({
     tableHeader: true,
     children: headers.map((h, idx) => new TableCell({
@@ -733,14 +733,14 @@ async function buildT10(): Promise<Buffer> {
 
   return pack([
     body("{{firm.name}}", { align: AlignmentType.CENTER, bold: true }),
-    title("卷 宗 目 录"),
-    body("归档编号：{{archive.archiveNo}}    案件编号：{{matter.code}}", { align: AlignmentType.RIGHT }),
-    body("案件：{{matter.title}}", { align: AlignmentType.RIGHT }),
+    title("MỤC LỤC HỒ SƠ"),
+    body("Số lưu trữ: {{archive.archiveNo}}     Số vụ án: {{matter.code}}", { align: AlignmentType.RIGHT }),
+    body("Vụ án: {{matter.title}}", { align: AlignmentType.RIGHT }),
     blank(),
     table,
     blank(),
-    body("承办律师：{{lawyer.name}}", { align: AlignmentType.RIGHT }),
-    body("归档日期：{{archive.archivedAtCN}}", { align: AlignmentType.RIGHT })
+    body("Luật sư phụ trách: {{lawyer.name}}", { align: AlignmentType.RIGHT }),
+    body("Ngày lưu trữ: {{archive.archivedAtCN}}", { align: AlignmentType.RIGHT })
   ]);
 }
 

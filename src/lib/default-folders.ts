@@ -21,23 +21,22 @@ import type { MatterCategory } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
 
 /**
- * v0.8 默认卷宗结构（按案件类别）
- * 新建 Matter 时自动 seed；isDefault=true 不可删，可改名。
+ * v0.8 Cấu trúc thư mục mặc định (theo category vụ án)
+ * Tạo Matter mới tự động seed; isDefault=true không xóa được, có thể đổi tên.
  */
 export const DEFAULT_FOLDERS_BY_CATEGORY: Record<MatterCategory, readonly string[]> = {
-  CIVIL_COMMERCIAL: ["收案", "立案", "委托手续", "证据", "程序文书", "庭审", "裁判", "结案"],
-  LABOR_ARBITRATION: ["收案", "委托手续", "证据", "仲裁文书", "开庭", "裁决", "诉讼", "结案"],
-  COMMERCIAL_ARBITRATION: ["收案", "委托手续", "证据", "仲裁文书", "开庭", "裁决", "结案"],
-  ADMINISTRATIVE: ["收案", "立案", "委托手续", "证据", "程序文书", "庭审", "裁判", "结案"],
-  CRIMINAL: ["收案", "委托手续", "阅卷", "会见", "取证", "庭前", "庭审", "判决与上诉", "结案"],
-  NON_LITIGATION: ["立项", "调研", "工作底稿", "出具文件", "归档"],
-  LEGAL_COUNSEL: ["立项", "调研", "工作底稿", "出具文件", "归档"],
-  SPECIAL_PROJECT: ["立项", "调研", "工作底稿", "出具文件", "归档"]
+  CIVIL_COMMERCIAL: ["Nhận vụ án", "Nộp đơn", "Thủ tục ủy quyền", "Chứng cứ", "Văn bản thủ tục", "Phiên tòa", "Phán quyết", "Kết thúc"],
+  LABOR_ARBITRATION: ["Nhận vụ án", "Thủ tục ủy quyền", "Chứng cứ", "Văn bản trọng tài", "Mở phiên", "Phán quyết", "Tố tụng", "Kết thúc"],
+  COMMERCIAL_ARBITRATION: ["Nhận vụ án", "Thủ tục ủy quyền", "Chứng cứ", "Văn bản trọng tài", "Mở phiên", "Phán quyết", "Kết thúc"],
+  ADMINISTRATIVE: ["Nhận vụ án", "Nộp đơn", "Thủ tục ủy quyền", "Chứng cứ", "Văn bản thủ tục", "Phiên tòa", "Phán quyết", "Kết thúc"],
+  CRIMINAL: ["Nhận vụ án", "Thủ tục ủy quyền", "Xem hồ sơ", "Gặp mặt", "Thu thập chứng cứ", "Trước phiên tòa", "Phiên tòa", "Phán quyết và kháng cáo", "Kết thúc"],
+  NON_LITIGATION: ["Dự án", "Nghiên cứu", "Bản ghi công việc", "File đã phát hành", "Lưu trữ"],
+  LEGAL_COUNSEL: ["Dự án", "Nghiên cứu", "Bản ghi công việc", "File đã phát hành", "Lưu trữ"],
+  SPECIAL_PROJECT: ["Dự án", "Nghiên cứu", "Bản ghi công việc", "File đã phát hành", "Lưu trữ"]
 } as const;
 
-/**
- * 在事务中为新 Matter 创建默认卷宗。
- * 调用方提供 tx；本函数只写库，不做权限/校验。
+/** Tạo thư mục mặc định cho Matter mới trong transaction.
+ * Caller cung cấp tx; fn chỉ viết DB, không check quyền.
  */
 export async function seedDefaultFolders(
   tx: Prisma.TransactionClient,
@@ -57,8 +56,9 @@ export async function seedDefaultFolders(
 }
 
 /**
- * 按模板大类推荐默认归档卷宗名（用于"从模板新建"时自动选目标卷宗）。
- * 推荐不到时返回 null，由 UI 让用户手选。
+ * Gợi ý tên thư mục lưu trữ mặc định theo template category
+ * (dùng khi 'tạo từ template' tự động chọn target).
+ * Không gợi ý được trả null, UI cần cho user chọn thủ công.
  */
 export function suggestFolderByTemplateCategory(
   templateCategory: string,
@@ -70,25 +70,25 @@ export function suggestFolderByTemplateCategory(
     matterCategory === "CRIMINAL";
 
   const mapLitigation: Record<string, string> = {
-    INTAKE: "收案",
-    RETAINER: "委托手续",
-    LITIGATION: matterCategory === "CRIMINAL" ? "庭前" : "程序文书",
-    HEARING: matterCategory === "CRIMINAL" ? "庭审" : "庭审",
-    WORK_PRODUCT: matterCategory === "CRIMINAL" ? "取证" : "证据",
-    ARCHIVE: matterCategory === "CRIMINAL" ? "结案" : "结案",
-    CLOSING: "结案",
-    BLANK: matterCategory === "CRIMINAL" ? "收案" : "收案"
+    INTAKE: "Nhận vụ án",
+    RETAINER: "Thủ tục ủy quyền",
+    LITIGATION: matterCategory === "CRIMINAL" ? "Trước phiên tòa" : "Văn bản thủ tục",
+    HEARING: matterCategory === "CRIMINAL" ? "Phiên tòa" : "Phiên tòa",
+    WORK_PRODUCT: matterCategory === "CRIMINAL" ? "Thu thập chứng cứ" : "Chứng cứ",
+    ARCHIVE: matterCategory === "CRIMINAL" ? "Kết thúc" : "Kết thúc",
+    CLOSING: "Kết thúc",
+    BLANK: matterCategory === "CRIMINAL" ? "Nhận vụ án" : "Nhận vụ án"
   };
 
   const mapNonLitigation: Record<string, string> = {
-    INTAKE: "立项",
-    RETAINER: "立项",
-    LITIGATION: "出具文件",
-    HEARING: "工作底稿",
-    WORK_PRODUCT: "出具文件",
-    ARCHIVE: "归档",
-    CLOSING: "归档",
-    BLANK: "工作底稿"
+    INTAKE: "Dự án",
+    RETAINER: "Dự án",
+    LITIGATION: "File đã phát hành",
+    HEARING: "Bản ghi công việc",
+    WORK_PRODUCT: "File đã phát hành",
+    ARCHIVE: "Lưu trữ",
+    CLOSING: "Lưu trữ",
+    BLANK: "Bản ghi công việc"
   };
 
   const map = isLitigation ? mapLitigation : mapNonLitigation;

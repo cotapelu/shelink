@@ -29,7 +29,7 @@ import { assertCanLeadMatter } from "@/lib/permissions";
 
 const closeMatterSchema = z.object({
   id: z.string().cuid(),
-  summary: z.string().min(1, "结案小结必填").max(2000)
+  summary: z.string().min(1, "Tóm tắt kết thúc vụ án bắt buộc").max(2000)
 });
 
 const holdMatterSchema = z.object({
@@ -41,14 +41,14 @@ export type CloseMatterInput = z.infer<typeof closeMatterSchema>;
 export type HoldMatterInput = z.infer<typeof holdMatterSchema>;
 
 /**
- * 结案：把案件状态切到 CLOSED，记录结案小结到 TimelineEvent。
- * 不强制要求所有 procedure 都 concluded，律师自行判断。
+ * Kết thúc vụ án: Chuyển status sang CLOSED, lưu tóm tắt kết thúc vào TimelineEvent.
+ * Không yêu cầu tất cả procedure phải concluded, luật sư tự quyết định.
  */
 export async function closeMatter(input: CloseMatterInput) {
   const session = await requireSession();
   const data = closeMatterSchema.parse(input);
   await assertMatterWritable(data.id);
-  await assertCanLeadMatter(session.user.id, data.id, "仅案件主办/协办可以结案");
+  await assertCanLeadMatter(session.user.id, data.id, "Chỉ luật sư phụ trách/assist được kết thúc vụ án");
 
   await prisma.$transaction(async (tx) => {
     await tx.matter.update({
@@ -62,7 +62,7 @@ export async function closeMatter(input: CloseMatterInput) {
       data: {
         matterId: data.id,
         eventType: "MATTER_CLOSED",
-        title: "案件已结案",
+        title: "Vụ án đã kết thúc",
         content: data.summary,
         occurredAt: new Date()
       }
@@ -83,22 +83,22 @@ export async function closeMatter(input: CloseMatterInput) {
 }
 
 /**
- * 归档：完整流程见 src/server/archive/actions.ts → archiveMatter
- * 这里不再保留旧的轻量版本（v0.9.4 起统一走 ArchiveWizard）。
+ * Lưu trữ: Quy trình đầy đủ thấy ở src/server/archive/actions.ts → archiveMatter
+ * Không còn giữ legacy lightweight version (từ v0.9.4 dùng ArchiveWizard thống nhất).
  */
 
 /**
- * 重新开放（从 ON_HOLD / CLOSED 回到 IN_PROGRESS）。
- * ARCHIVED 状态不能重新开放（如需要应由 ADMIN 走单独路径）。
+ * Mở lại (từ ON_HOLD / CLOSED về IN_PROGRESS).
+ * Trạng thái ARCHIVED không thể mở lại (nếu cần ADMIN dùng path riêng).
  */
 export async function reopenMatter(id: string) {
   const session = await requireSession();
   const matter = await prisma.matter.findUnique({ where: { id }, select: { status: true } });
-  if (!matter) throw new Error("案件不存在");
+  if (!matter) throw new Error("Vụ án không tồn tại");
   await assertMatterWritable(id);
-  await assertCanLeadMatter(session.user.id, id, "仅案件主办/协办可以重新开放案件");
+  await assertCanLeadMatter(session.user.id, id, "Chỉ luật sư phụ trách/assist được mở lại vụ án");
   if (matter.status === "ARCHIVED") {
-    throw new Error("已归档案件不能重新开放");
+    throw new Error("Vụ án đã lưu trữ không thể mở lại");
   }
 
   await prisma.$transaction(async (tx) => {
@@ -113,7 +113,7 @@ export async function reopenMatter(id: string) {
       data: {
         matterId: id,
         eventType: "MATTER_REOPENED",
-        title: "案件已重新开放",
+        title: "Vụ án đã được mở lại",
         occurredAt: new Date()
       }
     });
@@ -132,13 +132,13 @@ export async function reopenMatter(id: string) {
 }
 
 /**
- * 暂停案件（客户失联、待补充材料等）。
+ * Tạm dừng vụ án (khách hàng mất liên lạc, chờ bổ sung tài liệu...).
  */
 export async function holdMatter(input: HoldMatterInput) {
   const session = await requireSession();
   const data = holdMatterSchema.parse(input);
   await assertMatterWritable(data.id);
-  await assertCanLeadMatter(session.user.id, data.id, "仅案件主办/协办可以暂停案件");
+  await assertCanLeadMatter(session.user.id, data.id, "Chỉ luật sư phụ trách/assist được tạm dừng vụ án");
 
   await prisma.$transaction(async (tx) => {
     await tx.matter.update({
@@ -149,7 +149,7 @@ export async function holdMatter(input: HoldMatterInput) {
       data: {
         matterId: data.id,
         eventType: "MATTER_ON_HOLD",
-        title: "案件已暂停",
+        title: "Vụ án đã tạm dừng",
         content: data.reason || undefined,
         occurredAt: new Date()
       }

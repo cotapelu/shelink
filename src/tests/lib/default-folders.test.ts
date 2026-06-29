@@ -64,11 +64,11 @@ describe("DEFAULT_FOLDERS_BY_CATEGORY", () => {
     // NON_LITIGATION has fewer folders (5) than litigation (8-9)
     expect(nonLitigation).toBeLessThan(litigation);
     expect(DEFAULT_FOLDERS_BY_CATEGORY.NON_LITIGATION).toEqual([
-      "立项",
-      "调研",
-      "工作底稿",
-      "出具文件",
-      "归档"
+      "Dự án",
+      "Nghiên cứu",
+      "Bản ghi công việc",
+      "File đã phát hành",
+      "Lưu trữ"
     ]);
   });
 });
@@ -137,44 +137,44 @@ describe("suggestFolderByTemplateCategory", () => {
   describe("Litigation categories", () => {
     const litigationMatterCategory = "CIVIL_COMMERCIAL" as const;
 
-    it("maps INTAKE to 收案", () => {
-      expect(suggestFolderByTemplateCategory("INTAKE", litigationMatterCategory)).toBe("收案");
+    it("maps INTAKE to Nhận vụ án", () => {
+      expect(suggestFolderByTemplateCategory("INTAKE", litigationMatterCategory)).toBe("Nhận vụ án");
     });
 
-    it("maps RETAINER to 委托手续", () => {
-      expect(suggestFolderByTemplateCategory("RETAINER", litigationMatterCategory)).toBe("委托手续");
+    it("maps RETAINER to Thủ tục ủy quyền", () => {
+      expect(suggestFolderByTemplateCategory("RETAINER", litigationMatterCategory)).toBe("Thủ tục ủy quyền");
     });
 
-    it("maps LITIGATION to 程序文书 (non-criminal)", () => {
-      expect(suggestFolderByTemplateCategory("LITIGATION", "CIVIL_COMMERCIAL")).toBe("程序文书");
+    it("maps LITIGATION to Văn bản thủ tục (non-criminal)", () => {
+      expect(suggestFolderByTemplateCategory("LITIGATION", "CIVIL_COMMERCIAL")).toBe("Văn bản thủ tục");
     });
 
-    it("maps LITIGATION to 庭前 for CRIMINAL", () => {
-      expect(suggestFolderByTemplateCategory("LITIGATION", "CRIMINAL")).toBe("庭前");
+    it("maps LITIGATION to Trước phiên tòa for CRIMINAL", () => {
+      expect(suggestFolderByTemplateCategory("LITIGATION", "CRIMINAL")).toBe("Trước phiên tòa");
     });
 
-    it("maps HEARING to 庭审 (non-criminal)", () => {
-      expect(suggestFolderByTemplateCategory("HEARING", "CIVIL_COMMERCIAL")).toBe("庭审");
+    it("maps HEARING to Phiên tòa (non-criminal)", () => {
+      expect(suggestFolderByTemplateCategory("HEARING", "CIVIL_COMMERCIAL")).toBe("Phiên tòa");
     });
 
-    it("maps WORK_PRODUCT to 证据 (non-criminal)", () => {
-      expect(suggestFolderByTemplateCategory("WORK_PRODUCT", "CIVIL_COMMERCIAL")).toBe("证据");
+    it("maps WORK_PRODUCT to Chứng cứ (non-criminal)", () => {
+      expect(suggestFolderByTemplateCategory("WORK_PRODUCT", "CIVIL_COMMERCIAL")).toBe("Chứng cứ");
     });
 
-    it("maps WORK_PRODUCT to 取证 for CRIMINAL", () => {
-      expect(suggestFolderByTemplateCategory("WORK_PRODUCT", "CRIMINAL")).toBe("取证");
+    it("maps WORK_PRODUCT to Thu thập chứng cứ for CRIMINAL", () => {
+      expect(suggestFolderByTemplateCategory("WORK_PRODUCT", "CRIMINAL")).toBe("Thu thập chứng cứ");
     });
 
-    it("maps ARCHIVE to 结案", () => {
-      expect(suggestFolderByTemplateCategory("ARCHIVE", "CIVIL_COMMERCIAL")).toBe("结案");
+    it("maps ARCHIVE to Kết thúc", () => {
+      expect(suggestFolderByTemplateCategory("ARCHIVE", "CIVIL_COMMERCIAL")).toBe("Kết thúc");
     });
 
-    it("maps CLOSING to 结案", () => {
-      expect(suggestFolderByTemplateCategory("CLOSING", "CIVIL_COMMERCIAL")).toBe("结案");
+    it("maps CLOSING to Kết thúc", () => {
+      expect(suggestFolderByTemplateCategory("CLOSING", "CIVIL_COMMERCIAL")).toBe("Kết thúc");
     });
 
-    it("maps BLANK to 收案 (non-criminal)", () => {
-      expect(suggestFolderByTemplateCategory("BLANK", "CIVIL_COMMERCIAL")).toBe("收案");
+    it("maps BLANK to Nhận vụ án (non-criminal)", () => {
+      expect(suggestFolderByTemplateCategory("BLANK", "CIVIL_COMMERCIAL")).toBe("Nhận vụ án");
     });
 
     it("returns null for unknown templateCategory", () => {
@@ -182,44 +182,44 @@ describe("suggestFolderByTemplateCategory", () => {
     });
 
     it("handles ADMINISTRATIVE as litigation", () => {
-      expect(suggestFolderByTemplateCategory("INTAKE", "ADMINISTRATIVE")).toBe("收案");
-      expect(suggestFolderByTemplateCategory("HEARING", "ADMINISTRATIVE")).toBe("庭审");
+      expect(suggestFolderByTemplateCategory("INTAKE", "ADMINISTRATIVE")).toBe("Nhận vụ án");
+      expect(suggestFolderByTemplateCategory("HEARING", "ADMINISTRATIVE")).toBe("Phiên tòa");
     });
   });
 
   describe("Non-litigation categories", () => {
     const nonLitigationMatterCategory = "NON_LITIGATION" as const;
 
-    it("maps INTAKE to 立项", () => {
-      expect(suggestFolderByTemplateCategory("INTAKE", nonLitigationMatterCategory)).toBe("立项");
+    it("maps INTAKE to Dự án", () => {
+      expect(suggestFolderByTemplateCategory("INTAKE", nonLitigationMatterCategory)).toBe("Dự án");
     });
 
-    it("maps RETAINER to 立项", () => {
-      expect(suggestFolderByTemplateCategory("RETAINER", nonLitigationMatterCategory)).toBe("立项");
+    it("maps RETAINER to Dự án", () => {
+      expect(suggestFolderByTemplateCategory("RETAINER", nonLitigationMatterCategory)).toBe("Dự án");
     });
 
-    it("maps LITIGATION to 出具文件", () => {
-      expect(suggestFolderByTemplateCategory("LITIGATION", nonLitigationMatterCategory)).toBe("出具文件");
+    it("maps LITIGATION to File đã phát hành", () => {
+      expect(suggestFolderByTemplateCategory("LITIGATION", nonLitigationMatterCategory)).toBe("File đã phát hành");
     });
 
-    it("maps HEARING to 工作底稿", () => {
-      expect(suggestFolderByTemplateCategory("HEARING", nonLitigationMatterCategory)).toBe("工作底稿");
+    it("maps HEARING to Bản ghi công việc", () => {
+      expect(suggestFolderByTemplateCategory("HEARING", nonLitigationMatterCategory)).toBe("Bản ghi công việc");
     });
 
-    it("maps WORK_PRODUCT to 出具文件", () => {
-      expect(suggestFolderByTemplateCategory("WORK_PRODUCT", nonLitigationMatterCategory)).toBe("出具文件");
+    it("maps WORK_PRODUCT to File đã phát hành", () => {
+      expect(suggestFolderByTemplateCategory("WORK_PRODUCT", nonLitigationMatterCategory)).toBe("File đã phát hành");
     });
 
-    it("maps ARCHIVE to 归档", () => {
-      expect(suggestFolderByTemplateCategory("ARCHIVE", nonLitigationMatterCategory)).toBe("归档");
+    it("maps ARCHIVE to Lưu trữ", () => {
+      expect(suggestFolderByTemplateCategory("ARCHIVE", nonLitigationMatterCategory)).toBe("Lưu trữ");
     });
 
-    it("maps CLOSING to 归档", () => {
-      expect(suggestFolderByTemplateCategory("CLOSING", nonLitigationMatterCategory)).toBe("归档");
+    it("maps CLOSING to Lưu trữ", () => {
+      expect(suggestFolderByTemplateCategory("CLOSING", nonLitigationMatterCategory)).toBe("Lưu trữ");
     });
 
-    it("maps BLANK to 工作底稿", () => {
-      expect(suggestFolderByTemplateCategory("BLANK", nonLitigationMatterCategory)).toBe("工作底稿");
+    it("maps BLANK to Bản ghi công việc", () => {
+      expect(suggestFolderByTemplateCategory("BLANK", nonLitigationMatterCategory)).toBe("Bản ghi công việc");
     });
 
     it("returns null for unknown templateCategory", () => {
@@ -229,23 +229,23 @@ describe("suggestFolderByTemplateCategory", () => {
 
   describe("Edge categories", () => {
     it("LEGAL_COUNSEL uses non-litigation map", () => {
-      expect(suggestFolderByTemplateCategory("INTAKE", "LEGAL_COUNSEL")).toBe("立项");
-      expect(suggestFolderByTemplateCategory("WORK_PRODUCT", "LEGAL_COUNSEL")).toBe("出具文件");
+      expect(suggestFolderByTemplateCategory("INTAKE", "LEGAL_COUNSEL")).toBe("Dự án");
+      expect(suggestFolderByTemplateCategory("WORK_PRODUCT", "LEGAL_COUNSEL")).toBe("File đã phát hành");
     });
 
     it("SPECIAL_PROJECT uses non-litigation map", () => {
-      expect(suggestFolderByTemplateCategory("HEARING", "SPECIAL_PROJECT")).toBe("工作底稿");
-      expect(suggestFolderByTemplateCategory("ARCHIVE", "SPECIAL_PROJECT")).toBe("归档");
+      expect(suggestFolderByTemplateCategory("HEARING", "SPECIAL_PROJECT")).toBe("Bản ghi công việc");
+      expect(suggestFolderByTemplateCategory("ARCHIVE", "SPECIAL_PROJECT")).toBe("Lưu trữ");
     });
 
     it("LABOR_ARBITRATION uses non-litigation map (not in isLitigation)", () => {
-      expect(suggestFolderByTemplateCategory("INTAKE", "LABOR_ARBITRATION")).toBe("立项");
-      expect(suggestFolderByTemplateCategory("HEARING", "LABOR_ARBITRATION")).toBe("工作底稿");
+      expect(suggestFolderByTemplateCategory("INTAKE", "LABOR_ARBITRATION")).toBe("Dự án");
+      expect(suggestFolderByTemplateCategory("HEARING", "LABOR_ARBITRATION")).toBe("Bản ghi công việc");
     });
 
     it("COMMERCIAL_ARBITRATION uses non-litigation map (not in isLitigation)", () => {
-      expect(suggestFolderByTemplateCategory("RETAINER", "COMMERCIAL_ARBITRATION")).toBe("立项");
-      expect(suggestFolderByTemplateCategory("CLOSING", "COMMERCIAL_ARBITRATION")).toBe("归档");
+      expect(suggestFolderByTemplateCategory("RETAINER", "COMMERCIAL_ARBITRATION")).toBe("Dự án");
+      expect(suggestFolderByTemplateCategory("CLOSING", "COMMERCIAL_ARBITRATION")).toBe("Lưu trữ");
     });
   });
 });

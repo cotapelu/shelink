@@ -18,14 +18,14 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.9 法院短信解析（TypeScript 实现，对应旧系统 server.py 的 parse_sms_regex）
+ * v0.9 Phân tích tin nhắn tòa án (Triển khai TypeScript, tương ứng với parse_sms_regex trong server.py hệ thống cũ)
  *
- * 用法：
+ * Cách sử dụng:
  *   const parsed = parseSms(rawText);
  *   parsed.smsType / parsed.caseNumbers / parsed.hearingDate ...
  *
- * 此文件**纯正则 + 纯 helper**，无 node:* / server-only 依赖，client 可 import。
- * AI 增强见 `sms-parser-ai.ts`（server-only）。
+ * File này **chỉ chứa regex thuần và helper thuần**, không có dependencies node:* / server-only, client có thể import.
+ * Nâng cao AI xem `sms-parser-ai.ts` (chỉ dành cho server).
  */
 import type { SmsType } from "@prisma/client";
 
@@ -49,9 +49,9 @@ export interface ParsedSms {
   smsType: SmsType;
   caseNumbers: string[];
   court: string | null;
-  // 完整日期时间字符串数组（保留原文格式，UI 友好显示）
+  // Mảng chuỗi ngày tháng đầy đủ (giữ định dạng gốc, hiển thị thân thiện với UI)
   dates: string[];
-  // 推测开庭时间（取 SMS 中第一个含时分的日期，开庭通知场景才有意义）
+  // Dự đoán thời gian xét xử (lấy ngày đầu tiên trong SMS chứa giờ-phút, có ý nghĩa trong kịch bản thông báo xét xử)
   hearingDate: string | null;
   filingDate: string | null;
   judgmentDate: string | null;
@@ -64,13 +64,13 @@ export interface ParsedSms {
   urls: string[];
   platforms: string[];
   summary: string;
-  // v0.9.1 AI 增强字段（aiEnriched=true 时才填）
+  // Trường nâng cao AI v0.9.1 (chỉ điền khi aiEnriched=true)
   aiEnriched?: boolean;
-  action?: string | null;       // 律师应采取的动作
+  action?: string | null;       // Hành động luật sư nên thực hiện
   urgency?: "HIGH" | "MEDIUM" | "LOW" | null;
 }
 
-// ━━━ 正则模式（与旧系统 SMS_PATTERNS 对齐）━━━
+// ━━━ Mẫu regex (đồng bộ với SMS_PATTERNS hệ thống cũ) ━━━
 const PAT_CASE_NUMBER = [/[（(]\d{4}[)）][一-龥]{1,4}\d{0,4}[一-龥]{1,4}\d+号/g];
 
 const PAT_COURT = [
@@ -125,7 +125,7 @@ const PAT_APPEAL_DEADLINE = [
 
 const PAT_AMOUNT = [/(?:人民币|金额|标的)\s*(\d[\d,]*\.?\d*)\s*元/g, /(\d[\d,]*\.?\d*)\s*元/g];
 
-// 法院前缀噪声词（"日内向 XX 法院" 等剥离）
+// Từ nhiễu tiền tố tòa án (loại bỏ như "trong ngày gửi đến XX tòa án")
 const PREFIX_NOISE = [
   "日内",
   "可向",
@@ -159,7 +159,7 @@ const SMS_TYPE_KEYWORDS: Array<{ type: SmsType; words: string[] }> = [
   { type: "EVIDENCE_SUBMIT", words: ["补充材料", "举证期", "证据交换", "提交材料"] }
 ];
 
-// ━━━ 工具 ━━━
+// ━━━ Tiện ích ━━━
 function uniq<T>(arr: T[]): T[] {
   return Array.from(new Set(arr));
 }
@@ -197,7 +197,7 @@ function classifyType(text: string): SmsType {
 }
 
 function pickHearingDate(dates: string[]): string | null {
-  // 优先含时分的（开庭场景）
+  // Ưu tiên có giờ-phút (cho kịch bản xét xử)
   const withTime = dates.find((d) => /\d{1,2}[:：时]\d{0,2}/.test(d));
   return withTime ?? null;
 }
@@ -208,14 +208,14 @@ function summarize(text: string): string {
     .map((l) => l.trim())
     .filter(Boolean);
   if (lines.length === 0) return text.slice(0, 50);
-  // 取最长且含关键字的一句作摘要
+  // Lấy câu dài nhất và chứa từ khóa làm tóm tắt
   const informative = lines.find((l) =>
     /开庭|送达|缴费|调解|执行|立案|判决|举证|裁定/.test(l)
   );
   return (informative ?? lines[0]).slice(0, 80);
 }
 
-// ━━━ 主入口 ━━━
+// ━━━ Điểm vào chính ━━━
 export function parseSms(text: string): ParsedSms {
   const result: ParsedSms = {
     smsType: classifyType(text),
@@ -236,14 +236,14 @@ export function parseSms(text: string): ParsedSms {
     summary: summarize(text)
   };
 
-  // 案号
+  // Số vụ án
   for (const pat of PAT_CASE_NUMBER) {
     const ms = text.match(pat);
     if (ms) result.caseNumbers.push(...ms);
   }
   result.caseNumbers = uniq(result.caseNumbers);
 
-  // 法院（按优先级匹配第一个有效）
+  // Tòa án (theo thứ tự ưu tiên, khớp với cái hiệu lực đầu tiên)
   for (const pat of PAT_COURT) {
     const m = text.match(pat);
     if (m) {
@@ -259,7 +259,7 @@ export function parseSms(text: string): ParsedSms {
     }
   }
 
-  // 日期时间
+  // Ngày tháng
   for (const pat of PAT_DATETIME) {
     const ms = text.match(pat);
     if (ms) result.dates.push(...ms);
@@ -267,7 +267,7 @@ export function parseSms(text: string): ParsedSms {
   result.dates = uniq(result.dates);
   result.hearingDate = pickHearingDate(result.dates);
 
-  // URL + 平台
+  // URL + Nền tảng
   for (const pat of PAT_URLS) {
     const ms = text.match(pat);
     if (ms) result.urls.push(...ms);
@@ -280,7 +280,7 @@ export function parseSms(text: string): ParsedSms {
   }
   result.platforms = Array.from(plats);
 
-  // 法庭
+  // Phòng xét xử
   for (const pat of PAT_COURT_ROOM) {
     const m = text.match(pat);
     if (m) {
@@ -289,7 +289,7 @@ export function parseSms(text: string): ParsedSms {
     }
   }
 
-  // 法官
+  // Thẩm phán
   for (const pat of PAT_JUDGE) {
     const m = text.match(pat);
     if (m) {
@@ -298,7 +298,7 @@ export function parseSms(text: string): ParsedSms {
     }
   }
 
-  // 书记员
+  // Thư ký
   for (const pat of PAT_CLERK) {
     const m = text.match(pat);
     if (m) {
@@ -307,14 +307,14 @@ export function parseSms(text: string): ParsedSms {
     }
   }
 
-  // 电话
+  // Điện thoại
   for (const pat of PAT_PHONE) {
     const ms = text.match(pat);
     if (ms) result.phones.push(...ms);
   }
   result.phones = uniq(result.phones);
 
-  // 立案日 / 判决日 / 上诉期
+  // Ngày nộp đơn / Ngày phán quyết / Thời hạn kháng cáo
   for (const pat of PAT_FILING_DATE) {
     const m = text.match(pat);
     if (m) {
@@ -337,7 +337,7 @@ export function parseSms(text: string): ParsedSms {
     }
   }
 
-  // 金额
+  // Số tiền
   for (const pat of PAT_AMOUNT) {
     const ms = text.match(pat);
     if (ms) result.amounts.push(...ms);
@@ -347,7 +347,7 @@ export function parseSms(text: string): ParsedSms {
   return result;
 }
 
-// ━━━ 批量解析（按空行或分隔线拆分多条）━━━
+// ━━━ Phân tích hàng loạt (tách nhiều tin nhắn theo dòng trống hoặc đường phân cách) ━━━
 export function splitSmsBatch(text: string): string[] {
   return text
     .split(/\n\s*\n|\n-{3,}\n|\n={3,}\n/)
@@ -355,7 +355,7 @@ export function splitSmsBatch(text: string): string[] {
     .filter(Boolean);
 }
 
-// ━━━ 尝试把短信 dates 解析为 JS Date，方便落到 Hearing/Deadline ━━━
+// ━━━ Cố gắng phân tích dates SMS thành JS Date, thuận tiện cho Hearing/Deadline ━━━
 const CN_DIGIT: Record<string, number> = {
   "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10
 };
@@ -378,6 +378,6 @@ export function toDate(s: string): Date | null {
 
 export { CN_DIGIT };
 
-// AI 增强（enrichWithAi）已迁移至 sms-parser-ai.ts（server-only）
-// 该文件保持 client-safe（无 node:* 依赖），sms-paste-dialog 等 client
-// 组件可直接 import 这里的 parseSms / splitSmsBatch / toDate。
+// Tăng cường AI (enrichWithAi) đã di chuyển sang sms-parser-ai.ts (chỉ dành cho server)
+// File này giữ client-safe (không có dependencies node:*), các client như sms-paste-dialog
+// component có thể import trực tiếp parseSms / splitSmsBatch / toDate từ đây.

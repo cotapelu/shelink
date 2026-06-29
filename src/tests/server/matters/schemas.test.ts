@@ -221,7 +221,7 @@ describe('partyInputSchema', () => {
       idNumber: '   ',
       enterpriseSocialCode: ''
     };
-    expect(() => partyInputSchema.parse(input)).toThrow("自然人需填写身份证号码");
+    expect(() => partyInputSchema.parse(input)).toThrow("Cá nhân phải cung cấp số CMND/CCCD");
   });
 
   it('rejects non-natural person without enterpriseSocialCode', () => {
@@ -233,7 +233,7 @@ describe('partyInputSchema', () => {
       idNumber: '',
       enterpriseSocialCode: '   '
     };
-    expect(() => partyInputSchema.parse(input)).toThrow("公司/组织需填写统一社会信用代码");
+    expect(() => partyInputSchema.parse(input)).toThrow("Công ty/tổ chức phải cung cấp unified social credit code");
   });
 
   it('accepts party with missing optional standing (undefined)', () => {

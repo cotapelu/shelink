@@ -19,9 +19,8 @@
  */
 import type { MatterCategory, ProcedureType, LitigationStanding } from "@prisma/client";
 
-/**
- * 各案件类别下可选的程序类型。
- * UI 上"新建案件"和"添加程序"按此表过滤可选项。
+/** Các loại thủ tục có thể chọn theo category vụ án.
+ * UI: "Tạo vụ án" và "Thêm thủ tục" lọc options theo bảng này.
  */
 export const proceduresByCategory: Record<MatterCategory, ProcedureType[]> = {
   CIVIL_COMMERCIAL: [
@@ -111,24 +110,22 @@ export const standingsByCategory: Record<MatterCategory, LitigationStanding[]> =
   SPECIAL_PROJECT: ["NON_LITIGATION_PARTY"]
 };
 
-/**
- * 根据程序类型推荐"办理机关"的提示文本。
- */
+/** Gợi ý 'Cơ quan xử lý' theo loại thủ tục. */
 export function suggestHandlingAgency(type: ProcedureType): string {
-  if (type === "INVESTIGATION") return "公安局 / 监察委 / 国安局";
-  if (type === "PROSECUTION_REVIEW") return "检察院（审查起诉部门）";
-  if (type === "PROSECUTORIAL_SUPERVISION") return "检察院";
-  if (type === "CRIMINAL_ENFORCEMENT") return "监狱 / 看守所 / 社区矫正机构";
-  if (type === "COMMUTATION_PAROLE_REVIEW") return "法院（执行庭）";
-  if (type === "ADMIN_RECONSIDERATION") return "复议机关";
-  if (type === "COMMERCIAL_ARBITRATION") return "仲裁委员会";
-  if (type === "LABOR_ARBITRATION") return "劳动人事争议仲裁委";
+  if (type === "INVESTIGATION") return "Công an / Thanh tra / An ninh";
+  if (type === "PROSECUTION_REVIEW") return "Viện kiểm sát (phòng xét xử)";
+  if (type === "PROSECUTORIAL_SUPERVISION") return "Viện kiểm sát";
+  if (type === "CRIMINAL_ENFORCEMENT") return "Nhà tù / Trại giam / Cơ quan cộng đồng";
+  if (type === "COMMUTATION_PAROLE_REVIEW") return "Tòa án (phòng thi hành)";
+  if (type === "ADMIN_RECONSIDERATION") return "Cơ quan phúc thẩm hành chính";
+  if (type === "COMMERCIAL_ARBITRATION") return "Hội đồng trọng tài thương mại";
+  if (type === "LABOR_ARBITRATION") return "Hội đồng trọng tài lao động";
   if (type === "ARBITRATION_SET_ASIDE" || type === "ARBITRATION_ENFORCEMENT_REVIEW")
-    return "中级人民法院";
-  if (type === "ENFORCEMENT" || type === "ENFORCEMENT_OBJECTION") return "法院（执行局）";
-  if (type === "ADMIN_NON_LITIGATION_ENFORCEMENT") return "法院";
-  // 一审/二审/再审 等审判类
-  return "法院";
+    return "Tòa án trung cấp";
+  if (type === "ENFORCEMENT" || type === "ENFORCEMENT_OBJECTION") return "Tòa án (phòng thi hành)";
+  if (type === "ADMIN_NON_LITIGATION_ENFORCEMENT") return "Tòa án";
+  // Tố tụng: sơ thẩm/phúc thẩm/giám đốc thẩm...
+  return "Tòa án";
 }
 
 export const matterCategoryCode: Record<MatterCategory, string> = {

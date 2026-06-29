@@ -46,22 +46,22 @@ import {
 
 describe("clientTypeLabel", () => {
   it("labels INDIVIDUAL", () => {
-    expect(clientTypeLabel.INDIVIDUAL).toBe("自然人");
+    expect(clientTypeLabel.INDIVIDUAL).toBe("Cá nhân");
   });
   it("labels COMPANY", () => {
-    expect(clientTypeLabel.COMPANY).toBe("公司");
+    expect(clientTypeLabel.COMPANY).toBe("Công ty");
   });
   it("labels ORGANIZATION", () => {
-    expect(clientTypeLabel.ORGANIZATION).toBe("其他组织");
+    expect(clientTypeLabel.ORGANIZATION).toBe("Tổ chức khác");
   });
 });
 
 describe("cooperationStatusLabel", () => {
   it("labels all states", () => {
-    expect(cooperationStatusLabel.POTENTIAL).toBe("潜在");
-    expect(cooperationStatusLabel.NEGOTIATING).toBe("洽谈中");
-    expect(cooperationStatusLabel.SIGNED).toBe("已签约");
-    expect(cooperationStatusLabel.TERMINATED).toBe("已终止");
+    expect(cooperationStatusLabel.POTENTIAL).toBe("Tiềm năng");
+    expect(cooperationStatusLabel.NEGOTIATING).toBe("Đang đàm phán");
+    expect(cooperationStatusLabel.SIGNED).toBe("Đã ký hợp đồng");
+    expect(cooperationStatusLabel.TERMINATED).toBe("Đã chấm dứt");
   });
 });
 
@@ -78,8 +78,8 @@ describe("COOPERATION_STATUS_OPTIONS", () => {
 
 describe("genderLabel", () => {
   it("labels MALE and FEMALE", () => {
-    expect(genderLabel.MALE).toBe("男");
-    expect(genderLabel.FEMALE).toBe("女");
+    expect(genderLabel.MALE).toBe("Nam");
+    expect(genderLabel.FEMALE).toBe("Nữ");
   });
 });
 
@@ -91,16 +91,28 @@ describe("GENDER_OPTIONS", () => {
 
 describe("partyTypeLabel", () => {
   it("labels NATURAL_PERSON", () => {
-    expect(partyTypeLabel.NATURAL_PERSON).toBe("自然人");
+    expect(partyTypeLabel.NATURAL_PERSON).toBe("Cá nhân");
   });
   it("labels COMPANY", () => {
-    expect(partyTypeLabel.COMPANY).toBe("公司");
+    expect(partyTypeLabel.COMPANY).toBe("Công ty");
   });
   it("labels PARTNERSHIP", () => {
-    expect(partyTypeLabel.PARTNERSHIP).toBe("合伙企业");
+    expect(partyTypeLabel.PARTNERSHIP).toBe("Hợp danh");
   });
   it("labels INDIVIDUAL_BUSINESS", () => {
-    expect(partyTypeLabel.INDIVIDUAL_BUSINESS).toBe("个体工商户");
+    expect(partyTypeLabel.INDIVIDUAL_BUSINESS).toBe("Hộ kinh doanh cá thể");
+  });
+  it("labels INSTITUTION", () => {
+    expect(partyTypeLabel.INSTITUTION).toBe("Đơn vị sự nghiệp");
+  });
+  it("labels SOCIAL_ORG", () => {
+    expect(partyTypeLabel.SOCIAL_ORG).toBe("Tổ chức xã hội");
+  });
+  it("labels GOVERNMENT", () => {
+    expect(partyTypeLabel.GOVERNMENT).toBe("Cơ quan nhà nước");
+  });
+  it("labels OTHER_ORG", () => {
+    expect(partyTypeLabel.OTHER_ORG).toBe("Tổ chức khác");
   });
 });
 
@@ -113,8 +125,11 @@ describe("PARTY_TYPE_OPTIONS", () => {
 
 describe("barFilingLabel", () => {
   it("labels NONE and others", () => {
-    expect(barFilingLabel.NONE).toBe("否");
-    expect(barFilingLabel.COLLECTIVE).toBe("需要，涉集体案件");
+    expect(barFilingLabel.NONE).toBe("Không");
+    expect(barFilingLabel.COLLECTIVE).toBe("Cần, liên quan tập thể");
+    expect(barFilingLabel.SENSITIVE).toBe("Cần, liên quan nhạy cảm");
+    expect(barFilingLabel.MAJOR).toBe("Cần, liên quan lớn");
+    expect(barFilingLabel.OTHER).toBe("Cần, trường hợp khác");
   });
 });
 
@@ -145,9 +160,14 @@ describe("matterCategoryKind", () => {
 
 describe("matterCategoryLabel", () => {
   it("has labels for all categories", () => {
-    expect(matterCategoryLabel.CIVIL_COMMERCIAL).toBe("民商诉讼");
-    expect(matterCategoryLabel.LABOR_ARBITRATION).toBe("劳动仲裁");
-    expect(matterCategoryLabel.LEGAL_COUNSEL).toBe("常年顾问");
+    expect(matterCategoryLabel.CIVIL_COMMERCIAL).toBe("Dân sự - Thương mại");
+    expect(matterCategoryLabel.LABOR_ARBITRATION).toBe("Lao động & Trọng tài");
+    expect(matterCategoryLabel.COMMERCIAL_ARBITRATION).toBe("Thương mại & Trọng tài");
+    expect(matterCategoryLabel.CRIMINAL).toBe("Hình sự");
+    expect(matterCategoryLabel.ADMINISTRATIVE).toBe("Hành chính");
+    expect(matterCategoryLabel.NON_LITIGATION).toBe("Phi tố tụng");
+    expect(matterCategoryLabel.LEGAL_COUNSEL).toBe("Tư vấn");
+    expect(matterCategoryLabel.SPECIAL_PROJECT).toBe("Dự án đặc biệt");
   });
 });
 
@@ -170,27 +190,31 @@ describe("matterCategoryShort", () => {
 
 describe("matterStatusLabel", () => {
   it("labels all statuses", () => {
-    expect(matterStatusLabel.PENDING_ACCEPTANCE).toBe("待启动");
-    expect(matterStatusLabel.IN_PROGRESS).toBe("办理中");
-    expect(matterStatusLabel.CLOSED).toBe("已结案");
+    expect(matterStatusLabel.PENDING_ACCEPTANCE).toBe("Chờ khởi động");
+    expect(matterStatusLabel.IN_PROGRESS).toBe("Đang xử lý");
+    expect(matterStatusLabel.ON_HOLD).toBe("Tạm dừng");
+    expect(matterStatusLabel.CLOSED).toBe("Đã kết thúc");
+    expect(matterStatusLabel.ARCHIVED).toBe("Đã lưu trữ");
   });
 });
 
 describe("intakeStatusLabel", () => {
   it("labels all intake statuses", () => {
-    expect(intakeStatusLabel.INTAKE).toBe("已咨询");
-    expect(intakeStatusLabel.CONVERTED).toBe("已转化");
-    expect(intakeStatusLabel.DECLINED).toBe("不接案");
+    expect(intakeStatusLabel.INTAKE).toBe("Đã tư vấn");
+    expect(intakeStatusLabel.PENDING_CONFIRMATION).toBe("Chờ xác nhận");
+    expect(intakeStatusLabel.CONVERTED).toBe("Đã chuyển đổi");
+    expect(intakeStatusLabel.DECLINED).toBe("Từ chối");
+    expect(intakeStatusLabel.NEEDS_REVISION).toBe("Chờ bổ sung");
   });
 });
 
 describe("userRoleLabel", () => {
   it("labels all roles", () => {
-    expect(userRoleLabel.ADMIN).toBe("系统管理员");
-    expect(userRoleLabel.PRINCIPAL_LAWYER).toBe("主办律师");
-    expect(userRoleLabel.LAWYER).toBe("经办律师");
-    expect(userRoleLabel.ASSISTANT).toBe("助理");
-    expect(userRoleLabel.FINANCE).toBe("财务");
+    expect(userRoleLabel.ADMIN).toBe("Quản trị viên");
+    expect(userRoleLabel.PRINCIPAL_LAWYER).toBe("Luật sư chính");
+    expect(userRoleLabel.LAWYER).toBe("Luật sư");
+    expect(userRoleLabel.ASSISTANT).toBe("Trợ lý");
+    expect(userRoleLabel.FINANCE).toBe("Tài chính");
   });
 });
 
@@ -199,33 +223,55 @@ describe("litigationStandingLabel", () => {
     expect(Object.keys(litigationStandingLabel).length).toBeGreaterThan(10);
   });
   it("labels common standings", () => {
-    expect(litigationStandingLabel.PLAINTIFF).toBe("原告");
-    expect(litigationStandingLabel.DEFENDANT).toBe("被告");
+    expect(litigationStandingLabel.PLAINTIFF).toBe("Nguyên đơn");
+    expect(litigationStandingLabel.JOINT_PLAINTIFF).toBe("Cùng nguyên đơn");
+    expect(litigationStandingLabel.DEFENDANT).toBe("Bị đơn");
+    expect(litigationStandingLabel.JOINT_DEFENDANT).toBe("Cùng bị đơn");
+    expect(litigationStandingLabel.THIRD_PARTY).toBe("Người thứ ba");
   });
 });
 
 describe("procedureTypeLabel", () => {
   it("has labels for all procedure types", () => {
-    expect(procedureTypeLabel.FIRST_INSTANCE).toBe("一审");
-    expect(procedureTypeLabel.SECOND_INSTANCE).toBe("二审");
-    expect(procedureTypeLabel.ENFORCEMENT).toBe("强制执行");
+    expect(procedureTypeLabel.FIRST_INSTANCE).toBe("Tòa sơ thẩm");
+    expect(procedureTypeLabel.SECOND_INSTANCE).toBe("Tòa phúc thẩm");
+    expect(procedureTypeLabel.RETRIAL_REVIEW).toBe("Xét xử phúc thẩm");
+    expect(procedureTypeLabel.RETRIAL).toBe("Xét xử giám đốc thẩm");
+    expect(procedureTypeLabel.REMAND_FIRST).toBe("Trả về xét xử lần 1");
+    expect(procedureTypeLabel.REMAND_SECOND).toBe("Trả về xét xử lần 2");
+    expect(procedureTypeLabel.PROSECUTORIAL_SUPERVISION).toBe("Giám sát tố tụng");
+    expect(procedureTypeLabel.COMMERCIAL_ARBITRATION).toBe("Trọng tài thương mại");
+    expect(procedureTypeLabel.LABOR_ARBITRATION).toBe("Trọng tài lao động");
+    expect(procedureTypeLabel.ARBITRATION_SET_ASIDE).toBe("Hủy phán quyết trọng tài");
+    expect(procedureTypeLabel.ARBITRATION_ENFORCEMENT_REVIEW).toBe("Xem xét thi hành trọng tài");
+    expect(procedureTypeLabel.ENFORCEMENT).toBe("Thi hành án");
+    expect(procedureTypeLabel.ENFORCEMENT_OBJECTION).toBe("Phản đối thi hành");
+    expect(procedureTypeLabel.INVESTIGATION).toBe("Điều tra");
+    expect(procedureTypeLabel.PROSECUTION_REVIEW).toBe("Xét xử phúc thẩm");
+    expect(procedureTypeLabel.DEATH_PENALTY_REVIEW).toBe("Xét xử án tử hình");
+    expect(procedureTypeLabel.CRIMINAL_ENFORCEMENT).toBe("Thi hành hình sự");
+    expect(procedureTypeLabel.COMMUTATION_PAROLE_REVIEW).toBe("Xét xét giảm án/tha tù");
+    expect(procedureTypeLabel.ADMIN_RECONSIDERATION).toBe("Tái xem xét hành chính");
+    expect(procedureTypeLabel.ADMIN_NON_LITIGATION_ENFORCEMENT).toBe("Thi hành hành chính phi tố tụng");
+    expect(procedureTypeLabel.NON_LITIGATION_PHASE).toBe("Giai đoạn phi tố tụng");
+    expect(procedureTypeLabel.CUSTOM).toBe("Tùy chỉnh");
   });
 });
 
 describe("feeTypeLabel", () => {
   it("labels fee types", () => {
-    expect(feeTypeLabel.FIXED).toBe("固定收费");
-    expect(feeTypeLabel.CONTINGENCY).toBe("风险代理");
-    expect(feeTypeLabel.TIMED).toBe("计时收费");
+    expect(feeTypeLabel.FIXED).toBe("Cố định");
+    expect(feeTypeLabel.CONTINGENCY).toBe("Phụ thuộc kết quả");
+    expect(feeTypeLabel.TIMED).toBe("Theo thời gian");
   });
 });
 
 describe("invoiceRequestStatusLabel & Color", () => {
   it("labels all statuses", () => {
-    expect(invoiceRequestStatusLabel.PENDING).toBe("待财务处理");
-    expect(invoiceRequestStatusLabel.APPROVED).toBe("已批准");
-    expect(invoiceRequestStatusLabel.ISSUED).toBe("已开具");
-    expect(invoiceRequestStatusLabel.REJECTED).toBe("已驳回");
+    expect(invoiceRequestStatusLabel.PENDING).toBe("Chờ tài chính xử lý");
+    expect(invoiceRequestStatusLabel.APPROVED).toBe("Đã duyệt");
+    expect(invoiceRequestStatusLabel.ISSUED).toBe("Đã xuất hóa đơn");
+    expect(invoiceRequestStatusLabel.REJECTED).toBe("Đã từ chối");
   });
   it("has matching colors", () => {
     expect(invoiceRequestStatusColor.PENDING).toBe("#FBBF24");

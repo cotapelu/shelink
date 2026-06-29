@@ -155,8 +155,8 @@ describe("assertManagerOrRole", () => {
     expect(() => assertManagerOrRole("ASSISTANT", "LAWYER", "ASSISTANT")).not.toThrow();
   });
 
-  it("throws if not manager and role not allowed", () => {
-    expect(() => assertManagerOrRole("LAWYER", "ASSISTANT")).toThrow("权限不足");
-    expect(() => assertManagerOrRole("ASSISTANT", "LAWYER")).toThrow("权限不足");
+  it('throws if not manager and role not allowed', () => {
+    expect(() => assertManagerOrRole('LAWYER', 'ASSISTANT')).toThrow('Không đủ quyền');
+    expect(() => assertManagerOrRole('ASSISTANT', 'LAWYER')).toThrow('Không đủ quyền');
   });
 });

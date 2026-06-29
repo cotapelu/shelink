@@ -171,7 +171,7 @@ describe("assertManagerOrRole", () => {
   });
 
   it("rejects role not in allowed list", () => {
-    expect(() => assertManagerOrRole("ASSISTANT", "LAWYER")).toThrow("权限不足");
+    expect(() => assertManagerOrRole("ASSISTANT", "LAWYER")).toThrow("Không đủ quyền");
   });
 
   it("handles multiple allowed roles", () => {

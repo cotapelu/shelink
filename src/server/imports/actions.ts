@@ -40,12 +40,12 @@ import {
 async function requireManager() {
   const session = await requireSession();
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
-    throw new Error("仅管理员 / 主任律师可批量导入案件");
+    throw new Error("Chỉ admin / Principal Lawyer được phép import hàng loạt vụ án");
   }
   return session;
 }
 
-/** Excel 单元格值 → 字符串（日期统一格式化为 YYYY-MM-DD） */
+/** Giá trị cell Excel → chuỗi (ngày tháng chuẩn hóa YYYY-MM-DD) */
 function cellToString(value: ExcelJS.CellValue): string {
   if (value === null || value === undefined) return "";
   if (value instanceof Date) {
@@ -55,7 +55,7 @@ function cellToString(value: ExcelJS.CellValue): string {
     return `${y}-${m}-${d}`;
   }
   if (typeof value === "object") {
-    // 富文本 / 公式结果
+    // Rich text / formula result
     const obj = value as { result?: unknown; text?: unknown; richText?: { text: string }[] };
     if (obj.richText) return obj.richText.map((r) => r.text).join("");
     if (obj.text !== undefined) return String(obj.text);
@@ -65,13 +65,13 @@ function cellToString(value: ExcelJS.CellValue): string {
   return String(value).trim();
 }
 
-/** 解析上传的 xlsx → [{ rowNo, raw }]，rowNo 为 Excel 行号（含表头，从 2 起） */
+/** Parse xlsx upload → [{ rowNo, raw }], rowNo là số dòng Excel (bao gồm header, bắt đầu từ 2) */
 async function readSheet(file: File): Promise<{ rowNo: number; raw: RawRow }[]> {
   const buf = Buffer.from(await file.arrayBuffer());
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.load(buf as unknown as ArrayBuffer);
   const sheet = wb.worksheets[0];
-  if (!sheet) throw new Error("文件中没有工作表");
+  if (!sheet) throw new Error("File không có worksheet");
 
   // 表头 → 列索引（去掉必填星号，匹配 IMPORT_COLUMNS.header）
   const headerByIndex = new Map<number, string>(); // colIndex → field key
@@ -82,7 +82,7 @@ async function readSheet(file: File): Promise<{ rowNo: number; raw: RawRow }[]> 
     if (col) headerByIndex.set(colNumber, col.key);
   });
   if (headerByIndex.size === 0) {
-    throw new Error("未识别到表头，请使用下载的模板填写");
+    throw new Error("Không nhận diện được header, hãy dùng template đã tải để điền");
   }
 
   const rows: { rowNo: number; raw: RawRow }[] = [];
@@ -243,9 +243,9 @@ async function createOneMatter(n: NormalizedRow, currentUserId: string) {
         archivedAt: n.status === "ARCHIVED" ? new Date() : null,
         primaryClientId: clientId,
         members: { create: { userId: ownerId, role: "LEAD" } },
-        clientLinks: { create: { clientId, isPrimary: true, label: "主要委托方" } },
+        clientLinks: { create: { clientId, isPrimary: true, label: "Khách hàng chính" } },
         parties: { create: [clientParty, opposingParty] },
-        // 办理中按类别自动生成首程序（与收案转化一致）；结案/归档不建
+        // Trạng thái IN_PROGRESS tự động tạo首程序 theo category (giống intake convert); trạng thái CLOSED/ARCHIVED không tạo
         ...(n.status === "IN_PROGRESS"
           ? {
               procedures: {
@@ -268,7 +268,7 @@ async function createOneMatter(n: NormalizedRow, currentUserId: string) {
       data: {
         matterId: matter.id,
         eventType: "MATTER_CREATED",
-        title: "案件已创建（批量导入）",
+        title: "Vụ án đã được tạo (import hàng loạt)",
         occurredAt: new Date()
       }
     });
@@ -285,7 +285,7 @@ export interface ImportResult {
   failed: { rowNo: number; error: string }[];
 }
 
-/** 确认导入：逐行事务、失败不阻断，返回成功/失败清单 */
+/** Xác nhận import: Mỗi row là transaction riêng, lỗi không chặn, trả về danh sách thành công/thất bại */
 export async function commitMatterImportAction(input: {
   rows: { rowNo: number; raw: RawRow }[];
 }): Promise<ImportResult> {
@@ -296,7 +296,7 @@ export async function commitMatterImportAction(input: {
   for (const { rowNo, raw } of input.rows) {
     try {
       const { errors, normalized } = validateRow(raw);
-      if (!normalized) throw new Error(errors.join("；") || "行校验失败");
+      if (!normalized) throw new Error(errors.join(";") || "Hàng không hợp lệ");
       const m = await createOneMatter(normalized, session.user.id);
       succeeded.push({
         rowNo,
@@ -305,7 +305,7 @@ export async function commitMatterImportAction(input: {
         title: m.title
       });
     } catch (e) {
-      failed.push({ rowNo, error: e instanceof Error ? e.message : "导入失败" });
+      failed.push({ rowNo, error: e instanceof Error ? e.message : "Import thất bại" });
     }
   }
 

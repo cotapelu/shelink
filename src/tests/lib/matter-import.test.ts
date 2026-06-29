@@ -33,33 +33,41 @@ import {
 
 describe("批量导入 — 文本映射", () => {
   it("案件类型反查", () => {
-    expect(parseCategoryLabel("民商诉讼")).toBe("CIVIL_COMMERCIAL");
-    expect(parseCategoryLabel("劳动仲裁")).toBe("LABOR_ARBITRATION");
-    expect(parseCategoryLabel("不存在")).toBeNull();
+    expect(parseCategoryLabel("Dân sự - Thương mại")).toBe("CIVIL_COMMERCIAL");
+    expect(parseCategoryLabel("Lao động & Trọng tài")).toBe("LABOR_ARBITRATION");
+    expect(parseCategoryLabel("Thương mại & Trọng tài")).toBe("COMMERCIAL_ARBITRATION");
+    expect(parseCategoryLabel("Hình sự")).toBe("CRIMINAL");
+    expect(parseCategoryLabel("Hành chính")).toBe("ADMINISTRATIVE");
+    expect(parseCategoryLabel("Phi tố tụng")).toBe("NON_LITIGATION");
+    expect(parseCategoryLabel("Tư vấn")).toBe("LEGAL_COUNSEL");
+    expect(parseCategoryLabel("Dự án đặc biệt")).toBe("SPECIAL_PROJECT");
+    expect(parseCategoryLabel("Không tồn tại")).toBeNull();
   });
 
   it("案件状态反查（兼容「结案」）", () => {
-    expect(parseStatusLabel("办理中")).toBe("IN_PROGRESS");
+    expect(parseStatusLabel("Đang xử lý")).toBe("IN_PROGRESS");
+    expect(parseStatusLabel("Đã kết thúc")).toBe("CLOSED");
     expect(parseStatusLabel("已结案")).toBe("CLOSED");
-    expect(parseStatusLabel("结案")).toBe("CLOSED");
-    expect(parseStatusLabel("已归档")).toBe("ARCHIVED");
-    expect(parseStatusLabel("乱填")).toBeNull();
+    expect(parseStatusLabel("Đã lưu trữ")).toBe("ARCHIVED");
+    expect(parseStatusLabel("Chờ khởi động")).toBe("PENDING_ACCEPTANCE");
+    expect(parseStatusLabel("Tạm dừng")).toBe("ON_HOLD");
+    expect(parseStatusLabel("Sai")).toBeNull();
   });
 
   it("个人/企业 → PartyType / ClientType", () => {
-    expect(parsePartyType("企业")).toBe("COMPANY");
-    expect(parsePartyType("个人")).toBe("NATURAL_PERSON");
+    expect(parsePartyType("Công ty")).toBe("COMPANY");
+    expect(parsePartyType("Cá nhân")).toBe("NATURAL_PERSON");
     expect(parsePartyType("")).toBe("NATURAL_PERSON");
-    expect(parseClientType("企业")).toBe("COMPANY");
+    expect(parseClientType("Công ty")).toBe("COMPANY");
     expect(parseClientType(undefined)).toBe("INDIVIDUAL");
   });
 
   it("日期 / 金额解析", () => {
     expect(parseImportDate("2026-05-30")?.getFullYear()).toBe(2026);
     expect(parseImportDate("2026/5/3")?.getMonth()).toBe(4);
-    expect(parseImportDate("无效")).toBeNull();
+    expect(parseImportDate("Không hợp lệ")).toBeNull();
     expect(parseAmount("120,000")).toBe(120000);
-    expect(parseAmount("¥12万")).toBeNull(); // 「万」不解析
+    expect(parseAmount("¥12万")).toBeNull(); // 「万」không phân tích
     expect(parseAmount("")).toBeNull();
   });
 
@@ -82,9 +90,9 @@ describe("批量导入 — 单行校验", () => {
     clientIdNumber: "110101199001011234",
     opposingName: "某公司",
     opposingIdNumber: "91110000MA01XXXX1A",
-    opposingType: "企业",
-    category: "民商诉讼",
-    status: "办理中",
+    opposingType: "Công ty",
+    category: "Dân sự - Thương mại",
+    status: "Đang xử lý",
     claimAmount: "120000"
   };
 
@@ -101,12 +109,12 @@ describe("批量导入 — 单行校验", () => {
   it("缺必填项报错且 normalized 为 null", () => {
     const { errors, normalized } = validateRow({ ...okRow, clientName: "", category: "瞎填" });
     expect(normalized).toBeNull();
-    expect(errors.some((e) => e.includes("客户名称"))).toBe(true);
-    expect(errors.some((e) => e.includes("案件类型"))).toBe(true);
+    expect(errors.some((e) => e.includes("tên khách hàng"))).toBe(true);
+    expect(errors.some((e) => e.includes("Loại vụ án"))).toBe(true);
   });
 
   it("收案日期格式错误报错", () => {
-    const { errors } = validateRow({ ...okRow, intakeDate: "2026年5月" });
-    expect(errors.some((e) => e.includes("收案日期"))).toBe(true);
+    const { errors } = validateRow({ ...okRow, intakeDate: "30/05/2026" });
+    expect(errors.some((e) => e.includes("Ngày nhận vụ án"))).toBe(true);
   });
 });

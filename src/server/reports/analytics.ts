@@ -18,10 +18,10 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.22: 报表深入分析
+ * v0.22: Phân tích sâu báo cáo
  *
- * - 办案周期：本期已结案件的 closedAt - createdAt 天数，按 category 统计
- * - AI 审查 top issues：本期 ReviewRecord.itemsJson 聚合，找高频 title
+ * - Chu kỳ xử lý vụ án: Số ngày closedAt - createdAt của các vụ án đã kết thúc trong kỳ, thống kê theo category
+ * - AI review top issues: Tập hợp ReviewRecord.itemsJson trong kỳ, tìm title xuất hiện nhiều
  */
 import { prisma } from "@/lib/prisma";
 import type { MatterCategory } from "@prisma/client";
@@ -38,8 +38,8 @@ export type CycleStats = {
 };
 
 /**
- * 计算"收案→结案"周期。本期 closedAt 落入的案件为口径。
- * 用 JS 端排序算中位数（prisma groupBy 不支持中位数）。
+ * Tính chu kỳ "Nhận vụ án → Kết thúc". Chỉ xét các vụ án có closedAt rơi trong kỳ.
+ * Dùng JS sort để tính trung vị (prisma groupBy không hỗ trợ).
  */
 export async function getCaseCycleAnalysis(period: ReportPeriod): Promise<CycleStats[]> {
   const closed = await prisma.matter.findMany({
@@ -97,12 +97,12 @@ export type ReviewIssueAnalysis = {
   totalItems: number;
   bySeverity: Record<ReviewSeverity, number>;
   byType: Record<ReviewType, number>;
-  topIssues: ReviewTopIssue[]; // 出现频率 top 10 的 title
+  topIssues: ReviewTopIssue[]; // Top 10 title xuất hiện nhiều nhất
 };
 
 /**
- * 本期 AI 审查的跨案件聚合统计。
- * 从 ReviewRecord.itemsJson 拉出来 JS 聚合（PG jsonb 函数路径 prisma 不友好）。
+ * Tổng hợp跨案件 AI review trong kỳ.
+ * Lấy dữ liệu từ ReviewRecord.itemsJson và tập hợp bằng JS (PG jsonb functions khó dùng với prisma).
  */
 export async function getReviewIssueAnalysis(period: ReportPeriod): Promise<ReviewIssueAnalysis> {
   const records = await prisma.reviewRecord.findMany({

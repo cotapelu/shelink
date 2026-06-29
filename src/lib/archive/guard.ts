@@ -18,16 +18,16 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.9.4 归档只读门禁
+ * Cửa chỉ đọc lưu trữ
  *
- * 策略（用户选择"中"）：
- *   - 案件 status === "ARCHIVED" 后：业务写操作全禁
- *   - 例外：补传材料到 ARCHIVE 卷宗（结案/归档）允许
+ * Chiến lược (user chọn "trung"):
+ *   - Sau khi matter.status === "ARCHIVED": cấm mọi ghi
+ *   - Ngoại lệ: upload vào ARCHIVE folder được phép
  *
- * 调用方式（每个写操作 server action 入口）：
+ * Cách gọi (mỗi server action ghi):
  *   await assertMatterWritable(matterId);
  *
- * 文档上传 / 删除 需要 isArchiveFolder() 配合放行 ARCHIVE 卷宗。
+ * Upload tài liệu / xóa cần isArchiveFolder() để cho phép ARCHIVE.
  */
 import { requireSession } from "@/lib/auth/session";
 import { matterAssociationFilter } from "@/lib/permissions";
@@ -63,20 +63,20 @@ export async function assertMatterWritable(
 ): Promise<void> {
   if (!matterId) return;
   const matter = await findWritableMatter(matterId, opts);
-  if (!matter) throw new Error("案件不存在或无权处理");
+  if (!matter) throw new Error("Vụ án không tồn tại hoặc không có quyền xử lý");
   if (matter.status === "ARCHIVED") {
     const detail = opts?.allowedIfArchivedReason
-      ? `（${opts.allowedIfArchivedReason}除外）`
+      ? `（ngoại lệ: ${opts.allowedIfArchivedReason}）`
       : "";
-    throw new Error(`案件已归档，禁止修改${detail}`);
+    throw new Error(`Vụ án đã lưu trữ, cấm sửa đổi${detail}`);
   }
 }
 
 /**
- * 判定 folder 是否为 ARCHIVE 卷宗（结案 / 归档），用于上传材料门禁放行。
- * 命中条件：name 命中 ["结案", "归档"] 之一（与 default-folders.ts 一致）。
+ * Kiểm tra folder có phải ARCHIVE (lưu trữ/đóng) không, dùng để cho phép upload.
+ * Điều kiện: name khớp một trong ["Lưu trữ", "Đóng"] (như default-folders.ts).
  */
-const ARCHIVE_FOLDER_NAMES = new Set(["结案", "归档"]);
+const ARCHIVE_FOLDER_NAMES = new Set(["Lưu trữ", "Đóng"]);
 
 export function isArchiveFolderName(name: string | null | undefined): boolean {
   if (!name) return false;

@@ -20,12 +20,12 @@
 "use server";
 
 /**
- * v0.22: 律所资料库（FirmFile）
+ * v0.22: Thư viện tài liệu律所 (FirmFile)
  *
- * 全所共享：所有 active 用户可读；admin / PRINCIPAL_LAWYER 可上传 / 替代 / 删除。
- * 4 分类：制度 / 指引 / 参考模板 / 其他文件。
- * 版本：supersededById 链接旧→新；列表默认只显示"最新"。
- * 搜索：ILIKE name + description + tags 多字段模糊匹配（不用 tsvector）。
+ * Chia sẻ toàn律所: Tất cả active users đọc được; admin / PRINCIPAL_LAWYER upload / thay thế / xóa.
+ * 4 phân loại: Chế độ / Hướng dẫn / Template tham khảo / Tệp khác.
+ * Phiên bản: supersededById liên kết cũ → mới; danh sách mặc định chỉ hiển thị "mới nhất".
+ * Tìm kiếm: ILIKE name + description + tags nhiều trường fuzzy match (không dùng tsvector).
  */
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
@@ -55,7 +55,7 @@ export type FirmFileEntry = {
 async function requireUploader() {
   const session = await requireSession();
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
-    throw new Error("仅管理员 / 主任律师可管理律所资料");
+    throw new Error("Chỉ admin / Principal Lawyer được quản lý tài liệu律所");
   }
   return session;
 }
@@ -63,9 +63,9 @@ async function requireUploader() {
 const CATEGORY_VALUES: FirmFileCategory[] = ["POLICY", "GUIDE", "TEMPLATE", "REFERENCE"];
 
 function parseCategory(raw: unknown): FirmFileCategory {
-  if (typeof raw !== "string") throw new Error("分类必填");
+  if (typeof raw !== "string") throw new Error("Phân loại bắt buộc");
   if ((CATEGORY_VALUES as string[]).includes(raw)) return raw as FirmFileCategory;
-  throw new Error(`无效分类：${raw}`);
+  throw new Error(`Phân loại không hợp lệ: ${raw}`);
 }
 
 function parseTags(raw: unknown): string[] {
@@ -134,7 +134,7 @@ export async function listFirmFiles(input: {
 
 export async function getFirmFileVersionHistory(input: { id: string }) {
   await requireSession();
-  // 沿着 supersedes 链向旧版深挖（理论是树，业务上单链）
+  // Theo chuỗi supersedes, đào sâu vào các phiên bản cũ (lý thuyết là tree, nhưng thực tế là single-linked chain)
   type Node = {
     id: string;
     name: string;
@@ -188,8 +188,8 @@ export async function uploadFirmFile(formData: FormData): Promise<{
   if (!(file instanceof File)) throw new Error("缺少文件");
   if (file.size === 0) throw new Error("空文件");
   if (file.size > FIRM_FILE_MAX_BYTES)
-    throw new Error(`文件超过 ${Math.round(FIRM_FILE_MAX_BYTES / 1024 / 1024)}MB`);
-  if (typeof name !== "string" || !name.trim()) throw new Error("名称必填");
+    throw new Error(`File vượt quá ${Math.round(FIRM_FILE_MAX_BYTES / 1024 / 1024)}MB`);
+  if (typeof name !== "string" || !name.trim()) throw new Error("Tên bắt buộc");
 
   const supersedesId =
     typeof supersedesRaw === "string" && supersedesRaw ? supersedesRaw : null;
@@ -200,17 +200,17 @@ export async function uploadFirmFile(formData: FormData): Promise<{
       where: { id: supersedesId },
       select: { id: true, supersededById: true, archivedAt: true }
     });
-    if (!old) throw new Error("被替代的旧版不存在");
-    if (old.supersededById) throw new Error("该旧版已被其他新版替代");
-    if (old.archivedAt) throw new Error("该旧版已删除，无法被替代");
+    if (!old) throw new Error("Phiên bản cũ cần thay thế không tồn tại");
+    if (old.supersededById) throw new Error("Phiên bản cũ này đã được phiên bản khác thay thế");
+    if (old.archivedAt) throw new Error("Phiên bản cũ đã bị xóa, không thể thay thế");
   }
 
   const buf = Buffer.from(await file.arrayBuffer());
   const path = await storage.writeFile("firm-files", buf);
   const hash = sha256(buf);
 
-  // 用户填的 name 可能不含扩展名（如"员工手册 v2.4"），下载时浏览器要靠扩展名识别程序，
-  // 这里优先取原始文件名的扩展名兜底，其次用 mimeType 推断
+  // Người dùng nhập tên có thể không có extension (ví dụ "Nhân viên handbook v2.4"), khi download trình duyệt cần extension để nhận diện.
+  // Ưu tiên lấy extension từ tên file gốc, nếu không có thì suy ra từ mimeType.
   const trimmedName = name.trim().slice(0, 200);
   const userHasExt = /\.[A-Za-z0-9]{1,5}$/.test(trimmedName);
   let nameWithFileExt = trimmedName;

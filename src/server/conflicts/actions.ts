@@ -84,14 +84,14 @@ const runCheckSchema = z.object({
 });
 
 /**
- * 跑一次冲突检索并落库。
- * 如果 intakeId 在，则把 ConflictCheck 挂在该 Intake 上；否则单独存（targetType=Intake 为空）。
+ * Chạy một lần kiểm tra xung đột và lưu vào DB.
+ * Nếu có intakeId, gán ConflictCheck vào Intake đó; nếu không thì lưu riêng (targetType=Intake rỗng).
  */
 export async function runCheckAndSave(input: z.infer<typeof runCheckSchema>) {
   const session = await requireSession();
   const data = runCheckSchema.parse(input);
 
-  // 清理 query（v0.4: 允许 name 为空，由 idNumber 兜底；role 缺省视为 OPPOSING_PARTY）
+  // Làm sạch query (v0.4: cho phép name rỗng, idNumber bù; role mặc định là OPPOSING_PARTY)
   const queries: QueryItem[] = data.queries.map((q) => ({
     role: q.role ?? "OPPOSING_PARTY",
     name: (q.name ?? "").trim(),

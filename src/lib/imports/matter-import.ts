@@ -35,20 +35,20 @@ export interface ImportColumn {
 }
 
 export const IMPORT_COLUMNS: ImportColumn[] = [
-  { key: "clientName", header: "客户名称", required: true },
-  { key: "clientIdNumber", header: "客户证件号", required: true, hint: "身份证 / 统一社会信用代码" },
-  { key: "clientType", header: "客户类型", required: false, hint: "个人 / 企业，默认个人" },
-  { key: "opposingName", header: "相对方名称", required: true },
-  { key: "opposingIdNumber", header: "相对方证件号", required: true },
-  { key: "opposingType", header: "相对方类型", required: false, hint: "个人 / 企业，默认个人" },
-  { key: "category", header: "案件类型", required: true, hint: Object.values(matterCategoryLabel).join(" / ") },
-  { key: "status", header: "案件状态", required: true, hint: "办理中 / 已结案 / 已归档" },
-  { key: "ownerEmail", header: "主办律师邮箱", required: false, hint: "按邮箱精确匹配；留空则归当前导入人" },
-  { key: "intakeDate", header: "收案日期", required: false, hint: "YYYY-MM-DD" },
-  { key: "cause", header: "案由", required: false, hint: "匹配案由库；未匹配则作为自由文本" },
-  { key: "claimAmount", header: "标的额", required: false, hint: "数字，单位元" },
-  { key: "clientPhone", header: "联系电话", required: false },
-  { key: "jurisdiction", header: "所属管辖地", required: false }
+  { key: "clientName", header: "Tên khách hàng", required: true },
+  { key: "clientIdNumber", header: "Số căn cước khách hàng", required: true, hint: "CMND / Mã số thuế" },
+  { key: "clientType", header: "Loại khách hàng", required: false, hint: "Cá nhân / Công ty, mặc định cá nhân" },
+  { key: "opposingName", header: "Tên đối phương", required: true },
+  { key: "opposingIdNumber", header: "Số căn cước đối phương", required: true },
+  { key: "opposingType", header: "Loại đối phương", required: false, hint: "Cá nhân / Công ty, mặc định cá nhân" },
+  { key: "category", header: "Loại vụ án", required: true, hint: Object.values(matterCategoryLabel).join(" / ") },
+  { key: "status", header: "Trạng thái vụ án", required: true, hint: "Đang xử lý / Đã kết thúc / Đã lưu trữ" },
+  { key: "ownerEmail", header: "Email luật sư phụ trách", required: false, hint: "Tìm theo email; để trống thì gán cho người import" },
+  { key: "intakeDate", header: "Ngày nhận vụ án", required: false, hint: "YYYY-MM-DD" },
+  { key: "cause", header: "Vụ án", required: false, hint: "Tìm trong database; nếu không có dùng text free" },
+  { key: "claimAmount", header: "Giá trị yêu cầu", required: false, hint: "Số, đơn vị VNĐ" },
+  { key: "clientPhone", header: "Số điện thoại", required: false },
+  { key: "jurisdiction", header: "Có thẩm quyền", required: false }
 ];
 
 export type RawRow = Record<string, string>;
@@ -80,10 +80,10 @@ export function parseCategoryLabel(text: string): MatterCategory | null {
   return null;
 }
 
-/** 文本反查案件状态（兼容「结案」=「已结案」） */
+/** 文本反查案件状态（兼容「结案」/「已结案」/「Kết thúc」=「Đã kết thúc」） */
 export function parseStatusLabel(text: string): MatterStatus | null {
   const t = text.trim();
-  if (t === "结案") return "CLOSED";
+  if (t === "结案" || t === "已结案" || t === "Kết thúc") return "CLOSED";
   for (const [key, label] of Object.entries(matterStatusLabel)) {
     if (label === t) return key as MatterStatus;
   }
@@ -93,14 +93,14 @@ export function parseStatusLabel(text: string): MatterStatus | null {
 /** 个人 / 企业 → ClientType（默认个人） */
 export function parseClientType(text: string | undefined): ClientType {
   const t = (text ?? "").trim();
-  if (t === "企业" || t === "公司" || t === "单位") return "COMPANY";
+  if (t === "Công ty" || t === "企业" || t === "公司" || t === "单位") return "COMPANY";
   return "INDIVIDUAL";
 }
 
 /** 个人 / 企业 → PartyType（默认自然人） */
 export function parsePartyType(text: string | undefined): PartyType {
   const t = (text ?? "").trim();
-  if (t === "企业" || t === "公司" || t === "单位") return "COMPANY";
+  if (t === "Công ty" || t === "企业" || t === "公司" || t === "单位") return "COMPANY";
   return "NATURAL_PERSON";
 }
 
@@ -154,33 +154,33 @@ export function validateRow(raw: RawRow): RowValidation {
   const clientIdNumber = get("clientIdNumber");
   const opposingName = get("opposingName");
   const opposingIdNumber = get("opposingIdNumber");
-  if (!clientName) errors.push("缺少客户名称");
-  if (!clientIdNumber) errors.push("缺少客户证件号");
-  if (!opposingName) errors.push("缺少相对方名称");
-  if (!opposingIdNumber) errors.push("缺少相对方证件号");
+  if (!clientName) errors.push("Thiếu tên khách hàng");
+  if (!clientIdNumber) errors.push("Thiếu số căn cước khách hàng");
+  if (!opposingName) errors.push("Thiếu tên đối phương");
+  if (!opposingIdNumber) errors.push("Thiếu số căn cước đối phương");
 
   const categoryText = get("category");
   const category = parseCategoryLabel(categoryText);
-  if (!categoryText) errors.push("缺少案件类型");
-  else if (!category) errors.push(`案件类型「${categoryText}」无法识别`);
+  if (!categoryText) errors.push("Thiếu loại vụ án");
+  else if (!category) errors.push(`Loại vụ án「${categoryText}」không nhận diện được`);
 
   const statusText = get("status");
   const status = parseStatusLabel(statusText);
-  if (!statusText) errors.push("缺少案件状态");
-  else if (!status) errors.push(`案件状态「${statusText}」无法识别（办理中/已结案/已归档）`);
+  if (!statusText) errors.push("Thiếu trạng thái vụ án");
+  else if (!status) errors.push(`Trạng thái vụ án「${statusText}」không nhận diện được (Đang xử lý/Đã kết thúc/Đã lưu trữ)`);
 
   const intakeText = get("intakeDate");
   let intakeDate: Date | null = null;
   if (intakeText) {
     intakeDate = parseImportDate(intakeText);
-    if (!intakeDate) errors.push(`收案日期「${intakeText}」格式应为 YYYY-MM-DD`);
+    if (!intakeDate) errors.push(`Ngày nhận vụ án「${intakeText}」định dạng phải là YYYY-MM-DD`);
   }
 
   const amountText = get("claimAmount");
   let claimAmount: number | null = null;
   if (amountText) {
     claimAmount = parseAmount(amountText);
-    if (claimAmount === null) errors.push(`标的额「${amountText}」不是有效数字`);
+    if (claimAmount === null) errors.push(`Giá trị yêu cầu「${amountText}」không phải số hợp lệ`);
   }
 
   if (errors.length > 0 || !category || !status) {

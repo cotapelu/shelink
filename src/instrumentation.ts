@@ -18,22 +18,22 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * Next.js instrumentation hook：进程启动时一次性副作用注册。
- * 启用方式：next.config.mjs experimental.instrumentationHook = true
+ * Next.js instrumentation hook: Đăng ký side-effect một lần khi khởi động tiến trình.
+ * Kích hoạt: next.config.mjs experimental.instrumentationHook = true
  *
- * 当前唯一职责：注册 cron 定时作业（仅生产 / nodejs runtime）。
- * dev 模式跳过，避免开发时误推真实通知。
+ * Trách nhiệm hiện tại: Đăng ký cron jobs (chỉ chạy trong production / nodejs runtime).
+ * Bỏ qua trong dev mode, tránh gửi thông báo thật trong lúc phát triển.
  *
- * ⚠ 重要：Next 14.x 即使 register() 内用了 dynamic import，dev 模式仍会扫描
- * 依赖链给 edge runtime 编译一遍（next-auth/bcryptjs 依赖 node:crypto 会 500）。
- * 解决方法：dev 模式下不光跳过执行，连 import 路径都不要写——彻底 noop。
+ * ⚠ Quan trọng: Next 14.x ngay cả khi dùng dynamic import trong register(), dev mode vẫn quét
+ * dependency chain để biên dịch cho edge runtime (next-auth/bcryptjs phụ thuộc node:crypto sẽ gây lỗi 500).
+ * Giải pháp: Trong dev mode, không chỉ bỏ qua thực thi, mà không được viết cả đường dẫn import – hoàn toàn noop.
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
   if (process.env.NODE_ENV !== "production") return;
   if (process.env.DISABLE_CRON === "1") return;
 
-  // 仅生产 nodejs 运行时才解析这个模块路径
+  // Chỉ phân tích module path này trong production nodejs runtime
   const mod = await import(/* webpackIgnore: true */ "./server/cron/scheduler");
   (mod as { registerCronJobs: () => void }).registerCronJobs();
 }

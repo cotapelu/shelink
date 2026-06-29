@@ -18,23 +18,23 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * 冲突检索算法（V2）
+ * Thuật toán kiểm tra xung đột (V2)
  *
- * 与 V1 的关键区别：
- *   - V1 把"客户库同名"也当作冲突命中并标 HIGH，会出现"自己跟自己冲突"
- *     的错觉（系统已有同名客户档案 ≠ 利益冲突）。
- *   - V2 严格把"利益冲突"定义为：候选当事人在过去 Matter 里的角色与本次
- *     候选角色组合构成冲突。命中只落在 Matter 上，不落在 Client。
- *   - 同名客户档案单独走 sameNameClients 提示，不染色、不计入 hits。
- *   - 身份证号一致 → 单独走 idMatchedClients（强提示，可点开人工核对）。
+ * Khác biệt chính so với V1:
+ *   - V1 coi "cùng tên trong client library" cũng là hit và đánh dấu HIGH, dẫn đến ảo giác "tự mình xung đột".
+ *     (Có client档案 trùng tên ≠ xung đột lợi ích).
+ *   - V2 định nghĩa chặt "xung đột lợi ích": Candidate party có vai trò trong Matter cũ tương tác với
+ *     candidate vai trò lần này. Hit chỉ rơi vào Matter, không vào Client.
+ *   - Client档案 trùng tên riêng ra thành sameNameClients hint, không nhuộm màu, không tính vào hits.
+ *   - Số ID card nhất quán → riêng ra thành idMatchedClients (strong hint, mở ra xác minh thủ công).
  *
- * 严重度判定：
- *   候选 CLIENT_PARTY  ×  历史 OPPOSING_PARTY  → HIGH        曾经的对手现在要变委托方
- *   候选 OPPOSING_PARTY × 历史 CLIENT_PARTY    → BLOCKING    拟代理的对方曾是我所客户
- *   候选 OPPOSING_PARTY × 历史 OPPOSING_PARTY  → LOW         历史交锋提示，可继续办
- *   候选 CLIENT_PARTY  ×  历史 CLIENT_PARTY    → LOW         熟客户复办
- *   候选 THIRD_PARTY    × 任何                  → MEDIUM
- *   身份证一致 → 在原严重度基础上升 1 级（BLOCKING 顶天）
+ * Xác định mức độ:
+ *   Candidate CLIENT_PARTY × Lịch sử OPPOSING_PARTY → HIGH        Đối thủ cũ trở thành người ủy thác
+ *   Candidate OPPOSING_PARTY × Lịch sử CLIENT_PARTY    → BLOCKING    Bên được dự kiến từng là khách hàng của firm
+ *   Candidate OPPOSING_PARTY × Lịch sử OPPOSING_PARTY → LOW         Gợi ý lịch sử đối đầu, có thể tiếp tục
+ *   Candidate CLIENT_PARTY  ×  Lịch sử CLIENT_PARTY    → LOW         Khách hàng quen quay lại
+ *   Candidate THIRD_PARTY    ×  Bất kỳ                → MEDIUM
+ *   ID card giống nhau → tăng 1 cấp trên mức độ cơ bản (BLOCKING là cao nhất)
  */
 
 import type { Prisma, PartyRole, LitigationStanding, MatterCategory, MatterStatus } from "@prisma/client";
@@ -151,11 +151,11 @@ export async function runConflictCheck(queries: QueryItem[]): Promise<ConflictCh
     const idNumber = q.idNumber?.trim() || null;
     if (!name && !idNumber) continue;
 
-    // v0.16: 同名 / 证件号匹配客户档案不再作为冲突提示
-    //  (用户反馈：与利益冲突检索无关；保留 sameNameClients/idMatchedClients 数据
-    //  结构以兼容历史 ConflictCheck 记录，但新检索时永远为空)
+    // v0.16: Trùng tên khách hàng / số ID không còn được coi là conflict hint
+    //  (User feedback: không liên quan đến conflict check; vẫn giữ sameNameClients/idMatchedClients
+    //  data structure để tương thích với lịch sử ConflictCheck, nhưng search mới luôn rỗng)
 
-    // ============ 历史案件 Party 匹配 ============
+    // ============ Lịch sử Party matching ============
     const partyWhere: Prisma.PartyWhereInput[] = [];
     if (name) partyWhere.push({ name });
     if (idNumber) partyWhere.push({ idNumber });
@@ -183,7 +183,7 @@ export async function runConflictCheck(queries: QueryItem[]): Promise<ConflictCh
       if (!p.matter) continue;
       const matterInfo = toMatterInfo(p.matter, p.role, p.standing);
 
-      // 身份证一致 → 在基础严重度上升 1 级
+      // ID card giống nhau → tăng 1 cấp trên severity cơ bản
       if (idNumber && p.idNumber && p.idNumber === idNumber) {
         const base = pickSeverity(q.role, p.role);
         const sev = bumpSeverity(base);
@@ -196,7 +196,7 @@ export async function runConflictCheck(queries: QueryItem[]): Promise<ConflictCh
           matchedValue: idNumber,
           matchedRatio: 1,
           severity: sev,
-          reason: `身份证 / 信用代码与案件「${p.matter.internalCode}」中 ${roleLabel(p.role)}「${p.name}」一致`,
+          reason: `Số ID card / mã số thuế của案件「${p.matter.internalCode}」trong ${roleLabel(p.role)}「${p.name}」giống nhau`,
           matterInfo
         });
       }
@@ -211,13 +211,13 @@ export async function runConflictCheck(queries: QueryItem[]): Promise<ConflictCh
           matchedValue: name,
           matchedRatio: 1,
           severity: sev,
-          reason: `与案件「${p.matter.internalCode}」中 ${roleLabel(p.role)}「${p.name}」同名`,
+          reason: `Trùng tên với ${roleLabel(p.role)}「${p.name}」trong案件「${p.matter.internalCode}」`,
           matterInfo
         });
       }
     }
 
-    // Party 姓名模糊匹配（限 3 字符以上，避免单字大量误命中）
+    // Party name fuzzy match (yêu cầu >= 3 ký tự, tránh false positive với chữ đơn)
     if (name && name.length >= 3) {
       const partiesFuzzy = await prisma.party.findMany({
         where: {
@@ -248,17 +248,17 @@ export async function runConflictCheck(queries: QueryItem[]): Promise<ConflictCh
           matchedValue: name,
           matchedRatio: name.length / p.name.length,
           severity: "LOW",
-          reason: `与案件「${p.matter.internalCode}」中 ${roleLabel(p.role)}「${p.name}」名称相似`,
+          reason: `Tên tương tự với ${roleLabel(p.role)}「${p.name}」trong案件「${p.matter.internalCode}」`,
           matterInfo: toMatterInfo(p.matter, p.role, p.standing)
         });
       }
     }
 
-    // ============ v0.43: 客户档案 → 关联案件 检索（修复漏报）============
-    // 老案件常只在 Matter.primaryClient / clientLinks 记客户、Party 表为空，
-    // 上面的 Party 检索会漏掉。客户作为某案件的「委托方(CLIENT_PARTY)」是真实
-    // 冲突信号，故按名称/证件号查 Client，再回溯其关联 Matter 产出命中。
-    // 不滤 status（已归档/进行中都要提示）；孤立客户档案（无任何关联案件）不产出命中。
+    // ============ v0.43: Tìm kiếm từ Client archive → liên kết Matter (fix漏报) ============
+    // Các vụ án cũ thường chỉ ghi client trong Matter.primaryClient / clientLinks, bảng Party trống.
+    // Party search trên sẽ bỏ sót. Làm client của một案件 với vai trò CLIENT_PARTY là tín hiệu xung đột thực tế.
+    // Vì vậy, tìm theo tên/số ID Client, rồi backtrack các Matter liên kết để tạo hit.
+    // Không lọc status (cả archived/in progress đều cần cảnh báo); client độc lập (không có Matter nào) không tạo hit.
     const clientWhere: Prisma.ClientWhereInput[] = [];
     if (name) clientWhere.push({ name });
     if (idNumber) clientWhere.push({ idNumber });
@@ -280,7 +280,7 @@ export async function runConflictCheck(queries: QueryItem[]): Promise<ConflictCh
       });
 
       for (const c of clients) {
-        // 该客户关联的全部案件（primaryClient + clientLinks），按 id 去重
+        // Tất cả Matter liên kết đến client này (primaryClient + clientLinks), dedup theo id
         const matters = [...c.matters, ...c.matterLinks.map((l) => l.matter)].filter(
           (m, i, arr) => arr.findIndex((x) => x.id === m.id) === i
         );
@@ -303,7 +303,7 @@ export async function runConflictCheck(queries: QueryItem[]): Promise<ConflictCh
               matchedValue: idNumber!,
               matchedRatio: 1,
               severity: sev,
-              reason: `身份证 / 信用代码与案件「${m.internalCode}」的委托方「${c.name}」一致`,
+              reason: `Số ID card / mã số thuế trùng với khách hàng「${c.name}」của案件「${m.internalCode}」`,
               matterInfo
             });
           }
@@ -317,7 +317,7 @@ export async function runConflictCheck(queries: QueryItem[]): Promise<ConflictCh
               matchedValue: name,
               matchedRatio: 1,
               severity: pickSeverity(q.role, "CLIENT_PARTY"),
-              reason: `与案件「${m.internalCode}」的委托方「${c.name}」同名`,
+              reason: `Trùng tên với khách hàng「${c.name}」của案件「${m.internalCode}」`,
               matterInfo
             });
           } else if (nameFuzzy) {
@@ -330,7 +330,7 @@ export async function runConflictCheck(queries: QueryItem[]): Promise<ConflictCh
               matchedValue: name,
               matchedRatio: name.length / c.name.length,
               severity: "LOW",
-              reason: `与案件「${m.internalCode}」的委托方「${c.name}」名称相似`,
+              reason: `Tên tương tự với khách hàng「${c.name}」của案件「${m.internalCode}」`,
               matterInfo
             });
           }

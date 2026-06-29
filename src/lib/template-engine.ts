@@ -18,14 +18,14 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.8 文档模板引擎
+ * v0.8 Document template engine
  *
- * 流程：
- *   1. buildContext(matterId, userId, overrides?) 从 DB 拼装变量上下文
- *   2. renderDocxBuffer(templateBuffer, context) 用 docxtemplater 渲染
- *   3. 渲染前 detectMissing(variables, context) 找出未填写的变量，由 UI 弹窗补全
+ * Flow:
+ *  1. buildContext(matterId, userId, overrides?) build variable context from DB
+ *  2. renderDocxBuffer(templateBuffer, context) render with docxtemplater
+ *  3. before render detectMissing(variables, context) find unfilled vars, UI popup to complete
  *
- * 模板变量使用双大括号语法：{{firm.name}} / {{client.idNumber}}。
+ * Template variables use double curly braces: {{firm.name}} / {{client.idNumber}}.
  */
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
@@ -76,54 +76,48 @@ const EMPTY_PARTY: PartySnapshot = {
   legalRep: ""
 };
 
-const STANDING_CN: Record<string, string> = {
-  PLAINTIFF: "原告",
-  JOINT_PLAINTIFF: "共同原告",
-  DEFENDANT: "被告",
-  JOINT_DEFENDANT: "共同被告",
-  THIRD_PARTY: "第三人",
-  APPELLANT: "上诉人",
-  APPELLEE: "被上诉人",
-  RETRIAL_APPLICANT: "再审申请人",
-  RETRIAL_RESPONDENT: "再审被申请人",
-  ENFORCEMENT_APPLICANT: "申请执行人",
-  EXECUTED_PERSON: "被执行人",
-  COUNTERCLAIM_PLAINTIFF: "反诉原告",
-  COUNTERCLAIM_DEFENDANT: "反诉被告",
-  CRIMINAL_DEFENDANT: "被告人",
-  CRIMINAL_VICTIM: "被害人",
-  PRIVATE_PROSECUTOR: "自诉人",
-  CRIMINAL_INCIDENTAL_PLAINTIFF: "附带民事诉讼原告人",
-  ARBITRATION_CLAIMANT: "仲裁申请人",
-  ARBITRATION_RESPONDENT: "仲裁被申请人",
-  ADMIN_PLAINTIFF: "行政诉讼原告",
-  ADMIN_DEFENDANT: "行政诉讼被告",
-  ADMIN_RECONSIDERATION_APPLICANT: "行政复议申请人",
-  ADMIN_RECONSIDERATION_RESPONDENT: "行政复议被申请人",
-  NON_LITIGATION_PARTY: "项目当事人"
+const STANDING_VI: Record<string, string> = {
+  PLAINTIFF: "Nguyên đơn",
+  JOINT_PLAINTIFF: "Cùng nguyên đơn",
+  DEFENDANT: "Bị đơn",
+  JOINT_DEFENDANT: "Cùng bị đơn",
+  THIRD_PARTY: "Người thứ ba",
+  APPELLANT: "Người kháng cáo",
+  APPELLEE: "Bị kháng cáo",
+  RETRIAL_APPLICANT: "Người xin xét xử lại",
+  RETRIAL_RESPONDENT: "Bị xin xét xử lại",
+  ENFORCEMENT_APPLICANT: "Người yêu cầu thi hành",
+  EXECUTED_PERSON: "Bị thi hành",
+  COUNTERCLAIM_PLAINTIFF: "Nguyên đơn phản tố",
+  COUNTERCLAIM_DEFENDANT: "Bị đơn phản tố",
+  CRIMINAL_DEFENDANT: "Bị cáo",
+  CRIMINAL_VICTIM: "Người bị hại",
+  PRIVATE_PROSECUTOR: "Người tự kiện",
+  CRIMINAL_INCIDENTAL_PLAINTIFF: "Nguyên đơn dân sự kèm hình sự",
+  ARBITRATION_CLAIMANT: "Người khởi kiện trọng tài",
+  ARBITRATION_RESPONDENT: "Bị khởi kiện trọng tài",
+  ADMIN_PLAINTIFF: "Nguyên đơn hành chính",
+  ADMIN_DEFENDANT: "Bị đơn hành chính",
+  ADMIN_RECONSIDERATION_APPLICANT: "Người xin tái xem xét hành chính",
+  ADMIN_RECONSIDERATION_RESPONDENT: "Bị xin tái xem xét hành chính",
+  NON_LITIGATION_PARTY: "Bên liên quan dự án"
 };
 
-const CATEGORY_CN: Record<string, string> = {
-  CIVIL_COMMERCIAL: "民商事",
-  CRIMINAL: "刑事",
-  ADMINISTRATIVE: "行政",
-  NON_LITIGATION: "非诉",
-  LEGAL_COUNSEL: "法律顾问",
-  SPECIAL_PROJECT: "专项法律服务"
+const CATEGORY_VI: Record<string, string> = {
+  CIVIL_COMMERCIAL: "Dân sự - Thương mại",
+  CRIMINAL: "Hình sự",
+  ADMINISTRATIVE: "Hành chính",
+  NON_LITIGATION: "Phi tố tụng",
+  LEGAL_COUNSEL: "Tư vấn",
+  SPECIAL_PROJECT: "Dự án đặc biệt"
 };
 
-function toCNDate(d: Date): string {
-  const cnDigits = "〇一二三四五六七八九";
-  const y = String(d.getFullYear()).split("").map((c) => cnDigits[+c]).join("");
-  const m = d.getMonth() + 1;
+function toVietDate(d: Date): string {
   const day = d.getDate();
-  const cnNum = (n: number) => {
-    if (n <= 10) return ["〇", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"][n];
-    if (n < 20) return "十" + cnDigits[n - 10];
-    if (n < 30) return "二十" + (n === 20 ? "" : cnDigits[n - 20]);
-    return "三十" + (n === 30 ? "" : cnDigits[n - 30]);
-  };
-  return `${y}年${cnNum(m)}月${cnNum(day)}日`;
+  const month = d.getMonth() + 1;
+  const year = d.getFullYear();
+  return `${day} tháng ${month} năm ${year}`;
+  // Alternative: return `${day}/${month}/${year}`;
 }
 
 function partyToSnapshot(p: {
@@ -155,9 +149,9 @@ async function getFirmInfo(): Promise<{ name: string; address: string; phone: st
 }
 
 /**
- * 应用 overrides（来自 UI 的行内补全），路径键如 "client.idNumber" 写回源表。
- * 注意：只回写 v0.8 高频缺失字段（client.idNumber / client.address / opposing.idNumber 等）。
- * 其他字段一律忽略，避免误操作。
+ * Áp dụng overrides (từ UI inline completion), keys như "client.idNumber" ghi ngược vào bảng.
+ * Lưu ý: chỉ ghi lại fields thường thiếu v0.8 (client.idNumber / client.address / opposing.idNumber...).
+ * Các field khác bỏ qua, tránh nhầm.
  */
 async function applyOverrides(matterId: string | undefined, overrides: Record<string, string>) {
   if (!matterId) return;
@@ -218,7 +212,7 @@ export async function buildContext(opts: {
     return {
       firm,
       today: today.toISOString().slice(0, 10),
-      todayCN: toCNDate(today),
+      todayCN: toVietDate(today),
       lawyer: { name: user?.name ?? "", phone: user?.phone ?? "" },
       matter: {
         code: "",
@@ -280,16 +274,16 @@ export async function buildContext(opts: {
   return {
     firm,
     today: today.toISOString().slice(0, 10),
-    todayCN: toCNDate(today),
+    todayCN: toVietDate(today),
     lawyer: { name: user?.name ?? "", phone: user?.phone ?? "" },
     matter: {
       code: matter.internalCode,
       title: matter.title,
-      category: CATEGORY_CN[matter.category] ?? matter.category,
+      category: CATEGORY_VI[matter.category] ?? matter.category,
       causeText,
       intakeDate: matter.intakeDate ? matter.intakeDate.toISOString().slice(0, 10) : "",
       claimAmount: matter.claimAmount ? `${matter.claimAmount} 元` : "—",
-      ourStanding: matter.ourStanding ? STANDING_CN[matter.ourStanding] ?? matter.ourStanding : ""
+      ourStanding: matter.ourStanding ? STANDING_VI[matter.ourStanding] ?? matter.ourStanding : ""
     },
     client: clientParty,
     opposing: opposingParties[0] ?? EMPTY_PARTY,
@@ -341,10 +335,10 @@ function formatDocxError(err: unknown): string {
 }
 
 /**
- * 渲染 docx：传入模板 Buffer + 上下文 → 返回填充后的 Buffer。
- * 模板用 {{var}} 语法（双大括号），避免与 docx 内嵌 "{" 冲突。
+ * Render docx: nhận template Buffer + context → trả về Buffer đã điền.
+ * Template dùng cú pháp {{var}} (double curly), tránh xung đột với "{" trong docx.
  *
- * 出错时抛出含具体 tag / 原因的中文异常，方便律师定位是哪个模板字段坏了。
+ * Khi lỗi, ném exception tiếng Việt chứa tag/nguyên nhân, giúp lawyer xác định field nào hỏng.
  */
 export function renderDocxBuffer(
   templateBuffer: Buffer,
@@ -354,7 +348,7 @@ export function renderDocxBuffer(
   try {
     zip = new PizZip(templateBuffer);
   } catch (err) {
-    throw new Error(`模板文件损坏，无法解压：${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(`Template file corrupted, không thể giải nén：${err instanceof Error ? err.message : String(err)}`);
   }
 
   const doc = new Docxtemplater(zip, {
@@ -372,9 +366,8 @@ export function renderDocxBuffer(
   return doc.getZip().generate({ type: "nodebuffer" }) as Buffer;
 }
 
-/**
- * 检查上下文中哪些变量为空，返回缺失变量路径列表（UI 弹窗用）。
- * @param required 模板声明的变量清单（DocumentTemplate.variables）
+/** Kiểm tra trong context biến nào empty, trả về list paths bị thiếu (dùng cho UI popup).
+ * @param required Danh sách variables khai báo (DocumentTemplate.variables)
  */
 export function detectMissing(required: string[], context: RenderContext): string[] {
   const missing: string[] = [];

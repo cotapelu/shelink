@@ -121,14 +121,14 @@ export async function listMatters(input: Partial<MatterListQuery> = {}) {
             }
           }
         },
-        // v0.8.1: 卡片化需要前几位对方/第三人
+        // v0.8.1: Cần vài ký tự đầu của đối phương/third party cho card UI
         parties: {
           where: { role: { in: ["OPPOSING_PARTY", "THIRD_PARTY"] } },
           orderBy: [{ role: "asc" }, { ordinal: "asc" }],
           take: 3,
           select: { id: true, name: true, role: true, standing: true }
         },
-        // v0.16: 是否有归档申请待审批
+        // v0.16: Có申请 lưu trữ待审批 không?
         archiveRecords: {
           where: { status: "PENDING_REVIEW" },
           take: 1,
@@ -181,7 +181,7 @@ export async function listMatters(input: Partial<MatterListQuery> = {}) {
   return { items, total, page: query.page, pageSize: query.pageSize };
 }
 
-// v0.32: 程序级基本信息编辑
+// v0.32: Chỉnh sửa thông tin cơ bản của thủ tục
 export async function updateProcedureInfo(input: {
   procedureId: string;
   jurisdiction?: string;
@@ -210,7 +210,7 @@ export async function updateProcedureInfo(input: {
     where: { id: input.procedureId },
     select: { matterId: true }
   });
-  if (!proc) throw new Error("程序不存在");
+  if (!proc) throw new Error("Thủ tục không tồn tại");
   await assertCanAccessMatter(session.user.id, session.user.role, proc.matterId);
   await assertMatterWritable(proc.matterId);
 
@@ -219,7 +219,7 @@ export async function updateProcedureInfo(input: {
     : null;
   const newPartyRows = normalizeNewProcedureParties(input.newProcedureParties ?? []);
   if ((input.newProcedureParties?.length ?? 0) !== newPartyRows.length) {
-    throw new Error("新增程序当事人信息不完整");
+    throw new Error("Thông tin party thủ tục mới không đầy đủ");
   }
 
   if (partyRows) {
@@ -255,7 +255,7 @@ export async function updateProcedureInfo(input: {
       ) ||
       clientIds.some((clientId) => !validClientIds.has(clientId))
     ) {
-      throw new Error("存在不属于本案的当事人");
+      throw new Error("Tồn tại party không thuộc vụ án này");
     }
   }
 
@@ -283,7 +283,7 @@ export async function updateProcedureInfo(input: {
             where: { id: partyId, matterId: proc.matterId },
             select: { id: true }
           });
-          if (!existingParty) throw new Error("存在不属于本案的当事人");
+          if (!existingParty) throw new Error("Tồn tại party không thuộc vụ án này");
           await tx.party.update({
             where: { id: existingParty.id },
             data: {
@@ -391,7 +391,7 @@ async function ensureClientParty(
     where: { id: clientId },
     select: { id: true, name: true, type: true, idNumber: true }
   });
-  if (!client) throw new Error("客户不存在");
+  if (!client) throw new Error("Khách hàng không tồn tại");
 
   const existing = await tx.party.findFirst({
     where: {
@@ -419,7 +419,7 @@ async function ensureClientParty(
       idNumber: partyType === "NATURAL_PERSON" ? client.idNumber : null,
       enterpriseSocialCode: partyType === "NATURAL_PERSON" ? null : client.idNumber,
       enterpriseName: partyType === "NATURAL_PERSON" ? null : client.name,
-      notes: "由案件关联客户自动补入"
+      notes: "Tự động bổ sung từ client liên kết vụ án"
     },
     select: { id: true }
   });
@@ -480,12 +480,12 @@ function normalizeNewProcedureParties(rows: NewProcedurePartyInput[]) {
     );
 }
 
-// v0.32: 关联案件 —— 搜索 / 关联 / 解除
+// v0.32: Liên kết vụ án —— Tìm kiếm / Liên kết / Hủy liên kết
 export async function searchMattersForLink(matterId: string, q: string) {
   const session = await requireSession();
   await assertCanAssociateMatter(session.user.id, matterId);
   const query = q.trim();
-  // 已关联的（两个方向）排除
+  // Đã liên kết (cả hai chiều) loại trừ
   const links = await prisma.matterLink.findMany({
     where: { OR: [{ matterId }, { relatedMatterId: matterId }] },
     select: { matterId: true, relatedMatterId: true }
@@ -520,7 +520,7 @@ export async function addMatterLink(matterId: string, relatedMatterId: string) {
   const session = await requireSession();
   await assertCanAssociateMatter(session.user.id, matterId);
   await assertCanAssociateMatter(session.user.id, relatedMatterId);
-  if (matterId === relatedMatterId) throw new Error("不能关联到自身");
+  if (matterId === relatedMatterId) throw new Error("Không thể liên kết đến chính vụ án này");
   await prisma.matterLink.upsert({
     where: { matterId_relatedMatterId: { matterId, relatedMatterId } },
     create: { matterId, relatedMatterId },
@@ -540,7 +540,7 @@ export async function removeMatterLink(matterId: string, relatedMatterId: string
   const session = await requireSession();
   await assertCanAssociateMatter(session.user.id, matterId);
   await assertCanAssociateMatter(session.user.id, relatedMatterId);
-  // 两个方向都删（无论当初谁关联谁）
+  // Xóa cả hai chiều (bất kể ban đầu ai liên kết ai)
   await prisma.matterLink.deleteMany({
     where: {
       OR: [
@@ -639,21 +639,21 @@ export async function createMatter(input: MatterCreateInput) {
 
         primaryClientId,
 
-        // 主办律师默认是创建者
+        // Luật sư phụ trách mặc định là người tạo
         members: {
           create: { userId: session.user.id, role: "LEAD" }
         },
 
-        // 多客户关联表
+        // Bảng liên kết nhiều khách hàng
         clientLinks: {
           create: data.clientIds.map((cid, idx) => ({
             clientId: cid,
             isPrimary: idx === 0,
-            label: idx === 0 ? "主要委托方" : `委托方 ${idx + 1}`
+            label: idx === 0 ? "Khách hàng chính" : `Bên ủy thác ${idx + 1}`
           }))
         },
 
-        // 当事人
+        // Các bên liên quan
         parties: {
           create: data.parties.map((p) =>
             emptyToNull({
@@ -673,7 +673,7 @@ export async function createMatter(input: MatterCreateInput) {
           )
         },
 
-        // 首程序
+        // Thủ tục đầu tiên
         procedures: {
           create: {
             type: data.firstProcedure.type,
@@ -691,20 +691,20 @@ export async function createMatter(input: MatterCreateInput) {
       }
     });
 
-    // TimelineEvent: 案件创建
+    // TimelineEvent: Tạo vụ án
     await tx.timelineEvent.create({
       data: {
         matterId: matter.id,
         eventType: "MATTER_CREATED",
-        title: "案件已创建",
+        title: "Vụ án đã được tạo",
         occurredAt: new Date()
       }
     });
 
-    // v0.8: 默认卷宗
+    // v0.8: Thư mục mặc định
     await seedDefaultFolders(tx, matter.id, data.category);
 
-    // 标记 otherClientIds 避免被 lint 误判未用
+    // Đánh dấu otherClientIds để tránh lint báo không dùng
     void otherClientIds;
 
     return matter;
@@ -723,10 +723,10 @@ export async function createMatter(input: MatterCreateInput) {
 }
 
 /**
- * v0.5: 更新案件团队。
- * - 仅当前主办律师可操作；管理角色只负责审批，不因角色放开他人案件处理权
- * - ownerId 改变时同步替换 MatterMember 中的 LEAD
- * - coLeadIds 和 assistantIds 覆盖式更新对应角色（不影响主办自动 LEAD）
+ * v0.5: Cập nhật team của vụ án.
+ * - Chỉ luật sư phụ trách hiện tại được thao tác; vai trò quản lý chỉ phê duyệt, không mở quyền xử lý vụ án người khác
+ * - Khi ownerId thay đổi, đồng bộ thay LEAD trong MatterMember
+ * - coLeadIds và assistantIds ghi đè các vai trò tương ứng (không ảnh hưởng đến LEAD tự động của chủ vụ)
  */
 export async function updateMatterTeam(input: {
   matterId: string;
@@ -739,18 +739,18 @@ export async function updateMatterTeam(input: {
     where: { id: input.matterId, deletedAt: null },
     select: { id: true, ownerId: true }
   });
-  if (!matter) throw new Error("案件不存在");
+  if (!matter) throw new Error("Vụ án không tồn tại");
   await assertMatterWritable(input.matterId);
-  await assertCanOwnMatter(session.user.id, input.matterId, "只有当前主办律师可以修改承办团队");
+  await assertCanOwnMatter(session.user.id, input.matterId, "Chỉ luật sư phụ trách hiện tại được sửa team vụ án");
 
-  // 校验：coLeadIds / assistantIds 不能与 ownerId 重叠
+  // Validate: coLeadIds / assistantIds không được overlap với ownerId
   const co = input.coLeadIds.filter((id) => id !== input.ownerId);
   const ass = input.assistantIds.filter(
     (id) => id !== input.ownerId && !co.includes(id)
   );
 
   await prisma.$transaction(async (tx) => {
-    // 更新 Matter.ownerId
+    // Cập nhật Matter.ownerId
     if (matter.ownerId !== input.ownerId) {
       await tx.matter.update({
         where: { id: input.matterId },
@@ -758,7 +758,7 @@ export async function updateMatterTeam(input: {
       });
     }
 
-    // 重建 MatterMember：先删除全部，再按新结构插入
+    // Rebuild MatterMember: xóa hết rồi insert lại theo cấu trúc mới
     await tx.matterMember.deleteMany({ where: { matterId: input.matterId } });
 
     const rows = [
@@ -785,12 +785,12 @@ export async function updateMatterTeam(input: {
     detail: { ownerId: input.ownerId, coLeads: co.length, assistants: ass.length }
   });
 
-  // v0.43 项4：写入案件动态时间线
+  // v0.43 mục 4: Ghi timeline vụ án
   await prisma.timelineEvent.create({
     data: {
       matterId: input.matterId,
       eventType: "TEAM_CHANGED",
-      title: "更新办案团队",
+      title: "Cập nhật team xử lý",
       occurredAt: new Date(),
       refType: "Matter",
       refId: input.matterId
@@ -801,7 +801,7 @@ export async function updateMatterTeam(input: {
   return { ok: true };
 }
 
-// v0.27: 编辑案件基本信息（系统编号 + 收案日期 readonly，状态走 lifecycle）
+// v0.27: Chỉnh sửa thông tin cơ bản vụ án (system编号 + ngày nhận readonly, status đi qua lifecycle)
 export async function updateMatterBasicInfo(input: MatterUpdateBasicInput) {
   const session = await requireSession();
   const data = matterUpdateBasicSchema.parse(input);
@@ -810,9 +810,9 @@ export async function updateMatterBasicInfo(input: MatterUpdateBasicInput) {
     where: { id: data.id, deletedAt: null },
     select: { id: true, ownerId: true, title: true }
   });
-  if (!matter) throw new Error("案件不存在");
+  if (!matter) throw new Error("Vụ án không tồn tại");
   await assertMatterWritable(data.id);
-  await assertCanOwnMatter(session.user.id, data.id, "只有当前主办律师可以编辑案件基本信息");
+  await assertCanOwnMatter(session.user.id, data.id, "Chỉ luật sư phụ trách hiện tại được chỉnh sửa thông tin vụ án");
 
   await prisma.matter.update({
     where: { id: data.id },
@@ -843,7 +843,7 @@ export async function updateMatterBasicInfo(input: MatterUpdateBasicInput) {
 export async function softDeleteMatter(id: string) {
   const session = await requireSession();
   await assertMatterWritable(id);
-  await assertCanOwnMatter(session.user.id, id, "只有当前主办律师可以删除案件");
+  await assertCanOwnMatter(session.user.id, id, "Chỉ luật sư phụ trách hiện tại được xóa vụ án");
 
   await prisma.matter.update({
     where: { id },

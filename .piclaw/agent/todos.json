@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Dịch tiếng Trung sang tiếng Việt toàn bộ codebase",
+      "tasks": [
+        {
+          "id": "task-1",
+          "content": "Dịch export-xlsx.ts headers và labels",
+          "status": "in_progress"
+        },
+        {
+          "id": "task-2",
+          "content": "Dịch matters/export-xlsx.ts labels",
+          "status": "pending"
+        },
+        {
+          "id": "task-3",
+          "content": "Dịch imports/template.ts template data",
+          "status": "pending"
+        },
+        {
+          "id": "task-4",
+          "content": "Dịch settings/firm-profile.ts category labels",
+          "status": "pending"
+        },
+        {
+          "id": "task-5",
+          "content": "Dịch các file settings khác",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
+          "content": "Dịch error messages và comments",
+          "status": "pending"
+        },
+        {
+          "id": "task-7",
+          "content": "Dịch conflicts algorithm comments",
+          "status": "pending"
+        },
+        {
+          "id": "task-8",
+          "content": "Dịch matters actions và schemas",
+          "status": "pending"
+        },
+        {
+          "id": "task-9",
+          "content": "Validate build và test",
+          "status": "pending"
+        }
+      ]
+    }
+  ],
+  "nextTaskId": 10,
+  "nextPhaseId": 2,
+  "updatedAt": "2026-06-29T03:08:10.103Z"
+}
