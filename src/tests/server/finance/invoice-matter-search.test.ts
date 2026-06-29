@@ -27,6 +27,14 @@ describe("invoiceMatterSearchWhere", () => {
     expect(matterAssociationFilter).toHaveBeenCalledWith(userId);
   });
 
+  it("handles undefined query (same as empty)", () => {
+    const result = invoiceMatterSearchWhere(userId);
+    expect(result).toEqual({
+      deletedAt: null,
+      ...mockAssociationWhere
+    });
+  });
+
   it("returns associationWhere spread directly when query is whitespace only", () => {
     const result = invoiceMatterSearchWhere(userId, "   ");
     expect(result).toEqual({

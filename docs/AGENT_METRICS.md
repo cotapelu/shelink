@@ -797,6 +797,36 @@ This file tracks performance and evolution of the AI agent during the migration 
   - Still uncovered line 292 in getEnterpriseSummary (likely async throw branch nuance).
 - **Verification**: All 756 tests pass; build success; typecheck 0; lint 0 errors.
 
+## Cycle 43 - Task: Increase branch coverage for server/intakes/helpers
+- **Timestamp**: 2026-06-29T07:17:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (intake helpers, 89.04% → 90.41%)
+- **Duration**: 10 min
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/server/intakes/helpers.test.ts
+- **Test Delta**: +6 tests (total 762)
+- **Coverage Delta**:
+  - Overall Branches: 93.21% → 93.31% (+0.10%, 934→935/1002)
+  - helpers Branches: 89.04% → 90.41% (+1.37%)
+- **Notes**:
+  - Added tests: unknown conclusion, whitespace-only note check, payload queries undefined/null, all normalized to null.
+- **Verification**: All 762 tests pass; build success; typecheck 0; lint 0 errors.
+
+## Cycle 44 - Task: Increase branch coverage for server/finance/invoice-matter-search
+- **Timestamp**: 2026-06-29T07:18:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (finance module, 87.5% → 100%)
+- **Duration**: 5 min
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/server/finance/invoice-matter-search.test.ts
+- **Test Delta**: +1 test (total 763)
+- **Coverage Delta**:
+  - Overall Branches: 93.31% → 93.41% (+0.10%, 935→936/1002)
+  - invoice-matter-search Branches: 87.5% → 100% (covered line 8)
+- **Notes**:
+  - Added test for undefined query (nullish coalescing branch).
+- **Verification**: All 763 tests pass; build success; typecheck 0; lint 0 errors.
+
 ---
 
 - **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models.

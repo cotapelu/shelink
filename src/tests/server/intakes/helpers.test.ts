@@ -166,5 +166,37 @@ describe("conflict query utilities", () => {
       );
       expect(() => assertConflictReviewAllowsConversion(intake)).not.toThrow();
     });
+
+    it("throws if conclusion is unknown value", () => {
+      const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({ conclusion: "UNKNOWN" as any, queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] }})]);
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("结论异常");
+    });
+
+    it("throws if high risk with whitespace-only note (trim to empty)", () => {
+      const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({
+        conclusion: "DIFFERENT",
+        queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] },
+        hits: [{ severity: "HIGH" }],
+        note: "   "
+      })]);
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("高风险");
+    });
+  });
+
+  describe("getCheckedConflictQueries edge cases", () => {
+    it("handles payload with queries undefined", () => {
+      const payload = { queries: undefined as any };
+      expect(getCheckedConflictQueries(payload)).toEqual([]);
+    });
+
+    it("handles payload with queries null", () => {
+      const payload = { queries: null as any };
+      expect(getCheckedConflictQueries(payload)).toEqual([]);
+    });
+
+    it("handles queries array where all normalized to null", () => {
+      const payload = { queries: [{ role: "CLIENT_PARTY", name: "", idNumber: "   " }] };
+      expect(getCheckedConflictQueries(payload)).toEqual([]);
+    });
   });
 });
