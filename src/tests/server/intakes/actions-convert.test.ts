@@ -27,7 +27,11 @@ vi.mock("@/server/intakes/helpers", () => ({
   assertConflictReviewAllowsConversion: vi.fn(),
   generateTitle: vi.fn(),
   emptyToNull: vi.fn(),
-  clientTypeToPartyType: vi.fn()
+  clientTypeToPartyType: vi.fn((type) =>
+    type === "INDIVIDUAL" ? "NATURAL_PERSON" :
+    type === "COMPANY" ? "COMPANY" :
+    "OTHER_ORG"
+  )
 }));
 
 vi.mock("@/server/matters/code-generator", () => ({
@@ -619,6 +623,168 @@ describe("convertIntakeToMatter", () => {
           counterclaimAsPlaintiff: false,
           counterclaimAsDefendant: true
         })
+      })
+    );
+  });
+
+  it("handles COMPANY client type, sets enterprise fields correctly", async () => {
+    (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
+    const mockIntake = {
+      id: "i1",
+      title: "Case Title",
+      category: "CIVIL_COMMERCIAL",
+      ownerUserId: "u2",
+      causeId: "c1",
+      causeFreeText: "free",
+      clientId: "cl1",
+      client: { id: "cl1", name: "Company A", type: "COMPANY", idNumber: "91110000XXXXXX" },
+      firstProcedureType: "FIRST_INSTANCE",
+      ourStanding: "PLAINTIFF",
+      claimAmount: 100000,
+      counterclaim: false,
+      coUserIds: [],
+      parties: [],
+      conflictChecks: [],
+      documents: []
+    };
+    (prisma.intake.findUnique as any).mockResolvedValue(mockIntake);
+
+    let capturedTx: any = null;
+    (prisma.$transaction as any).mockImplementation(async (cb: any) => {
+      const tx = {
+        matter: { create: vi.fn().mockResolvedValue({ id: "m1", internalCode: "IC", firmCaseNo: "FCN" }) },
+        procedure: { create: vi.fn().mockResolvedValue({ id: "p1" }) },
+        party: { create: vi.fn().mockResolvedValue({ id: "pa1" }), createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        billing: { create: vi.fn().mockResolvedValue({ id: "b1" }) },
+        matterMember: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        document: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        matterProcedure: { create: vi.fn().mockResolvedValue({ id: "mp1" }) },
+        procedureParty: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        intake: { update: vi.fn().mockResolvedValue({ id: "i1" }) },
+        timelineEvent: { create: vi.fn().mockResolvedValue({ id: "te1" }) },
+        documentFolder: { createMany: vi.fn().mockResolvedValue({ count: 0 }) }
+      };
+      capturedTx = tx;
+      return await cb(tx);
+    });
+
+    await convertIntakeToMatter("i1");
+
+    // Check party creation includes enterprise fields
+    expect(capturedTx.party.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          partyType: "COMPANY",
+          enterpriseSocialCode: "91110000XXXXXX",
+          enterpriseName: "Company A"
+        })
+      })
+    );
+  });
+
+  it("handles INDIVIDUAL client type, sets enterprise fields to null", async () => {
+    (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
+    const mockIntake = {
+      id: "i1",
+      title: "Case Title",
+      category: "CIVIL_COMMERCIAL",
+      ownerUserId: "u2",
+      causeId: "c1",
+      causeFreeText: "free",
+      clientId: "cl1",
+      client: { id: "cl1", name: "John Doe", type: "INDIVIDUAL", idNumber: "123456199001011234" },
+      firstProcedureType: "FIRST_INSTANCE",
+      ourStanding: "PLAINTIFF",
+      claimAmount: 100000,
+      counterclaim: false,
+      coUserIds: [],
+      parties: [],
+      conflictChecks: [],
+      documents: []
+    };
+    (prisma.intake.findUnique as any).mockResolvedValue(mockIntake);
+
+    let capturedTx: any = null;
+    (prisma.$transaction as any).mockImplementation(async (cb: any) => {
+      const tx = {
+        matter: { create: vi.fn().mockResolvedValue({ id: "m1", internalCode: "IC", firmCaseNo: "FCN" }) },
+        procedure: { create: vi.fn().mockResolvedValue({ id: "p1" }) },
+        party: { create: vi.fn().mockResolvedValue({ id: "pa1" }), createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        billing: { create: vi.fn().mockResolvedValue({ id: "b1" }) },
+        matterMember: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        document: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        matterProcedure: { create: vi.fn().mockResolvedValue({ id: "mp1" }) },
+        procedureParty: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        intake: { update: vi.fn().mockResolvedValue({ id: "i1" }) },
+        timelineEvent: { create: vi.fn().mockResolvedValue({ id: "te1" }) },
+        documentFolder: { createMany: vi.fn().mockResolvedValue({ count: 0 }) }
+      };
+      capturedTx = tx;
+      return await cb(tx);
+    });
+
+    await convertIntakeToMatter("i1");
+
+    // For INDIVIDUAL, enterprise fields should be null
+    expect(capturedTx.party.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          partyType: "NATURAL_PERSON",
+          enterpriseSocialCode: null,
+          enterpriseName: null
+        })
+      })
+    );
+  });
+
+  it("updates documents when intake has documents", async () => {
+    (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
+    const mockIntake = {
+      id: "i1",
+      title: "Case Title",
+      category: "CIVIL_COMMERCIAL",
+      ownerUserId: "u2",
+      causeId: "c1",
+      causeFreeText: "free",
+      clientId: "cl1",
+      client: { id: "cl1", name: "Client", type: "COMPANY", idNumber: "code" },
+      firstProcedureType: "FIRST_INSTANCE",
+      ourStanding: "PLAINTIFF",
+      claimAmount: 100000,
+      counterclaim: false,
+      coUserIds: [],
+      parties: [],
+      conflictChecks: [],
+      documents: [{ id: "d1" }, { id: "d2" }]
+    };
+    (prisma.intake.findUnique as any).mockResolvedValue(mockIntake);
+
+    let capturedTx: any = null;
+    (prisma.$transaction as any).mockImplementation(async (cb: any) => {
+      const tx = {
+        matter: { create: vi.fn().mockResolvedValue({ id: "m1", internalCode: "IC", firmCaseNo: "FCN" }) },
+        procedure: { create: vi.fn().mockResolvedValue({ id: "p1" }) },
+        party: { create: vi.fn().mockResolvedValue({ id: "pa1" }), createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        billing: { create: vi.fn().mockResolvedValue({ id: "b1" }) },
+        matterMember: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        document: { updateMany: vi.fn().mockResolvedValue({ count: 2 }) },
+        matterProcedure: { create: vi.fn().mockResolvedValue({ id: "mp1" }) },
+        procedureParty: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        intake: { update: vi.fn().mockResolvedValue({ id: "i1" }) },
+        timelineEvent: { create: vi.fn().mockResolvedValue({ id: "te1" }) },
+        documentFolder: { createMany: vi.fn().mockResolvedValue({ count: 0 }) }
+      };
+      capturedTx = tx;
+      return await cb(tx);
+    });
+
+    await convertIntakeToMatter("i1");
+
+    // Documents present → updateMany được gọi
+    expect(capturedTx.document.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { intakeId: "i1" },
+        data: { matterId: "m1" }
       })
     );
   });
