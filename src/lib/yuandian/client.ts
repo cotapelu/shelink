@@ -1,8 +1,8 @@
 /**
- * 元典开放平台 HTTP 客户端（server-side only）
+ * YuanDian Open Platform HTTP Client (server-side only)
  *
- * 入口：POST {baseUrl}/{routeKey}，header X-API-Key。
- * 详见 https://open.chineselaw.com/llms-full.txt
+ * Entry: POST {baseUrl}/{routeKey}, header X-API-Key.
+ * See details at https://open.chineselaw.com/llms-full.txt
  */
 import { getYuandianSettings, type ResolvedYuandianSettings } from "./settings";
 
@@ -65,9 +65,9 @@ export type PtalSearchResult = {
 };
 
 /**
- * 普通案例关键词检索（rh_ptal_search，计费 10 POINT/次）
+ * General case keyword search (rh_ptal_search, 10 POINT per call)
  *
- * 请求体不能完全为空，调用方至少传一个过滤条件（ay/qw/jbdw 等）。
+ * Request body cannot be completely empty; caller must provide at least one filter (ay/qw/jbdw/etc).
  */
 export async function searchPtalCases(
   params: PtalSearchParams,
@@ -76,7 +76,7 @@ export async function searchPtalCases(
   const s = resolved ?? (await getYuandianSettings());
   if (!s.configured) throw new YuandianNotConfiguredError();
 
-  // 元典要求 body 非空；调用方至少要传一个过滤条件
+  // YuanDian requires non-empty body; caller must provide at least one filter
   const hasAny =
     (params.ay?.length ?? 0) > 0 ||
     !!params.qw?.trim() ||
@@ -140,8 +140,8 @@ export async function searchPtalCases(
 }
 
 /**
- * 拼出元典前端的案例详情完整 URL（用于"查看全文"外跳）。
- * caseDetailHost 默认 https://www.chineselaw.com，可在设置里改。
+ * Build full URL for YuanDian frontend case detail (for "view full text" external link).
+ * Default caseDetailHost: https://www.chineselaw.com, configurable in settings.
  */
 export function buildCaseDetailUrl(host: string, relPath: string): string {
   const h = host.replace(/\/$/, "");
@@ -150,7 +150,7 @@ export function buildCaseDetailUrl(host: string, relPath: string): string {
 }
 
 // ============================================================
-// v0.22: 语义检索 case_vector_search（10 POINT/次）
+// v0.22: Semantic search case_vector_search (10 POINT per call)
 // ============================================================
 
 const WSZL_NAME_TO_CODE: Record<string, string> = {
@@ -161,22 +161,22 @@ const WSZL_NAME_TO_CODE: Record<string, string> = {
 };
 
 export type VectorSearchParams = {
-  query: string; // 必填，自然语言
-  ay?: string[]; // 案由名（vector 接受名字，不是 code）
-  ajlb?: PtalSearchParams["ajlb"]; // 同 ptal 的中文枚举
-  xzqh_p?: string; // ⚠ vector 这里是 string 单值，不是数组
-  wszl?: ("判决书" | "裁定书" | "调解书" | "决定书")[]; // 我们对外仍传名字，内部转 code
+  query: string; // required, natural language
+  ay?: string[]; // cause names (vector accepts names, not codes)
+  ajlb?: PtalSearchParams["ajlb"]; // same Chinese enums as ptal
+  xzqh_p?: string; // ⚠ vector uses single string, not array
+  wszl?: ("判决书" | "裁定书" | "调解书" | "决定书")[]; // we still pass names externally, convert to codes internally
   ja_start?: string;
   ja_end?: string;
-  return_num?: number; // 默认 10，上限 50（我们自己加保护）
+  return_num?: number; // default 10, max 50 (we add protection)
 };
 
 export type VectorCase = {
   scid: string;
   title: string;
   ah: string;
-  ay: string[]; // ⚠ 返回的是 code 数组，不是名字
-  anyou?: string[]; // 案由名（如果返回字段有的话，做兜底）
+  ay: string[]; // ⚠ Returns code array, not names
+  anyou?: string[]; // cause names (fallback if field exists)
   jbdw: string | null;
   ajlb: string;
   wszl: string;
@@ -218,7 +218,7 @@ export async function searchCasesByVector(
   const body: Record<string, unknown> = { query };
   if (Object.keys(filter).length) body.wenshu_filter = filter;
   body.return_num = Math.min(Math.max(params.return_num ?? 10, 1), 50);
-  body.rewrite_flag = false; // 走原 query；改写经常给奇怪结果
+  body.rewrite_flag = false; // use original query; rewriting often gives weird results
 
   const url = `${s.baseUrl.replace(/\/$/, "")}/case_vector_search`;
   const ctrl = new AbortController();
@@ -245,7 +245,7 @@ export async function searchCasesByVector(
     clearTimeout(timer);
   }
 
-  // 语义接口成功 code 是 201（按文档示例）；保险接受 200-299
+  // Semantic interface success code is 201 (per docs); conservatively accept 200-299
   const code = json.code ?? 0;
   if (code < 200 || code >= 300) {
     throw new YuandianApiError(json.msg ?? "元典语义检索失败", code);
@@ -253,7 +253,7 @@ export async function searchCasesByVector(
   return { items: json.extra?.wenshu ?? [] };
 }
 
-/** 语义检索详情 URL：scid → /ydzk/caseDetail/case/<scid> */
+/** Semantic search detail URL: scid → /ydzk/caseDetail/case/<scid> */
 export function buildVectorCaseDetailUrl(host: string, scid: string): string {
   return buildCaseDetailUrl(host, `/ydzk/caseDetail/case/${scid}`);
 }

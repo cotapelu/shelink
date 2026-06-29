@@ -1,20 +1,20 @@
 /**
- * 元典开放平台 — 企业信息 API（server-side only）
+ * YuanDian Open Platform - Enterprise Information API (server-side only)
  *
- * 入口：GET {baseUrl}/{routeKey}?param=value，header X-API-Key。
- * 复用 settings.ts 的加密密钥读取。
+ * Endpoint: GET {baseUrl}/{routeKey}?param=value, header X-API-Key.
+ * Reuses encryption key reading from settings.ts.
  */
 import { getYuandianSettings, type ResolvedYuandianSettings } from "./settings";
 import { YuandianNotConfiguredError, YuandianApiError } from "./client";
 
-// 元典企业搜索候选
+// YuanDian enterprise search candidate
 export type EnterpriseCandidate = {
   id: string;
   企业名称: string;
   统一社会信用代码: string;
 };
 
-// 映射后的企业信息（英文 key）
+// Mapped enterprise info (English keys)
 export type MappedEnterpriseInfo = {
   id: string;
   name: string;
@@ -27,7 +27,7 @@ export type MappedEnterpriseInfo = {
   establishedDate: string;
 };
 
-// 元典企业基本信息原始响应（中文 key）
+// Raw enterprise base info from YuanDian (Chinese keys)
 type RawEnterpriseBaseInfo = Record<string, unknown> & {
   id?: string;
 };
@@ -38,7 +38,7 @@ function getStr(obj: Record<string, unknown>, key: string): string {
 }
 
 /**
- * 企业名称搜索候选（rh_enterpriseSearch，1 POINT/次）
+ * Enterprise name search candidate (rh_enterpriseSearch, 1 POINT per call)
  */
 export async function searchEnterpriseCandidates(
   name: string,
@@ -83,7 +83,7 @@ export async function searchEnterpriseCandidates(
 }
 
 /**
- * 企业基本信息详情（rh_enterpriseBaseInfo，10 POINT/次）
+ * Enterprise base info detail (rh_enterpriseBaseInfo, 10 POINT per call)
  */
 export async function getEnterpriseBaseInfo(
   id: string,
@@ -137,7 +137,7 @@ export async function getEnterpriseBaseInfo(
 }
 
 // ============================================================
-// v0.26: 企业聚合总览（rh_enterpriseAggregationSummary，10 POINT/次）
+// v0.26: Enterprise aggregation summary (rh_enterpriseAggregationSummary, 10 POINT per call)
 // ============================================================
 
 /** 聚合接口返回各模块统计的通用结构。律师视角主要看「总数」。 */
@@ -169,7 +169,7 @@ export type EnterpriseSummary = {
   level: EnterpriseRiskLevel;
 };
 
-// 律师核心关心：5 类风险 — 命中即标红
+// Lawyer core concerns: 5 risk categories - highlight when hit
 const CORE_RISK_KEYS = [
   "失信被执行人统计",
   "被执行人统计",
@@ -178,7 +178,7 @@ const CORE_RISK_KEYS = [
   "经营异常统计"
 ] as const;
 
-// 涉诉相关
+// Litigation-related
 const LITIGATION_KEYS = [
   "法院公告统计",
   "开庭公告统计",
@@ -186,7 +186,7 @@ const LITIGATION_KEYS = [
   "欠税公告统计"
 ] as const;
 
-// 辅助维度
+// Auxiliary dimensions
 const AUXILIARY_KEYS = [
   "变更记录统计",
   "对外担保统计",
@@ -199,7 +199,7 @@ const AUXILIARY_KEYS = [
   "网站备案统计"
 ] as const;
 
-// 每个统计模块 top 维度对应的 key 名（聚合接口字段名不一致）
+// Top dimension key per category (aggregation API field names vary)
 const TOP_FIELD_BY_CATEGORY: Record<string, string> = {
   失信被执行人统计: "执行法院",
   被执行人统计: "执行法院",
@@ -228,7 +228,9 @@ function pickStat(
   const node = raw[rawKey];
   if (!node || typeof node !== "object") return null;
   const obj = node as Record<string, unknown>;
+  // Total count
   const total = typeof obj["总数"] === "number" ? (obj["总数"] as number) : 0;
+  // Plaintiff/Defendant counts (only for litigation modules)
   const asPlaintiff =
     typeof obj["起诉方"] === "number" ? (obj["起诉方"] as number) : undefined;
   const asDefendant =
@@ -250,6 +252,7 @@ function pickStat(
         .map((x) => ({ key: x.key, count: x.count }));
     }
   }
+  // Remove "统计" suffix from category name
   return {
     category: rawKey.replace(/统计$/, ""),
     total,
@@ -261,9 +264,9 @@ function pickStat(
 
 function computeRiskLevel(coreRisks: EnterpriseStat[]): EnterpriseRiskLevel {
   const m = new Map(coreRisks.map((s) => [s.category, s.total]));
-  // HIGH：失信被执行人（拒不履行的最强信号）
+  // HIGH: Judgment debtor (strongest signal of refusal to comply)
   if ((m.get("失信被执行人") ?? 0) > 0) return "HIGH";
-  // MEDIUM：被执行人 / 股权冻结 / 严重违法 — 已有执行案件或重大违规
+  // MEDIUM: Executed person / equity freeze / serious violation - existing enforcement or major violation
   if (
     (m.get("被执行人") ?? 0) > 0 ||
     (m.get("股权冻结") ?? 0) > 0 ||
@@ -271,15 +274,15 @@ function computeRiskLevel(coreRisks: EnterpriseStat[]): EnterpriseRiskLevel {
   ) {
     return "MEDIUM";
   }
-  // LOW：仅经营异常（多为年报/地址等非诚信问题）
+  // LOW: Only business abnormality (often non-credit issues like annual filing/address)
   if ((m.get("经营异常") ?? 0) > 0) return "LOW";
   return "NONE";
 }
 
 /**
- * 企业聚合总览（rh_enterpriseAggregationSummary，10 POINT/次）
+ * Enterprise aggregation summary (rh_enterpriseAggregationSummary, 10 POINT per call)
  *
- * 接受企业 ID 或统一社会信用代码（二者至少一个）。
+ * Accepts enterprise ID or unified social credit code (at least one required).
  */
 export async function getEnterpriseSummary(
   identifier: { id?: string; socialCode?: string },
