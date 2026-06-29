@@ -20,7 +20,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Plus, X, Loader2, Trash2, Star, Sparkles, Search } from "lucide-react";
@@ -104,6 +104,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
   const { fields, append, remove } = useFieldArray({ control, name: "contacts" });
   const watchedType = watch("type");
   const watchedTags = watch("tags");
+  const watchedName = useWatch({ name: "name" }) ?? "";
 
   // 当 editing 切换时重置表单
   useEffect(() => {
@@ -179,7 +180,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
   const [aiFilling, startAiFill] = useTransition();
 
   function handleAILookup() {
-    const name = (watch("name") || "").trim();
+    const name = watchedName.trim();
     if (!name) {
       toast.warning("请先填写客户名称再点击 AI 查找");
       return;
