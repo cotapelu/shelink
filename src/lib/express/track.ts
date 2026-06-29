@@ -90,7 +90,7 @@ async function callKdniao(opts: {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 10_000);
   try {
-    const res = await fetch("http://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx", {
+    const res = await fetch("https://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: params,
