@@ -275,4 +275,79 @@ describe("searchPtalCases", () => {
 
     await expect(searchPtalCases({ qw: "test" })).rejects.toThrow("JSON parse failed");
   });
+
+  it("defaults top_k to 10 when not provided", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open"
+    });
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: "success", data: { total: 0, lst: [] } })
+    });
+
+    await searchPtalCases({ ay: ["test"] });
+
+    const [url, opts] = (global.fetch as any).mock.calls[0];
+    const body = JSON.parse(opts.body);
+    expect(body.top_k).toBe(10);
+  });
+
+  it("clamps top_k to max 50", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open"
+    });
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: "success", data: { total: 0, lst: [] } })
+    });
+
+    await searchPtalCases({ ay: ["test"], top_k: 100 });
+
+    const [url, opts] = (global.fetch as any).mock.calls[0];
+    const body = JSON.parse(opts.body);
+    expect(body.top_k).toBe(50);
+  });
+
+  it("clamps top_k to min 1", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open"
+    });
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: "success", data: { total: 0, lst: [] } })
+    });
+
+    await searchPtalCases({ ay: ["test"], top_k: 0 });
+
+    const [url, opts] = (global.fetch as any).mock.calls[0];
+    const body = JSON.parse(opts.body);
+    expect(body.top_k).toBe(1);
+  });
+
+  it("does not add search_mode when qw is whitespace only (with other param)", async () => {
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: "key",
+      baseUrl: "https://open.chineselaw.com/open"
+    });
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: "success", data: { total: 0, lst: [] } })
+    });
+
+    await searchPtalCases({ ay: ["test"], qw: "   " });
+
+    const [url, opts] = (global.fetch as any).mock.calls[0];
+    const body = JSON.parse(opts.body);
+    expect(body.qw).toBeUndefined();
+    expect(body.search_mode).toBeUndefined();
+    expect(body.ay).toEqual(["test"]);
+  });
+
 });

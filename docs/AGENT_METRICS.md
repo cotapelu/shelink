@@ -860,6 +860,21 @@ This file tracks performance and evolution of the AI agent during the migration 
   - Remaining uncovered lines: 46, 80, 114-115, 159.
 - **Verification**: All 769 tests pass; build success; typecheck 0; lint 0 errors.
 
+## Cycle 48 - Task: Add tests for lib/yuandian/client edge cases
+- **Timestamp**: 2026-06-29T07:50:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (client 90.12% branches)
+- **Duration**: 10 min
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/lib/yuandian/client.test.ts
+- **Test Delta**: +4 tests (total 773)
+- **Coverage Impact**:
+  - Overall Branches: 93.91% (unchanged)
+  - client.ts Branches: 90.12% (no regression, guard against future changes)
+- **Notes**:
+  - Added: top_k default to 10, clamp max 50, clamp min 1, qw whitespace handling (no search_mode)
+- **Verification**: All 773 tests pass; build success; typecheck 0; lint 0 errors.
+
 ---
 
 - **Phase 1**: Database Unification completed – schema validated, migration applied, 20+ models.
