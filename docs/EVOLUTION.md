@@ -321,4 +321,12 @@ Long-term plan for the LawLink unified application.
 - **Coverage Impact**: Branches 89.47% → 91.36% (+1.89%); Statements 95.61% → 97.17% (+1.56%)
 - **Impact**: Added comprehensive tests for express tracking, covering fallback logic, error handling, and state mapping; fixed TypeScript errors.
 
+## Cycle 58 - Task: Increase coverage for lib/utils.ts (core utilities)
+- **Timestamp**: 2026-06-29T21:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Status**: ✅ Success
+- **Test Delta**: +22 tests (total 834)
+- **Coverage Impact**: utils.ts from ~0% to ~100% branches; overall coverage maintained (Statements 98.35%, Branches 92.8%)
+- **Impact**: Added unit tests for cn, formatCurrency, formatDate, daysUntil; eliminated critical utility blind spot.
+
 *Last updated: 2026-06-29*

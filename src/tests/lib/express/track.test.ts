@@ -150,4 +150,36 @@ describe("trackExpress", () => {
     const result = await trackExpress({ trackingNo: "123" });
     expect(result.state).toBe("未知");
   });
+
+  it("uses Kuaidi100 directly when KDNiao not configured", async () => {
+    vi.mocked(getExpressSettings).mockResolvedValueOnce({
+      kdniao: { configured: false, ebusinessId: "", appKey: "" },
+      kuaidi100: { configured: true, customer: "cust", key: "key" }
+    });
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      json: async () => ({ status: "200", message: "ok", state: "3", data: [{ time: "2024-01-01", context: "delivered" }] })
+    });
+    global.fetch = mockFetch;
+    const result = await trackExpress({ trackingNo: "123" });
+    expect(result.provider).toBe("快递100");
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("throws when Kuaidi100 returns error status", async () => {
+    vi.mocked(getExpressSettings).mockResolvedValueOnce({
+      kdniao: { configured: true, ebusinessId: "id", appKey: "key" },
+      kuaidi100: { configured: true, customer: "cust", key: "k" }
+    });
+    // KDNiao fails, then Kuaidi100 fails too
+    let callCount = 0;
+    const mockFetch = vi.fn().mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return Promise.resolve({ json: async () => ({ Success: false, Reason: "KDNiao down" }) });
+      }
+      return Promise.resolve({ json: async () => ({ status: "500", message: "error", state: "0", data: [] }) });
+    });
+    global.fetch = mockFetch;
+    await expect(trackExpress({ trackingNo: "123" })).rejects.toThrow("error");
+  });
 });
