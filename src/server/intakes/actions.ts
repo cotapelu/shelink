@@ -37,6 +37,13 @@ import { seedDefaultFolders } from "@/lib/default-folders";
 import { notifyRoleApprovers } from "@/server/notifications/approval";
 import * as helpers from "./helpers";
 
+/**
+ * List intake applications with filtering, pagination, and ordering.
+ * @param input - Query parameters (page, pageSize, status, category, date range, search, sort)
+ * @returns Promise<{ items: Intake[], total: number }> - paginated results and total count
+ * @throws {ZodError} - if input validation fails
+ * @access Requires authenticated session
+ */
 export async function listIntakes(input: Partial<IntakeListQuery> = {}) {
   const session = await requireSession();
   const query = intakeListQuerySchema.parse(input);
@@ -101,6 +108,13 @@ export async function listIntakes(input: Partial<IntakeListQuery> = {}) {
   return { items, total, page: query.page, pageSize: query.pageSize };
 }
 
+/**
+ * Get intake by ID with permission check.
+ * @param id - Intake ID
+ * @returns Promise<Intake> - intake with relations
+ * @throws {Error} - if intake not found or permission denied
+ * @access Requires authenticated session
+ */
 export async function getIntakeById(id: string) {
   const session = await requireSession();
   // 单条收案权限检查：manager 看全部，其他人只能看自己参与或创建的
@@ -148,6 +162,15 @@ export async function getIntakeById(id: string) {
   return intake;
 }
 
+/**
+ * Create a new intake application.
+ * @param input - IntakeCreateInput (client, title, description, category, etc.)
+ * @returns Promise<Intake> - created intake with relations
+ * @throws {ZodError} - if validation fails
+ * @throws {Error} - if client creation fails or other business errors
+ * @access Requires authenticated session
+ * @audit Logs intake creation
+ */
 export async function createIntake(input: IntakeCreateInput) {
   const session = await requireSession();
   const data = intakeCreateSchema.parse(input);
@@ -328,6 +351,15 @@ export async function createIntake(input: IntakeCreateInput) {
   return { ok: true, id: created.id, clientId: resolvedClientId };
 }
 
+/**
+ * Decline an intake application.
+ * @param input - DeclineIntakeInput (id, reason)
+ * @returns Promise<{ ok: boolean }>
+ * @throws {ZodError} - if validation fails
+ * @throws {Error} - if user is not an approver or intake not found
+ * @access Requires authenticated session with approver role
+ * @audit Logs decline action
+ */
 export async function declineIntake(input: DeclineIntakeInput) {
   const session = await requireSession();
   helpers.requireApprover(session.user.role);
@@ -355,7 +387,13 @@ export async function declineIntake(input: DeclineIntakeInput) {
   return { ok: true };
 }
 
-/** v0.14: 标记需补正 — 让律师补充材料后可再次提交（区别于 DECLINED 终态） */
+/** v0.14: Mark intake as needing revision (request additional materials).
+ * @param input - { id: string, reason: string }
+ * @returns Promise<{ ok: boolean }>
+ * @throws {Error} - if reason empty or user lacks permission
+ * @access Requires authenticated session with approver role
+ * @audit Logs revision request
+ */
 export async function markIntakeNeedsRevision(input: { id: string; reason: string }) {
   const session = await requireSession();
   helpers.requireApprover(session.user.role);
@@ -383,7 +421,13 @@ export async function markIntakeNeedsRevision(input: { id: string; reason: strin
   return { ok: true };
 }
 
-/** v0.14: 律师补完材料后重新提交（NEEDS_REVISION → PENDING_CONFIRMATION） */
+/** v0.14: Lawyer resubmits intake after completing materials (NEEDS_REVISION → PENDING_CONFIRMATION).
+ * @param id - Intake ID
+ * @returns Promise<{ ok: boolean }>
+ * @throws {Error} - if intake not found or status not NEEDS_REVISION
+ * @access Requires authenticated session (intake creator or owner only)
+ * @audit Logs resubmission
+ */
 export async function resubmitIntake(id: string) {
   const session = await requireSession();
 
@@ -427,7 +471,15 @@ export async function resubmitIntake(id: string) {
   return { ok: true };
 }
 
-/** 转 Matter：把 intake 上的全部字段铺到 Matter / 首程序 / 程序当事人 / Billing / MatterMember / Document */
+/** Convert intake to formal matter (creates Matter, Procedure, Parties, Billing, etc.).
+ * This is a complex business operation that transforms all intake data into the
+ * canonical Matter model and related entities. It's an approver-only action.
+ * @param intakeId - Intake ID to convert
+ * @returns Promise<{ ok: boolean; matterId: string }>
+ * @throws {Error} - if intake not found, status invalid, or conversion fails
+ * @access Requires authenticated session with approver role (ADMIN/PRINCIPAL_LAWYER)
+ * @audit Logs conversion and creates matter creation audit record
+ */
 export async function convertIntakeToMatter(intakeId: string) {
   const session = await requireSession();
   helpers.requireApprover(session.user.role);

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ContactsSection } from "../contacts-section";
-import type { Contact } from "@prisma/client";
+
 
 const mockContacts: any[] = [
   {

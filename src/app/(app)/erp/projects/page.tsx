@@ -20,13 +20,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Search, FolderOpen, Calendar, Users, Clock } from "lucide-react";
+import { Plus, Search, Calendar, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { listProjects } from "@/server/erp/actions";
-import type { WorkTask } from "@/types";
+
 // No Project type yet; using any for now
 
 function getStatusLabel(status: string) {

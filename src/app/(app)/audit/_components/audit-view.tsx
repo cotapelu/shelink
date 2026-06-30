@@ -25,7 +25,6 @@ import {
   ShieldCheck,
   ChevronDown,
   ChevronRight,
-  Filter,
   X,
   Trash2,
   Loader2

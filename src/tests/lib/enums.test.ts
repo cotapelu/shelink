@@ -279,38 +279,130 @@ describe("invoiceRequestStatusLabel & Color", () => {
   });
 });
 
-describe("procedureToStandingOptions", () => {
-  it("returns all standings for null procedure", () => {
+describe('procedureToStandingOptions', () => {
+  it('returns all standings for null procedure', () => {
     const result = procedureToStandingOptions(null, 'ours');
     expect(result.length).toBeGreaterThan(10);
   });
 
-  it("returns all standings for unknown procedure", () => {
-    const result = procedureToStandingOptions("UNKNOWN" as any, 'ours');
+  it('returns all standings for unknown procedure', () => {
+    const result = procedureToStandingOptions('UNKNOWN' as any, 'ours');
     expect(result.length).toBeGreaterThan(10);
   });
 
-  it("filters correctly for FIRST_INSTANCE ours side", () => {
-    const result = procedureToStandingOptions("FIRST_INSTANCE", "ours");
-    expect(result).toContain("PLAINTIFF");
-    expect(result).toContain("DEFENDANT");
-    expect(result).toContain("COUNTERCLAIM_PLAINTIFF");
+  // First instance and remand
+  it('filters FIRST_INSTANCE ours', () => {
+    const result = procedureToStandingOptions('FIRST_INSTANCE', 'ours');
+    expect(result).toEqual([
+      'PLAINTIFF', 'DEFENDANT', 'THIRD_PARTY', 'COUNTERCLAIM_PLAINTIFF', 'COUNTERCLAIM_DEFENDANT'
+    ]);
+  });
+  it('filters REMAND_FIRST ours', () => {
+    const result = procedureToStandingOptions('REMAND_FIRST', 'ours');
+    expect(result).toEqual([
+      'PLAINTIFF', 'DEFENDANT', 'THIRD_PARTY', 'COUNTERCLAIM_PLAINTIFF', 'COUNTERCLAIM_DEFENDANT'
+    ]);
   });
 
-  it("filters correctly for SECOND_INSTANCE", () => {
-    const result = procedureToStandingOptions("SECOND_INSTANCE", "ours");
-    expect(result).toEqual(["APPELLANT", "APPELLEE", "THIRD_PARTY"]);
+  // Second instance
+  it('filters SECOND_INSTANCE', () => {
+    const result = procedureToStandingOptions('SECOND_INSTANCE', 'ours');
+    expect(result).toEqual(['APPELLANT', 'APPELLEE', 'THIRD_PARTY']);
+  });
+  it('filters REMAND_SECOND', () => {
+    const result = procedureToStandingOptions('REMAND_SECOND', 'ours');
+    expect(result).toEqual(['APPELLANT', 'APPELLEE', 'THIRD_PARTY']);
   });
 
-  it("filters correctly for ENFORCEMENT", () => {
-    const result = procedureToStandingOptions("ENFORCEMENT", "ours");
-    expect(result).toContain("ENFORCEMENT_APPLICANT");
-    expect(result).toContain("EXECUTED_PERSON");
+  // Retrial
+  it('filters RETRIAL_REVIEW', () => {
+    const result = procedureToStandingOptions('RETRIAL_REVIEW', 'ours');
+    expect(result).toEqual(['RETRIAL_APPLICANT', 'RETRIAL_RESPONDENT', 'THIRD_PARTY']);
+  });
+  it('filters RETRIAL', () => {
+    const result = procedureToStandingOptions('RETRIAL', 'ours');
+    expect(result).toEqual(['RETRIAL_APPLICANT', 'RETRIAL_RESPONDENT', 'THIRD_PARTY']);
   });
 
-  it("handles opposite side", () => {
-    const result = procedureToStandingOptions("FIRST_INSTANCE", "opposite");
-    expect(result).toContain("PLAINTIFF");
-    expect(result).toContain("DEFENDANT");
+  // Prosecutorial supervision
+  it('filters PROSECUTORIAL_SUPERVISION', () => {
+    const result = procedureToStandingOptions('PROSECUTORIAL_SUPERVISION', 'ours');
+    expect(result).toEqual(['RETRIAL_APPLICANT', 'RETRIAL_RESPONDENT', 'THIRD_PARTY']);
+  });
+
+  // Arbitration
+  it('filters COMMERCIAL_ARBITRATION', () => {
+    const result = procedureToStandingOptions('COMMERCIAL_ARBITRATION', 'ours');
+    expect(result).toEqual(['ARBITRATION_CLAIMANT', 'ARBITRATION_RESPONDENT', 'THIRD_PARTY']);
+  });
+  it('filters LABOR_ARBITRATION', () => {
+    const result = procedureToStandingOptions('LABOR_ARBITRATION', 'ours');
+    expect(result).toEqual(['ARBITRATION_CLAIMANT', 'ARBITRATION_RESPONDENT', 'THIRD_PARTY']);
+  });
+  it('filters ARBITRATION_SET_ASIDE', () => {
+    const result = procedureToStandingOptions('ARBITRATION_SET_ASIDE', 'ours');
+    expect(result).toEqual(['ARBITRATION_CLAIMANT', 'ARBITRATION_RESPONDENT']);
+  });
+  it('filters ARBITRATION_ENFORCEMENT_REVIEW', () => {
+    const result = procedureToStandingOptions('ARBITRATION_ENFORCEMENT_REVIEW', 'ours');
+    expect(result).toEqual(['ARBITRATION_CLAIMANT', 'ARBITRATION_RESPONDENT']);
+  });
+
+  // Enforcement
+  it('filters ENFORCEMENT_OBJECTION', () => {
+    const result = procedureToStandingOptions('ENFORCEMENT_OBJECTION', 'ours');
+    expect(result).toEqual(['ENFORCEMENT_APPLICANT', 'EXECUTED_PERSON', 'THIRD_PARTY']);
+  });
+
+  // Criminal
+  it('filters INVESTIGATION', () => {
+    const result = procedureToStandingOptions('INVESTIGATION', 'ours');
+    expect(result).toEqual([
+      'CRIMINAL_DEFENDANT', 'CRIMINAL_VICTIM', 'PRIVATE_PROSECUTOR', 'CRIMINAL_INCIDENTAL_PLAINTIFF'
+    ]);
+  });
+  it('filters PROSECUTION_REVIEW', () => {
+    const result = procedureToStandingOptions('PROSECUTION_REVIEW', 'ours');
+    expect(result).toEqual([
+      'CRIMINAL_DEFENDANT', 'CRIMINAL_VICTIM', 'PRIVATE_PROSECUTOR', 'CRIMINAL_INCIDENTAL_PLAINTIFF'
+    ]);
+  });
+  it('filters DEATH_PENALTY_REVIEW', () => {
+    const result = procedureToStandingOptions('DEATH_PENALTY_REVIEW', 'ours');
+    expect(result).toEqual([
+      'CRIMINAL_DEFENDANT', 'CRIMINAL_VICTIM', 'PRIVATE_PROSECUTOR', 'CRIMINAL_INCIDENTAL_PLAINTIFF'
+    ]);
+  });
+  it('filters CRIMINAL_ENFORCEMENT', () => {
+    const result = procedureToStandingOptions('CRIMINAL_ENFORCEMENT', 'ours');
+    expect(result).toEqual([
+      'CRIMINAL_DEFENDANT', 'CRIMINAL_VICTIM', 'PRIVATE_PROSECUTOR', 'CRIMINAL_INCIDENTAL_PLAINTIFF'
+    ]);
+  });
+  it('filters COMMUTATION_PAROLE_REVIEW', () => {
+    const result = procedureToStandingOptions('COMMUTATION_PAROLE_REVIEW', 'ours');
+    expect(result).toEqual([
+      'CRIMINAL_DEFENDANT', 'CRIMINAL_VICTIM', 'PRIVATE_PROSECUTOR', 'CRIMINAL_INCIDENTAL_PLAINTIFF'
+    ]);
+  });
+
+  // Administrative
+  it('filters ADMIN_RECONSIDERATION', () => {
+    const result = procedureToStandingOptions('ADMIN_RECONSIDERATION', 'ours');
+    expect(result).toEqual(['ADMIN_RECONSIDERATION_APPLICANT', 'ADMIN_RECONSIDERATION_RESPONDENT', 'THIRD_PARTY']);
+  });
+  it('filters ADMIN_NON_LITIGATION_ENFORCEMENT', () => {
+    const result = procedureToStandingOptions('ADMIN_NON_LITIGATION_ENFORCEMENT', 'ours');
+    expect(result).toEqual(['ADMIN_PLAINTIFF', 'ADMIN_DEFENDANT', 'EXECUTED_PERSON']);
+  });
+
+  // Non-litigation and custom
+  it('filters NON_LITIGATION_PHASE', () => {
+    const result = procedureToStandingOptions('NON_LITIGATION_PHASE', 'ours');
+    expect(result).toEqual(['NON_LITIGATION_PARTY']);
+  });
+  it('filters CUSTOM', () => {
+    const result = procedureToStandingOptions('CUSTOM', 'ours');
+    expect(result).toEqual(['NON_LITIGATION_PARTY']);
   });
 });

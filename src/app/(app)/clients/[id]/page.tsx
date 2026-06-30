@@ -20,55 +20,28 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft,
-  Building2,
-  User,
-  Briefcase,
-  Wallet,
-  Coins,
-  Clock,
-  FileText
+  ArrowLeft
 } from "lucide-react";
 import { getClientById, getClientFinanceSummary } from "@/server/clients/actions";
-import { Badge } from "@/components/ui/badge";
-import {
-  clientTypeLabel,
-  cooperationStatusLabel,
-  genderLabel,
-  matterCategoryLabel,
-  matterStatusLabel
-} from "@/lib/enums";
-import { cn } from "@/lib/utils";
+
+
+
 import { ClientEditButton } from "./_components/client-edit-button";
 import { ClientHeader } from "./_components/client-header";
 import { ClientInfoSection } from "./_components/client-info-section";
 import { ContactsSection } from "./_components/contacts-section";
 import { MattersSection } from "./_components/matters-section";
 
-const billingStatusLabel: Record<string, string> = {
-  DRAFT: "草稿",
-  ACTIVE: "生效中",
-  CLOSED: "已结"
-};
-const yuan = (n: number) => `¥${n.toLocaleString()}`;
-const dash = <span className="text-muted-foreground/50">—</span>;
 
-const COOP_TONE: Record<string, string> = {
-  POTENTIAL: "bg-amber-100 text-amber-800",
-  NEGOTIATING: "bg-sky-100 text-sky-800",
-  SIGNED: "bg-emerald-100 text-emerald-800",
-  TERMINATED: "bg-muted text-muted-foreground"
-};
+
+
+
+
 
 export default async function ClientDetailPage({ params }: { params: { id: string } }) {
   const client = await getClientById(params.id);
   if (!client) notFound();
   const finance = await getClientFinanceSummary(params.id);
-
-  const isIndividual = client.type === "INDIVIDUAL";
-  const TypeIcon = isIndividual ? User : client.type === "COMPANY" ? Building2 : Briefcase;
-  // 企业客户：主要联系人（contacts 已按 isPrimary desc 排序）
-  const primaryContact = client.contacts[0] ?? null;
 
   // 按案件分组合同，关联案件与签约合同合并展示（左案件 / 右合同）
   const billingsByMatter = new Map<string, typeof finance.billings>();

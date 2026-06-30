@@ -21,7 +21,6 @@
 
 import { useState, useEffect } from 'react';
 import { getEvents } from '@/server/genealogy/actions';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { formatDisplayDate } from '@/utils/dateHelpers';

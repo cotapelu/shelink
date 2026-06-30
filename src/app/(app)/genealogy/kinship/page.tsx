@@ -31,7 +31,6 @@ export default function KinshipPage() {
   const [personA, setPersonA] = useState<string>('');
   const [personB, setPersonB] = useState<string>('');
   const [relationship, setRelationship] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
   const loadPersons = async () => {
     try {

@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { ClientInfoSection } from "../client-info-section";
 import type { Client } from "@prisma/client";
 
+
 const mockClient: any = {
   id: "c1",
   internalCode: "C001",

@@ -102,9 +102,11 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: "contacts" });
-  const watchedType = watch("type");
-  const watchedTags = watch("tags");
+  const watchedType = useWatch({ name: "type" });
+  const watchedTags = useWatch({ name: "tags" });
+  const watchedContacts = useWatch({ name: "contacts" });
   const watchedName = useWatch({ name: "name" }) ?? "";
+  const watchedGender = useWatch({ name: "gender" });
 
   // 当 editing 切换时重置表单
   useEffect(() => {
@@ -171,7 +173,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
   }
 
   function removeTag(tag: string) {
-    setValue("tags", (watchedTags || []).filter((t) => t !== tag), { shouldDirty: true });
+    setValue("tags", (watchedTags || []).filter((t: string) => t !== tag), { shouldDirty: true });
   }
 
   // v0.27: AI 自动填信用代码（公司 / 组织路径）
@@ -369,7 +371,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
 
               <Field label="合作状态">
                 <Select
-                  value={watch("cooperationStatus")}
+                  value={useWatch({ name: "cooperationStatus" })}
                   onValueChange={(v) =>
                     setValue("cooperationStatus", v as ClientCreateInput["cooperationStatus"], {
                       shouldDirty: true
@@ -397,7 +399,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                 <>
                   <Field label="性别">
                     <Select
-                      value={watch("gender") || "UNSET"}
+                      value={watchedGender || "UNSET"}
                       onValueChange={(v) =>
                         setValue(
                           "gender",
@@ -478,7 +480,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                       <div className="flex items-center gap-2">
                         <label className="flex cursor-pointer items-center gap-1 text-xs text-muted-foreground">
                           <Checkbox
-                            checked={watch(`contacts.${idx}.isPrimary`)}
+                            checked={watchedContacts?.[idx]?.isPrimary}
                             onCheckedChange={(c) => {
                               if (c) {
                                 // 单选：取消其他主联系人

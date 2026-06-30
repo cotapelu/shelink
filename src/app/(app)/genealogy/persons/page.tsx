@@ -24,7 +24,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { redirect } from "next/navigation";
 import { getPersons } from "@/server/genealogy/actions";
-import type { Person, Relationship } from "@/types";
+import type { Person } from "@/types";
 
 function mapPrismaPerson(p: any): Person {
   const genderMap: Record<string, "male" | "female" | "other"> = {
@@ -57,28 +57,9 @@ function mapPrismaPerson(p: any): Person {
   };
 }
 
-function mapPrismaRelationship(r: any): Relationship {
-  const typeMap: Record<string, "marriage" | "biological_child" | "adopted_child"> = {
-    SPOUSE: "marriage",
-    PARENT_CHILD: "biological_child",
-    ADOPTION: "adopted_child",
-  };
-  return {
-    id: r.id,
-    type: typeMap[r.type] || "adopted_child",
-    person_a: r.fromPersonId,
-    person_b: r.toPersonId,
-    note: null,
-    created_at: r.createdAt.toISOString(),
-    updated_at: r.updatedAt.toISOString(),
-  };
-}
 
-export default async function PersonsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ view?: string; rootId?: string }>;
-}) {
+
+export default async function PersonsPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -89,8 +70,7 @@ export default async function PersonsPage({
   const { persons: prismaPersons } = await getPersons({ page: 1, limit: 100 });
   const persons: Person[] = prismaPersons.map(mapPrismaPerson);
 
-  // Relationships sẽ load sau hoặc qua API tạm
-  const relationships: Relationship[] = [];
+
 
   // Determine edit permissions (simplified)
   const canEdit = session.user.role === "ADMIN" || session.user.role === "EDITOR";
