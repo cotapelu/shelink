@@ -187,6 +187,43 @@ describe("searchEnterpriseCandidates", () => {
     expect(result).toEqual([]);
   });
 
+  it('calls abort when timeout is reached', async () => {
+    vi.useFakeTimers();
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: 'test-key',
+      baseUrl: 'https://open.chineselaw.com/open',
+      caseDetailHost: 'https://www.chineselaw.com'
+    });
+    const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
+
+    let fetchResolve!: (value: unknown) => void;
+    (global.fetch as any).mockImplementation(() => {
+      return new Promise(resolve => { fetchResolve = resolve; });
+    });
+
+    const promise = searchEnterpriseCandidates('Test');
+
+    expect(abortSpy).not.toHaveBeenCalled();
+
+    // searchEnterpriseCandidates uses 15s timeout
+    await vi.advanceTimersByTimeAsync(15_000 + 50);
+    await Promise.resolve();
+
+    expect(abortSpy).toHaveBeenCalledTimes(1);
+
+    fetchResolve({
+      ok: true,
+      json: async () => ({ status: 'success', data: [] })
+    } as any);
+
+    const result = await promise;
+    expect(result).toEqual([]);
+
+    abortSpy.mockRestore();
+    vi.useRealTimers();
+  });
+
 });
 
 describe("getEnterpriseBaseInfo", () => {
@@ -337,5 +374,57 @@ describe("getEnterpriseBaseInfo", () => {
     });
 
     await expect(getEnterpriseBaseInfo("id")).rejects.toThrow(YuandianApiError);
-  });  
+  });
+
+  it('calls abort when timeout is reached', async () => {
+    vi.useFakeTimers();
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: 'test-key',
+      baseUrl: 'https://open.chineselaw.com/open',
+      caseDetailHost: 'https://www.chineselaw.com'
+    });
+    const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
+
+    let fetchResolve!: (value: unknown) => void;
+    (global.fetch as any).mockImplementation(() => {
+      return new Promise(resolve => { fetchResolve = resolve; });
+    });
+
+    const promise = getEnterpriseBaseInfo('my-id');
+
+    expect(abortSpy).not.toHaveBeenCalled();
+
+    // getEnterpriseBaseInfo uses 30s timeout
+    await vi.advanceTimersByTimeAsync(30_000 + 50);
+    await Promise.resolve();
+
+    expect(abortSpy).toHaveBeenCalledTimes(1);
+
+    fetchResolve({
+      ok: true,
+      json: async () => ({
+        status: 'success',
+        data: {
+          id: 'my-id',
+          企业名称: 'Test Corp',
+          统一社会信用代码: '123456789012345678',
+          法定代表人: 'Jane Doe',
+          注册资本: '1000万',
+          注册地址: 'Beijing',
+          经营状态: '存续',
+          经营范围: 'legal services'
+        }
+      })
+    } as any);
+
+    const result = await promise;
+    expect(result).not.toBeNull();
+    expect(result!.id).toBe('my-id');
+    expect(result!.name).toBe('Test Corp');
+
+    abortSpy.mockRestore();
+    vi.useRealTimers();
+  });
+
 });

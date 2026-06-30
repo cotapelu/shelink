@@ -369,4 +369,12 @@ Long-term plan for the LawLink unified application.
 - **Coverage Impact**: Overall functions 96.26%; ai/client.ts 100%, yuandian/client.ts 90%, track.ts 88.89%
 - **Impact**: Covered setTimeout abort callbacks in three external API clients using AbortController spy; improved timeout handling and error resilience.
 
+## Cycle 64 - Task: Increase function coverage for lib/yuandian/enterprise.ts
+- **Timestamp**: 2026-06-30T00:15+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Status**: ✅ Success
+- **Test Delta**: +2 tests (total 883)
+- **Coverage Impact**: Overall functions 97.19%; enterprise.ts functions 94.44%
+- **Impact**: Covered setTimeout abort callbacks for searchEnterpriseCandidates and getEnterpriseBaseInfo; enterprise.ts now >85% function coverage.
+
 *Last updated: 2026-06-30*
