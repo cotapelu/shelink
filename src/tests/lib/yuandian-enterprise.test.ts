@@ -20,6 +20,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { getEnterpriseSummary, searchEnterpriseCandidates, getEnterpriseBaseInfo } from "@/lib/yuandian/enterprise";
 import { YuandianNotConfiguredError, YuandianApiError } from "@/lib/yuandian/client";
+import * as settings from "@/lib/yuandian/settings";
 import type { ResolvedYuandianSettings } from "@/lib/yuandian/settings";
 
 const configured: ResolvedYuandianSettings = {
@@ -607,6 +608,25 @@ describe("searchEnterpriseCandidates", () => {
     fetchMock.mockImplementation(() => new Promise((_, reject) => setTimeout(() => reject(new DOMException("Aborted")), 10)));
     await expect(searchEnterpriseCandidates("Test", undefined, configured)).rejects.toThrow();
   });
+
+  it('uses default settings when resolved not provided', async () => {
+    vi.spyOn(settings, 'getYuandianSettings').mockResolvedValue(configured);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        status: 'success',
+        data: {
+          id: 'eid-1',
+          name: 'Test Corp'
+        }
+      })
+    } as any);
+    const result = await getEnterpriseSummary({ id: 'eid-1' });
+    expect(result).not.toBeNull();
+    expect(result!.id).toBe('eid-1');
+    expect(result!.name).toBe('Test Corp');
+  });
+
 });
 
 describe("getEnterpriseBaseInfo", () => {
