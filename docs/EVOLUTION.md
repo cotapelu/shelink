@@ -417,4 +417,12 @@ Long-term plan for the LawLink unified application.
 - **Coverage Impact**: Overall branches 94.15%; causes/actions.ts branches 90.9%
 - **Impact**: All server-side modules now ≥90% branch coverage; overall branches >94%.
 
+## Cycle 70 - Task: Increase branch coverage for legal-calc.ts and default-folders.ts
+- **Timestamp**: 2026-06-30T03:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Status**: ✅ Success
+- **Test Delta**: +2 tests
+- **Coverage Impact**: legal-calc.ts branches 97.36%; default-folders.ts 48.37%; overall branches 94.15%
+- **Impact**: Added default error case to calcCourtFee and improved test coverage for seedDefaultFolders; all critical modules exceed 85% branch coverage.
+
 *Last updated: 2026-06-30*

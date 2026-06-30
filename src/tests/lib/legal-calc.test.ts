@@ -81,6 +81,10 @@ describe("calcCourtFee", () => {
     const res = calcCourtFee({ caseType: "OTHER" });
     expect(res.fee).toBe(100);
   });
+
+  it("throws on unsupported caseType", () => {
+    expect(() => calcCourtFee({ caseType: "UNKNOWN" as any })).toThrow(/Unsupported caseType/);
+  });
 });
 
 describe("calcLateInterest", () => {

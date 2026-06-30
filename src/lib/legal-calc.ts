@@ -130,6 +130,9 @@ export function calcCourtFee(input: { caseType: CourtFeeCaseType; amount?: numbe
         feeSimplified: 50,
         note: "Khác mỗi vụ 50–100, kết quả lấy ngưỡng cao"
       };
+    default:
+      // Exhaustive check in TypeScript should prevent this, but at runtime handle unexpected values
+      throw new Error(`Unsupported caseType: ${(input.caseType as string)}`);
   }
 }
 

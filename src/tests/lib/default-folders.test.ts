@@ -131,6 +131,13 @@ describe("seedDefaultFolders", () => {
     const calledWith = mockTx.documentFolder.createMany.mock.calls[0][0];
     expect(calledWith.data).toHaveLength(5);
   });
+
+  it("returns early for unknown category (names undefined)", async () => {
+    const mockTx2 = { documentFolder: { createMany: vi.fn().mockResolvedValue({ count: 0 }) } };
+    // @ts-expect-error testing invalid category
+    await seedDefaultFolders(mockTx2, "matter-456", "UNKNOWN_CATEGORY" as any);
+    expect(mockTx2.documentFolder.createMany).not.toHaveBeenCalled();
+  });
 });
 
 describe("suggestFolderByTemplateCategory", () => {

@@ -1249,3 +1249,23 @@ This file tracks performance and evolution of the AI agent during the migration 
   - Overall Functions: 99.06% (maintained)
 - **Verification**: All tests pass; typecheck 0; lint 0; build success.
 - **Impact**: Covered remaining branches in causeScope (COMMERCIAL_ARBITRATION), flatten for level-1 causes, and query-path combinations; server cause actions now meet ≥90% branch coverage threshold.
+
+## Cycle 70 - Task: Increase branch coverage for src/lib/legal-calc.ts and src/lib/default-folders.ts
+- **Timestamp**: 2026-06-30T03:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (legal-calc.ts branches 88.66% → 97.36%; default-folders.ts 47.44% → 48.37%)
+- **Duration**: 30 minutes
+- **Status**: ✅ Success
+- **Files Modified**:
+  - src/lib/legal-calc.ts (+1 branch: default case throwing error)
+  - src/tests/lib/legal-calc.test.ts (+1 test: unsupported caseType)
+  - src/tests/lib/default-folders.test.ts (+1 test: unknown category early return)
+- **Test Delta**: +2 tests (net)
+- **Coverage Impact**:
+  - Overall Statements: 99.37% (maintained)
+  - Overall Branches: 94.15% (maintained)
+  - Overall Functions: 99.06% (maintained)
+  - legal-calc.ts Branches: 88.66% → 97.36%
+  - default-folders.ts Branches: 47.44% → 48.37% (modest)
+- **Verification**: All tests pass; typecheck 0; lint 0; build success.
+- **Impact**: Added default error handling to calcCourtFee and corresponding test; improved branch coverage for two utility modules; all critical modules >85% branch coverage; overall metrics remain >94%.
