@@ -226,7 +226,47 @@ describe("searchPtalCases", () => {
     expect(result).toEqual({ total: 0, items: [] });
   });
 
-  // Timeout test requires more complex mocking; skipped for unit test scope
+  it('calls abort when timeout is reached', async () => {
+    vi.useFakeTimers();
+    (getYuandianSettings as any).mockResolvedValue({
+      configured: true,
+      apiKey: 'test-key',
+      baseUrl: 'https://open.chineselaw.com/open',
+      caseDetailHost: 'https://www.chineselaw.com'
+    });
+
+    const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
+
+    let fetchResolve!: (value: unknown) => void;
+    (global.fetch as any).mockImplementation(() => {
+      return new Promise(resolve => {
+        fetchResolve = resolve;
+      });
+    });
+
+    // searchPtalCases uses a hardcoded 30s timeout
+    const promise = searchPtalCases({ ay: ['test'] });
+
+    expect(abortSpy).not.toHaveBeenCalled();
+
+    // Advance time past the 30s timeout
+    await vi.advanceTimersByTimeAsync(30_000 + 50);
+    await Promise.resolve(); // flush microtasks
+
+    expect(abortSpy).toHaveBeenCalledTimes(1);
+
+    // Resolve fetch with a valid response to complete the call
+    fetchResolve({
+      ok: true,
+      json: async () => ({ status: 'success', data: { total: 0, lst: [] } })
+    } as Response);
+
+    const result = await promise;
+    expect(result).toEqual({ total: 0, items: [] });
+
+    abortSpy.mockRestore();
+    vi.useRealTimers();
+  });
 
   it("throws when all params empty/undefined", async () => {
     (getYuandianSettings as any).mockResolvedValue({

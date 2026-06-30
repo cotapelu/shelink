@@ -138,6 +138,52 @@ describe('aiChat', () => {
     expect(body.temperature).toBe(0.5);
   });
 
+  it('calls abort when timeout is reached', async () => {
+    vi.useFakeTimers();
+    (getAiSettings as any).mockResolvedValue(mockSettings);
+
+    // Spy on AbortController.prototype.abort
+    const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
+
+    // Mock fetch with a controllable promise
+    let fetchResolve!: (value: unknown) => void;
+    const mockFetch = vi.mocked(globalThis.fetch as any);
+    mockFetch.mockImplementation(() => {
+      return new Promise(resolve => {
+        fetchResolve = resolve;
+      });
+    });
+
+    const timeoutMs = 100;
+    const promise = aiChat({
+      messages: [{ role: 'user', content: 'hi' }],
+      timeoutMs,
+    });
+
+    // Initially, fetch pending, abort not called
+    expect(abortSpy).not.toHaveBeenCalled();
+
+    // Advance timers past the timeout
+    await vi.advanceTimersByTimeAsync(timeoutMs + 50);
+    // Process any microtasks
+    await Promise.resolve();
+
+    // Abort should have been called once
+    expect(abortSpy).toHaveBeenCalledTimes(1);
+
+    // Resolve fetch to allow aiChat to complete
+    fetchResolve({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: 'ok' } }] })
+    } as unknown as Response);
+
+    const result = await promise;
+    expect(result.content).toBe('ok');
+
+    // Cleanup spy (restore will also work)
+    abortSpy.mockRestore();
+  });
+
 });
 
 describe('aiVision', () => {

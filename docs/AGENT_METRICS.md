@@ -1138,3 +1138,23 @@ This file tracks performance and evolution of the AI agent during the migration 
   - enterprise.ts Functions: 83.33% (maintained, but additional branches covered)
 - **Verification**: All 878 tests pass; typecheck 0; lint 0; build success.
 - **Impact**: Added tests for getEnterpriseBaseInfo id fallback and pickStat non-array top; improved robustness of enterprise client edge-case handling.
+
+## Cycle 63 - Task: Increase function coverage for external API clients (ai, yuandian)
+- **Timestamp**: 2026-06-30T00:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (ai/client.ts 83.33% functions, yuandian/client.ts 80% functions)
+- **Duration**: 50 minutes
+- **Status**: ✅ Success
+- **Files Modified**:
+  - src/tests/lib/ai/client.test.ts (+1 test: abort timeout)
+  - src/tests/lib/yuandian/client.test.ts (+1 test: abort timeout)
+- **Test Delta**: +2 tests (total 880)
+- **Coverage Impact**:
+  - Overall Statements: 98.43% → 98.58% (+0.15%)
+  - Overall Branches: 94.24% (maintained)
+  - Overall Functions: 94.85% → 95.79% (+0.94%)
+  - Overall Lines: 99.54% (unchanged)
+  - ai/client.ts Functions: 83.33% → 100%
+  - yuandian/client.ts Functions: 80% → 90%
+- **Verification**: All 880 tests pass; typecheck 0; lint 0; build success.
+- **Impact**: Covered setTimeout abort callbacks in both external API clients using AbortController spy and controlled fetch mocks; improved security-adjacent modules to meet >85% function coverage threshold.

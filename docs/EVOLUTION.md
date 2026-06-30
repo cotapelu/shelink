@@ -361,4 +361,12 @@ Long-term plan for the LawLink unified application.
 - **Coverage Impact**: Overall branches 94.24% (maintained); enterprise.ts branches modest increase
 - **Impact**: Added edge-case tests for enterprise client functions; continued push toward 95% overall.
 
-*Last updated: 2026-06-29*
+## Cycle 63 - Task: Increase function coverage for external API clients (ai, yuandian)
+- **Timestamp**: 2026-06-30T00:00+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Status**: ✅ Success
+- **Test Delta**: +2 tests (total 880)
+- **Coverage Impact**: Overall functions 95.79%; ai/client.ts 100% functions; yuandian/client.ts 90% functions
+- **Impact**: Covered setTimeout abort callbacks in both external API clients; critical modules now >85% function coverage.
+
+*Last updated: 2026-06-30*
