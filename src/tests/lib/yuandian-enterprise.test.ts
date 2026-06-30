@@ -18,7 +18,7 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { getEnterpriseSummary } from "@/lib/yuandian/enterprise";
+import { getEnterpriseSummary, searchEnterpriseCandidates, getEnterpriseBaseInfo } from "@/lib/yuandian/enterprise";
 import { YuandianNotConfiguredError, YuandianApiError } from "@/lib/yuandian/client";
 import type { ResolvedYuandianSettings } from "@/lib/yuandian/settings";
 
@@ -387,6 +387,26 @@ describe("getEnterpriseSummary", () => {
     const r = await getEnterpriseSummary({ id: "x" }, configured);
     expect(r!.auxiliary).toEqual([]);
   });
+
+  it("handles topField defined but top array non-array (top remains undefined)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        失信被执行人统计: { 总数: 1, 执行法院: "not an array" as any },
+        被执行人统计: { 总数: 2 },
+        股权冻结统计: { 总数: 3 },
+        严重违法统计: { 总数: 4 },
+        经营异常统计: { 总数: 5 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    const dishou = r!.coreRisks.find(c => c.category === "失信被执行人");
+    expect(dishou!.top).toBeUndefined();
+  });
 });
 
 describe("computeRiskLevel（通过聚合响应间接验证）", () => {
@@ -479,5 +499,193 @@ describe("computeRiskLevel（通过聚合响应间接验证）", () => {
     expect(r!.coreRisks.length).toBe(1);
     expect(r!.coreRisks[0].category).toBe("失信被执行人");
     expect(r!.coreRisks[0].total).toBe(0);
+  });
+
+  it("throws when fetch response not ok (e.g., 500)", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: vi.fn().mockResolvedValue({})
+    } as any);
+    await expect(getEnterpriseSummary({ id: "x" }, configured)).rejects.toBeInstanceOf(YuandianApiError);
+  });
+
+  it("throws when fetch aborts (timeout)", async () => {
+    fetchMock.mockImplementation(() => new Promise((_, reject) => setTimeout(() => reject(new DOMException("Aborted")), 10)));
+    await expect(getEnterpriseSummary({ id: "x" }, configured)).rejects.toThrow();
+  });
+
+  it("throws when JSON parse fails", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: vi.fn().mockRejectedValue(new SyntaxError("Invalid JSON"))
+    } as any);
+    await expect(getEnterpriseSummary({ id: "x" }, configured)).rejects.toThrow();
+  });
+});
+
+describe("searchEnterpriseCandidates", () => {
+  it("not configured → throw NotConfigured", async () => {
+    await expect(searchEnterpriseCandidates("Test", undefined, { ...unconfigured } as any)).rejects.toBeInstanceOf(YuandianNotConfiguredError);
+    fetchMock.mockResolvedValue({ json: vi.fn().mockResolvedValue([]) } as any); // should not be called
+  });
+
+  it("empty name after trim → returns [] without fetch", async () => {
+    const results = await searchEnterpriseCandidates("   ", undefined, configured);
+    expect(results).toEqual([]);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("clamps top_k to max 50", async () => {
+    fetchMock.mockResolvedValue(jsonRes({ status: "success", data: [] }));
+    await searchEnterpriseCandidates("Test", 100, configured);
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toContain("top_k=50");
+  });
+
+  it("honors lower top_k", async () => {
+    fetchMock.mockResolvedValue(jsonRes({ status: "success", data: [] }));
+    await searchEnterpriseCandidates("Test", 5, configured);
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toContain("top_k=5");
+  });
+
+  it("constructs URL with encoded name and default top_k=10", async () => {
+    fetchMock.mockResolvedValue(jsonRes({ status: "success", data: [] }));
+    await searchEnterpriseCandidates("TestCorp", undefined, configured);
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toContain("rh_enterpriseSearch?");
+    expect(url).toContain("name=TestCorp");
+    expect(url).toContain("top_k=10");
+  });
+
+  it("throws when response not ok", async () => {
+    fetchMock.mockResolvedValue({ ok: false, status: 500, json: vi.fn().mockResolvedValue({}) } as any);
+    await expect(searchEnterpriseCandidates("Test", undefined, configured)).rejects.toBeInstanceOf(YuandianApiError);
+  });
+
+  it("throws when status != success", async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 200, json: vi.fn().mockResolvedValue({ status: "failed", message: "error" }) } as any);
+    await expect(searchEnterpriseCandidates("Test", undefined, configured)).rejects.toBeInstanceOf(YuandianApiError);
+  });
+
+  it("returns array when status=success and data present", async () => {
+    const mockData = [{ id: "1", name: "A" }, { id: "2", name: "B" }];
+    fetchMock.mockResolvedValue({ ok: true, status: 200, json: vi.fn().mockResolvedValue({ status: "success", data: mockData }) } as any);
+    const results = await searchEnterpriseCandidates("Test", undefined, configured);
+    expect(results).toEqual(mockData);
+  });
+
+  it("returns empty array when data is null", async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 200, json: vi.fn().mockResolvedValue({ status: "success", data: null }) } as any);
+    const results = await searchEnterpriseCandidates("Test", undefined, configured);
+    expect(results).toEqual([]);
+  });
+
+  it("handles fetch abort (timeout)", async () => {
+    fetchMock.mockImplementation(() => new Promise((_, reject) => setTimeout(() => reject(new DOMException("Aborted")), 10)));
+    await expect(searchEnterpriseCandidates("Test", undefined, configured)).rejects.toThrow();
+  });
+});
+
+describe("getEnterpriseBaseInfo", () => {
+  it("not configured → throw NotConfigured", async () => {
+    await expect(getEnterpriseBaseInfo("eid", unconfigured)).rejects.toBeInstanceOf(YuandianNotConfiguredError);
+  });
+
+  it("throws when fetch response not ok", async () => {
+    fetchMock.mockResolvedValue({ ok: false, status: 500, json: vi.fn().mockResolvedValue({}) } as any);
+    await expect(getEnterpriseBaseInfo("eid", configured)).rejects.toBeInstanceOf(YuandianApiError);
+  });
+
+  it("throws when status != success", async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 200, json: vi.fn().mockResolvedValue({ status: "failed", message: "error" }) } as any);
+    await expect(getEnterpriseBaseInfo("eid", configured)).rejects.toBeInstanceOf(YuandianApiError);
+  });
+
+  it("returns null when data is null", async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 200, json: vi.fn().mockResolvedValue({ status: "success", data: null }) } as any);
+    const r = await getEnterpriseBaseInfo("eid", configured);
+    expect(r).toBeNull();
+  });
+
+  it("maps fields correctly using getStr", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: vi.fn().mockResolvedValue({
+        status: "success",
+        data: {
+          企业名称: "Test Corp",
+          统一社会信用代码: "123456789012345678",
+          法定代表人: "Jane Doe",
+          注册资本: "100万",
+          注册地址: "Beijing",
+          经营状态: "在营",
+          经营范围: "tech",
+          成立日期: "2020-01-01"
+        }
+      })
+    } as any);
+    const r = await getEnterpriseBaseInfo("eid", configured);
+    expect(r).not.toBeNull();
+    expect(r!.id).toBe("eid");
+    expect(r!.name).toBe("Test Corp");
+    expect(r!.creditCode).toBe("123456789012345678");
+    expect(r!.legalRep).toBe("Jane Doe");
+    expect(r!.registeredCapital).toBe("100万");
+    expect(r!.address).toBe("Beijing");
+    expect(r!.status).toBe("在营");
+    expect(r!.businessScope).toBe("tech");
+    expect(r!.establishedDate).toBe("2020-01-01");
+  });
+
+  it("uses fallback '' for missing optional fields via getStr", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: vi.fn().mockResolvedValue({
+        status: "success",
+        data: { id: "eid" } // missing all expected keys
+      })
+    } as any);
+    const r = await getEnterpriseBaseInfo("eid", configured);
+    expect(r).not.toBeNull();
+    expect(r!.name).toBe("");
+    expect(r!.creditCode).toBe("");
+    expect(r!.legalRep).toBe("");
+    expect(r!.registeredCapital).toBe("");
+    expect(r!.address).toBe("");
+    expect(r!.status).toBe("");
+    expect(r!.businessScope).toBe("");
+    expect(r!.establishedDate).toBe("");
+  });
+
+  it("maps id from data.id when present, else falls back to parameter", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: vi.fn().mockResolvedValue({
+        status: "success",
+        data: { id: "response-id", 企业名称: "Test" }
+      })
+    } as any);
+    const r = await getEnterpriseBaseInfo("param-id", configured);
+    expect(r!.id).toBe("response-id"); // uses data.id
+  });
+
+  it("handles fetch abort (timeout)", async () => {
+    fetchMock.mockImplementation(() => new Promise((_, reject) => setTimeout(() => reject(new DOMException("Aborted")), 10)));
+    await expect(getEnterpriseBaseInfo("eid", configured)).rejects.toThrow();
+  });
+
+  it("handles JSON parse error", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: vi.fn().mockRejectedValue(new SyntaxError("Invalid JSON"))
+    } as any);
+    await expect(getEnterpriseBaseInfo("eid", configured)).rejects.toThrow();
   });
 });
