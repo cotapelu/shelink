@@ -68,4 +68,24 @@ describe("ClientInfoSection", () => {
     expect(screen.getByText("¥60,000")).toBeInTheDocument();
     expect(screen.getByText("¥40,000")).toBeInTheDocument();
   });
+
+  it("renders gender label when gender present", () => {
+    render(<ClientInfoSection client={mockClient} finance={finance} />);
+    // genderLabel[MALE] = "Nam"
+    expect(screen.getByText("Nam")).toBeInTheDocument();
+  });
+
+  it("renders fallback Briefcase icon for unknown client type", () => {
+    const unknownType = { ...mockClient, type: "UNKNOWN" as any };
+    render(<ClientInfoSection client={unknownType} finance={finance} />);
+    const icon = document.querySelector("svg");
+    expect(icon).toBeInTheDocument();
+  });
+
+  it("renders fallback tone for unknown cooperationStatus", () => {
+    const unknownStatus = { ...mockClient, cooperationStatus: "UNKNOWN" as any };
+    render(<ClientInfoSection client={unknownStatus} finance={finance} />);
+    const badge = document.querySelector("span.bg-muted");
+    expect(badge).toBeInTheDocument();
+  });
 });

@@ -182,4 +182,119 @@ describe("trackExpress", () => {
     global.fetch = mockFetch;
     await expect(trackExpress({ trackingNo: "123" })).rejects.toThrow("error");
   });
+
+  it("handles KDNiao timeout", async () => {
+    vi.mocked(getExpressSettings).mockResolvedValueOnce({
+      kdniao: { configured: true, ebusinessId: "id", appKey: "key" },
+      kuaidi100: { configured: false, customer: "", key: "" }
+    });
+    const mockFetch = vi.fn().mockImplementation(() => {
+      return new Promise((_, reject) => setTimeout(() => reject(new DOMException("Aborted")), 20));
+    });
+    global.fetch = mockFetch;
+    await expect(trackExpress({ trackingNo: "123" })).rejects.toThrow();
+  });
+
+  it("handles KDNiao error response with Reason", async () => {
+    vi.mocked(getExpressSettings).mockResolvedValueOnce({
+      kdniao: { configured: true, ebusinessId: "id", appKey: "key" },
+      kuaidi100: { configured: false, customer: "", key: "" }
+    });
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      json: async () => ({ Success: false, Reason: "Invalid tracking number" })
+    });
+    await expect(trackExpress({ trackingNo: "123" })).rejects.toThrow("Invalid tracking number");
+  });
+
+  it("returns empty traces when KDNiao Traces missing", async () => {
+    vi.mocked(getExpressSettings).mockResolvedValueOnce({
+      kdniao: { configured: true, ebusinessId: "id", appKey: "key" },
+      kuaidi100: { configured: false, customer: "", key: "" }
+    });
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      json: async () => ({ Success: true, State: "3" })
+    });
+    const result = await trackExpress({ trackingNo: "123" });
+    expect(result.traces).toEqual([]);
+  });
+
+  it("handles Kuaidi100 error status", async () => {
+    vi.mocked(getExpressSettings).mockResolvedValueOnce({
+      kdniao: { configured: false, ebusinessId: "", appKey: "" },
+      kuaidi100: { configured: true, customer: "c", key: "k" }
+    });
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      json: async () => ({ status: "500", message: "error", state: "0", data: [] })
+    });
+    await expect(trackExpress({ trackingNo: "123" })).rejects.toThrow("error");
+  });
+
+  it("maps unknown kuaidi100 state codes to '未知'", async () => {
+    vi.mocked(getExpressSettings).mockResolvedValueOnce({
+      kdniao: { configured: false, ebusinessId: "", appKey: "" },
+      kuaidi100: { configured: true, customer: "c", key: "k" }
+    });
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      json: async () => ({ status: "200", message: "ok", state: "99", data: [] })
+    });
+    const result = await trackExpress({ trackingNo: "123" });
+    expect(result.state).toBe("未知");
+  });
+
+  it("defaults KDNiao state to '暂无信息' when State missing", async () => {
+    vi.mocked(getExpressSettings).mockResolvedValueOnce({
+      kdniao: { configured: true, ebusinessId: "id", appKey: "key" },
+      kuaidi100: { configured: false, customer: "", key: "" }
+    });
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      json: async () => ({ Success: true })
+    });
+    const result = await trackExpress({ trackingNo: "123" });
+    expect(result.state).toBe("暂无信息");
+  });
+
+  it("handles KDNiao traces with missing AcceptTime/AcceptStation", async () => {
+    vi.mocked(getExpressSettings).mockResolvedValueOnce({
+      kdniao: { configured: true, ebusinessId: "id", appKey: "key" },
+      kuaidi100: { configured: false, customer: "", key: "" }
+    });
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      json: async () => ({ Success: true, Traces: [{ AcceptTime: undefined, AcceptStation: "Station" }, { AcceptTime: "Time", AcceptStation: undefined }] })
+    });
+    const result = await trackExpress({ trackingNo: "123" });
+    expect(result.traces).toHaveLength(2);
+    expect(result.traces[0].time).toBe("");
+    expect(result.traces[0].desc).toBe("Station");
+    expect(result.traces[1].time).toBe("Time");
+    expect(result.traces[1].desc).toBe("");
+  });
+
+  it("handles Kuaidi100 data with missing time/context", async () => {
+    vi.mocked(getExpressSettings).mockResolvedValueOnce({
+      kdniao: { configured: false, ebusinessId: "", appKey: "" },
+      kuaidi100: { configured: true, customer: "c", key: "k" }
+    });
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      json: async () => ({ status: "200", message: "ok", state: "3", data: [{ context: "only context" }, { time: "only time" }] })
+    });
+    const result = await trackExpress({ trackingNo: "123" });
+    expect(result.traces).toHaveLength(2);
+    expect(result.traces[0].time).toBe("");
+    expect(result.traces[0].desc).toBe("only context");
+    expect(result.traces[1].time).toBe("only time");
+    expect(result.traces[1].desc).toBe("");
+  });
+
+  it("defaults Kuaidi100 state to '在途' when state missing", async () => {
+    vi.mocked(getExpressSettings).mockResolvedValueOnce({
+      kdniao: { configured: false, ebusinessId: "", appKey: "" },
+      kuaidi100: { configured: true, customer: "c", key: "k" }
+    });
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      json: async () => ({ status: "200", message: "ok", data: [] })
+    });
+    const result = await trackExpress({ trackingNo: "123" });
+    expect(result.state).toBe("在途");
+  });
+
 });

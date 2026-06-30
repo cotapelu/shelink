@@ -57,4 +57,19 @@ describe("ClientHeader", () => {
     const icon = document.querySelector("svg");
     expect(icon).toBeInTheDocument();
   });
+
+  it("renders fallback Briefcase icon for unknown client type", () => {
+    const unknown: Client = { ...mockClient, type: "UNKNOWN" as any };
+    render(<ClientHeader client={unknown} />);
+    const icon = document.querySelector("svg");
+    expect(icon).toBeInTheDocument();
+  });
+
+  it("renders fallback tone for unknown cooperationStatus", () => {
+    const unknownStatus = { ...mockClient, cooperationStatus: "UNKNOWN" as any };
+    render(<ClientHeader client={unknownStatus} />);
+    // The cooperation status badge should have the default muted classes
+    const badge = document.querySelector("span.bg-muted");
+    expect(badge).toBeInTheDocument();
+  });
 });

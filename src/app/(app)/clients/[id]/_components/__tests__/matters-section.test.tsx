@@ -110,4 +110,17 @@ describe("MattersSection", () => {
     const statuses = screen.getAllByText("IN_PROGRESS");
     expect(statuses.length).toBeGreaterThanOrEqual(1);
   });
+
+  it("handles matter with no billings gracefully (fallback to empty array)", () => {
+    const matterNoBillings = [mockMatters[0]];
+    const emptyBillingsMap = new Map<string, Billing[]>();
+    render(<MattersSection matters={matterNoBillings} billingsMap={emptyBillingsMap} />);
+    // Table headers should be present
+    expect(screen.getByText("关联案件")).toBeInTheDocument();
+    expect(screen.getByText("案件编号")).toBeInTheDocument();
+    // No data rows should be rendered
+    const rows = screen.queryAllByRole("row");
+    // Only header row exists
+    expect(rows.length).toBe(1);
+  });
 });
