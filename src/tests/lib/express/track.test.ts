@@ -332,4 +332,56 @@ describe("trackExpress", () => {
     vi.useRealTimers();
   });
 
+  it('aborts Kuaidi100 request on timeout when falling back', async () => {
+    vi.useFakeTimers();
+    const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
+
+    // Both providers configured
+    vi.mocked(getExpressSettings).mockResolvedValue({
+      kdniao: { configured: true, ebusinessId: 'id', appKey: 'key' },
+      kuaidi100: { configured: true, customer: 'cust', key: 'k' }
+    });
+
+    let fetchResolve!: (value: unknown) => void;
+    let fetchReject!: (reason?: any) => void;
+    let callCount = 0;
+    global.fetch = vi.fn().mockImplementation(() => {
+      callCount++;
+      return new Promise((resolve, reject) => {
+        fetchResolve = resolve;
+        fetchReject = reject;
+        // First call (KDNiao) rejects immediately to trigger fallback
+        if (callCount === 1) {
+          reject(new Error('KDNiao fails'));
+        }
+        // Second call (Kuaidi100) stays pending until we resolve it
+      });
+    });
+
+    const promise = trackExpress({ trackingNo: '123456', companyCode: '顺丰快递' });
+
+    // Allow the initial rejection from KDNiao to propagate and fallback to start
+    await Promise.resolve();
+
+    expect(abortSpy).not.toHaveBeenCalled();
+
+    // Advance timers to trigger Kuaidi100 timeout (its timer is set after fallback starts)
+    await vi.advanceTimersByTimeAsync(10_000 + 50);
+    await Promise.resolve();
+
+    expect(abortSpy).toHaveBeenCalledTimes(1);
+
+    // Resolve the second fetch to allow the promise to settle
+    fetchResolve({
+      ok: true,
+      json: async () => ({ status: "200", message: "ok", state: "3", data: [{ time: "2024-01-01", context: "delivered" }] })
+    } as any);
+
+    const result = await promise;
+    expect(result.provider).toBe('快递100');
+
+    abortSpy.mockRestore();
+    vi.useRealTimers();
+  });
+
 });
