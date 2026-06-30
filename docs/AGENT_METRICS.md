@@ -995,6 +995,23 @@ This file tracks performance and evolution of the AI agent during the migration 
 
 ---
 
+## Cycle 55 - Task: Resolve react-hooks warnings and add subcomponent tests
+- **Timestamp**: 2025-06-29T18:30+07:00
+- **Type**: Violation Fix (HIGH) + Proactive Improvement (T)
+- **Priority**: HIGH (Quality Gate failures, coverage dip)
+- **Duration**: 30 minutes
+- **Status**: ✅ Success
+- **Files Modified**:
+  - `src/app/(app)/finance-forms.tsx` (replaced `watch` with `useWatch`)
+  - `src/app/(app)/procedures/_components/procedure-forms.tsx` (replaced `watch` with `useWatch`, fixed destructuring)
+  - `src/app/(app)/notes/_components/notes-panel.tsx` (replaced `watch` with `useWatch`)
+  - `src/app/(app)/users/_components/users-view.tsx` (replaced `watch` with `useWatch`)
+  - Added new test files: `client-header.test.tsx`, `client-info-section.test.tsx`, `contacts-section.test.tsx`, `matters-section.test.tsx`
+- **Test Delta**: +14 tests (total 803)
+- **Coverage**: Statements 95.61%, Branches 89.47% (no new regressions)
+- **Verification**: All 803 tests pass; lint 0 errors; typecheck 0; build success.
+- **Impact**: Resolved react-hooks/incompatible-library warnings across multiple pages; added comprehensive unit tests for new ClientDetail subcomponents; restored coverage after refactor dip.
+
 ## Cycle 56 - Task: Fix lint errors (ban-ts-comment)
 - **Timestamp**: 2025-06-29T20:45+07:00
 - **Type**: Violation Fix (HIGH)
@@ -1011,3 +1028,18 @@ This file tracks performance and evolution of the AI agent during the migration 
   - Tests: ✅ All passing (803 tests)
 - **Coverage**: Unchanged (Statements 95.61%, Branches 89.47%)
 - **Notes**: Lint errors originated from added `@ts-nocheck` comments to bypass type errors. Replaced with proper `any` typing for test mocks. Rule `@typescript-eslint/ban-ts-comment` enforces no disabling of type checking.
+
+## Cycle 57 - Task: Increase branch coverage for lib/express/track.ts
+- **Timestamp**: 2026-06-29T20:55+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (coverage low for security-critical module)
+- **Duration**: 25 minutes
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/lib/express/track.test.ts (new, +7 tests)
+- **Test Delta**: +7 tests (total 810)
+- **Coverage Impact**:
+  - Overall Branches: 89.47% → 91.36% (+1.89%)
+  - Statements: 95.61% → 97.17% (+1.56%)
+  - track.ts module branches: 28% → 70%
+- **Verification**: All 810 tests pass; typecheck 0; lint 0; build success.
+- **Impact**: Added comprehensive tests for KDNiao/Kuaidi100 fallback, error handling, state mapping; fixed TypeScript syntax and type errors; improved security posture of express tracking module.
