@@ -393,4 +393,12 @@ Long-term plan for the LawLink unified application.
 - **Coverage Impact**: track.ts functions 100%; overall functions 97.66%
 - **Impact**: Covered Kuaidi100 timeout abort; all critical external API clients now have ≥90% function coverage.
 
+## Cycle 67 - Task: Increase function coverage for UI component table.tsx to 100%
+- **Timestamp**: 2026-06-30T01:45+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Status**: ✅ Success
+- **Test Delta**: +2 tests (total 887)
+- **Coverage Impact**: Overall functions 98.59%; table.tsx functions 100%
+- **Impact**: All modules now ≥85% function coverage; overall function coverage approaches 99%.
+
 *Last updated: 2026-06-30*

@@ -1205,3 +1205,17 @@ This file tracks performance and evolution of the AI agent during the migration 
   - track.ts Branches: 90% (maintained)
 - **Verification**: All 885 tests pass; typecheck 0; lint 0; build success.
 - **Impact**: Covered setTimeout abort callback in callKuaidi100 by simulating KDNiao failure and Kuaidi100 timeout; track.ts now achieves 100% function coverage, meeting critical external API module targets.
+
+## Cycle 67 - Task: Increase function coverage for UI component table.tsx to 100%
+- **Timestamp**: 2026-06-30T01:45+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: MEDIUM (table.tsx functions 75% < 85%)
+- **Duration**: 20 minutes
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/components/ui/table.test.tsx (new, 2 tests)
+- **Test Delta**: +2 tests (total 887)
+- **Coverage Impact**:
+  - Overall Functions: 97.66% → 98.59% (+0.93%)
+  - table.tsx Functions: 75% → 100% (+25%)
+- **Verification**: All 887 tests pass; typecheck 0; lint 0; build success.
+- **Impact**: Added tests for TableFooter and TableCaption components, covering previously uncovered forwardRef arrow functions; all modules now ≥85% function coverage.
