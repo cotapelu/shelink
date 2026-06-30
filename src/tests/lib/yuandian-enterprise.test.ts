@@ -481,6 +481,26 @@ describe("computeRiskLevel（通过聚合响应间接验证）", () => {
     expect(dishou!.top).toEqual([{ key: "Court", count: 2 }]);
   });
 
+  it("handles topField defined but value not an array (top remains undefined)", async () => {
+    const customData = {
+      status: "success",
+      code: 200,
+      data: {
+        id: "eid",
+        name: "Test",
+        失信被执行人统计: { 总数: 1, 执行法院: "not an array" as any },
+        被执行人统计: { 总数: 2 },
+        股权冻结统计: { 总数: 3 },
+        严重违法统计: { 总数: 4 },
+        经营异常统计: { 总数: 5 }
+      }
+    };
+    fetchMock.mockResolvedValue(jsonRes(customData));
+    const r = await getEnterpriseSummary({ id: "x" }, configured);
+    const dishou = r!.coreRisks.find(c => c.category === "失信被执行人");
+    expect(dishou!.top).toBeUndefined();
+  });
+
   it("filters out core risk category when total is 0 AND category not in CORE_RISK_KEYS (defense-in-depth)", async () => {
     const customData = {
       status: "success",
@@ -673,6 +693,19 @@ describe("getEnterpriseBaseInfo", () => {
     } as any);
     const r = await getEnterpriseBaseInfo("param-id", configured);
     expect(r!.id).toBe("response-id"); // uses data.id
+  });
+
+  it("falls back to parameter id when data.id missing", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: vi.fn().mockResolvedValue({
+        status: "success",
+        data: { 企业名称: "Test" }
+      })
+    } as any);
+    const r = await getEnterpriseBaseInfo("param-id", configured);
+    expect(r!.id).toBe("param-id");
   });
 
   it("handles fetch abort (timeout)", async () => {

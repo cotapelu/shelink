@@ -1123,3 +1123,18 @@ This file tracks performance and evolution of the AI agent during the migration 
   - enterprise.ts Functions: 83.33% (unchanged)
 - **Verification**: All 876 tests pass; typecheck 0; lint 0; build success.
 - **Impact**: Added comprehensive tests for getEnterpriseBaseInfo and searchEnterpriseCandidates, covering abort, HTTP errors, status failures, data null, field mapping, top extraction edge cases; significantly improved security-adjacent external API client coverage.
+
+## Cycle 62 - Task: Increase coverage for lib/yuandian/enterprise.ts (edge cases)
+- **Timestamp**: 2026-06-29T23:50+07:00
+- **Type**: Proactive Improvement (T - Tests)
+- **Priority**: HIGH (function coverage 83.33%)
+- **Duration**: 20 minutes
+- **Status**: ✅ Success
+- **Files Modified**: src/tests/lib/yuandian-enterprise.test.ts (+2 tests)
+- **Test Delta**: +2 tests (total 878)
+- **Coverage Impact**:
+  - Overall Branches: 94.24% (maintained)
+  - enterprise.ts Branches: 89.58% (modest improvement)
+  - enterprise.ts Functions: 83.33% (maintained, but additional branches covered)
+- **Verification**: All 878 tests pass; typecheck 0; lint 0; build success.
+- **Impact**: Added tests for getEnterpriseBaseInfo id fallback and pickStat non-array top; improved robustness of enterprise client edge-case handling.
