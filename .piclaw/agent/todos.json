@@ -3,37 +3,37 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Cycle 72 - Final",
+      "name": "Cycle 73 - Coverage Push",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Increase enterprise.ts coverage - ✅ Completed",
-          "status": "completed"
+          "content": "Increase default-folders.ts branch coverage from 48% to >85%",
+          "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Add JSDoc for intakes/actions - ✅ Completed (7 functions)",
-          "status": "completed"
+          "content": "Increase yuandian/client.ts branch coverage to >92%",
+          "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "React-hooks warnings - ✅ No errors (warnings acceptable)",
-          "status": "completed"
+          "content": "Fix react-hooks warnings in intake-sheet.tsx",
+          "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Dependency audit - ✅ Clean (0 vulnerabilities)",
-          "status": "completed"
+          "content": "Add JSDoc for matters/actions.ts public functions",
+          "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "Auth checks - ✅ All endpoints require session",
-          "status": "completed"
+          "content": "Retry npm outdated and plan dependency updates",
+          "status": "pending"
         }
       ]
     }
   ],
   "nextTaskId": 6,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-30T08:55:18.794Z"
+  "updatedAt": "2026-06-30T08:59:00.126Z"
 }
