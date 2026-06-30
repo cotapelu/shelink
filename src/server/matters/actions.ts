@@ -51,6 +51,14 @@ function emptyToNull<T extends Record<string, unknown>>(obj: T): T {
   return out as T;
 }
 
+/**
+ * List matters with filtering, pagination, and visibility checks.
+ * @param input - MatterListQuery (filters: category, status, ownerId, clientId, date range, search, sorting)
+ * @returns Promise<{ items: Matter[], total: number, page: number, pageSize: number }>
+ * @throws {ZodError} - if input validation fails
+ * @access Requires authenticated session (visibility filter applied)
+ * @audit Logs matter access (read)
+ */
 export async function listMatters(input: Partial<MatterListQuery> = {}) {
   const session = await requireSession();
   const query = matterListQuerySchema.parse(input);
@@ -559,6 +567,14 @@ export async function removeMatterLink(matterId: string, relatedMatterId: string
   revalidatePath(`/matters/${matterId}`);
 }
 
+/**
+ * Get matter by ID with full includes and permission check.
+ * @param id - Matter ID
+ * @returns Promise<Matter> - matter with all relations (client, parties, cause, members, etc.)
+ * @throws {Error} - if matter not found or user lacks access
+ * @access Requires authenticated session; checks matter visibility permissions
+ * @audit Logs matter view
+ */
 export async function getMatterById(id: string) {
   const session = await requireSession();
   await assertCanAccessMatter(session.user.id, session.user.role, id);
