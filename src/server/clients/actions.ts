@@ -46,6 +46,14 @@ function emptyToNull<T extends Record<string, unknown>>(obj: T): T {
   return out as T;
 }
 
+/**
+ * List clients with filtering (type, tag, search) and pagination.
+ * @param input - Partial<ClientListQuery> (search, type, tag, page, pageSize)
+ * @returns Promise<{ items: Client[], total: number, page: number, pageSize: number }>
+ * @throws {ZodError} - if validation fails
+ * @access Requires authenticated session; respects client visibility filter
+ * @audit Logs client access (read)
+ */
 export async function listClients(input: Partial<ClientListQuery> = {}) {
   const session = await requireSession();
   const query = clientListQuerySchema.parse(input);
@@ -84,6 +92,14 @@ export async function listClients(input: Partial<ClientListQuery> = {}) {
   return { items, total, page: query.page, pageSize: query.pageSize };
 }
 
+/**
+ * Get client by ID with permission check.
+ * @param id - Client ID
+ * @returns Promise<Client> - client with primary contact and counts
+ * @throws {Error} - if client not found or user lacks permission
+ * @access Requires authenticated session; checks client association via matters/intakes
+ * @audit Logs client view
+ */
 export async function getClientById(id: string) {
   const session = await requireSession();
   // Kiểm tra quyền: manager/finance xem tất cả, người khác phải có vụ án liên quan
