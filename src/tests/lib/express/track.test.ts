@@ -297,4 +297,39 @@ describe("trackExpress", () => {
     expect(result.state).toBe("在途");
   });
 
+  it('calls abort when timeout is reached', async () => {
+    vi.useFakeTimers();
+    const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
+
+    // Reset fetch mock
+    let fetchResolve!: (value: unknown) => void;
+    global.fetch = vi.fn().mockImplementation(() => {
+      return new Promise(resolve => {
+        fetchResolve = resolve;
+      });
+    });
+
+    const promise = trackExpress({ trackingNo: '123456', companyCode: '顺丰快递' });
+
+    expect(abortSpy).not.toHaveBeenCalled();
+
+    // Advance timers past the 10s timeout
+    await vi.advanceTimersByTimeAsync(10_000 + 50);
+    await Promise.resolve();
+
+    expect(abortSpy).toHaveBeenCalledTimes(1);
+
+    // Resolve fetch with a valid response
+    fetchResolve({
+      json: async () => ({ Success: true, Traces: [] })
+    } as any);
+
+    const result = await promise;
+    expect(result.provider).toBe('快递鸟');
+    expect(result.trackingNo).toBe('123456');
+
+    abortSpy.mockRestore();
+    vi.useRealTimers();
+  });
+
 });
