@@ -20,7 +20,7 @@
 "use client";
 
 import { useTransition, useRef, useState, useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, Upload, ScanText } from "lucide-react";
@@ -95,9 +95,9 @@ export function AddProcedureSheet({
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
     reset,
+    control,
     formState: { errors }
   } = useForm<ProcedureCreateInput>({
     resolver: zodResolver(procedureCreateSchema),
@@ -117,10 +117,11 @@ export function AddProcedureSheet({
     }
   });
 
-  const procedureType = watch("type");
-  const leadLawyerId = watch("leadLawyerId");
-  const isExternalLead = watch("isExternalLead");
-  const jurisdiction = watch("jurisdiction") ?? "";
+  const jurisdiction = useWatch({ name: "jurisdiction", control }) ?? "";
+  const procedureType = useWatch({ name: "type", control });
+  const leadLawyerId = useWatch({ name: "leadLawyerId", control });
+  const isExternalLead = useWatch({ name: "isExternalLead", control });
+  const watchedHandlingAgency = useWatch({ name: "handlingAgency", control });
   const agencyOpts = useMemo(() => agencyOptions(jurisdiction), [jurisdiction]);
 
   function onSubmit(values: ProcedureCreateInput) {
@@ -223,7 +224,7 @@ export function AddProcedureSheet({
                   value={jurisdiction}
                   onChange={(v) => {
                     setValue("jurisdiction", v);
-                    const cur = watch("handlingAgency");
+                    const cur = watchedHandlingAgency;
                     if (cur && !agencyOptions(v).includes(cur)) {
                       setValue("handlingAgency", "");
                     }
@@ -232,7 +233,7 @@ export function AddProcedureSheet({
               </Field>
               <Field label="办理机关">
                 <Select
-                  value={watch("handlingAgency") || ""}
+                  value={watchedHandlingAgency || ""}
                   onValueChange={(v) => setValue("handlingAgency", v)}
                   disabled={agencyOpts.length === 0}
                 >
@@ -323,8 +324,8 @@ export function AddDeadlineDialog({
     register,
     handleSubmit,
     setValue,
-    watch,
     reset,
+    control,
     formState: { errors }
   } = useForm<DeadlineCreateInput>({
     resolver: zodResolver(deadlineCreateSchema),
@@ -337,6 +338,9 @@ export function AddDeadlineDialog({
       remindDays: 3
     }
   });
+
+  const watchedProcedureId = useWatch({ name: "procedureId", control });
+  const watchedCategory = useWatch({ name: "category", control });
 
   // 打开时把所处程序默认值同步为当前选中程序
   useEffect(() => {
@@ -369,7 +373,7 @@ export function AddDeadlineDialog({
           <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
             <Field label="所处程序" required>
               <Select
-                value={watch("procedureId") || undefined}
+                value={watchedProcedureId || undefined}
                 onValueChange={(v) => setValue("procedureId", v)}
               >
                 <SelectTrigger>
@@ -394,7 +398,7 @@ export function AddDeadlineDialog({
 
             <Field label="期限类型">
               <Select
-                value={watch("category")}
+                value={watchedCategory}
                 onValueChange={(v) =>
                   setValue("category", v as DeadlineCreateInput["category"])
                 }
@@ -481,7 +485,7 @@ export function AddHearingDialog({
     handleSubmit,
     reset,
     setValue,
-    watch,
+    control,
     formState: { errors }
   } = useForm<HearingCreateInput>({
     resolver: zodResolver(hearingCreateSchema),
@@ -498,7 +502,8 @@ export function AddHearingDialog({
     }
   });
 
-  const procedureId = watch("procedureId");
+  const watchedProcedureId = useWatch({ name: "procedureId", control });
+  const procedureId = watchedProcedureId;
 
   const CN_NUM: Record<number, string> = { 1: "一", 2: "二", 3: "三", 4: "四", 5: "五", 6: "六", 7: "七", 8: "八", 9: "九", 10: "十" };
 
@@ -614,7 +619,7 @@ export function AddHearingDialog({
             <div className="grid grid-cols-2 gap-3">
               <Field label="所处程序" required>
                 <Select
-                  value={watch("procedureId") || undefined}
+                  value={watchedProcedureId || undefined}
                   onValueChange={(v) => {
                     setValue("procedureId", v);
                     autoTitle(v);
@@ -635,7 +640,7 @@ export function AddHearingDialog({
               <Field label="审理法院">
                 <Input
                   readOnly
-                  value={proceduresDetail?.[watch("procedureId")]?.handlingAgency ?? "—"}
+                  value={proceduresDetail?.[watchedProcedureId]?.handlingAgency ?? "—"}
                   className="bg-muted/50 text-muted-foreground"
                 />
               </Field>

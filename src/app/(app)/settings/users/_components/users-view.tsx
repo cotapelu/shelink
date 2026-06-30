@@ -20,7 +20,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -282,9 +282,9 @@ function CreateUserSheet({
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
     reset,
+    control,
     formState: { errors }
   } = useForm<CreateValues>({
     resolver: zodResolver(createSchema),
@@ -296,6 +296,8 @@ function CreateUserSheet({
       phone: ""
     }
   });
+
+  const watchedRole = useWatch({ name: "role", control });
 
   function onSubmit(values: CreateValues) {
     startTransition(async () => {
@@ -333,7 +335,7 @@ function CreateUserSheet({
             </SheetField>
             <SheetField label="角色" required>
               <Select
-                value={watch("role")}
+                value={watchedRole}
                 onValueChange={(v) =>
                   setValue("role", v as CreateValues["role"], { shouldDirty: true })
                 }

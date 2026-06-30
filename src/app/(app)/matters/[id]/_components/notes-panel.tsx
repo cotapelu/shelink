@@ -20,7 +20,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -210,9 +210,9 @@ function NoteSheet({
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
     reset,
+    control,
     formState: { errors }
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -225,7 +225,7 @@ function NoteSheet({
     }
   });
 
-  const channel = watch("channel");
+  const channel = useWatch({ name: "channel", control });
 
   function onSubmit(values: FormValues) {
     startTransition(async () => {

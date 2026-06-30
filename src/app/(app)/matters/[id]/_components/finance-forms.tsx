@@ -20,7 +20,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Paperclip, FileText, Sparkles } from "lucide-react";
@@ -77,8 +77,8 @@ export function AddBillingSheet({
     register,
     handleSubmit,
     setValue,
-    watch,
     reset,
+    control,
     formState: { errors }
   } = useForm<BillingCreateInput>({
     resolver: zodResolver(billingCreateSchema),
@@ -90,6 +90,8 @@ export function AddBillingSheet({
       status: "ACTIVE"
     }
   });
+
+  const watchedStatus = useWatch({ name: "status", control });
 
   function onSubmit(values: BillingCreateInput) {
     startTransition(async () => {
@@ -153,7 +155,7 @@ export function AddBillingSheet({
                   { value: "ACTIVE", label: "生效中" },
                   { value: "CLOSED", label: "已结清" }
                 ]}
-                value={watch("status")}
+                value={watchedStatus}
                 onChange={(v) => setValue("status", v as BillingCreateInput["status"])}
               />
             </Field>
@@ -243,8 +245,8 @@ export function AddFeeEntrySheet({
     register,
     handleSubmit,
     setValue,
-    watch,
     reset,
+    control,
     formState: { errors }
   } = useForm<FeeEntryCreateInput>({
     resolver: zodResolver(feeEntryCreateSchema),
@@ -261,7 +263,10 @@ export function AddFeeEntrySheet({
     }
   });
 
-  const type = watch("type");
+  const watchedType = useWatch({ name: "type", control });
+  const watchedBillingId = useWatch({ name: "billingId", control });
+  const watchedNote = useWatch({ name: "note", control });
+  const type = watchedType; // alias for existing code
 
   function onSubmit(values: FeeEntryCreateInput) {
     startTransition(async () => {
@@ -320,7 +325,7 @@ export function AddFeeEntrySheet({
             {billings.length > 0 && (
               <Field label="关联合同">
                 <Select
-                  value={watch("billingId") || "none"}
+                  value={watchedBillingId || "none"}
                   onValueChange={(v) =>
                     setValue("billingId", v === "none" ? "" : v)
                   }
@@ -363,7 +368,7 @@ export function AddFeeEntrySheet({
                     // 优先用真实发票号（财务已 ISSUED 时回填），否则用占位
                     const invoiceNoValue = req.invoiceNo ?? `req:${req.id.slice(0, 8)}`;
                     setValue("invoiceNo", invoiceNoValue, { shouldDirty: true });
-                    const existing = watch("note") ?? "";
+                    const existing = watchedNote ?? "";
                     const noteText = req.invoiceNo
                       ? `关联申请发票 #${req.id.slice(0, 8)}${req.title ? "（" + req.title + "）" : ""}`
                       : `关联申请发票（未开具）#${req.id.slice(0, 8)}${req.title ? "（" + req.title + "）" : ""}`;
