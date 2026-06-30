@@ -104,6 +104,18 @@ describe('searchCauses', () => {
     expect(args.where.OR).toContainEqual({ code: 'CC-7' });
     expect(args.where.OR).toContainEqual({ code: { startsWith: 'CC-7-' } });
   });
+
+  it('uses codeFilter for COMMERCIAL_ARBITRATION', async () => {
+    vi.mocked(prisma.causeOfAction).findMany = vi.fn().mockResolvedValue([]);
+    vi.mocked(requireSession).mockResolvedValue({} as any);
+    await searchCauses({ category: 'COMMERCIAL_ARBITRATION' as any });
+    const args = vi.mocked(prisma.causeOfAction).findMany.mock.calls[0][0] as any;
+    expect(args.where.category).toBe('CIVIL_COMMERCIAL');
+    // Should include multiple CC codes
+    expect(args.where.OR).toContainEqual({ code: 'CC-3' });
+    expect(args.where.OR).toContainEqual({ code: { startsWith: 'CC-3-' } });
+    expect(args.where.OR).toContainEqual({ code: 'CC-4' });
+  });
 });
 
 describe('getCauseById', () => {
@@ -116,9 +128,9 @@ describe('getCauseById', () => {
     expect(result).toBeNull();
   });
 
-  it('flattens cause with parent chain', async () => {
+  it('flattens cause with full parent chain up to level 0', async () => {
     const raw = {
-      id: 'c1', code: 'C1', name: 'Test', shortName: 'T', level: 2,
+      id: 'c1', code: 'C1', name: 'Child', shortName: 'C', level: 2,
       parentId: 'p1',
       parent: {
         id: 'p1', name: 'Parent', level: 1,
@@ -131,7 +143,23 @@ describe('getCauseById', () => {
     const result = await getCauseById('c1' as any);
     expect(result).not.toBeNull();
     expect(result!.l1Name).toBe('Parent');
-    expect(result!.l2Name).toBe('Test');
+    expect(result!.l2Name).toBe('Child');
     expect(result!.category).toBe('CIVIL');
+  });
+
+  it('flattens cause with no parent (level 1)', async () => {
+    const raw = {
+      id: 'c1', code: 'C1', name: 'Root Cause', shortName: 'R', level: 1,
+      parentId: null,
+      parent: null,
+      category: 'CRIMINAL'
+    };
+    vi.mocked(prisma.causeOfAction).findUnique = vi.fn().mockResolvedValue(raw);
+    vi.mocked(requireSession).mockResolvedValue({} as any);
+    const result = await getCauseById('c1' as any);
+    expect(result).not.toBeNull();
+    expect(result!.l1Name).toBe('Root Cause');
+    expect(result!.l2Name).toBeNull();
+    expect(result!.category).toBe('CRIMINAL');
   });
 });
