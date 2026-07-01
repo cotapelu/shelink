@@ -22,24 +22,12 @@
 ### 🔴 CRITICAL (0)
 *None*
 
-### 🟠 HIGH (2)
+### 🟠 HIGH (0)
+*All HIGH violations resolved*
 
-#### HIGH-1: Low Test Coverage - server/preservations/actions.ts
-- **Coverage**: Stmts 8.33%, Branch 5.73%, Funcs 10%, Lines 9%
-- **LOC**: ~285 lines
-- **Impact**: Critical business logic almost untested
-- **Root Cause**: Complex state mutations, likely difficult to test without mocking
-- **Fix Strategy**: Break down complex actions, add unit tests with mocks, integration tests
-- **Estimated Effort**: 16-20 hours
-- **Priority**: P0
-
-#### HIGH-2: Medium Test Coverage - lib/telemetry/metrics.ts
-- **Coverage**: Stmts 61.53%, Branch 56.25%, Funcs 75%, Lines 61.53%
-- **LOC**: ~80 lines
-- **Impact**: Observability metrics not fully tested
-- **Fix Strategy**: Add unit tests for all metric recording functions
-- **Estimated Effort**: 4-6 hours
-- **Priority**: P1
+*Previously resolved:*
+- HIGH-1: server/preservations/actions.ts ✅ (Sprint 1)
+- HIGH-2: lib/telemetry/metrics.ts ✅ (Sprint 2)
 
 ---
 

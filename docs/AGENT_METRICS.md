@@ -11,7 +11,7 @@
 | Metric | Current | Target | Trend |
 |--------|---------|--------|-------|
 | Health Score | 63.2* | ≥90 | ↗️ |
-| Test Coverage | **98.18%** | ≥80% | ↗️ |
+| Test Coverage | **98.85%** | ≥80% | ↗️ |
 | Avg Complexity | TBD | ≤10 | ↔️ |
 | Duplication | TBD% | <5% | ↔️ |
 | Evolution Rate | 0/week | ≥10/week | ↔️ |
@@ -109,8 +109,100 @@
 - All tests pass, coverage improved significantly
 
 **Files Modified**:
+- docs/AGENT_METRICS.md (created)
+- docs/AGENT_PROFILE.md (created)
+- docs/EVOLUTION.md (created)
+- docs/VIOLATIONS.md (created)
+
+---
+
+### [CYCLE-1] - 2025-06-30 Sprint 1 - Test Coverage Improvement
+
+**Type**: Violation Fix (HIGH)  
+**Priority**: CRITICAL  
+**Duration**: ~60 minutes  
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Lint: 32 warnings (0 errors) - unchanged
+- ✅ Typecheck: PASS
+- ✅ Tests: **933 → 963 passed** (+30 tests)
+- ✅ Build: SUCCESS
+
+**Coverage Baseline → After**:
+| Metric | Before | After | Δ |
+|---------|--------|-------|----|
+| Statements | 90.24% | **98.18%** | +7.94% |
+| Branches | 84.89% | **91.51%** | +6.62% |
+| Functions | 93.72% | **97.48%** | +3.76% |
+| Lines | 91.07% | **98.68%** | +7.61% |
+
+**Target Module**: `server/preservations/actions.ts`
+| Metric | Before | After | Δ |
+|--------|--------|-------|----|
+| Statements | ~9% | **97.88%** | +88% |
+| Branches | ~5% | **75.4%** | +70% |
+| Functions | ~10% | **100%** | +90% |
+| Lines | ~9% | **97.52%** | +88% |
+
+**Test Delta**:
+- Added 30 new tests (from 933 → 963)
+- Covered all 8 exported functions
+- Covered error paths, validation, permissions
+
+**Violations Resolved**:
+- ✅ HIGH-1: server/preservations/actions.ts coverage gap (FIXED)
+
+**Files Modified**:
 - src/tests/server/preservations/actions.test.ts (expanded)
 - package.json (added `cuid` dev dependency)
+
+---
+
+### [CYCLE-2] - 2025-06-30 Sprint 2 - Telemetry Metrics Testing
+
+**Type**: Violation Fix (HIGH)  
+**Priority**: HIGH  
+**Duration**: ~45 minutes  
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Lint: unchanged (32 warnings)
+- ✅ Typecheck: PASS
+- ✅ Tests: **963 → 993 passed** (+30 tests)
+- ✅ Build: SUCCESS
+
+**Coverage After**:
+| Metric | Before | After | Δ |
+|---------|--------|-------|----|
+| Statements | 98.18% | **98.85%** | +0.67% |
+| Branches | 91.51% | **91.97%** | +0.46% |
+| Functions | 97.48% | **98.32%** | +0.84% |
+| Lines | 98.68% | **99.45%** | +0.77% |
+
+**Target Module**: `lib/telemetry/metrics.ts`
+| Metric | Before | After | Δ |
+|--------|--------|-------|----|
+| Statements | ~61% | **100%** | +39% |
+| Branches | ~56% | **93.75%** | +37.75% |
+| Functions | ~75% | **100%** | +25% |
+| Lines | ~61% | **100%** | +39% |
+
+**Test Delta**:
+- Added 30 comprehensive tests for metrics recording
+- Covered counter, gauge, histogram, apiRequest, businessEvent
+- Tested edge cases, label escaping, pattern detection
+
+**Violations Resolved**:
+- ✅ HIGH-2: lib/telemetry/metrics.ts coverage gap (FIXED)
+
+**Notes**:
+- All 30 tests pass
+- Mocked console.log to verify metric format
+- Tested both Pattern A and Pattern B for recordApiRequest
+
+**Files Modified**:
+- src/tests/lib/telemetry/metrics.test.ts (new, 9.5KB)
 
 ---
 
@@ -141,7 +233,7 @@ Target: ≥90 points, increase ≥0.5%/week
 | Severity | Count | Trend |
 |----------|-------|-------|
 | CRITICAL | 0     | ↔️ |
-| HIGH     | 2 ↙️ 1 | ↘️ |
+| HIGH     | 0     | ✅ |
 | MEDIUM   | 32    | ↔️ |
 | LOW      | 1     | ↔️ |
 
