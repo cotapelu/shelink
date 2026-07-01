@@ -583,3 +583,10 @@ Current: **85/100** → **87/100** (+2)
 - **Impact**: Improved clarity for audit logging internals.
 - **Tests**: 933 passing; coverage maintained.
 
+
+## Cycle 88 - Code Quality: remove unused parameter
+- **Type**: Lint cleanup
+- **Status**: ✅ Success
+- **Impact**: Cleaner codebase; lint warnings -1.
+- **Tests**: 933 passing; coverage maintained.
+
