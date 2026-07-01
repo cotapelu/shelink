@@ -34,7 +34,7 @@ export interface AppError {
 /**
  * Get user-friendly suggestion based on error code
  */
-function getSuggestion(code: string, action?: string): string {
+function getSuggestion(code: string): string {
   switch (code) {
     case 'unauthorized':
       return 'Vui lòng đăng nhập lại.';
@@ -72,7 +72,7 @@ export function formatApiError(
 ): AppError {
   const code = apiError.code ? apiError.code.toString().toLowerCase() : 'unknown';
   const reason = apiError.error || defaultMessage;
-  const suggestion = getSuggestion(code, actionName);
+  const suggestion = getSuggestion(code);
 
   // Format: [ERROR] ActionName - reason - suggestion
   const userMessage = `[ERROR] ${actionName} - ${reason} - ${suggestion}`;
