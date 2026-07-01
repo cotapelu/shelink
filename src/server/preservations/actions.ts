@@ -38,6 +38,11 @@ import {
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+/**
+ * List preservation records with optional filters.
+ * @param input - Optional filter criteria: status, matterId, search.
+ * @returns Array of preservation records with related matter, owner, and recent renewals.
+ */
 export async function listPreservations(input?: z.input<typeof preservationListFilterSchema>) {
   const session = await requireSession();
   const filter = preservationListFilterSchema.parse(input ?? {});
@@ -77,6 +82,12 @@ export async function listPreservations(input?: z.input<typeof preservationListF
   });
 }
 
+/**
+ * Retrieve a single preservation record by ID with permission check.
+ * @param id - Preservation record ID.
+ * @returns Preservation record with matter, owner, and renewals.
+ * @throws {Error} If access denied or record not found.
+ */
 export async function getPreservation(id: string) {
   const session = await requireSession();
   await assertCanAccessPreservation(session.user.id, id);

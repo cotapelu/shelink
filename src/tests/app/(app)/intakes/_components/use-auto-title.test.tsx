@@ -24,7 +24,7 @@ describe('useAutoTitleSuggestion', () => {
   });
 
   it('should auto-generate title when untouched', () => {
-    const { result, rerender } = renderHook(
+    const { result } = renderHook(
       () => useAutoTitleSuggestion({}),
       { wrapper: Wrapper }
     );
