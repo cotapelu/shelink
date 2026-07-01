@@ -33,18 +33,17 @@ export default function PersonDetailPage() {
   const [person, setPerson] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadPerson = async () => {
-    try {
-      const data = await getPerson(id);
-      setPerson(data);
-    } catch (e: any) {
-      toast.error('Lỗi khi tải thông tin: ' + e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadPerson = async () => {
+      try {
+        const data = await getPerson(id);
+        setPerson(data);
+      } catch (e: any) {
+        toast.error('Lỗi khi tải thông tin: ' + e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
     if (id) loadPerson();
   }, [id]);
 

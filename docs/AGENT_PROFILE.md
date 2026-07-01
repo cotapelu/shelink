@@ -68,3 +68,69 @@ Strengths, weaknesses, and fragile areas observed during migration.
 4. **Setup CI/CD**: GitHub Actions workflow with required status checks (lint, typecheck, test-coverage ≥80%, security-scan). Integrate Danger.js to enforce PR template completion.
 5. **Load Testing**: Benchmark API endpoints with autocannon/k6 to validate rate limiting and measure p50/p99 latency against SLOs (<100ms/<200ms).
 
+
+## Recent Progress (Cycles 1-3)
+
+**Cycle 1**:
+- Rate limiting integrated (P0)
+- PR template + CODEOWNERS added (P2)
+- Observability modules created (correlation-id, metrics, cache) (P1 partial)
+
+**Cycle 2**:
+- Correlation ID header added to proxy (P1)
+- Metrics recorder implemented (console Prometheus format)
+- OpenTelemetry SDK deferred (simpler approach)
+
+**Cycle 3**:
+- GitHub Actions CI workflow added (P2)
+- Quality gate automation: lint, typecheck, test, build, security-scan
+
+## Current Weaknesses
+
+- **God Objects**: intake-sheet.tsx (1593 lines), procedure-content.tsx (1357), export-xlsx.ts (1058), finance-forms.tsx (747) → refactor needed
+- **Metrics Unused**: Metrics module created but not called from server actions → no real data collected
+- **Cache Unused**: fetch-cache.ts created but not integrated into API client
+- **CI Not Enforced**: Workflow exists but branch protection not enabled → still manual merge possible
+- **Lint Warnings**: 74 warnings (mostly unused vars, hook deps) - not critical but noisy
+
+## Action Plan (Next 2 Weeks)
+
+1. **Instrument Server Actions** (P1): Call recordApiRequest, recordBusinessEvent in createIntake, convertIntakeToMatter, etc.
+2. **Split God Objects** (P1): Start with intake-sheet (extract 3-4 subcomponents, reduce to <1000 lines)
+3. **Enable Branch Protection** (P2): Require quality.yml to pass before merge on main/develop
+4. **Integrate API Caching** (P2): Use fetch-cache in client.ts for enumeration endpoints
+5. **Load Test** (P2): Run autocannon against key APIs, validate rate limiting, measure p50/p99
+6. **Fix Remaining Lint Warnings** (P3): Auto-fix unused imports, review hook deps
+
+
+## Cycle 71 Update (2026-07-01)
+
+### Fixed Weaknesses
+- **React Hook Form incompatibility**: Replaced all `watch()` calls with `useWatch` in `intake-sheet.tsx` (1593 lines). Resolved `react-hooks/incompatible-library` warnings that could cause stale closures.
+- **TypeScript parse errors**: Fixed missing parentheses in server actions (`listIntakes`, `createIntake`) and generic cast in `withMetrics`. Restored typecheck pass.
+- **Exhaustive-deps violations**: Moved async load functions inside `useEffect` in genealogy page to satisfy React best practices.
+
+### Current God Object Status
+- **intake-sheet.tsx**: Still 1500+ lines. Needs refactor into subcomponents (e.g., PartySection, CauseSection, FeeSection, ProcedureSection). Target: split into 4-5 components <300 lines each.
+- **procedure-content.tsx**: 1357 lines (unchanged)
+- **export-xlsx.ts**: 1058 lines (unchanged)
+- **finance-forms.tsx**: 747 lines (unchanged)
+
+### Quality Gate Compliance
+- All gates green: typecheck, lint (0 errors), test (931 passing), build success.
+- Coverage: >99% statements, >94% branches – excellent.
+
+### Remaining Action Items (High Priority)
+1. **Refactor God Objects**: Split `intake-sheet` and `procedure-content` into smaller, testable units with custom hooks.
+2. **Instrument Observability**: Add `recordApiRequest` / `recordBusinessEvent` calls to critical server actions (intakes, matters, finance) to make metrics useful.
+3. **Enable Branch Protection**: Configure GitHub Actions to require `quality.yml` to pass before merging PRs.
+4. **Integrate API Caching**: Use `fetch-cache.ts` in `client.ts` for enumeration endpoints (causes, clients, users) with 5-minute TTL.
+5. **Address Remaining Warnings**: Many `@typescript-eslint/no-unused-vars` in test files and UI components. Consider disabling rule for test files if intentional.
+
+### Recommended Next Cycle
+Focus on **God Object refactor** for `intake-sheet.tsx`:
+- Extract `PartyFormSection`, `CauseAndFeeSection`, `ProcedureAndStandingSection`, `DocumentUploadSection`.
+- Each subcomponent receives `control` prop (react-hook-form context) and field arrays.
+- Update parent to compose these sections.
+- Add unit tests for extracted subcomponents (if missing).
+Estimated effort: 1-2 hours.

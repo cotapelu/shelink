@@ -33,6 +33,7 @@ import {
   type IntakeListQuery,
   type DeclineIntakeInput
 } from "./schemas";
+import { withMetrics } from "@/lib/telemetry/server-metrics";
 import { seedDefaultFolders } from "@/lib/default-folders";
 import { notifyRoleApprovers } from "@/server/notifications/approval";
 import * as helpers from "./helpers";
@@ -44,7 +45,7 @@ import * as helpers from "./helpers";
  * @throws {ZodError} - if input validation fails
  * @access Requires authenticated session
  */
-export async function listIntakes(input: Partial<IntakeListQuery> = {}) {
+export const listIntakes = withMetrics('listIntakes', async function listIntakes(input: Partial<IntakeListQuery> = {}) {
   const session = await requireSession();
   const query = intakeListQuerySchema.parse(input);
 
@@ -106,7 +107,7 @@ export async function listIntakes(input: Partial<IntakeListQuery> = {}) {
   ]);
 
   return { items, total, page: query.page, pageSize: query.pageSize };
-}
+});
 
 /**
  * Get intake by ID with permission check.
@@ -171,7 +172,7 @@ export async function getIntakeById(id: string) {
  * @access Requires authenticated session
  * @audit Logs intake creation
  */
-export async function createIntake(input: IntakeCreateInput) {
+export const createIntake = withMetrics('createIntake', async function createIntake(input: IntakeCreateInput) {
   const session = await requireSession();
   const data = intakeCreateSchema.parse(input);
 
@@ -349,7 +350,7 @@ export async function createIntake(input: IntakeCreateInput) {
   revalidatePath("/intakes");
   revalidatePath("/matters");
   return { ok: true, id: created.id, clientId: resolvedClientId };
-}
+});
 
 /**
  * Decline an intake application.

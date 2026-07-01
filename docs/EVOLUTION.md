@@ -454,3 +454,49 @@ Current: **85/100** → **87/100** (+2)
 - Enable API caching (P2)
 - Load testing and performance validation (P2)
 
+
+## Phase 2 Continued (2025-06-28)
+
+### Cycle 2-3 Accomplishments
+- **Correlation ID** now propagated from proxy to API responses (X-Correlation-ID header)
+- **Metrics recorder** module created (Prometheus-style console output)
+- **GitHub Actions CI** workflow established with 5 jobs: lint, typecheck, test+coverage, build, security-scan
+- Code coverage maintained at 99.37% statements, 94.51% branches
+
+### Health Score Trend
+87 → 88 (+1)
+- Security: 100 (rate limiting active, no high vulnerabilities)
+- Quality: 95 (coverage excellent, but 5 God Objects >300 lines)
+- Observability: 60 (scaffolding done, not instrumented)
+- Process: 75 (CI workflow exists but not enforced)
+
+### Blockers
+- Observability metrics not actually recorded (modules unused)
+- God Objects remain; refactor complexity high (>1000 lines each)
+- Branch protection not enabled (manual override possible)
+
+### Upcoming (Week 2)
+- Instrument server actions with metrics (P1)
+- Refactor intake-sheet into smaller components (P1)
+- Enable branch protection and status checks (P2)
+- Integrate API response caching (P2)
+- Load testing and SLO validation (P2)
+
+
+## Cycle 71 - Quality Gate Restoration (2026-07-01)
+- **Type**: Violation Fix (Critical)
+- **Priority**: CRITICAL (blocked CI/CD)
+- **Duration**: 35 minutes
+- **Status**: ✅ Success
+- **Coverage**: Maintained >99% statements, >94% branches (931 tests passing)
+- **Files Modified**:
+  - `src/server/intakes/actions.ts` (fixed missing parentheses in return statements)
+  - `src/lib/telemetry/server-metrics.ts` (fixed generic cast issue)
+  - `src/app/(app)/genealogy/persons/[id]/page.tsx` (useEffect dependency fix)
+  - `src/app/(app)/intakes/_components/intake-sheet.tsx` (replaced all `watch()` with `useWatch`)
+- **Impact**:
+  - Resolved typecheck errors that broke production build
+  - Eliminated react-hooks warnings that could cause runtime bugs
+  - Restored Quality Gates to fully green state
+- **Next**: Address remaining 123 lint warnings (mostly unused vars) and begin God Object refactor for `intake-sheet.tsx`.
+

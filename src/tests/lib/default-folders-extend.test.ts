@@ -63,7 +63,7 @@ describe("default-folders", () => {
 
     it("returns early for unknown category (no createMany call)", async () => {
       const tx = { documentFolder: { createMany: vi.fn() } } as any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       await seedDefaultFolders(tx, "m-4", "UNKNOWN_CATEGORY" as any);
       expect(tx.documentFolder.createMany).not.toHaveBeenCalled();
     });

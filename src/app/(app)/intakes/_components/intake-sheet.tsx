@@ -20,7 +20,7 @@
 "use client";
 
 import { useState, useTransition, useRef, useMemo, useEffect } from "react";
-import { useForm, useFieldArray, FormProvider } from "react-hook-form";
+import { useForm, useFieldArray, FormProvider, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -233,7 +233,6 @@ export function IntakeSheet({
     register,
     control,
     handleSubmit,
-    watch,
     setValue,
     reset,
     formState: { errors }
@@ -244,17 +243,26 @@ export function IntakeSheet({
     name: "parties"
   });
 
-  const category = watch("category");
-  const firstProcedureType = watch("firstProcedureType");
-  const clientId = watch("clientId") ?? "";
-  const feeType = watch("feeType");
-  const ownerUserId = watch("ownerUserId");
-  const coUserIds = watch("coUserIds");
-  const receivedAt = watch("receivedAt");
-  const jurisdiction = watch("jurisdiction") ?? "";
-  const watchedFirstAgency = watch("firstAgency");
+  const category = useWatch({ control, name: "category" });
+  const firstProcedureType = useWatch({ control, name: "firstProcedureType" });
+  const clientId = useWatch({ control, name: "clientId" }) ?? "";
+  const feeType = useWatch({ control, name: "feeType" });
+  const ownerUserId = useWatch({ control, name: "ownerUserId" });
+  const coUserIds = useWatch({ control, name: "coUserIds" });
+  const receivedAt = useWatch({ control, name: "receivedAt" });
+  const jurisdiction = useWatch({ control, name: "jurisdiction" }) ?? "";
+  const watchedFirstAgency = useWatch({ control, name: "firstAgency" });
   // 争议解决机构按管辖地匹配
   const agencyOpts = useMemo(() => agencyOptions(jurisdiction), [jurisdiction]);
+
+  // Additional watched fields via useWatch to avoid incompatible-library warnings
+  const barFiling = useWatch({ control, name: "barFiling" });
+  const counterclaim = useWatch({ control, name: "counterclaim" });
+  const ourStanding = useWatch({ control, name: "ourStanding" });
+  const businessType = useWatch({ control, name: "businessType" });
+  const serviceStart = useWatch({ control, name: "serviceStart" });
+  const serviceEnd = useWatch({ control, name: "serviceEnd" });
+  const counselType = useWatch({ control, name: "counselType" });
 
   // v0.31: 案件类别决定表单结构（诉讼/仲裁 vs 非诉/专项 vs 顾问）
   const kind: CategoryKind = matterCategoryKind(category);
@@ -264,12 +272,12 @@ export function IntakeSheet({
   // 标题自动生成：填完当事人 + 案由后按「委托方 与 对方 案由」生成，用户手改后不再覆盖
   const [titleTouched, setTitleTouched] = useState(false);
   const [causeName, setCauseName] = useState("");
-  const watchedParties = watch("parties");
-  const watchedTitle = watch("title");
-  const watchedCauseFree = watch("causeFreeText");
-  const watchedClaimAmount = watch("claimAmount");
-  const watchedClaimDescription = watch("claimDescription");
-  const watchedCauseId = watch("causeId");
+  const watchedParties = useWatch({ control, name: "parties" });
+  const watchedTitle = useWatch({ control, name: "title" });
+  const watchedCauseFree = useWatch({ control, name: "causeFreeText" });
+  const watchedClaimAmount = useWatch({ control, name: "claimAmount" });
+  const watchedClaimDescription = useWatch({ control, name: "claimDescription" });
+  const watchedCauseId = useWatch({ control, name: "causeId" });
   useEffect(() => {
     if (titleTouched) return;
     const list = (watchedParties ?? []) as { role?: string; name?: string }[];
@@ -665,7 +673,7 @@ export function IntakeSheet({
     return (
       <Field label="是否需向律协备案">
         <Select
-          value={watch("barFiling") ?? ""}
+          value={barFiling ?? ""}
           onValueChange={(v) => setValue("barFiling", v as BarFilingType, { shouldDirty: true })}
         >
           <SelectTrigger className="h-10 bg-background">
@@ -687,7 +695,7 @@ export function IntakeSheet({
     return (
       <Field label="是否反诉">
         <Select
-          value={watch("counterclaim") ? "yes" : "no"}
+          value={counterclaim ? "yes" : "no"}
           onValueChange={(v) => setValue("counterclaim", v === "yes", { shouldDirty: true })}
         >
           <SelectTrigger className="h-10 bg-background">
@@ -733,12 +741,11 @@ export function IntakeSheet({
           </div>
 
           {parties.map((p, idx) => {
-            const all = (watch("parties") ?? []) as { role?: string }[];
+            const all = (watchedParties ?? []) as { role?: string }[];
             const role = (all[idx]?.role as PartyRole) ?? "OPPOSING_PARTY";
             const isClient = role === "CLIENT_PARTY";
             // 顾问类只显示委托方
             if (mode === "counsel" && !isClient) return null;
-            const ourStanding = watch("ourStanding");
             return (
               <PartyCard
                 key={p.id}
@@ -810,7 +817,7 @@ export function IntakeSheet({
                   ) : (
                     <div className="space-y-1">
                       <Select
-                        value={watch(`parties.${idx}.standing`) ?? ""}
+                        value={watchedParties?.[idx]?.standing ?? ""}
                         onValueChange={(v) =>
                           setValue(`parties.${idx}.standing`, v as LitigationStanding, {
                             shouldDirty: true,
@@ -842,9 +849,9 @@ export function IntakeSheet({
                     <ClientCombobox
                       triggerClassName="h-9 text-sm"
                       clientId={clientId}
-                      clientName={watch("parties.0.name") ?? ""}
+                      clientName={watchedParties?.[0]?.name ?? ""}
                       clientType={
-                        watch("parties.0.partyType") === "ORGANIZATION"
+                        watchedParties?.[0]?.partyType === "ORGANIZATION"
                           ? "COMPANY"
                           : "INDIVIDUAL"
                       }
@@ -996,7 +1003,7 @@ export function IntakeSheet({
                   <Field label="案由" required>
                     <CauseCombobox
                       category={category}
-                      value={watch("causeId") || ""}
+                      value={watchedCauseId || ""}
                       onChange={(id, name) => {
                         setValue("causeId", id, { shouldDirty: true });
                         setCauseName(name);
@@ -1088,7 +1095,7 @@ export function IntakeSheet({
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
                   <Field label="业务类型">
                     <Select
-                      value={watch("businessType") || ""}
+                      value={businessType || ""}
                       onValueChange={(v) => setValue("businessType", v, { shouldDirty: true })}
                     >
                       <SelectTrigger className="h-10 bg-background">
@@ -1117,8 +1124,8 @@ export function IntakeSheet({
                     <Input
                       type="date"
                       value={
-                        watch("serviceStart")
-                          ? new Date(watch("serviceStart")!).toISOString().split("T")[0]
+                        serviceStart
+                          ? new Date(serviceStart!).toISOString().split("T")[0]
                           : ""
                       }
                       onChange={(e) =>
@@ -1134,8 +1141,8 @@ export function IntakeSheet({
                     <Input
                       type="date"
                       value={
-                        watch("serviceEnd")
-                          ? new Date(watch("serviceEnd")!).toISOString().split("T")[0]
+                        serviceEnd
+                          ? new Date(serviceEnd!).toISOString().split("T")[0]
                           : ""
                       }
                       onChange={(e) =>
@@ -1173,7 +1180,7 @@ export function IntakeSheet({
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
                   <Field label="顾问类型">
                     <Select
-                      value={watch("counselType") || ""}
+                      value={counselType || ""}
                       onValueChange={(v) => setValue("counselType", v, { shouldDirty: true })}
                     >
                       <SelectTrigger className="h-10 bg-background">
@@ -1192,8 +1199,8 @@ export function IntakeSheet({
                     <Input
                       type="date"
                       value={
-                        watch("serviceStart")
-                          ? new Date(watch("serviceStart")!).toISOString().split("T")[0]
+                        serviceStart
+                          ? new Date(serviceStart!).toISOString().split("T")[0]
                           : ""
                       }
                       onChange={(e) =>
@@ -1209,8 +1216,8 @@ export function IntakeSheet({
                     <Input
                       type="date"
                       value={
-                        watch("serviceEnd")
-                          ? new Date(watch("serviceEnd")!).toISOString().split("T")[0]
+                        serviceEnd
+                          ? new Date(serviceEnd!).toISOString().split("T")[0]
                           : ""
                       }
                       onChange={(e) =>
@@ -1248,7 +1255,7 @@ export function IntakeSheet({
               required
               headerAction={addPartyBtn("添加当事人")}
             >
-              {watch("ourStanding") && RECEIVING_STANDINGS.has(watch("ourStanding")!) && (
+              {ourStanding && RECEIVING_STANDINGS.has(ourStanding!) && (
                 <div className="rounded-md border border-dashed border-primary/40 bg-primary/[0.03] p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="text-xs text-muted-foreground">
@@ -1499,9 +1506,9 @@ export function IntakeSheet({
         category={category}
         contextHints={(() => {
           const lines: string[] = [];
-          const cf = watch("causeFreeText");
+          const cf = watchedCauseFree;
           if (cf) lines.push(`OCR 识别案由：${cf}`);
-          const cd = watch("claimDescription");
+          const cd = watchedClaimDescription;
           if (cd) lines.push(`诉讼请求：${cd}`);
           const opp = parties
             .filter((p) => p.role === "OPPOSING_PARTY")
