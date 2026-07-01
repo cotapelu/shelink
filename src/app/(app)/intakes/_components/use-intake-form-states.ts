@@ -6,8 +6,12 @@ import type { IntakeCreateInput } from '@/server/intakes/schemas';
 import type { MatterCategory, ProcedureType, FeeType, BarFilingType, LitigationStanding } from '@prisma/client';
 
 /**
- * Hook that aggregates all watched form fields for intake creation.
- * @param control - react-hook-form control object (from useForm<IntakeCreateInput>)
+ * Aggregates all watched form fields for the intake creation form.
+ * Centralizes form state access and reduces repetitive `useWatch` calls.
+ * Provides sensible defaults for certain fields (e.g., category defaults to 'CIVIL_COMMERCIAL').
+ *
+ * @param control - react-hook-form control object from `useForm<IntakeCreateInput>`
+ * @returns Object containing all watched values needed for the intake form.
  */
 export function useIntakeFormStates(control: Control<IntakeCreateInput>) {
   return {
