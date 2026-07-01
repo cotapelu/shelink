@@ -170,3 +170,11 @@ Goal: Reduce complexity and improve maintainability while preserving all functio
 - **Total Tests**: 931 passing.
 - **Refactor Progress**: intake-sheet.tsx reduced by ~30 lines via hook extraction.
 
+
+## Cycle 75 Update (2026-07-01)
+- **Code Cleanup**: Removed several unused variables and props in InfoPanel component (finance, clientContactName, clientPhone, fmtMoney, counterclaim, firmCaseNoCell).
+- **Effect**: Lint warnings reduced by ~6; codebase cleaner.
+- **Refactor Progress**: intake-sheet.tsx down from ~1600 to ~1570 lines (via hook extraction). Still needs further section extraction.
+- **Total Tests**: 931 passing.
+- **Next**: Continue God Object reduction – target PartiesSection, CauseFeeSection.
+

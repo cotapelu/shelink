@@ -1517,3 +1517,18 @@ This file tracks performance and evolution of the AI agent during the migration 
 - **Verification**: All 931 tests pass; build successful; typecheck clean.
 - **Impact**: Hook now has unit test coverage; ensures title auto-generation logic correctness.
 
+
+## Cycle 75 - Task: Cleanup unused code in InfoPanel
+- **Timestamp**: 2026-07-01T09:30:00+07:00
+- **Type**: Code Quality (D - Debt)
+- **Priority**: MEDIUM (lint cleanup)
+- **Duration**: 15 minutes
+- **Status**: ✅ Success
+- **Files Modified**:
+  - src/app/(app)/matters/[id]/_components/info-panel.tsx (removed unused finance prop, dead variables)
+  - src/app/(app)/matters/[id]/_components/matter-detail-tabs.tsx (removed finance prop pass-through)
+- **Impact**: Reduced lint warnings by 6; improved maintainability.
+- **Tests**: 931 passing
+- **Build**: ✅ Success
+- **Typecheck**: ✅ Clean
+

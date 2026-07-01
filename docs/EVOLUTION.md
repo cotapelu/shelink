@@ -525,3 +525,10 @@ Current: **85/100** → **87/100** (+2)
 - **Coverage**: Maintained >99% stmts, >94% branches
 - **Impact**: Hook testability verified; reduces risk of title generation bugs.
 
+
+## Cycle 75 - Cleanup unused variables in InfoPanel
+- **Type**: Code Quality (D)
+- **Status**: ✅ Success
+- **Impact**: Removed dead code, reduced warnings, improved clarity.
+- **Refactor**: intake-sheet.tsx reduced to ~1570 lines.
+
