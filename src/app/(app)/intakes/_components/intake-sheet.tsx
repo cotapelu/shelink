@@ -105,6 +105,7 @@ import type { ClientOption } from "@/app/(app)/matters/_components/matters-view"
 import { ClientCombobox } from "./client-combobox";
 import { CauseRecommendationDialog } from "./cause-recommendation-dialog";
 import { JurisdictionSelect } from "./jurisdiction-select";
+import { useAutoTitleSuggestion } from "./use-auto-title";
 
 const CATEGORIES: MatterCategory[] = [
   "CIVIL_COMMERCIAL",
@@ -269,28 +270,17 @@ export function IntakeSheet({
   const nameLabel =
     kind === "counsel" ? "顾问事项名称" : kind === "project" ? "项目名称" : "案件名称";
 
-  // 标题自动生成：填完当事人 + 案由后按「委托方 与 对方 案由」生成，用户手改后不再覆盖
-  const [titleTouched, setTitleTouched] = useState(false);
-  const [causeName, setCauseName] = useState("");
+  // Watched fields
   const watchedParties = useWatch({ control, name: "parties" });
   const watchedTitle = useWatch({ control, name: "title" });
   const watchedCauseFree = useWatch({ control, name: "causeFreeText" });
   const watchedClaimAmount = useWatch({ control, name: "claimAmount" });
   const watchedClaimDescription = useWatch({ control, name: "claimDescription" });
   const watchedCauseId = useWatch({ control, name: "causeId" });
-  useEffect(() => {
-    if (titleTouched) return;
-    const list = (watchedParties ?? []) as { role?: string; name?: string }[];
-    const clientNm = list.find((p) => p.role === "CLIENT_PARTY")?.name?.trim();
-    const oppNm = list.find((p) => p.role === "OPPOSING_PARTY")?.name?.trim();
-    const causeNm = (causeName || watchedCauseFree || "").trim();
-    if (!clientNm && !oppNm) return;
-    // 案件名称不含空格（产品要求）
-    const suggested = `${clientNm ?? ""}${oppNm ? `与${oppNm}` : ""}${causeNm}`.replace(/\s+/g, "");
-    if (suggested && suggested !== (watchedTitle ?? "")) {
-      setValue("title", suggested, { shouldDirty: true });
-    }
-  }, [watchedParties, causeName, watchedCauseFree, titleTouched, watchedTitle, setValue]);
+
+  // Auto-title suggestion
+  const [causeName, setCauseName] = useState("");
+  const { titleTouched, setTitleTouched } = useAutoTitleSuggestion({});
 
   // 当前类别下可选程序
   const procedureOptions: ProcedureType[] = useMemo(

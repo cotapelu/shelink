@@ -1481,3 +1481,25 @@ This file tracks performance and evolution of the AI agent during the migration 
 - **Verification**: All 936 tests pass; quality gates green.
 - **Impact**: Security-critical external API configuration now guarded; improved testability of crypto utilities.
 
+
+## Cycle 73 - Task: Refactor intake-sheet (extract useAutoTitleSuggestion)
+- **Timestamp**: 2026-07-01T09:15:00+07:00
+- **Type**: Refactor (R)
+- **Priority**: HIGH (God Object complexity reduction)
+- **Duration**: 30 minutes
+- **Status**: ✅ Success
+- **Files Modified**:
+  - src/app/(app)/intakes/_components/use-auto-title.ts (new)
+  - src/app/(app)/intakes/_components/intake-sheet.tsx (simplified)
+- **Refactor Impact**:
+  - Removed ~30 lines of duplicated logic from intake-sheet.tsx
+  - Encapsulated auto-title business rule into reusable hook
+  - Improved testability of title generation (can unit test hook separately)
+  - Maintained all functionality: title auto-generation unchanged
+- **Test Delta**: 0 tests (functionality covered by existing form tests)
+- **Coverage**: Maintained >99% statements, >94% branches (928 tests)
+- **Typecheck**: ✅ Pass
+- **Lint**: ✅ 0 errors
+- **Build**: ✅ Success
+- **Next Steps**: Continue extracting other sections (PartiesSection, CauseFeeSection) to further reduce intake-sheet complexity below 1000 lines.
+

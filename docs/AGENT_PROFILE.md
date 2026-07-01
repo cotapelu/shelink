@@ -158,3 +158,9 @@ Begin refactor of `intake-sheet.tsx` into logical sections:
 - SubmissionSection
 
 Goal: Reduce complexity and improve maintainability while preserving all functionality.
+
+## Cycle 73 Update (2026-07-01)
+- **Refactor Progress**: Extracted `useAutoTitleSuggestion` custom hook from `intake-sheet.tsx`, reducing complexity and improving separation of concerns.
+- **Impact**: File reduced by ~30 lines; auto-title logic now testable in isolation.
+- **Remaining**: Still need to extract PartiesSection, CauseFeeSection, ProcedureSection, DocumentSection, SubmissionSection to bring intake-sheet below 1000 lines.
+

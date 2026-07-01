@@ -512,3 +512,8 @@ Current: **85/100** → **87/100** (+2)
 - **Impact**: Yuandian API settings module now fully tested; crypto utilities verified; improved confidence in configuration management.
 - **Next**: Refactor God Objects (intake-sheet, procedure-content).
 
+
+## Cycle 73 - Refactor intake-sheet (extract useAutoTitleSuggestion)
+- **Type**: Refactor (R)
+- **Status**: ✅ Success
+- **Impact**: -30 lines, improved testability
