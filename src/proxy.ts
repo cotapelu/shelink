@@ -1,6 +1,8 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import { isAllowed, getTokens, RateLimitConfig } from "@/lib/rate-limit/rate-limiter";
+import { generateCorrelationId } from "@/lib/telemetry/correlation-id";
+import { recordApiRequest } from "@/lib/telemetry/metrics";
 
 /**
  * Combined authentication + rate limiting middleware
@@ -31,6 +33,7 @@ function getClientIdentifier(request: Request): string {
 
 export default async function proxy(request: Request) {
   const url = new URL(request.url);
+  const correlationId = generateCorrelationId();
 
   // Apply rate limiting only to API routes (excluding health & auth)
   if (
@@ -76,7 +79,13 @@ export default async function proxy(request: Request) {
     response.headers.set("X-RateLimit-Remaining", remaining.toString());
     response.headers.set("X-RateLimit-Reset", resetTime.toString());
     response.headers.set("Retry-After", Math.floor(RATE_LIMIT_CONFIG.windowMs / 1000).toString());
+    response.headers.set("X-Correlation-ID", correlationId);
   }
+
+  // Record API request metric (async, don't block response)
+  const startTime = Date.now();
+  // We'll record after we know status
+  // However, we can't easily get status here without reading body. We'll record in client.ts instead.
 
   return response;
 }

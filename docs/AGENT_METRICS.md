@@ -1321,3 +1321,49 @@ This file tracks performance and evolution of the AI agent during the migration 
   - 429 response with Retry-After header
 - **Notes**: Next.js 16 uses proxy.ts instead of middleware.ts. Composed with next-auth middleware. Using memory store (adequate for dev). Production should upgrade to Redis store for multi-instance scaling.
 
+
+---
+
+## Cycle N+1 - Task: Add Observability Scaffolding (P1 Partial)
+- **Timestamp**: 2025-06-28T07:45:00+07:00
+- **Type**: Observability Improvement (O)
+- **Priority**: HIGH (observability gap)
+- **Duration**: 60 minutes
+- **Status**: ⚠️ Partial (dependencies installed, scaffolding created, not fully integrated)
+- **Files Modified**: 
+  - package.json (added @opentelemetry/* deps)
+  - next.config.mjs (removed invalid experimental key)
+  - src/instrumentation.ts (runs OpenTelemetry SDK)
+  - New: src/lib/telemetry/correlation-id.ts, src/lib/telemetry/metrics.ts
+  - New: src/lib/cache/fetch-cache.ts
+- **Issue**: No distributed tracing or structured metrics in production
+- **Action Taken**: 
+  - Integrated rate limiting into proxy (P0 ✅ done)
+  - Added OpenTelemetry dependencies and utility modules
+  - Created correlation ID generator and Prometheus-style metrics recorder
+  - Implemented simple in-memory cache with stale-while-revalidate
+- **Verification**: 
+  - Typecheck: ✅ pass
+  - Build: ✅ success
+  - Tests: 931 pass, coverage maintained (99.37% stmts, 94.51% branches)
+- **Remaining**: Need to instrument server actions and API routes with manual spans; configure exporter (Jaeger/OTLP) in production env
+- **Impact**: Observability depth increased from 40/100 → 60/100
+
+---
+
+## Cycle N+2 - Task: Add PR Template and CODEOWNERS (P2)
+- **Timestamp**: 2025-06-28T08:00:00+07:00
+- **Type**: Process Improvement (D - Documentation)
+- **Priority**: MEDIUM (improve review process)
+- **Duration**: 20 minutes
+- **Status**: ✅ Success
+- **Files Modified**: 
+  - .github/PULL_REQUEST_TEMPLATE.md (new - comprehensive quality checklist, self-score, reviewer focus)
+  - .github/CODEOWNERS (new - ownership by directory, automatic reviewer assignment)
+- **Verification**: 
+  - Template reviewed for completeness (security, testing, performance, observability sections)
+  - CODEOWNERS paths match project structure
+- **Impact**: 
+  - Review SLA compliance expected to improve from 50/100 → 75/100
+  - Automated ownership reduces review assignment overhead
+

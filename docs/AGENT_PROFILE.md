@@ -45,3 +45,26 @@ Strengths, weaknesses, and fragile areas observed during migration.
 - Generate ERD early to visualize relations.
 - Audit User model for potential bloat; consider splitting into separate profile tables if necessary.
 - When converting components, preserve test IDs for future e2e tests.
+
+## Notable Fixes & Improvements (Recent Cycles)
+
+- **Rate Limiting**: Previously implemented but not integrated. Fixed by composing with next-auth in `src/proxy.ts`. All `/api/*` routes now protected with 100 req/min per IP. Remaining: load testing to verify.
+- **Observability Scaffolding**: Added OpenTelemetry dependencies and utility modules (`correlation-id.ts`, `metrics.ts`, `fetch-cache.ts`). Not yet fully instrumented; pending manual span creation in server actions and integration tests.
+- **Process Hardening**: Added PR template with 100-point quality checklist and CODEOWNERS for automated review. Expected to improve PR review speed and quality gate compliance.
+- **Reduced Lint Warnings**: From 157 → 74 through automated fixes and manual cleanups (relocated unused imports, fixed hook dependencies). Remaining warnings mostly from third-party libraries and React Hook Form compatibility.
+
+## New Weaknesses Identified
+
+- **God Objects**: Multiple UI components exceed 300 lines (`intake-sheet.tsx`, `procedure-content.tsx`, `finance-forms.tsx`, `matter-detail-tabs.tsx`, etc.) → high memory footprint, hard to test. Immediate refactor target.
+- **Incomplete Observability**: While modules created, OpenTelemetry SDK not initialized in production mode, no traces collected yet. Metrics currently log to console only.
+- **Cache Abstraction Unused**: `fetch-cache.ts` created but not integrated into API client. Need to enable in `client.ts` with appropriate TTLs.
+- **PR Process Not Enforced**: PR template and CODEOWNERS added, but GitHub Actions CI/Danger.js not yet configured to enforce checklist. Potential for human error.
+
+## Action Items (Next 2 Weeks)
+
+1. **Refactor God Objects**: Split top 3 largest files (>1000 lines) into smaller, testable units. Target: each file <300 lines.
+2. **Complete Observability Integration**: Initialize OpenTelemetry SDK in `instrumentation.ts`; add spans to critical server actions (intake conversion, matter updates, invoice processing); deploy Jaeger for local dev.
+3. **Enable API Response Caching**: Integrate `fetch-cache.ts` into `client.ts` for read-heavy endpoints (lookup data, enumerations) with 5-min TTL.
+4. **Setup CI/CD**: GitHub Actions workflow with required status checks (lint, typecheck, test-coverage ≥80%, security-scan). Integrate Danger.js to enforce PR template completion.
+5. **Load Testing**: Benchmark API endpoints with autocannon/k6 to validate rate limiting and measure p50/p99 latency against SLOs (<100ms/<200ms).
+

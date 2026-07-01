@@ -33,7 +33,7 @@ export async function register() {
   if (process.env.NODE_ENV !== "production") return;
   if (process.env.DISABLE_CRON === "1") return;
 
-  // Chỉ phân tích module path này trong production nodejs runtime
+  // Register cron jobs
   const mod = await import(/* webpackIgnore: true */ "./server/cron/scheduler");
   (mod as { registerCronJobs: () => void }).registerCronJobs();
 }
