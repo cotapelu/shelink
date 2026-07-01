@@ -191,3 +191,9 @@ Goal: Reduce complexity and improve maintainability while preserving all functio
 - **Unused Hook**: Created `use-intake-form-states.ts` (not yet integrated) – preparatory for next intake-sheet refactor phase.
 - **Next**: Integrate `useIntakeFormStates` into `intake-sheet.tsx` to reduce ~20 lines of repetitive `useWatch` calls, then continue extracting sections (PartiesSection, CauseFeeSection) to bring intake-sheet under 1500 lines.
 
+
+## Cycle 78 Update (2026-07-01)
+- **Refactor Progress**: Integrated `useIntakeFormStates` into `intake-sheet.tsx`, replacing 22 `useWatch` calls. File reduced by ~20 lines (now ~1543 lines).
+- **Type Safety**: Hook now provides strongly-typed return values with sensible defaults (category defaults to 'CIVIL_COMMERCIAL').
+- **Next**: Continue section extraction (PartiesSection, CauseFeeSection) to bring intake-sheet below 1500 lines.
+

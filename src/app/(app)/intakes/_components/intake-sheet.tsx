@@ -245,39 +245,41 @@ export function IntakeSheet({
     name: "parties"
   });
 
-  const category = useWatch({ control, name: "category" });
-  const firstProcedureType = useWatch({ control, name: "firstProcedureType" });
-  const clientId = useWatch({ control, name: "clientId" }) ?? "";
-  const feeType = useWatch({ control, name: "feeType" });
-  const ownerUserId = useWatch({ control, name: "ownerUserId" });
-  const coUserIds = useWatch({ control, name: "coUserIds" });
-  const receivedAt = useWatch({ control, name: "receivedAt" });
-  const jurisdiction = useWatch({ control, name: "jurisdiction" }) ?? "";
-  const watchedFirstAgency = useWatch({ control, name: "firstAgency" });
+  // Aggregate all watched fields via custom hook
+  const {
+    category,
+    firstProcedureType,
+    clientId,
+    feeType,
+    ownerUserId,
+    coUserIds,
+    receivedAt,
+    jurisdiction,
+    firstAgency: watchedFirstAgency,
+    barFiling,
+    counterclaim,
+    ourStanding,
+    businessType,
+    serviceStart,
+    serviceEnd,
+    counselType,
+    parties: watchedParties,
+    title: watchedTitle,
+    causeFreeText: watchedCauseFree,
+    claimAmount: watchedClaimAmount,
+    claimDescription: watchedClaimDescription,
+    causeId: watchedCauseId,
+  } = useIntakeFormStates(control);
+
   // 争议解决机构按管辖地匹配
   const agencyOpts = useMemo(() => agencyOptions(jurisdiction), [jurisdiction]);
-
-  // Additional watched fields via useWatch to avoid incompatible-library warnings
-  const barFiling = useWatch({ control, name: "barFiling" });
-  const counterclaim = useWatch({ control, name: "counterclaim" });
-  const ourStanding = useWatch({ control, name: "ourStanding" });
-  const businessType = useWatch({ control, name: "businessType" });
-  const serviceStart = useWatch({ control, name: "serviceStart" });
-  const serviceEnd = useWatch({ control, name: "serviceEnd" });
-  const counselType = useWatch({ control, name: "counselType" });
 
   // v0.31: 案件类别决定表单结构（诉讼/仲裁 vs 非诉/专项 vs 顾问）
   const kind: CategoryKind = matterCategoryKind(category);
   const nameLabel =
     kind === "counsel" ? "顾问事项名称" : kind === "project" ? "项目名称" : "案件名称";
 
-  // Watched fields
-  const watchedParties = useWatch({ control, name: "parties" });
-  const watchedTitle = useWatch({ control, name: "title" });
-  const watchedCauseFree = useWatch({ control, name: "causeFreeText" });
-  const watchedClaimAmount = useWatch({ control, name: "claimAmount" });
-  const watchedClaimDescription = useWatch({ control, name: "claimDescription" });
-  const watchedCauseId = useWatch({ control, name: "causeId" });
+
 
   // Auto-title suggestion
   const [causeName, setCauseName] = useState("");

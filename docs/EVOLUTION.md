@@ -547,3 +547,11 @@ Current: **85/100** → **87/100** (+2)
 - **Impact**: Core observability helper now guarded; better confidence in metrics pipeline.
 - **Refactor Prep**: Created `use-intake-form-states` hook (pending integration) to simplify intake form state management.
 
+
+## Cycle 78 - Refactor: useIntakeFormStates integration
+- **Type**: Refactor (R)
+- **Status**: ✅ Success
+- **Impact**: -20 lines in intake-sheet; centralized form state management; improved type safety.
+- **Tests**: 937 passing; coverage unchanged.
+- **Next**: Extract sections (Parties, Cause/Fee, Procedure, Documents) to further reduce God Object.
+
