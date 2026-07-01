@@ -106,6 +106,7 @@ import { ClientCombobox } from "./client-combobox";
 import { CauseRecommendationDialog } from "./cause-recommendation-dialog";
 import { JurisdictionSelect } from "./jurisdiction-select";
 import { useAutoTitleSuggestion } from "./use-auto-title";
+import { useIntakeFormStates } from "./use-intake-form-states";
 
 const CATEGORIES: MatterCategory[] = [
   "CIVIL_COMMERCIAL",

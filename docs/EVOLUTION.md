@@ -539,3 +539,11 @@ Current: **85/100** → **87/100** (+2)
 - **Impact**: Corrected import path; maintains type safety.
 - **Tests**: 931 passing.
 
+
+## Cycle 77 - Test coverage for server-metrics
+- **Type**: Testing (O)
+- **Status**: ✅ Success
+- **Test Delta**: +6 (937 total)
+- **Impact**: Core observability helper now guarded; better confidence in metrics pipeline.
+- **Refactor Prep**: Created `use-intake-form-states` hook (pending integration) to simplify intake form state management.
+

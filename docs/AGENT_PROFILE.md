@@ -184,3 +184,10 @@ Goal: Reduce complexity and improve maintainability while preserving all functio
 - **Test Suite**: 931 passing; coverage >99% stmt, >94% branch.
 - **Next**: Continue God Object refactor (intake-sheet, procedure-content, export-xlsx, finance-forms).
 
+
+## Cycle 77 Update (2026-07-01)
+- **Observability Testing**: Added 6 unit tests for `server-metrics.ts` covering `withMetrics` success/error paths and `recordActionEvent`. Strengthens reliability of metrics collection.
+- **Test Count**: 937 passing.
+- **Unused Hook**: Created `use-intake-form-states.ts` (not yet integrated) – preparatory for next intake-sheet refactor phase.
+- **Next**: Integrate `useIntakeFormStates` into `intake-sheet.tsx` to reduce ~20 lines of repetitive `useWatch` calls, then continue extracting sections (PartiesSection, CauseFeeSection) to bring intake-sheet under 1500 lines.
+
