@@ -17,7 +17,7 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
-import { ApiError, PaginationParams, PaginatedResponse } from './index';
+import { ApiError, PaginationParams } from './index';
 
 export interface QueryParams extends PaginationParams {
   search?: string;
