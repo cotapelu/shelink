@@ -1503,3 +1503,17 @@ This file tracks performance and evolution of the AI agent during the migration 
 - **Build**: ✅ Success
 - **Next Steps**: Continue extracting other sections (PartiesSection, CauseFeeSection) to further reduce intake-sheet complexity below 1000 lines.
 
+
+## Cycle 74 - Task: Unit test for useAutoTitleSuggestion hook
+- **Timestamp**: 2026-07-01T09:05:00+07:00
+- **Type**: Testing (T)
+- **Priority**: HIGH (test extracted hook)
+- **Duration**: 20 minutes
+- **Status**: ✅ Success
+- **Files Modified**:
+  - src/tests/app/(app)/intakes/_components/use-auto-title.test.tsx (new, 3 tests)
+- **Test Delta**: +3 tests (total 931)
+- **Coverage**: Maintained >99% statements, >94% branches
+- **Verification**: All 931 tests pass; build successful; typecheck clean.
+- **Impact**: Hook now has unit test coverage; ensures title auto-generation logic correctness.
+

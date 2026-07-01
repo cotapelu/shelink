@@ -164,3 +164,9 @@ Goal: Reduce complexity and improve maintainability while preserving all functio
 - **Impact**: File reduced by ~30 lines; auto-title logic now testable in isolation.
 - **Remaining**: Still need to extract PartiesSection, CauseFeeSection, ProcedureSection, DocumentSection, SubmissionSection to bring intake-sheet below 1000 lines.
 
+
+## Cycle 74 Update (2026-07-01)
+- **Test Coverage**: Added unit tests for `useAutoTitleSuggestion` hook (3 tests).
+- **Total Tests**: 931 passing.
+- **Refactor Progress**: intake-sheet.tsx reduced by ~30 lines via hook extraction.
+

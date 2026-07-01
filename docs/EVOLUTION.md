@@ -517,3 +517,11 @@ Current: **85/100** → **87/100** (+2)
 - **Type**: Refactor (R)
 - **Status**: ✅ Success
 - **Impact**: -30 lines, improved testability
+
+## Cycle 74 - Unit test for useAutoTitleSuggestion
+- **Type**: Testing (T)
+- **Status**: ✅ Success
+- **Test Delta**: +3 tests (total 931)
+- **Coverage**: Maintained >99% stmts, >94% branches
+- **Impact**: Hook testability verified; reduces risk of title generation bugs.
+
