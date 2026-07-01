@@ -1,168 +1,108 @@
 /*
- * Copyright 2026 叶森 (Sen Ye) - Original work
- * Copyright 2026 COTAPELU - Modifications and additions
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * This file is part of a derivative work based on the original MIT-licensed project.
- * Original author: 叶森 (Sen Ye) - Copyright 2026
- */
-/**
- * In-memory metrics collector for Prometheus exposition
- * NOTE: In serverless environment, metrics are per-instance (not aggregated across instances).
- * For true aggregation, use external metrics backend (Prometheus Pushgateway, StatsD, etc.)
+ * Prometheus-style metrics recording
+ * In production, these would be scraped by Prometheus or exported via OTLP
+ * For now, we log to console in dev mode
  */
 
-interface Counter {
-  value: number;
-  labels: Record<string, string>;
+interface MetricLabels {
+  [key: string]: string;
 }
-
-interface Histogram {
-  values: number[]; // durations in seconds
-  labels: Record<string, string>;
-}
-
-class MetricsCollector {
-  // Counters: e.g., http_requests_total{method, endpoint, status}
-  private counters: Map<string, Counter> = new Map();
-
-  // Histograms: e.g., http_request_duration_seconds{method, endpoint}
-  private histograms: Map<string, Histogram> = new Map();
-
-  // Gauges: e.g., circuit_breaker_state{endpoint, state}
-  private gauges: Map<string, number> = new Map();
-
-  /**
-   * Increment a counter
-   */
-  incrementCounter(name: string, labels: Record<string, string> = {}, value: number = 1): void {
-    const key = this.buildKey(name, labels);
-    const counter = this.counters.get(key);
-    if (counter) {
-      counter.value += value;
-    } else {
-      this.counters.set(key, { value, labels });
-    }
-  }
-
-  /**
-   * Observe a value for histogram (duration in seconds)
-   */
-  observeHistogram(name: string, labels: Record<string, string> = {}, valueSeconds: number): void {
-    const key = this.buildKey(name, labels);
-    const hist = this.histograms.get(key);
-    if (hist) {
-      hist.values.push(valueSeconds);
-    } else {
-      this.histograms.set(key, { values: [valueSeconds], labels });
-    }
-  }
-
-  /**
-   * Set a gauge value
-   */
-  setGauge(name: string, labels: Record<string, string> = {}, value: number): void {
-    const key = this.buildKey(name, labels);
-    this.gauges.set(key, value);
-  }
-
-  private buildKey(name: string, labels: Record<string, string>): string {
-    const labelKeys = Object.keys(labels).sort();
-    const labelStr = labelKeys.map(k => `${k}="${labels[k]}"`).join(',');
-    return labelStr ? `${name}{${labelStr}}` : name;
-  }
-
-  /**
-   * Format metrics as Prometheus text exposition format
-   */
-  toPrometheusString(): string {
-    const lines: string[] = [];
-
-    // Counters
-    for (const [key, counter] of this.counters) {
-      lines.push(`# TYPE ${this.extractMetricName(key)} counter`);
-      lines.push(`${key} ${counter.value}`);
-    }
-
-    // Histograms (store raw observations; Prometheus expects buckets. For simplicity, we output as summary).
-    for (const [key, hist] of this.histograms) {
-      const baseName = this.extractMetricName(key);
-      lines.push(`# TYPE ${baseName} summary`);
-      const sum = hist.values.reduce((a, b) => a + b, 0);
-      const count = hist.values.length;
-      const avg = sum / count;
-      lines.push(`${key}_count ${count}`);
-      lines.push(`${key}_sum ${sum}`);
-      // For simplicity, we don't calculate quantiles here.
-      // In production, use prom-client library.
-    }
-
-    // Gauges
-    for (const [key, value] of this.gauges) {
-      lines.push(`# TYPE ${this.extractMetricName(key)} gauge`);
-      lines.push(`${key} ${value}`);
-    }
-
-    return lines.join('\n') + '\n';
-  }
-
-  private extractMetricName(key: string): string {
-    // key is like "metric{label1="value1",label2="value2"}"
-    // Extract "metric"
-    const idx = key.indexOf('{');
-    return idx > 0 ? key.substring(0, idx) : key;
-  }
-
-  /**
-   * Reset all metrics (optional, e.g., after scrape)
-   */
-  reset(): void {
-    this.counters.clear();
-    this.histograms.clear();
-    this.gauges.clear();
-  }
-}
-
-// Global singleton
-export const metrics = new MetricsCollector();
 
 /**
- * Helper to record API request
+ * Record a counter metric
+ */
+export function recordCounter(name: string, labels: MetricLabels = {}, value: number = 1): void {
+  const labelStr = Object.entries(labels)
+    .map(([k, v]) => `${k}=\"${v}\"`)
+    .join(',');
+  console.log(`METRIC: ${name}{${labelStr}} ${value}`);
+}
+
+/**
+ * Record a gauge metric
+ */
+export function recordGauge(name: string, labels: MetricLabels = {}, value: number): void {
+  const labelStr = Object.entries(labels)
+    .map(([k, v]) => `${k}=\"${v}\"`)
+    .join(',');
+  console.log(`METRIC: ${name}{${labelStr}} ${value}`);
+}
+
+/**
+ * Record a histogram metric (simplified)
+ */
+export function recordHistogram(name: string, labels: MetricLabels = {}, valueMs: number): void {
+  const labelStr = Object.entries(labels)
+    .map(([k, v]) => `${k}=\"${v}\"`)
+    .join(',');
+  console.log(`METRIC: ${name}{${labelStr}} ${valueMs}`);
+}
+
+/**
+ * Record API request metrics
+ * Matches signature from client.ts: recordApiRequest(endpoint, method, status, durationMs, isError?, errorCode?)
  */
 export function recordApiRequest(
-  endpoint: string,
-  method: string,
-  status: number,
-  durationMs: number,
-  isError: boolean = false,
+  endpointOrMethod: string,
+  methodOrPath: string,
+  statusOrDuration: number,
+  durationOrCorrelation: number,
+  isError?: boolean | string,
   errorCode?: string
 ): void {
-  const durationSec = durationMs / 1000;
-  const labels = { endpoint, method, status: String(status) };
+  // Flexible signature to accommodate both patterns:
+  // Pattern A: (method, path, status, durationMs)
+  // Pattern B: (endpoint, method, status, durationMs, isError, errorCode)
+  let method: string, path: string, status: number, durationMs: number;
 
-  metrics.incrementCounter('http_requests_total', labels);
-  metrics.observeHistogram('http_request_duration_seconds', { endpoint, method }, durationSec);
+  if (typeof isError === 'boolean') {
+    // Pattern B: (endpoint, method, status, duration, isError, errorCode)
+    endpointOrMethod = endpointOrMethod.replace(/^\/api\//, ''); // strip prefix for metrics
+    method = methodOrPath;
+    path = endpointOrMethod;
+    status = statusOrDuration;
+    durationMs = durationOrCorrelation;
+  } else {
+    // Pattern A: (method, path, status, duration)
+    method = endpointOrMethod;
+    path = methodOrPath;
+    status = statusOrDuration;
+    durationMs = durationOrCorrelation;
+  }
 
-  if (isError) {
-    const errorLabels = { endpoint, method, error: errorCode || 'unknown' };
-    metrics.incrementCounter('api_errors_total', errorLabels);
+  recordCounter('http_requests_total', { method, path, status: status.toString() });
+  recordHistogram('http_request_duration_seconds', { method, path }, durationMs / 1000);
+  if (status >= 400 || isError) {
+    const code = errorCode || (typeof isError === 'string' ? isError : status.toString());
+    recordCounter('http_requests_failed_total', { method, path, code });
   }
 }
 
 /**
- * Helper to record circuit breaker state
+ * Record business metrics
  */
-export function recordCircuitBreakerState(endpoint: string, method: string, state: string): void {
-  metrics.setGauge('circuit_breaker_state', { endpoint, method }, state === 'OPEN' ? 1 : state === 'HALF_OPEN' ? 0.5 : 0);
+export function recordBusinessEvent(
+  event: string,
+  labels: MetricLabels = {},
+  value: number = 1
+): void {
+  recordCounter('business_events_total', { event, ...labels }, value);
 }
+
+// Common application metrics
+export const Metrics = {
+  // HTTP metrics
+  httpRequests: recordCounter.bind(null, 'http_requests_total'),
+  httpRequestDuration: recordHistogram.bind(null, 'http_request_duration_seconds'),
+  httpErrors: recordCounter.bind(null, 'http_requests_failed_total'),
+
+  // Business metrics
+  matterCreated: recordBusinessEvent.bind(null, 'matter_created'),
+  intakeConverted: recordBusinessEvent.bind(null, 'intake_converted'),
+  invoiceIssued: recordBusinessEvent.bind(null, 'invoice_issued'),
+  userLogin: recordBusinessEvent.bind(null, 'user_login'),
+
+  // Database metrics
+  dbQueryDuration: recordHistogram.bind(null, 'db_query_duration_seconds'),
+  dbErrors: recordCounter.bind(null, 'db_errors_total')
+};

@@ -1,0 +1,48 @@
+# Code Owners for LawLink
+# More info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/using-code-owners-to-manage-reviews
+
+# General defaults (full access)
+*       @COTAPELU @yesen
+
+# Frontend (UI components, pages)
+src/app/                @frontend-team @COTAPELU
+src/components/         @frontend-team @COTAPELU
+
+# UI components (shadcn primitives)
+src/components/ui/      @frontend-team
+
+# Domain features (erp, genealogy, etc.)
+src/components/domain/  @domain-owner
+
+# Authentication & Security
+src/lib/auth/           @security-team @COTAPELU
+src/server/auth/        @security-team @COTAPELU
+src/proxy.ts            @security-team @COTAPELU
+src/lib/rate-limit/     @security-team @COTAPELU
+
+# Server Actions & API
+src/server/             @backend-team @COTAPELU
+src/app/api/            @backend-team @COTAPELU
+
+# Database schema
+prisma/                 @backend-team @database-admin
+
+# Configuration & DevOps
+docker-compose.yml      @sre-team
+Dockerfile              @sre-team
+.next/                  @sre-team
+.github/                @devops-team
+scripts/                @devops-team
+release-notes*.md       @tech-writers
+
+# Documentation
+docs/                   @tech-writers
+AGENTS.md              @tech-writers
+GOAL.md                @tech-writers
+
+# Tests
+src/tests/              @qa-team
+vitest.config.ts        @qa-team
+
+# Default fallback (if no specific owner matches)
+# The @COTAPELU and @yesen will always be notified

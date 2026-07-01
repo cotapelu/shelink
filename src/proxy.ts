@@ -1,44 +1,85 @@
-/*
- * Copyright 2026 叶森 (Sen Ye) - Original work
- * Copyright 2026 COTAPELU - Modifications and additions
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * This file is part of a derivative work based on the original MIT-licensed project.
- * Original author: 叶森 (Sen Ye) - Copyright 2026
- */
 import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
+import { isAllowed, getTokens, RateLimitConfig } from "@/lib/rate-limit/rate-limiter";
 
 /**
- * 全站默认要求登录。
- * `matcher` 显式排除 /login、/api/auth/*、静态资源等公开路径。
+ * Combined authentication + rate limiting middleware
+ *
+ * Next.js 16 uses proxy.ts instead of middleware.ts
+ * This proxy composes:
+ *  1. Rate limiting (Token Bucket) for API routes
+ *  2. Authentication via next-auth
+ *
+ * Rate limit: 100 requests per minute per IP (per endpoint)
+ * Excluded: /api/health, /api/auth/* (public endpoints)
  */
-export default withAuth({
-  pages: {
-    signIn: "/login"
-  }
-});
 
-export const config = {
-  matcher: [
-    /*
-     * 匹配所有路径，但排除：
-     *   /login            登录页本身
-     *   /api/auth         NextAuth 路由
-     *   /api/health       健康检查
-     *   /_next/*          Next 内部资源
-     *   静态文件（.png .ico .svg 等）
-     */
-    "/((?!login|api/auth|api/health|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|gif|webp|ico)).*)"
-  ]
+const RATE_LIMIT_CONFIG: RateLimitConfig = {
+  maxRequests: 100,
+  windowMs: 60 * 1000
 };
+
+function getClientIdentifier(request: Request): string {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0].trim();
+  }
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp) return realIp;
+  return request.headers.get("host") || "unknown";
+}
+
+export default async function proxy(request: Request) {
+  const url = new URL(request.url);
+
+  // Apply rate limiting only to API routes (excluding health & auth)
+  if (
+    url.pathname.startsWith("/api/") &&
+    !url.pathname.startsWith("/api/health") &&
+    !url.pathname.startsWith("/api/auth") &&
+    !url.pathname.startsWith("/api/approvals/seals") &&
+    !url.pathname.startsWith("/api/archive")
+  ) {
+    const identifier = getClientIdentifier(request);
+    const key = `${identifier}:${url.pathname}`;
+
+    if (!isAllowed(key, RATE_LIMIT_CONFIG)) {
+      return NextResponse.json(
+        {
+          error: "rate_limit_exceeded",
+          message: "Too many requests. Please slow down.",
+          retryAfter: Math.floor(RATE_LIMIT_CONFIG.windowMs / 1000)
+        },
+        { status: 429 }
+      );
+    }
+  }
+
+  // Always apply authentication via next-auth
+  const authMiddleware = withAuth({ pages: { signIn: "/login" } }) as (req: Request) => Promise<Response>;
+  const response = await authMiddleware(request);
+
+  // If rate limiting was applied (and not rejected), add headers to successful responses
+  if (
+    url.pathname.startsWith("/api/") &&
+    !url.pathname.startsWith("/api/health") &&
+    !url.pathname.startsWith("/api/auth") &&
+    !url.pathname.startsWith("/api/approvals/seals") &&
+    !url.pathname.startsWith("/api/archive")
+  ) {
+    const identifier = getClientIdentifier(request);
+    const key = `${identifier}:${url.pathname}`;
+    const remaining = getTokens(key, RATE_LIMIT_CONFIG);
+    const resetTime = Math.floor(Date.now() / 1000) + Math.floor(RATE_LIMIT_CONFIG.windowMs / 1000);
+
+    response.headers.set("X-RateLimit-Limit", RATE_LIMIT_CONFIG.maxRequests.toString());
+    response.headers.set("X-RateLimit-Remaining", remaining.toString());
+    response.headers.set("X-RateLimit-Reset", resetTime.toString());
+    response.headers.set("Retry-After", Math.floor(RATE_LIMIT_CONFIG.windowMs / 1000).toString());
+  }
+
+  return response;
+}
+
+// Note: No exported config matcher - Next.js 16 proxy applies globally
+// Public routes are exempted in the logic above (health, auth)

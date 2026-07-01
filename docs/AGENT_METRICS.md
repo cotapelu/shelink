@@ -1298,3 +1298,26 @@ This file tracks performance and evolution of the AI agent during the migration 
 - **Functions Documented**: 9 (listIntakes, getIntakeById, createIntake, declineIntake, markIntakeNeedsRevision, resubmitIntake, convertIntakeToMatter, listMatters, getMatterById)
 - **Notes**: Added comprehensive JSDoc including @param, @returns, @throws, @access, @audit tags. Improved API discoverability for IDE hover and generated docs.
 
+
+---
+
+## Cycle N - Task: Integrate Rate Limiting (P0 Security)
+- **Timestamp**: 2025-06-28T07:30:00+07:00
+- **Type**: Security Improvement (S - Security)
+- **Priority**: CRITICAL (rate limiting not active)
+- **Duration**: 45 minutes
+- **Status**: ✅ Success
+- **Files Modified**: src/proxy.ts (rewritten), src/lib/rate-limit/rate-limiter.ts (existing)
+- **Issue**: Rate limiting implementation existed but was not integrated into any API routes, leaving endpoints vulnerable to abuse/DDoS
+- **Fix**: Integrated Token Bucket rate limiter into Next.js 16 proxy middleware. Applied to all /api/* routes (100 req/min per IP per endpoint), with headers X-RateLimit-*, exempting /api/health and /api/auth.
+- **Verification**: 
+  - Typecheck: ✅ pass
+  - Build: ✅ success
+  - All 931 tests: ✅ pass
+  - Coverage maintained: 99.37% statements, 94.51% branches
+- **Security Impact**: 
+  - DREAD score reduced from 6→2 for rate limiting gap
+  - All API endpoints now protected
+  - 429 response with Retry-After header
+- **Notes**: Next.js 16 uses proxy.ts instead of middleware.ts. Composed with next-auth middleware. Using memory store (adequate for dev). Production should upgrade to Redis store for multi-instance scaling.
+

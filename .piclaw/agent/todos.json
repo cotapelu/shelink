@@ -1,39 +1,7 @@
 {
   "version": 1,
-  "phases": [
-    {
-      "id": "phase-1",
-      "name": "Cycle 73 - Coverage Push",
-      "tasks": [
-        {
-          "id": "task-1",
-          "content": "Increase default-folders.ts branch coverage from 48% to >85%",
-          "status": "in_progress"
-        },
-        {
-          "id": "task-2",
-          "content": "Increase yuandian/client.ts branch coverage to >92%",
-          "status": "pending"
-        },
-        {
-          "id": "task-3",
-          "content": "Fix react-hooks warnings in intake-sheet.tsx",
-          "status": "pending"
-        },
-        {
-          "id": "task-4",
-          "content": "Add JSDoc for matters/actions.ts public functions",
-          "status": "pending"
-        },
-        {
-          "id": "task-5",
-          "content": "Retry npm outdated and plan dependency updates",
-          "status": "pending"
-        }
-      ]
-    }
-  ],
-  "nextTaskId": 6,
-  "nextPhaseId": 2,
-  "updatedAt": "2026-06-30T08:59:00.126Z"
+  "phases": [],
+  "nextTaskId": 1,
+  "nextPhaseId": 1,
+  "updatedAt": "2026-07-01T00:08:31.091Z"
 }

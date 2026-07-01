@@ -11,7 +11,9 @@ const nextConfig = {
     serverActions: {
       // 材料上传需要更大的 body 限制（默认 1MB）
       bodySizeLimit: "25mb"
-    }
+    },
+    // OpenTelemetry instrumentation hook
+    instrumentationHook: true
   }
 };
 
