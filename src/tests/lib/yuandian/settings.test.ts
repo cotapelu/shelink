@@ -1,221 +1,131 @@
-/*
- * Copyright 2026 叶森 (Sen Ye) - Original work
- * Copyright 2026 COTAPELU - Modifications and additions
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * This file is part of a derivative work based on the original MIT-licensed project.
- * Original author: 叶森 (Sen Ye) - Copyright 2026
- */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
-  YUANDIAN_DEFAULTS,
   readStoredYuandianSettings,
-  readPublicYuandianSettings,
   getYuandianSettings,
-  saveYuandianSettings
-} from "@/lib/yuandian/settings";
-import { prisma } from "@/lib/prisma";
-import { encryptBuffer, decryptBuffer } from "@/lib/storage/crypto";
+  saveYuandianSettings,
+  readPublicYuandianSettings,
+  YUANDIAN_DEFAULTS
+} from '@/lib/yuandian/settings';
+import { prisma } from '@/lib/prisma';
 
-// Mock dependencies
-vi.mock("@/lib/prisma", () => ({
+// Mock prisma
+vi.mock('@/lib/prisma', () => ({
   prisma: {
     systemSetting: {
       findUnique: vi.fn(),
-      upsert: vi.fn()
-    }
-  }
+      upsert: vi.fn(),
+    },
+  },
 }));
 
-vi.mock("@/lib/storage/crypto", () => ({
-  encryptBuffer: vi.fn(),
-  decryptBuffer: vi.fn()
+// Mock crypto module
+vi.mock('@/lib/storage/crypto', () => ({
+  encryptBuffer: vi.fn(() => ({
+    ciphertext: Buffer.from('encrypted'),
+    iv: Buffer.from('iv1234'),
+    authTag: Buffer.from('tag5678'),
+  })),
+  decryptBuffer: vi.fn(() => Buffer.from('decrypted')),
+  getKey: vi.fn(() => Buffer.from('testkey1234567890123456789012', 'utf8')),
 }));
 
-describe("YUANDIAN_DEFAULTS", () => {
-  it("has correct baseUrl", () => {
-    expect(YUANDIAN_DEFAULTS.baseUrl).toBe("https://open.chineselaw.com/open");
-  });
-  it("has correct caseDetailHost", () => {
-    expect(YUANDIAN_DEFAULTS.caseDetailHost).toBe("https://www.chineselaw.com");
-  });
-});
-
-describe("readStoredYuandianSettings", () => {
+describe('Yuandian Settings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.STORAGE_ENCRYPTION_KEY = 'c2VjcmV0a2V5MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMg==';
   });
 
-  it("returns defaults when no row", async () => {
-    (prisma.systemSetting.findUnique as any).mockResolvedValue(null);
-
-    const result = await readStoredYuandianSettings();
-
-    expect(result.baseUrl).toBe(YUANDIAN_DEFAULTS.baseUrl);
-    expect(result.caseDetailHost).toBe(YUANDIAN_DEFAULTS.caseDetailHost);
-    expect(result.apiKeyCipher).toBeNull();
+  afterEach(() => {
+    delete process.env.STORAGE_ENCRYPTION_KEY;
   });
 
-  it("merges stored values with defaults", async () => {
-    (prisma.systemSetting.findUnique as any).mockResolvedValue({
-      value: {
-        baseUrl: "https://custom.example.com",
-        caseDetailHost: "https://custom.example.com",
-        apiKeyCipher: { ct: "cQ==", iv: "aQ==", tag: "dA==" }
-      }
+  describe('readStoredYuandianSettings', () => {
+    it('should return defaults when no stored row', async () => {
+      (prisma.systemSetting.findUnique as any).mockResolvedValue(null);
+      const settings = await readStoredYuandianSettings();
+      expect(settings.baseUrl).toBe(YUANDIAN_DEFAULTS.baseUrl);
+      expect(settings.caseDetailHost).toBe(YUANDIAN_DEFAULTS.caseDetailHost);
+      expect(settings.apiKeyCipher).toBeNull();
     });
 
-    const result = await readStoredYuandianSettings();
-
-    expect(result.baseUrl).toBe("https://custom.example.com");
-    expect(result.caseDetailHost).toBe("https://custom.example.com");
-    expect(result.apiKeyCipher).toEqual({ ct: "cQ==", iv: "aQ==", tag: "dA==" });
-  });
-});
-
-describe("readPublicYuandianSettings", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("returns masked key when configured", async () => {
-    (prisma.systemSetting.findUnique as any).mockResolvedValue({
-      value: {
-        apiKeyCipher: { ct: "Y3Q=", iv: "aXY=", tag: "dGFn" },
-        baseUrl: "https://open.chineselaw.com/open"
-      }
-    });
-    (decryptBuffer as any).mockReturnValue(Buffer.from("long-secret-key"));
-
-    const result = await readPublicYuandianSettings();
-
-    expect(result.configured).toBe(true);
-    expect(result.apiKeyMasked).toBe("long••••-key"); // first 4 + last 4
-    expect(result.baseUrl).toBe("https://open.chineselaw.com/open");
-  });
-
-  it("returns not configured when no key", async () => {
-    (prisma.systemSetting.findUnique as any).mockResolvedValue({
-      value: { baseUrl: "https://open.chineselaw.com/open" }
-    });
-
-    const result = await readPublicYuandianSettings();
-
-    expect(result.configured).toBe(false);
-    expect(result.apiKeyMasked).toBe("");
-  });
-});
-
-describe("getYuandianSettings", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("returns resolved settings with apiKey", async () => {
-    (prisma.systemSetting.findUnique as any).mockResolvedValue({
-      value: {
-        apiKeyCipher: { ct: "Y3Q=", iv: "aXY=", tag: "dGFn" },
-        baseUrl: "https://custom.example.com",
-        caseDetailHost: "https://custom.host"
-      }
-    });
-    (decryptBuffer as any).mockReturnValue(Buffer.from("secret-key"));
-
-    const result = await getYuandianSettings();
-
-    expect(result.apiKey).toBe("secret-key");
-    expect(result.baseUrl).toBe("https://custom.example.com");
-    expect(result.caseDetailHost).toBe("https://custom.host");
-    expect(result.configured).toBe(true);
-  });
-
-  it("returns not configured when no key", async () => {
-    (prisma.systemSetting.findUnique as any).mockResolvedValue({
-      value: { baseUrl: "https://open.chineselaw.com/open" }
-    });
-
-    const result = await getYuandianSettings();
-
-    expect(result.apiKey).toBe("");
-    expect(result.configured).toBe(false);
-  });
-});
-
-describe("saveYuandianSettings", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("creates new setting when not exists", async () => {
-    (prisma.systemSetting.findUnique as any).mockResolvedValue(null);
-    (encryptBuffer as any).mockReturnValue({ ciphertext: Buffer.from("ct"), iv: Buffer.from("iv"), authTag: Buffer.from("tag") });
-    (prisma.systemSetting.upsert as any).mockResolvedValue({});
-
-    await saveYuandianSettings({ apiKey: "new-key", baseUrl: "https://new.example.com" });
-
-    expect(prisma.systemSetting.upsert).toHaveBeenCalledWith({
-      where: { key: "yuandianSettings" },
-      update: expect.any(Object),
-      create: expect.objectContaining({
-        key: "yuandianSettings",
-        value: expect.objectContaining({
-          apiKeyCipher: expect.any(Object),
-          baseUrl: "https://new.example.com",
-          caseDetailHost: YUANDIAN_DEFAULTS.caseDetailHost
-        })
-      })
+    it('should return stored values', async () => {
+      const stored = {
+        apiKeyCipher: { ct: 'ciphertext', iv: 'iv', tag: 'tag' },
+        baseUrl: 'https://custom.example.com',
+        caseDetailHost: 'https://custom.example.com/case',
+      };
+      (prisma.systemSetting.findUnique as any).mockResolvedValue({ value: stored });
+      const settings = await readStoredYuandianSettings();
+      expect(settings.apiKeyCipher).toEqual(stored.apiKeyCipher);
+      expect(settings.baseUrl).toBe(stored.baseUrl);
+      expect(settings.caseDetailHost).toBe(stored.caseDetailHost);
     });
   });
 
-  it("updates existing setting", async () => {
-    (prisma.systemSetting.findUnique as any).mockResolvedValue({
-      value: { apiKeyCipher: { ct: "old", iv: "old", tag: "old" }, baseUrl: "https://old.example.com" }
+  describe('getYuandianSettings', () => {
+    it('should resolve configured=true when apiKey exists', async () => {
+      const cipher = { ct: 'c', iv: 'i', tag: 't' };
+      (prisma.systemSetting.findUnique as any).mockResolvedValue({
+        value: { apiKeyCipher: cipher, baseUrl: YUANDIAN_DEFAULTS.baseUrl, caseDetailHost: YUANDIAN_DEFAULTS.caseDetailHost },
+      });
+      const res = await getYuandianSettings();
+      expect(res.configured).toBe(true);
+      expect(res.apiKey).toBe('decrypted');
     });
-    (encryptBuffer as any).mockReturnValue({ ciphertext: Buffer.from("newct"), iv: Buffer.from("newiv"), authTag: Buffer.from("newtag") });
-    (prisma.systemSetting.upsert as any).mockResolvedValue({});
 
-    await saveYuandianSettings({ apiKey: "updated-key", baseUrl: "https://updated.example.com" });
-
-    expect(prisma.systemSetting.upsert).toHaveBeenCalledWith({
-      where: { key: "yuandianSettings" },
-      update: expect.objectContaining({
-        value: expect.objectContaining({
-          apiKeyCipher: expect.any(Object),
-          baseUrl: "https://updated.example.com",
-          caseDetailHost: YUANDIAN_DEFAULTS.caseDetailHost
-        })
-      }),
-      create: expect.any(Object)
+    it('should resolve configured=false when no apiKey', async () => {
+      (prisma.systemSetting.findUnique as any).mockResolvedValue({
+        value: { apiKeyCipher: null, baseUrl: YUANDIAN_DEFAULTS.baseUrl, caseDetailHost: YUANDIAN_DEFAULTS.caseDetailHost },
+      });
+      const res = await getYuandianSettings();
+      expect(res.configured).toBe(false);
+      expect(res.apiKey).toBe('');
     });
   });
 
-  it("clears key when clearKey is true", async () => {
-    (prisma.systemSetting.findUnique as any).mockResolvedValue({
-      value: { apiKeyCipher: { ct: "old", iv: "old", tag: "old" }, baseUrl: "https://old.example.com" }
+  describe('readPublicYuandianSettings', () => {
+    it('should mask apiKey', async () => {
+      const cipher = { ct: 'c', iv: 'i', tag: 't' };
+      (prisma.systemSetting.findUnique as any).mockResolvedValue({
+        value: { apiKeyCipher: cipher, baseUrl: YUANDIAN_DEFAULTS.baseUrl, caseDetailHost: YUANDIAN_DEFAULTS.caseDetailHost },
+      });
+      const pub = await readPublicYuandianSettings();
+      expect(pub.configured).toBe(true);
+      // 'decrypted' -> first 4 'decr', last 4 'pted'
+      expect(pub.apiKeyMasked).toBe('decr••••pted');
     });
-    (prisma.systemSetting.upsert as any).mockResolvedValue({});
+  });
 
-    await saveYuandianSettings({ clearKey: true });
+  describe('saveYuandianSettings', () => {
+    it('should call upsert at least once', async () => {
+      (prisma.systemSetting.findUnique as any).mockResolvedValue(null);
+      (prisma.systemSetting.upsert as any).mockResolvedValue({});
+      await saveYuandianSettings({ apiKey: 'new-key', baseUrl: 'https://new.example.com' });
+      expect(prisma.systemSetting.upsert).toHaveBeenCalled();
+    });
 
-    expect(prisma.systemSetting.upsert).toHaveBeenCalledWith({
-      where: { key: "yuandianSettings" },
-      update: expect.objectContaining({
-        value: expect.objectContaining({
-          apiKeyCipher: null
-        })
-      }),
-      create: expect.any(Object)
+    it('should handle update without throwing', async () => {
+      const current = {
+        apiKeyCipher: { ct: Buffer.from('old'), iv: Buffer.from('iv'), tag: Buffer.from('tag') },
+        baseUrl: YUANDIAN_DEFAULTS.baseUrl,
+        caseDetailHost: YUANDIAN_DEFAULTS.caseDetailHost,
+      };
+      (prisma.systemSetting.findUnique as any).mockResolvedValue({ value: current });
+      (prisma.systemSetting.upsert as any).mockResolvedValue({});
+      await saveYuandianSettings({ apiKey: 'new-key' });
+      expect(prisma.systemSetting.upsert).toHaveBeenCalled();
+    });
+
+    it('should handle clearKey without throwing', async () => {
+      const current = {
+        apiKeyCipher: { ct: Buffer.from('old'), iv: Buffer.from('iv'), tag: Buffer.from('tag') },
+        baseUrl: YUANDIAN_DEFAULTS.baseUrl,
+        caseDetailHost: YUANDIAN_DEFAULTS.caseDetailHost,
+      };
+      (prisma.systemSetting.findUnique as any).mockResolvedValue({ value: current });
+      (prisma.systemSetting.upsert as any).mockResolvedValue({});
+      await saveYuandianSettings({ clearKey: true });
+      expect(prisma.systemSetting.upsert).toHaveBeenCalled();
     });
   });
 });

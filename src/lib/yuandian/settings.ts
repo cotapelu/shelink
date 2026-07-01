@@ -47,7 +47,7 @@ export interface ResolvedYuandianSettings {
   configured: boolean;
 }
 
-function encryptKey(plain: string): StoredYuandianSettings["apiKeyCipher"] {
+export function encryptKey(plain: string): StoredYuandianSettings["apiKeyCipher"] {
   if (!plain) return null;
   const enc = encryptBuffer(Buffer.from(plain, "utf-8"));
   return {
@@ -57,7 +57,7 @@ function encryptKey(plain: string): StoredYuandianSettings["apiKeyCipher"] {
   };
 }
 
-function decryptKey(cipher: StoredYuandianSettings["apiKeyCipher"]): string {
+export function decryptKey(cipher: StoredYuandianSettings["apiKeyCipher"]): string {
   if (!cipher) return "";
   const ct = Buffer.from(cipher.ct, "base64");
   return decryptBuffer(ct, cipher.iv, cipher.tag).toString("utf-8");

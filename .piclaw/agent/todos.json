@@ -3,17 +3,62 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Cycle 1 - All Tasks Completed",
+      "name": "Cycle 2 - Refactor intake-sheet God Object",
       "tasks": [
         {
           "id": "task-1",
-          "content": "All quality gates restored: typecheck, lint, test, build passing",
-          "status": "completed"
+          "content": "Analyze intake-sheet.tsx structure and plan component extraction",
+          "status": "in_progress"
+        },
+        {
+          "id": "task-2",
+          "content": "Create ClientSection subcomponent (extract client & contact fields)",
+          "status": "pending"
+        },
+        {
+          "id": "task-3",
+          "content": "Create PartiesSection subcomponent (extract parties table & adder)",
+          "status": "pending"
+        },
+        {
+          "id": "task-4",
+          "content": "Create CauseFeeSection subcomponent (extract cause, fee, claim amount)",
+          "status": "pending"
+        },
+        {
+          "id": "task-5",
+          "content": "Create ProcedureSection subcomponent (extract procedure type & standing)",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
+          "content": "Create DocumentsSection subcomponent (extract file upload)",
+          "status": "pending"
+        },
+        {
+          "id": "task-7",
+          "content": "Create SubmissionSection subcomponent (extract submit buttons & actions)",
+          "status": "pending"
+        },
+        {
+          "id": "task-8",
+          "content": "Update intake-sheet.tsx to compose new sections",
+          "status": "pending"
+        },
+        {
+          "id": "task-9",
+          "content": "Verify typecheck, lint, test, build - quality gates",
+          "status": "pending"
+        },
+        {
+          "id": "task-10",
+          "content": "Update AGENT_METRICS.md and AGENT_PROFILE.md",
+          "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 2,
+  "nextTaskId": 11,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-01T01:27:10.369Z"
+  "updatedAt": "2026-07-01T01:29:59.450Z"
 }
