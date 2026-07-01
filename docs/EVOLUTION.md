@@ -532,3 +532,10 @@ Current: **85/100** → **87/100** (+2)
 - **Impact**: Removed dead code, reduced warnings, improved clarity.
 - **Refactor**: intake-sheet.tsx reduced to ~1570 lines.
 
+
+## Cycle 76 - Fix typecheck error in test
+- **Type**: Violation Fix (Critical)
+- **Status**: ✅ Success
+- **Impact**: Corrected import path; maintains type safety.
+- **Tests**: 931 passing.
+

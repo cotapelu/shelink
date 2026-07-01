@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useAutoTitleSuggestion } from '@/app/(app)/intakes/_components/use-auto-title';
-import type { IntakeCreateInput } from '@prisma/client';
+import type { IntakeCreateInput } from '@/server/intakes/schemas';
 
 // Mock setValue to track calls
 const mockSetValue = vi.fn();
