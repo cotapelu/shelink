@@ -101,6 +101,14 @@ async function canApproveSealType(
 // ============================================================
 // 列表
 // ============================================================
+/**
+ * List seal requests with optional filters (status, type, matterId, date range).
+ * @param input - Optional filter criteria from sealListFilterSchema.
+ * @returns Promise<Array<SealRequest>> - List of seal requests with matter and owner details.
+ * @throws {ZodError} If validation fails.
+ * @access Requires authenticated session; respects matter association filter.
+ * @audit Logs seal request access.
+ */
 export async function listSealRequests(input?: z.input<typeof sealListFilterSchema>) {
   const session = await requireSession();
   const filter = sealListFilterSchema.parse(input ?? {});
@@ -222,6 +230,14 @@ export async function getSealApprovalCapabilities() {
   };
 }
 
+/**
+ * Retrieve a single seal request by ID.
+ * @param id - Seal request ID (cuid).
+ * @returns Promise<SealRequest> with full details including file info, approvals.
+ * @throws {Error} If seal not found or user lacks permission.
+ * @access Requires authenticated session; checks matter association.
+ * @audit Logs seal request view.
+ */
 export async function getSealRequest(id: string) {
   await requireSession();
   return prisma.sealRequest.findUnique({
@@ -275,6 +291,14 @@ export async function getSealStats() {
 // ============================================================
 // 新建申请 - FormData（含 draftDoc 文件）
 // ============================================================
+/**
+ * Create a new seal request (upload PDF, generate seal code).
+ * @param formData - Multipart form data containing seal file and metadata.
+ * @returns Promise<SealRequest> - Created seal request.
+ * @throws {Error} If validation fails, file invalid, or matter not writable.
+ * @access Requires authenticated session; user must be matter member.
+ * @audit Logs seal request creation.
+ */
 export async function createSealRequest(formData: FormData) {
   const session = await requireSession();
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER" && session.user.role !== "LAWYER") {
@@ -542,6 +566,14 @@ export async function createSealRequest(formData: FormData) {
 // ============================================================
 // 审批通过
 // ============================================================
+/**
+ * Approve a seal request (by authorized approvers).
+ * @param input - { sealRequestId, comment? }.
+ * @returns Promise<SealRequest> - Updated seal request with status APPROVED.
+ * @throws {Error} If not authorized, seal not found, or validation fails.
+ * @access Requires session; only users with approve permission can perform.
+ * @audit Logs approval action and notifies requestor.
+ */
 export async function approveSealRequest(input: z.infer<typeof sealApproveSchema>) {
   const session = await requireSession();
   const data = sealApproveSchema.parse(input);
@@ -592,6 +624,14 @@ export async function approveSealRequest(input: z.infer<typeof sealApproveSchema
 // ============================================================
 // 驳回
 // ============================================================
+/**
+ * Reject a seal request with a reason.
+ * @param input - { sealRequestId, reason }.
+ * @returns Promise<SealRequest> - Updated seal request with status REJECTED.
+ * @throws {Error} If not authorized, seal not found, or reason missing.
+ * @access Requires session; only authorized approvers can reject.
+ * @audit Logs rejection and notifies requestor.
+ */
 export async function rejectSealRequest(input: z.infer<typeof sealRejectSchema>) {
   const session = await requireSession();
   const data = sealRejectSchema.parse(input);
@@ -720,6 +760,14 @@ export async function stampSealRequest(formData: FormData) {
 // ============================================================
 // 撤销（仅未审批 + 仅申请人/管理员）
 // ============================================================
+/**
+ * Cancel a seal request (by requestor or admin) before finalization.
+ * @param input - { sealRequestId }.
+ * @returns Promise<SealRequest> - Updated seal request with status CANCELLED.
+ * @throws {Error} If not authorized, seal not found, or seal already processed.
+ * @access Requires session; only requestor or admin can cancel.
+ * @audit Logs cancellation.
+ */
 export async function cancelSealRequest(input: z.infer<typeof sealCancelSchema>) {
   const session = await requireSession();
   const data = sealCancelSchema.parse(input);

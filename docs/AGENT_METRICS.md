@@ -1600,3 +1600,13 @@ This file tracks performance and evolution of the AI agent during the migration 
   - Renamed `wrapper` to `Wrapper` to satisfy react-hooks naming rule.
   - Added eslint-disable for immutability violation (required to mock setValue in test).
   - All quality gates now green.
+
+## [2026-07-01 12:18] Cycle 82 - Task: Add JSDoc for preservation actions
+- **Type**: Documentation (D)
+- **Priority**: LOW
+- **Duration**: ~10 minutes
+- **Status**: ✅ Success
+- **Test Delta**: 0 (933 passing)
+- **Coverage Delta**: 0% (maintained >99% stmt, >94% branch)
+- **Notes**: Added JSDoc for listPreservations and getPreservation. Removed unused test files experimented earlier.
+
