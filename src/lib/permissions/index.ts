@@ -20,14 +20,28 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
-/** ADMIN 或 PRINCIPAL_LAWYER — 管理层，看所有数据 */
+/**
+ * Check if user has manager role (ADMIN or PRINCIPAL_LAWYER).
+ * Managers have full access to all data across the firm.
+ * @param role - User role string
+ * @returns boolean
+ */
 export function isManager(role: string): boolean {
   return role === "ADMIN" || role === "PRINCIPAL_LAWYER";
 }
 
 // ============ QUYỀN TRUY CẬP VỤ ÁN ============
 
-/** Dùng cho list query: trả về Prisma where片段, AND vào where hiện tại */
+/**
+ * Build Prisma where clause for matter list queries based on user role.
+ * - Managers/Finance: return empty object (no restriction)
+ * - Lawyers: see own matters + matters where they are members
+ * - Assistants: see only matters where they are members
+ *
+ * @param userId - User ID
+ * @param role - User role string
+ * @returns Prisma.MatterWhereInput to be AND-ed into query
+ */
 export function matterVisibilityFilter(
   userId: string,
   role: string
@@ -55,7 +69,15 @@ export function matterAssociationFilter(userId: string): Prisma.MatterWhereInput
   };
 }
 
-/** Assertion single access: nếu không thấy hoặc không có quyền, luôn throw "Vụ án không tồn tại" (tránh leak ID) */
+/**
+ * Assert that user can access a specific matter.
+ * Throws "Vụ án không tồn tại" if not found or unauthorized (to avoid ID enumeration).
+ * Managers and FINANCE role can access any non-deleted matter; others must be associated.
+ *
+ * @param userId - User ID
+ * @param role - User role string
+ * @param matterId - Matter ID to check
+ */
 export async function assertCanAccessMatter(
   userId: string,
   role: string,
@@ -80,7 +102,14 @@ export async function assertCanAccessMatter(
   if (!row) throw new Error("Vụ án không tồn tại");
 }
 
-/** Assertion cho operations/association: chỉ cho phép host hoặc member, không open do vai trò quản lý */
+/**
+ * Assert user can associate (link) with a matter.
+ * Only host or members can associate; managers/Principal Lawyers are NOT automatically allowed (must be explicit).
+ *
+ * @param userId - User ID
+ * @param matterId - Matter ID
+ * @throws {Error} If not associated
+ */
 export async function assertCanAssociateMatter(
   userId: string,
   matterId: string
@@ -96,7 +125,14 @@ export async function assertCanAssociateMatter(
   if (!row) throw new Error("Vụ án không tồn tại hoặc không có quyền liên kết");
 }
 
-/** Assertion cho matter handling: chỉ cho phép host hoặc member, không open do vai trò quản lý */
+/**
+ * Assert user can handle (operate on) a matter.
+ * Restricts to host or members; managers/finance must still be explicit members.
+ *
+ * @param userId - User ID
+ * @param matterId - Matter ID
+ * @throws {Error} If cannot handle
+ */
 export async function assertCanHandleMatter(
   userId: string,
   matterId: string
@@ -112,7 +148,15 @@ export async function assertCanHandleMatter(
   if (!row) throw new Error("Vụ án không tồn tại hoặc không có quyền xử lý");
 }
 
-/** Host/Assistant assertion: dùng cho lưu trữ, team, thông tin chính, tạo văn bản... */
+/**
+ * Assert user is a host (owner) or assistant (LEAD/CO_LEAD) of the matter.
+ * Used for critical operations: archive, team management, document creation.
+ *
+ * @param userId - User ID
+ * @param matterId - Matter ID
+ * @param message? - Custom error message
+ * @throws {Error} If not host/assistant
+ */
 export async function assertCanLeadMatter(
   userId: string,
   matterId: string,
@@ -132,7 +176,15 @@ export async function assertCanLeadMatter(
   if (!row) throw new Error(message);
 }
 
-/** Assertion cho current host lawyer: dùng cho thay đổi team, xóa vụ án, các operation level ownership */
+/**
+ * Assert user is the host (owner) of the matter.
+ * Required for ownership-level operations: delete matter, change fee plan, etc.
+ *
+ * @param userId - User ID
+ * @param matterId - Matter ID
+ * @param message? - Custom error message
+ * @throws {Error} If not the owner
+ */
 export async function assertCanOwnMatter(
   userId: string,
   matterId: string,
@@ -149,7 +201,15 @@ export async function assertCanOwnMatter(
   if (!row) throw new Error(message);
 }
 
-/** Assertion modification: chỉ cho phép host hoặc member, không open do vai trò quản lý */
+/**
+ * Assert user can modify matter details (general write permission).
+ * Uses matterAssociationFilter; managers/finance are NOT automatically allowed unless explicit member.
+ *
+ * @param userId - User ID
+ * @param _role - User role (unused, kept for backward compatibility)
+ * @param matterId - Matter ID
+ * @throws {Error} If cannot modify
+ */
 export async function assertCanModifyMatter(
   userId: string,
   _role: string,
