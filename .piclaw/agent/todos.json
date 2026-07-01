@@ -3,62 +3,52 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Cycle 2 - Refactor intake-sheet God Object",
+      "name": "Autonomous Agent Setup & Initial Discovery",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Analyze intake-sheet.tsx structure and plan component extraction",
+          "content": "Create docs/AGENT_METRICS.md with template",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Create ClientSection subcomponent (extract client & contact fields)",
+          "content": "Create docs/AGENT_PROFILE.md with template",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Create PartiesSection subcomponent (extract parties table & adder)",
+          "content": "Create docs/EVOLUTION.md with template",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Create CauseFeeSection subcomponent (extract cause, fee, claim amount)",
+          "content": "Run quality gates (lint, typecheck, test, build) and capture baseline",
           "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "Create ProcedureSection subcomponent (extract procedure type & standing)",
+          "content": "Parse violations and categorize by severity",
           "status": "pending"
         },
         {
           "id": "task-6",
-          "content": "Create DocumentsSection subcomponent (extract file upload)",
+          "content": "Generate initial improvement plan from violations",
           "status": "pending"
         },
         {
           "id": "task-7",
-          "content": "Create SubmissionSection subcomponent (extract submit buttons & actions)",
+          "content": "Perform system audit on existing codebase",
           "status": "pending"
         },
         {
           "id": "task-8",
-          "content": "Update intake-sheet.tsx to compose new sections",
-          "status": "pending"
-        },
-        {
-          "id": "task-9",
-          "content": "Verify typecheck, lint, test, build - quality gates",
-          "status": "pending"
-        },
-        {
-          "id": "task-10",
-          "content": "Update AGENT_METRICS.md and AGENT_PROFILE.md",
+          "content": "Write first evolution cycle metrics to AGENT_METRICS.md",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 11,
+  "nextTaskId": 9,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-01T01:29:59.450Z"
+  "updatedAt": "2026-07-01T09:05:42.658Z"
 }
