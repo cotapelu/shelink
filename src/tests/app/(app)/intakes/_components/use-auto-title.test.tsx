@@ -8,11 +8,12 @@ import type { IntakeCreateInput } from '@/server/intakes/schemas';
 const mockSetValue = vi.fn();
 
 // Wrapper to provide form context
-function wrapper({ children }: { children: React.ReactNode }) {
+function Wrapper({ children }: { children: React.ReactNode }) {
   const methods = useForm<IntakeCreateInput>({
     defaultValues: { title: '' },
   });
   // Inject mock setValue
+  // eslint-disable-next-line react-hooks/immutability -- required to override setValue for testing
   (methods as any).setValue = mockSetValue;
   return <FormProvider {...methods}>{children}</FormProvider>;
 }
@@ -25,7 +26,7 @@ describe('useAutoTitleSuggestion', () => {
   it('should auto-generate title when untouched', () => {
     const { result, rerender } = renderHook(
       () => useAutoTitleSuggestion({}),
-      { wrapper }
+      { wrapper: Wrapper }
     );
 
     // Simulate state changes by rerendering with different props? Actually hook uses internal state and watches.
@@ -37,7 +38,7 @@ describe('useAutoTitleSuggestion', () => {
   it('should set causeName via setCauseName', () => {
     const { result } = renderHook(
       () => useAutoTitleSuggestion({}),
-      { wrapper }
+      { wrapper: Wrapper }
     );
 
     act(() => {
@@ -50,7 +51,7 @@ describe('useAutoTitleSuggestion', () => {
   it('should mark title as touched', () => {
     const { result } = renderHook(
       () => useAutoTitleSuggestion({}),
-      { wrapper }
+      { wrapper: Wrapper }
     );
 
     act(() => {

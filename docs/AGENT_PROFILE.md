@@ -197,3 +197,8 @@ Goal: Reduce complexity and improve maintainability while preserving all functio
 - **Type Safety**: Hook now provides strongly-typed return values with sensible defaults (category defaults to 'CIVIL_COMMERCIAL').
 - **Next**: Continue section extraction (PartiesSection, CauseFeeSection) to bring intake-sheet below 1500 lines.
 
+
+## Cycle 79 Update (2026-07-01)
+- **Documentation**: Improved JSDoc for `useIntakeFormStates` to clarify usage and return types.
+- **Cleanup**: Removed incomplete test file that failed typecheck, keeping repo clean.
+
