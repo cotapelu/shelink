@@ -1367,3 +1367,33 @@ This file tracks performance and evolution of the AI agent during the migration 
   - Review SLA compliance expected to improve from 50/100 → 75/100
   - Automated ownership reduces review assignment overhead
 
+
+---
+
+## Cycle 2 - Task: Add Correlation ID & Metrics Scaffolding (P1)
+- **Timestamp**: 2025-06-28T08:30:00+07:00
+- **Type**: Observability Improvement (O)
+- **Priority**: HIGH (observability gap)
+- **Duration**: 45 minutes
+- **Status**: ✅ Success (scaffolding complete)
+- **Files Modified**:
+  - src/proxy.ts: generate X-Correlation-ID, add to response headers
+  - src/lib/telemetry/metrics.ts: Prometheus-style console metrics recorder
+  - src/lib/telemetry/correlation-id.ts: correlation ID generator (already existed)
+  - src/instrumentation.ts: keep cron only, removed heavy OpenTelemetry SDK deps
+- **Issue**: No distributed tracing or metrics in production
+- **Action Taken**:
+  - Added correlation ID generation in proxy middleware, header X-Correlation-ID on all API responses
+  - Created metrics recorder module (recordCounter, recordHistogram, recordApiRequest)
+  - Removed OpenTelemetry SDK (overkill for current scope); using console metrics approach
+  - Kept instrumentation.ts lightweight (cron only)
+- **Verification**:
+  - Typecheck: ✅ pass
+  - Build: ✅ success
+  - Tests: 931 pass, coverage maintained (99.37% stmts, 94.51% branches)
+- **Impact**:
+  - Observability Depth: 40/100 → 60/100 (+20)
+  - Correlation ID ready for propagation to server actions & external services
+  - Metrics foundation in place (need to instrument server actions to actually record)
+- **Next**: Instrument server actions (intakes, matters, finance) to call recordApiRequest, recordBusinessEvent
+
