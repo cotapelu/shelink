@@ -32,14 +32,12 @@ import { RelatedMattersField } from "./related-matters-field";
 export function InfoPanel({
   matter,
   userOptions,
-  finance,
   contracts,
   canEditMatter,
   canManageRelatedMatters
 }: {
   matter: MatterPayload;
   userOptions: UserOption[];
-  finance: FinancePayload;
   /** v0.43 项1：委托合同 = 收案（审批）阶段上传、绑定本案的文件 */
   contracts: { id: string; name: string }[];
   canEditMatter: boolean;
@@ -70,8 +68,9 @@ export function InfoPanel({
   const client = matter.primaryClient;
   const clientContact = client?.contacts?.[0] ?? null;
   const clientIdNumber = primaryClient?.idNumber ?? null;
-  const clientContactName = clientContact?.name ?? null;
-  const clientPhone = clientContact?.phone ?? client?.phone ?? null;
+  // Unused contact fields kept for future use
+  // const clientContactName = clientContact?.name ?? null;
+  // const clientPhone = clientContact?.phone ?? client?.phone ?? null;
 
   // 其他案件当事人（第三方 / 关联方）；相对方统一在案件程序的程序当事人中展示
   const otherParties = matter.parties
@@ -95,11 +94,6 @@ export function InfoPanel({
     ...matter.linksTo.map((l) => l.matter)
   ].filter((m, i, arr) => arr.findIndex((x) => x.id === m.id) === i);
 
-  // 财务：开票 / 回款
-  const fmtMoney = (n: number) =>
-    n ? `¥${n.toLocaleString()}` : "¥0";
-  const counterclaim = matter.intake?.counterclaim ?? false;
-
   // v0.35: 按案件类别分叉展示（诉讼/仲裁 vs 非诉/专项 vs 顾问）
   const kind = matterCategoryKind(matter.category);
   const period = (s: Date | null, e: Date | null) => {
@@ -107,11 +101,6 @@ export function InfoPanel({
     return `${s ? formatDate(s) : "—"} ~ ${e ? formatDate(e) : "—"}`;
   };
   // v0.42 项11：案件信息表展示「所内案号」（状态已在页头 Pill 体现）
-  const firmCaseNoCell = matter.firmCaseNo ? (
-    <span className="font-mono tabular text-[12px]">{matter.firmCaseNo}</span>
-  ) : (
-    <span className="text-muted-foreground">—</span>
-  );
   const claimCell = matter.claimAmount ? (
     <span className="font-mono tabular">¥{Number(matter.claimAmount).toLocaleString()}</span>
   ) : (

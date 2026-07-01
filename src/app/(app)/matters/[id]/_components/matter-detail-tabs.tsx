@@ -299,7 +299,6 @@ export function MatterDetailTabs({
           <InfoPanel
             matter={matter}
             userOptions={userOptions}
-            finance={finance}
             contracts={intakeContracts.map((d) => ({ id: d.id, name: d.name }))}
             canEditMatter={canOwnThisMatter}
             canManageRelatedMatters={canAssociateThisMatter}
