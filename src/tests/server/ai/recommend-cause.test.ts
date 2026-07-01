@@ -274,7 +274,7 @@ describe('recommendCause', () => {
     // LABOR_ARBITRATION and COMMERCIAL_ARBITRATION fall through to default
     ['LABOR_ARBITRATION', 'LABOR_ARBITRATION'],
     ['COMMERCIAL_ARBITRATION', 'COMMERCIAL_ARBITRATION']
-  ])('categoryHint returns correct hint for %s', async (category, expectedHint) => {
+  ])('categoryHint returns correct hint for %s', async (category) => {
     (aiChat as any).mockResolvedValue({ content: '[{"name":"A","reason":"r","confidence":"HIGH"}]' });
     (extractJson as any).mockReturnValue([{ name: 'A', reason: 'r', confidence: 'HIGH' }]);
     (searchCauses as any).mockResolvedValue([{ id: 'c1', name: 'A', level: 3 }]);

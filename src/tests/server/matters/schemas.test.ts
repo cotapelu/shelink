@@ -32,7 +32,6 @@ import {
   type MatterCreateInput,
   type PartyInput,
   type MatterUpdateBasicInput,
-  type MatterListQuery
 } from '@/server/matters/schemas';
 
 // CUID-like strings for tests (start with 'c', alphanumeric, length > 7)

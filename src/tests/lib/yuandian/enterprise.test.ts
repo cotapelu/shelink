@@ -21,8 +21,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   searchEnterpriseCandidates,
   getEnterpriseBaseInfo,
-  EnterpriseCandidate,
-  MappedEnterpriseInfo
 } from "@/lib/yuandian/enterprise";
 import { getYuandianSettings } from "@/lib/yuandian/settings";
 import { YuandianNotConfiguredError, YuandianApiError } from "@/lib/yuandian/client";
