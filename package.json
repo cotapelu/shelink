@@ -16,7 +16,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test": "vitest run",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "complexity": "eslint src/ --max-warnings 0",
+    "duplication": "jscpd src/ --min-tokens 50 --format console"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1053.0",
@@ -94,6 +96,8 @@
     "cuid": "^3.0.0",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.7",
+    "eslint-plugin-complexity": "^1.0.2",
+    "jscpd": "^5.0.11",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.15",
     "prisma": "^5.22.0",

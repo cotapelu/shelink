@@ -1,0 +1,1650 @@
+
+> shelink@0.0.1 complexity
+> eslint src/ --max-warnings 0
+
+(node:265520) ESLintIgnoreWarning: The ".eslintignore" file is no longer supported. Switch to using the "ignores" property in "eslint.config.js": https://eslint.org/docs/latest/use/configure/migration-guide#ignoring-files
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/announcements/_components/announcement-dialog.tsx
+  61:8  error  Function 'AnnouncementDialog' has too many lines (120). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/announcements/_components/announcements-view.tsx
+   42:8   error  Function 'AnnouncementsView' has too many lines (121). Maximum allowed is 30  max-lines-per-function
+  101:23  error  Arrow function has too many lines (55). Maximum allowed is 30                 max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/approvals/seals/_components/matter-combobox.tsx
+  46:8  error  Function 'MatterCombobox' has too many lines (99). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/approvals/seals/_components/seal-actions-dialogs.tsx
+   70:1  error  Function 'SealDetailDialog' has too many lines (48). Maximum allowed is 30  max-lines-per-function
+  119:1  error  Function 'ApprovalDialog' has too many lines (115). Maximum allowed is 30   max-lines-per-function
+  235:1  error  Function 'StampDialog' has too many lines (75). Maximum allowed is 30       max-lines-per-function
+  311:1  error  Function 'CancelDialog' has too many lines (33). Maximum allowed is 30      max-lines-per-function
+  337:1  error  File has too many lines (334). Maximum allowed is 300                       max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/approvals/seals/_components/seal-request-sheet.tsx
+   55:8   error  Function 'SealRequestSheet' has too many lines (327). Maximum allowed is 30      max-lines-per-function
+   55:8   error  Function 'SealRequestSheet' has too many statements (21). Maximum allowed is 20  max-statements
+  119:18  error  Arrow function has too many lines (57). Maximum allowed is 30                    max-lines-per-function
+  119:18  error  Arrow function has too many statements (34). Maximum allowed is 20               max-statements
+  345:1   error  File has too many lines (336). Maximum allowed is 300                            max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/approvals/seals/_components/seals-view.tsx
+   42:8  error  Function 'SealsView' has too many lines (186). Maximum allowed is 30  max-lines-per-function
+  299:1  error  Function 'SealRow' has too many lines (115). Maximum allowed is 30    max-lines-per-function
+  338:1  error  File has too many lines (376). Maximum allowed is 300                 max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/approvals/seals/page.tsx
+  31:16  error  Async function 'SealsPage' has too many lines (50). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/archive/_components/pending-archive-table.tsx
+   87:8   error  Function 'PendingArchiveTable' has too many lines (213). Maximum allowed is 30  max-lines-per-function
+  180:26  error  Arrow function has too many lines (83). Maximum allowed is 30                   max-lines-per-function
+  306:1   error  Function 'BatchApproveDialog' has too many lines (117). Maximum allowed is 30   max-lines-per-function
+  333:1   error  File has too many lines (825). Maximum allowed is 300                           max-lines
+  424:1   error  Function 'BatchResultPanel' has too many lines (54). Maximum allowed is 30      max-lines-per-function
+  479:1   error  Function 'BatchRejectDialog' has too many lines (118). Maximum allowed is 30    max-lines-per-function
+  598:1   error  Function 'ApproveDialog' has too many lines (83). Maximum allowed is 30         max-lines-per-function
+  682:1   error  Function 'RejectDialog' has too many lines (81). Maximum allowed is 30          max-lines-per-function
+  764:1   error  Function 'DetailDialog' has too many lines (82). Maximum allowed is 30          max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/archive/page.tsx
+   41:16  error  Async function 'ArchivePage' has too many lines (124). Maximum allowed is 30  max-lines-per-function
+  105:26  error  Arrow function has too many lines (53). Maximum allowed is 30                 max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/audit/_components/audit-view.tsx
+   54:8   error  Function 'AuditView' has too many lines (291). Maximum allowed is 30  max-lines-per-function
+  274:36  error  Arrow function has too many lines (55). Maximum allowed is 30         max-lines-per-function
+  338:1   error  File has too many lines (315). Maximum allowed is 300                 max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/audit/page.tsx
+  25:16  error  Async function 'AuditPage' has too many lines (35). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/clients/[id]/_components/__tests__/client-header.test.tsx
+  30:26  error  Arrow function has too many lines (47). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/clients/[id]/_components/__tests__/client-info-section.test.tsx
+  31:31  error  Arrow function has too many lines (62). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/clients/[id]/_components/__tests__/matters-section.test.tsx
+  80:28  error  Arrow function has too many lines (49). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/clients/[id]/_components/client-info-section.tsx
+  25:8  error  Function 'ClientInfoSection' has too many lines (97). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/clients/[id]/_components/contacts-section.tsx
+  6:8  error  Function 'ContactsSection' has too many lines (40). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/clients/[id]/_components/matters-section.tsx
+  14:8  error  Function 'MattersSection' has too many lines (45). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/clients/_components/client-sheet.tsx
+   87:8   error  Function 'ClientSheet' has too many lines (492). Maximum allowed is 30  max-lines-per-function
+  111:13  error  Arrow function has too many lines (35). Maximum allowed is 30           max-lines-per-function
+  339:1   error  File has too many lines (615). Maximum allowed is 300                   max-lines
+  470:29  error  Arrow function has too many lines (81). Maximum allowed is 30           max-lines-per-function
+  630:1   error  Function 'TagInput' has too many lines (42). Maximum allowed is 30      max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/clients/_components/clients-table.tsx
+   41:8   error  Function 'ClientsTable' has too many lines (186). Maximum allowed is 30  max-lines-per-function
+   76:24  error  Arrow function has too many lines (90). Maximum allowed is 30            max-lines-per-function
+  172:20  error  Arrow function has too many lines (51). Maximum allowed is 30            max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/clients/_components/clients-view.tsx
+  57:8  error  Function 'ClientsView' has too many lines (123). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/conflicts/_components/conflicts-view.tsx
+  119:8   error  Function 'ConflictsView' has too many lines (226). Maximum allowed is 30  max-lines-per-function
+  187:24  error  Arrow function has too many lines (62). Maximum allowed is 30             max-lines-per-function
+  285:28  error  Arrow function has too many lines (53). Maximum allowed is 30             max-lines-per-function
+  340:1   error  File has too many lines (342). Maximum allowed is 300                     max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/contacts/_components/contacts-view.tsx
+   78:8   error  Function 'ContactsView' has too many lines (282). Maximum allowed is 30  max-lines-per-function
+  251:35  error  Arrow function has too many lines (101). Maximum allowed is 30           max-lines-per-function
+  334:1   error  File has too many lines (325). Maximum allowed is 300                    max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/contacts/_components/external-contact-dialog.tsx
+  75:8  error  Function 'ExternalContactDialog' has too many lines (198). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/dashboard/page.tsx
+  27:16  error  Function 'DashboardPage' has too many lines (72). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/erp/page.tsx
+  28:16  error  Function 'ERPDashboardPage' has too many lines (121). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/erp/projects/page.tsx
+   58:16  error  Function 'ProjectsPage' has too many lines (118). Maximum allowed is 30  max-lines-per-function
+  129:34  error  Arrow function has too many lines (41). Maximum allowed is 30            max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/erp/tasks/board/page.tsx
+  29:16  error  Function 'TasksBoardPage' has too many lines (105). Maximum allowed is 30  max-lines-per-function
+  33:13  error  Arrow function has too many lines (45). Maximum allowed is 30              max-lines-per-function
+  34:24  error  Async arrow function has too many lines (42). Maximum allowed is 30        max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/erp/tasks/page.tsx
+  30:16  error  Function 'TasksPage' has too many lines (108). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/express/_components/express-view.tsx
+   82:8   error  Function 'ExpressView' has too many lines (119). Maximum allowed is 30       max-lines-per-function
+  202:1   error  Function 'Card' has too many lines (161). Maximum allowed is 30              max-lines-per-function
+  338:1   error  File has too many lines (503). Maximum allowed is 300                        max-lines
+  366:1   error  Function 'NewExpressDialog' has too many lines (189). Maximum allowed is 30  max-lines-per-function
+  405:18  error  Arrow function has too many lines (32). Maximum allowed is 30                max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/express/page.tsx
+  27:16  error  Function 'ExpressPage' has too many lines (47). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/files/page.tsx
+  28:16  error  Function 'FilesPage' has too many lines (54). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/finance/_components/finance-view.tsx
+  146:8   error  Function 'FinanceView' has too many lines (266). Maximum allowed is 30  max-lines-per-function
+  337:1   error  File has too many lines (425). Maximum allowed is 300                   max-lines
+  358:27  error  Arrow function has too many lines (41). Maximum allowed is 30           max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/finance/_components/invoice-create-dialog.tsx
+   66:8   error  Function 'InvoiceCreateDialog' has too many lines (411). Maximum allowed is 30      max-lines-per-function
+   66:8   error  Function 'InvoiceCreateDialog' has too many statements (31). Maximum allowed is 20  max-statements
+  187:3   error  Function 'submit' has too many lines (59). Maximum allowed is 30                    max-lines-per-function
+  205:21  error  Async arrow function has too many lines (40). Maximum allowed is 30                 max-lines-per-function
+  342:1   error  File has too many lines (455). Maximum allowed is 300                               max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/finance/_components/invoice-management.tsx
+   81:8   error  Function 'InvoiceManagementSection' has too many lines (225). Maximum allowed is 30     max-lines-per-function
+  130:27  error  Arrow function has too many lines (155). Maximum allowed is 30                          max-lines-per-function
+  307:1   error  Function 'ProcessDialog' has too many lines (156). Maximum allowed is 30                max-lines-per-function
+  324:3   error  Async function 'handleInvoicePick' has too many lines (31). Maximum allowed is 30       max-lines-per-function
+  324:3   error  Async function 'handleInvoicePick' has too many statements (21). Maximum allowed is 20  max-statements
+  331:1   error  File has too many lines (696). Maximum allowed is 300                                   max-lines
+  464:1   error  Function 'RequestSummary' has too many lines (46). Maximum allowed is 30                max-lines-per-function
+  538:1   error  Function 'OcrPreview' has too many lines (44). Maximum allowed is 30                    max-lines-per-function
+  615:1   error  Function 'FileSlot' has too many lines (62). Maximum allowed is 30                      max-lines-per-function
+  678:1   error  Function 'RejectDialog' has too many lines (65). Maximum allowed is 30                  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/finance/page.tsx
+  29:16  error  Async function 'FinancePage' has too many lines (49). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/firm-resources/_components/firm-files-view.tsx
+   80:8   error  Function 'FirmFilesView' has too many lines (330). Maximum allowed is 30  max-lines-per-function
+  287:22  error  Arrow function has too many lines (102). Maximum allowed is 30            max-lines-per-function
+  345:1   error  File has too many lines (393). Maximum allowed is 300                     max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/firm-resources/_components/preview-dialog.tsx
+  53:8  error  Function 'PreviewDialog' has too many lines (89). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/firm-resources/_components/upload-dialog.tsx
+   67:8  error  Function 'UploadDialog' has too many lines (187). Maximum allowed is 30  max-lines-per-function
+  101:3  error  Function 'submit' has too many lines (34). Maximum allowed is 30         max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/firm-resources/page.tsx
+  32:16  error  Async function 'FirmResourcesPage' has too many lines (33). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/genealogy/events/page.tsx
+  28:16  error  Function 'EventsPage' has too many lines (48). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/genealogy/kinship/page.tsx
+  29:16  error  Function 'KinshipPage' has too many lines (81). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/genealogy/lineage/page.tsx
+  27:16  error  Function 'LineagePage' has too many lines (49). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/genealogy/page.tsx
+  78:16  error  Async function 'FamilyTreePage' has too many lines (53). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/genealogy/persons/[id]/page.tsx
+  30:16  error  Function 'PersonDetailPage' has too many lines (56). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/genealogy/persons/new/page.tsx
+  30:16  error  Function 'NewPersonPage' has too many lines (108). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/genealogy/persons/page.tsx
+  62:16  error  Async function 'PersonsPage' has too many lines (51). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/genealogy/stats/page.tsx
+  27:16  error  Function 'StatsPage' has too many lines (61). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/genealogy/users/page.tsx
+  27:16  error  Function 'UsersPage' has too many lines (43). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/inbox/_components/inbox-view.tsx
+   70:8  error  Function 'InboxView' has too many lines (100). Maximum allowed is 30    max-lines-per-function
+  211:1  error  Function 'SmsCard' has too many lines (202). Maximum allowed is 30      max-lines-per-function
+  340:1  error  File has too many lines (445). Maximum allowed is 300                   max-lines
+  441:1  error  Function 'MatterPicker' has too many lines (53). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/inbox/_components/sms-actions-dialogs.tsx
+   46:8  error  Function 'GenerateHearingDialog' has too many lines (131). Maximum allowed is 30   max-lines-per-function
+  221:8  error  Function 'GenerateDeadlineDialog' has too many lines (144). Maximum allowed is 30  max-lines-per-function
+  355:1  error  File has too many lines (320). Maximum allowed is 300                              max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/inbox/_components/sms-paste-dialog.tsx
+   40:8   error  Function 'SmsPasteDialog' has too many lines (152). Maximum allowed is 30  max-lines-per-function
+  135:30  error  Arrow function has too many lines (39). Maximum allowed is 30              max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/inbox/page.tsx
+  26:16  error  Async function 'InboxPage' has too many lines (35). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/intakes/[id]/_components/conflict-section.tsx
+  126:8  error  Function 'ConflictSection' has too many lines (251). Maximum allowed is 30  max-lines-per-function
+  140:3  error  Function 'handleRunCheck' has too many lines (37). Maximum allowed is 30    max-lines-per-function
+  339:1  error  File has too many lines (459). Maximum allowed is 300                       max-lines
+  404:1  error  Function 'HitCard' has too many lines (83). Maximum allowed is 30           max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/intakes/[id]/_components/intake-actions.tsx
+  46:8  error  Function 'IntakeActions' has too many lines (190). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/intakes/[id]/page.tsx
+   37:16  error  Async function 'IntakeDetailPage' has too many lines (261). Maximum allowed is 30  max-lines-per-function
+   78:52  error  Arrow function has too many lines (41). Maximum allowed is 30                      max-lines-per-function
+  341:1   error  File has too many lines (314). Maximum allowed is 300                              max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/intakes/_components/cause-recommendation-dialog.tsx
+  54:8  error  Function 'CauseRecommendationDialog' has too many lines (90). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/intakes/_components/client-combobox.tsx
+  43:8  error  Function 'ClientCombobox' has too many lines (221). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/intakes/_components/intake-sheet.tsx
+   202:8   error  Function 'IntakeSheet' has too many lines (1316). Maximum allowed is 30                  max-lines-per-function
+   202:8   error  Function 'IntakeSheet' has too many statements (45). Maximum allowed is 20               max-statements
+   357:3   error  Async function 'performSubmit' has too many lines (31). Maximum allowed is 30            max-lines-per-function
+   358:1   error  File has too many lines (1489). Maximum allowed is 300                                   max-lines
+   421:3   error  Async function 'handlePleadingFile' has too many lines (90). Maximum allowed is 30       max-lines-per-function
+   421:3   error  Async function 'handlePleadingFile' has too many statements (36). Maximum allowed is 20  max-statements
+   551:3   error  Async function 'handlePickYuandian' has too many lines (33). Maximum allowed is 30       max-lines-per-function
+   608:3   error  Function 'coLeadField' has too many lines (56). Maximum allowed is 30                    max-lines-per-function
+   707:3   error  Function 'renderParties' has too many lines (179). Maximum allowed is 30                 max-lines-per-function
+   736:24  error  Arrow function has too many lines (146). Maximum allowed is 30                           max-lines-per-function
+  1519:1   error  Function 'Section' has too many lines (47). Maximum allowed is 30                        max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/intakes/_components/jurisdiction-select.tsx
+  44:8  error  Function 'JurisdictionSelect' has too many lines (102). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/intakes/_components/use-auto-title.ts
+  15:8  error  Function 'useAutoTitleSuggestion' has too many lines (31). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/intakes/page.tsx
+  28:16  error  Function 'IntakesPage' has too many lines (60). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/layout.tsx
+  27:16  error  Async function 'AppLayout' has too many lines (31). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/add-reminder-dialog.tsx
+  44:8  error  Function 'AddReminderDialog' has too many lines (174). Maximum allowed is 30  max-lines-per-function
+  72:3  error  Function 'submit' has too many lines (41). Maximum allowed is 30              max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/approvals-panel.tsx
+  47:8  error  Function 'ApprovalsPanel' has too many lines (126). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/archive-status-banner.tsx
+  43:8  error  Function 'ArchiveStatusBanner' has too many lines (60). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/archive-wizard.tsx
+   89:8   error  Function 'ArchiveWizardDialog' has too many lines (363). Maximum allowed is 30      max-lines-per-function
+   89:8   error  Function 'ArchiveWizardDialog' has too many statements (22). Maximum allowed is 20  max-statements
+  176:3   error  Function 'handleSubmit' has too many lines (37). Maximum allowed is 30              max-lines-per-function
+  313:42  error  Arrow function has too many lines (80). Maximum allowed is 30                       max-lines-per-function
+  338:1   error  File has too many lines (411). Maximum allowed is 300                               max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/batch-review-button.tsx
+  43:8  error  Function 'BatchReviewButton' has too many lines (139). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/case-search-panel.tsx
+   81:8   error  Function 'CaseSearchPanel' has too many lines (455). Maximum allowed is 30      max-lines-per-function
+   81:8   error  Function 'CaseSearchPanel' has too many statements (21). Maximum allowed is 20  max-statements
+  153:3   error  Function 'handleSearch' has too many lines (50). Maximum allowed is 30          max-lines-per-function
+  159:21  error  Async arrow function has too many lines (43). Maximum allowed is 30             max-lines-per-function
+  336:1   error  File has too many lines (501). Maximum allowed is 300                           max-lines
+  382:38  error  Arrow function has too many lines (64). Maximum allowed is 30                   max-lines-per-function
+  457:37  error  Arrow function has too many lines (73). Maximum allowed is 30                   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/custom-fields-panel.tsx
+   49:8  error  Function 'CustomFieldsPanel' has too many lines (53). Maximum allowed is 30  max-lines-per-function
+  103:1  error  Function 'EditDialog' has too many lines (82). Maximum allowed is 30         max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/document-review-dialog.tsx
+   85:8  error  Function 'DocumentReviewDialog' has too many lines (299). Maximum allowed is 30  max-lines-per-function
+  343:1  error  File has too many lines (368). Maximum allowed is 300                            max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/documents-panel.tsx
+  125:8   error  Function 'DocumentsPanel' has too many lines (189). Maximum allowed is 30  max-lines-per-function
+  215:25  error  Arrow function has too many lines (77). Maximum allowed is 30              max-lines-per-function
+  339:1   error  File has too many lines (558). Maximum allowed is 300                      max-lines
+  348:1   error  Function 'UploadSheet' has too many lines (246). Maximum allowed is 30     max-lines-per-function
+  399:3   error  Function 'handleSubmit' has too many lines (33). Maximum allowed is 30     max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/finance-forms.tsx
+   65:8   error  Function 'AddBillingSheet' has too many lines (153). Maximum allowed is 30           max-lines-per-function
+  221:8   error  Function 'AddFeeEntrySheet' has too many lines (223). Maximum allowed is 30          max-lines-per-function
+  346:1   error  File has too many lines (672). Maximum allowed is 300                                max-lines
+  449:8   error  Function 'EditCommissionPlanDialog' has too many lines (170). Maximum allowed is 30  max-lines-per-function
+  518:23  error  Arrow function has too many lines (66). Maximum allowed is 30                        max-lines-per-function
+  622:1   error  Function 'InvoiceOcrBlock' has too many lines (97). Maximum allowed is 30            max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/finance-panel.tsx
+  35:8  error  Function 'FinancePanel' has too many lines (102). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/folders-panel.tsx
+   55:8  error  Function 'FoldersPanel' has too many lines (150). Maximum allowed is 30       max-lines-per-function
+  206:1  error  Function 'FolderItem' has too many lines (77). Maximum allowed is 30          max-lines-per-function
+  284:1  error  Function 'DocCard' has too many lines (53). Maximum allowed is 30             max-lines-per-function
+  334:1  error  File has too many lines (397). Maximum allowed is 300                         max-lines
+  338:1  error  Function 'NewFolderDialog' has too many lines (51). Maximum allowed is 30     max-lines-per-function
+  390:1  error  Function 'RenameFolderDialog' has too many lines (47). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/info-extras.tsx
+   77:8   error  Function 'ContractsCard' has too many lines (90). Maximum allowed is 30      max-lines-per-function
+  126:21  error  Arrow function has too many lines (36). Maximum allowed is 30                max-lines-per-function
+  179:8   error  Function 'ExpressMiniCard' has too many lines (72). Maximum allowed is 30    max-lines-per-function
+  259:1   error  Function 'AddExpressDialog' has too many lines (199). Maximum allowed is 30  max-lines-per-function
+  310:3   error  Function 'handleSubmit' has too many lines (31). Maximum allowed is 30       max-lines-per-function
+  340:1   error  File has too many lines (412). Maximum allowed is 300                        max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/info-panel.tsx
+   32:8  error  Function 'InfoPanel' has too many lines (215). Maximum allowed is 30  max-lines-per-function
+  295:8  error  Function 'Pair' has too many lines (35). Maximum allowed is 30        max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/invoice-request-sheet.tsx
+   62:8   error  Function 'InvoiceRequestSheet' has too many lines (394). Maximum allowed is 30      max-lines-per-function
+   62:8   error  Function 'InvoiceRequestSheet' has too many statements (22). Maximum allowed is 20  max-statements
+  144:3   error  Function 'submit' has too many lines (83). Maximum allowed is 30                    max-lines-per-function
+  144:3   error  Function 'submit' has too many statements (30). Maximum allowed is 20               max-statements
+  185:21  error  Async arrow function has too many lines (41). Maximum allowed is 30                 max-lines-per-function
+  347:1   error  File has too many lines (433). Maximum allowed is 300                               max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/invoice-section.tsx
+   64:8  error  Function 'InvoiceSection' has too many lines (63). Maximum allowed is 30        max-lines-per-function
+  128:1  error  Function 'InvoiceItem' has too many lines (71). Maximum allowed is 30           max-lines-per-function
+  200:1  error  Function 'CreateInvoiceDialog' has too many lines (109). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/lifecycle-actions.tsx
+  61:8  error  Function 'LifecycleActions' has too many lines (167). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/matter-detail-tabs.tsx
+  140:8   error  Function 'MatterDetailTabs' has too many lines (324). Maximum allowed is 30           max-lines-per-function
+  320:37  error  Arrow function has too many lines (46). Maximum allowed is 30                         max-lines-per-function
+  339:1   error  File has too many lines (499). Maximum allowed is 300                                 max-lines
+  465:1   error  Function 'MatterStatusPill' has too many lines (35). Maximum allowed is 30            max-lines-per-function
+  507:1   error  Function 'buildProcedurePartyOptions' has too many lines (40). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/matter-preservation-panel.tsx
+   47:8   error  Function 'MatterPreservationPanel' has too many lines (56). Maximum allowed is 30  max-lines-per-function
+  104:1   error  Function 'CaseCard' has too many lines (78). Maximum allowed is 30                 max-lines-per-function
+  135:27  error  Arrow function has too many lines (36). Maximum allowed is 30                      max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/notes-panel.tsx
+   80:8   error  Function 'NotesPanel' has too many lines (119). Maximum allowed is 30  max-lines-per-function
+  126:22  error  Arrow function has too many lines (66). Maximum allowed is 30          max-lines-per-function
+  200:1   error  Function 'NoteSheet' has too many lines (133). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/overview-panel.tsx
+  27:8   error  Function 'OverviewPanel' has too many lines (131). Maximum allowed is 30  max-lines-per-function
+  60:36  error  Arrow function has too many lines (34). Maximum allowed is 30             max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/parties-panel.tsx
+   36:8  error  Function 'PartiesPanel' has too many lines (41). Maximum allowed is 30  max-lines-per-function
+  121:1  error  Function 'PartyRowItem' has too many lines (42). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/procedure-content.tsx
+  103:8   error  Function 'ProcedureRemindersAndMemos' has too many lines (47). Maximum allowed is 30  max-lines-per-function
+  153:1   error  Function 'ImportantItemsCard' has too many lines (212). Maximum allowed is 30         max-lines-per-function
+  344:1   error  File has too many lines (1272). Maximum allowed is 300                                max-lines
+  378:1   error  Function 'DeadlineRow' has too many lines (92). Maximum allowed is 30                 max-lines-per-function
+  471:1   error  Function 'HearingRow' has too many lines (53). Maximum allowed is 30                  max-lines-per-function
+  525:1   error  Function 'ExpressRow' has too many lines (60). Maximum allowed is 30                  max-lines-per-function
+  586:1   error  Function 'MemoRow' has too many lines (40). Maximum allowed is 30                     max-lines-per-function
+  671:1   error  Function 'ImportantItemDialog' has too many lines (640). Maximum allowed is 30        max-lines-per-function
+  671:1   error  Function 'ImportantItemDialog' has too many statements (42). Maximum allowed is 20    max-statements
+  725:13  error  Arrow function has too many lines (32). Maximum allowed is 30                         max-lines-per-function
+  725:13  error  Arrow function has too many statements (30). Maximum allowed is 20                    max-statements
+  819:3   error  Function 'submitHearing' has too many lines (37). Maximum allowed is 30               max-lines-per-function
+  857:3   error  Function 'submitDeadline' has too many lines (34). Maximum allowed is 30              max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/procedure-documents-section.tsx
+  103:1   error  Function 'iconFor' has too many lines (61). Maximum allowed is 30                     max-lines-per-function
+  103:1   error  Function 'iconFor' has too many statements (25). Maximum allowed is 20                max-statements
+  176:8   error  Function 'ProcedureDocumentsSection' has too many lines (310). Maximum allowed is 30  max-lines-per-function
+  227:3   error  Function 'handleSubmit' has too many lines (31). Maximum allowed is 30                max-lines-per-function
+  328:25  error  Arrow function has too many lines (66). Maximum allowed is 30                         max-lines-per-function
+  349:1   error  File has too many lines (431). Maximum allowed is 300                                 max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/procedure-forms.tsx
+   72:8  error  Function 'AddProcedureSheet' has too many lines (219). Maximum allowed is 30   max-lines-per-function
+  309:8  error  Function 'AddDeadlineDialog' has too many lines (151). Maximum allowed is 30   max-lines-per-function
+  342:1  error  File has too many lines (645). Maximum allowed is 300                          max-lines
+  463:8  error  Function 'AddHearingDialog' has too many lines (234). Maximum allowed is 30    max-lines-per-function
+  522:3  error  Function 'handleSummonsUpload' has too many lines (35). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/procedure-info-panel.tsx
+  309:1   error  Function 'standingTone' has too many lines (33). Maximum allowed is 30             max-lines-per-function
+  343:1   error  Function 'StandingName' has too many lines (34). Maximum allowed is 30             max-lines-per-function
+  350:1   error  File has too many lines (933). Maximum allowed is 300                              max-lines
+  389:8   error  Function 'ProcedureInfoPanel' has too many lines (67). Maximum allowed is 30       max-lines-per-function
+  457:1   error  Function 'ProcedurePartiesSummary' has too many lines (92). Maximum allowed is 30  max-lines-per-function
+  513:26  error  Arrow function has too many lines (31). Maximum allowed is 30                      max-lines-per-function
+  550:1   error  Function 'EditDialog' has too many lines (441). Maximum allowed is 30              max-lines-per-function
+  653:3   error  Function 'addNewProcedureParty' has too many lines (40). Maximum allowed is 30     max-lines-per-function
+  694:3   error  Function 'save' has too many lines (31). Maximum allowed is 30                     max-lines-per-function
+  839:42  error  Arrow function has too many lines (45). Maximum allowed is 30                      max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/related-matters-field.tsx
+  38:8  error  Function 'RelatedMattersField' has too many lines (154). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/review-summary-card.tsx
+  25:8  error  Function 'ReviewSummaryCard' has too many lines (66). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/team-editor-dialog.tsx
+   91:8   error  Function 'TeamEditorDialog' has too many lines (258). Maximum allowed is 30  max-lines-per-function
+  141:3   error  Function 'handleSave' has too many lines (40). Maximum allowed is 30         max-lines-per-function
+  142:21  error  Async arrow function has too many lines (38). Maximum allowed is 30          max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/template-picker-dialog.tsx
+   68:8   error  Function 'TemplatePickerDialog' has too many lines (215). Maximum allowed is 30  max-lines-per-function
+  174:29  error  Arrow function has too many lines (38). Maximum allowed is 30                    max-lines-per-function
+  179:32  error  Arrow function has too many lines (31). Maximum allowed is 30                    max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/_components/timeline-panel.tsx
+  48:8   error  Function 'TimelinePanel' has too many lines (55). Maximum allowed is 30  max-lines-per-function
+  68:21  error  Arrow function has too many lines (31). Maximum allowed is 30            max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/[id]/page.tsx
+  34:16  error  Async function 'MatterDetailPage' has too many lines (170). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/_components/cause-ai-manual-dialog.tsx
+   58:8   error  Function 'CauseAiManualDialog' has too many lines (154). Maximum allowed is 30  max-lines-per-function
+  165:31  error  Arrow function has too many lines (33). Maximum allowed is 30                   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/_components/cause-combobox.tsx
+   52:8  error  Function 'CauseCombobox' has too many lines (206). Maximum allowed is 30  max-lines-per-function
+  259:1  error  Function 'Column' has too many lines (54). Maximum allowed is 30          max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/_components/intakes-table.tsx
+  49:8  error  Function 'IntakesTable' has too many lines (57). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/_components/matters-table.tsx
+   71:8  error  Function 'MattersTable' has too many lines (51). Maximum allowed is 30  max-lines-per-function
+  132:8  error  Function 'CaseListCard' has too many lines (91). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/_components/matters-view.tsx
+  121:8  error  Function 'MattersView' has too many lines (367). Maximum allowed is 30      max-lines-per-function
+  121:8  error  Function 'MattersView' has too many statements (26). Maximum allowed is 20  max-statements
+  347:1  error  File has too many lines (462). Maximum allowed is 300                       max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/_components/party-card.tsx
+  82:8  error  Function 'PartyCard' has too many lines (266). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/matters/page.tsx
+  97:16  error  Async function 'MattersPage' has too many lines (125). Maximum allowed is 30      max-lines-per-function
+  97:16  error  Async function 'MattersPage' has too many statements (23). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/notifications/page.tsx
+  45:16  error  Async function 'NotificationsPage' has too many lines (91). Maximum allowed is 30  max-lines-per-function
+  81:32  error  Arrow function has too many lines (49). Maximum allowed is 30                      max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/page.tsx
+  33:16  error  Async function 'DashboardPage' has too many lines (40). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/policy/page.tsx
+  30:16  error  Async function 'PolicyPage' has too many lines (32). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/preservation/_components/preservation-dialog.tsx
+   43:8  error  Function 'PreservationCaseDialog' has too many lines (145). Maximum allowed is 30  max-lines-per-function
+  224:8  error  Function 'AddPropertyDialog' has too many lines (58). Maximum allowed is 30        max-lines-per-function
+  285:8  error  Function 'RenewPropertyDialog' has too many lines (36). Maximum allowed is 30      max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/preservation/_components/preservations-view.tsx
+   61:8   error  Function 'PreservationsView' has too many lines (99). Maximum allowed is 30  max-lines-per-function
+  170:1   error  Function 'CaseCard' has too many lines (83). Maximum allowed is 30           max-lines-per-function
+  206:30  error  Arrow function has too many lines (36). Maximum allowed is 30                max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/preservations/page.tsx
+  29:16  error  Function 'PreservationsPage' has too many lines (57). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/reports/_components/reports-view.tsx
+   60:8  error  Function 'ReportsView' has too many lines (435). Maximum allowed is 30  max-lines-per-function
+  336:1  error  File has too many lines (504). Maximum allowed is 300                   max-lines
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/reports/page.tsx
+  28:16  error  Function 'ReportsPage' has too many lines (48). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/schedule/_components/add-task-dialog.tsx
+  49:8  error  Function 'AddTaskDialog' has too many lines (208). Maximum allowed is 30  max-lines-per-function
+  79:3  error  Function 'submit' has too many lines (46). Maximum allowed is 30          max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/schedule/_components/schedule-view.tsx
+   61:8   error  Function 'ScheduleView' has too many lines (123). Maximum allowed is 30       max-lines-per-function
+  185:1   error  Function 'ListView' has too many lines (72). Maximum allowed is 30            max-lines-per-function
+  212:19  error  Arrow function has too many lines (42). Maximum allowed is 30                 max-lines-per-function
+  258:1   error  Function 'Row' has too many lines (37). Maximum allowed is 30                 max-lines-per-function
+  296:1   error  Function 'CalendarCellItem' has too many lines (41). Maximum allowed is 30    max-lines-per-function
+  338:1   error  Function 'CalendarView' has too many lines (213). Maximum allowed is 30       max-lines-per-function
+  342:1   error  File has too many lines (689). Maximum allowed is 300                         max-lines
+  430:20  error  Arrow function has too many lines (70). Maximum allowed is 30                 max-lines-per-function
+  552:1   error  Function 'DayDetailItem' has too many lines (35). Maximum allowed is 30       max-lines-per-function
+  588:1   error  Function 'ScheduleItemDialog' has too many lines (88). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/seals/page.tsx
+  28:16  error  Function 'SealsPage' has too many lines (59). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/ai/_components/ai-settings-form.tsx
+  85:8  error  Function 'AiSettingsForm' has too many lines (231). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/ai/_components/yuandian-settings-form.tsx
+  48:8  error  Function 'YuandianSettingsForm' has too many lines (175). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/audit/_components/audit-view.tsx
+   72:8   error  Function 'AuditView' has too many lines (179). Maximum allowed is 30  max-lines-per-function
+  195:22  error  Arrow function has too many lines (51). Maximum allowed is 30         max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/custom-fields/_components/custom-fields-view.tsx
+   58:8   error  Function 'CustomFieldsView' has too many lines (122). Maximum allowed is 30  max-lines-per-function
+  123:32  error  Arrow function has too many lines (40). Maximum allowed is 30                max-lines-per-function
+  181:1   error  Function 'FieldFormDialog' has too many lines (108). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/data/page.tsx
+  27:16  error  Function 'DataManagementPage' has too many lines (87). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/express/_components/express-settings-form.tsx
+  35:8  error  Function 'ExpressSettingsForm' has too many lines (202). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/firm-profile/_components/firm-profile-form.tsx
+  46:8  error  Function 'FirmProfileForm' has too many lines (244). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/import/_components/matter-import-view.tsx
+  34:8  error  Function 'MatterImportView' has too many lines (209). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/layout.tsx
+  24:16  error  Async function 'SettingsLayout' has too many lines (97). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/profile/_components/avatar-form.tsx
+  30:8  error  Function 'AvatarForm' has too many lines (90). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/profile/_components/change-password-form.tsx
+  46:8  error  Function 'ChangePasswordForm' has too many lines (45). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/reminders/page.tsx
+  30:16  error  Async function 'RemindersSettingsPage' has too many lines (31). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/templates/_components/templates-view.tsx
+   81:8  error  Function 'TemplatesView' has too many lines (81). Maximum allowed is 30        max-lines-per-function
+  163:1  error  Function 'EditTemplateDialog' has too many lines (122). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/settings/users/_components/users-view.tsx
+   94:8  error  Function 'UsersView' has too many lines (56). Maximum allowed is 30            max-lines-per-function
+  151:1  error  Function 'UserRow' has too many lines (122). Maximum allowed is 30             max-lines-per-function
+  274:1  error  Function 'CreateUserSheet' has too many lines (105). Maximum allowed is 30     max-lines-per-function
+  337:1  error  File has too many lines (420). Maximum allowed is 300                          max-lines
+  380:1  error  Function 'ResetPasswordDialog' has too many lines (59). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/sms/page.tsx
+  27:16  error  Function 'SmsPage' has too many lines (45). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/tools/calc/_components/calc-view.tsx
+  38:8  error  Function 'CalcView' has too many lines (59). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/tools/calc/_components/court-fee-calc.tsx
+  39:8  error  Function 'CourtFeeCalc' has too many lines (73). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/tools/calc/_components/days-calc.tsx
+  38:8  error  Function 'DaysCalc' has too many lines (160). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(app)/tools/calc/_components/late-interest-calc.tsx
+  34:8  error  Function 'LateInterestCalc' has too many lines (136). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(auth)/login/login-form.tsx
+  42:8  error  Function 'LoginForm' has too many lines (99). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/(auth)/login/page.tsx
+  29:16  error  Function 'LoginPage' has too many lines (61). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/api/archive/[matterId]/export/route.ts
+  31:8  error  Async function 'GET' has too many lines (72). Maximum allowed is 30       max-lines-per-function
+  31:8  error  Async function 'GET' has too many statements (23). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/app/api/documents/[id]/download/route.ts
+  32:8  error  Async function 'GET' has too many lines (76). Maximum allowed is 30       max-lines-per-function
+  32:8  error  Async function 'GET' has too many statements (30). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/app/api/documents/[id]/preview/route.ts
+  65:8  error  Async function 'GET' has too many lines (108). Maximum allowed is 30      max-lines-per-function
+  65:8  error  Async function 'GET' has too many statements (42). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/app/api/firm-files/[id]/download/route.ts
+  31:8  error  Async function 'GET' has too many lines (46). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/api/matters/export/route.ts
+  32:8  error  Async function 'GET' has too many lines (49). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/app/api/reports/export/route.ts
+  30:8  error  Async function 'GET' has too many lines (49). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/Avatar/DefaultAvatar.tsx
+  22:16  error  Function 'DefaultAvatar' has too many lines (38). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/Button/Button.tsx
+  39:3  error  Arrow function has too many lines (63). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/Dropdown/Dropdown.tsx
+  34:25  error  Arrow function has too many lines (46). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/ExportButton.tsx
+  35:16  error  Function 'ExportButton' has too many lines (156). Maximum allowed is 30   max-lines-per-function
+  51:24  error  Async arrow function has too many lines (66). Maximum allowed is 30       max-lines-per-function
+  51:24  error  Async arrow function has too many statements (30). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/components/Input/Input.tsx
+  38:3  error  Arrow function has too many lines (91). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/Landing/LandingHero.tsx
+  56:16  error  Function 'LandingHero' has too many lines (95). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/Loading/Loading.tsx
+  40:24  error  Arrow function has too many lines (32). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/Modal/Modal.tsx
+  48:15  error  Arrow function has too many lines (65). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/Table/Table.tsx
+  48:8  error  Function 'Table' has too many lines (166). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/Toast/Toast.tsx
+  59:30  error  Arrow function has too many lines (54). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/ViewToggle.tsx
+  28:16  error  Function 'ViewToggle' has too many lines (42). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/conflict-dialog.tsx
+  123:8   error  Function 'ConflictDialog' has too many lines (316). Maximum allowed is 30  max-lines-per-function
+  145:3   error  Function 'handleRun' has too many lines (32). Maximum allowed is 30        max-lines-per-function
+  215:28  error  Arrow function has too many lines (69). Maximum allowed is 30              max-lines-per-function
+  338:1   error  File has too many lines (436). Maximum allowed is 300                      max-lines
+  373:32  error  Arrow function has too many lines (57). Maximum allowed is 30              max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/dashboard/alerts-list.tsx
+   44:1   error  Async function 'loadAlerts' has too many lines (104). Maximum allowed is 30  max-lines-per-function
+  155:8   error  Async function 'AlertsList' has too many lines (77). Maximum allowed is 30   max-lines-per-function
+  187:22  error  Arrow function has too many lines (40). Maximum allowed is 30                max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/dashboard/category-chart.tsx
+  27:8  error  Function 'CategoryChart' has too many lines (70). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/dashboard/dashboard-greeting.tsx
+   44:8  error  Function 'DashboardGreeting' has too many lines (84). Maximum allowed is 30  max-lines-per-function
+  129:1  error  Function 'ScheduleBriefItem' has too many lines (33). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/dashboard/hero-block.tsx
+  41:8  error  Function 'HeroBlock' has too many lines (129). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/dashboard/kpi-cards.tsx
+  27:8  error  Function 'KpiCards' has too many lines (43). Maximum allowed is 30   max-lines-per-function
+  99:1  error  Function 'Sparkline' has too many lines (41). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/dashboard/my-weekly-card.tsx
+  23:8  error  Function 'MyWeeklyCard' has too many lines (36). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/dashboard/revenue-chart.tsx
+  33:8  error  Function 'RevenueChart' has too many lines (91). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/dashboard/schedule-list.tsx
+  33:8  error  Function 'ScheduleList' has too many lines (58). Maximum allowed is 30  max-lines-per-function
+  92:1  error  Function 'ScheduleRow' has too many lines (41). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/erp/ChartWidget/ChartWidget.tsx
+  81:8   error  Function 'ChartWidget' has too many lines (170). Maximum allowed is 30  max-lines-per-function
+  98:23  error  Arrow function has too many lines (103). Maximum allowed is 30          max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/erp/DataTable/DataTable.tsx
+   75:8   error  Function 'DataTable' has too many lines (379). Maximum allowed is 30  max-lines-per-function
+  278:40  error  Arrow function has too many lines (45). Maximum allowed is 30         max-lines-per-function
+  336:1   error  File has too many lines (417). Maximum allowed is 300                 max-lines
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/erp/InvoiceBuilder/InvoiceBuilder.tsx
+   95:8   error  Function 'InvoiceBuilder' has too many lines (421). Maximum allowed is 30  max-lines-per-function
+  346:1   error  File has too many lines (466). Maximum allowed is 300                      max-lines
+  414:38  error  Arrow function has too many lines (41). Maximum allowed is 30              max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/erp/KanbanBoard/KanbanBoard.tsx
+   69:8   error  Function 'KanbanBoard' has too many lines (296). Maximum allowed is 30  max-lines-per-function
+  153:27  error  Arrow function has too many lines (175). Maximum allowed is 30          max-lines-per-function
+  200:35  error  Arrow function has too many lines (93). Maximum allowed is 30           max-lines-per-function
+  343:1   error  File has too many lines (322). Maximum allowed is 300                   max-lines
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/erp/ProjectTimeline/ProjectTimeline.tsx
+   66:8   error  Function 'ProjectTimeline' has too many lines (286). Maximum allowed is 30  max-lines-per-function
+  220:22  error  Arrow function has too many lines (103). Maximum allowed is 30              max-lines-per-function
+  345:1   error  File has too many lines (307). Maximum allowed is 300                       max-lines
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/erp/ReportBuilder/ReportBuilder.tsx
+   91:8   error  Function 'ReportBuilder' has too many lines (408). Maximum allowed is 30  max-lines-per-function
+  118:26  error  Async arrow function has too many lines (41). Maximum allowed is 30       max-lines-per-function
+  166:29  error  Arrow function has too many lines (95). Maximum allowed is 30             max-lines-per-function
+  348:1   error  File has too many lines (466). Maximum allowed is 300                     max-lines
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/erp/TaskCard/TaskCard.tsx
+  69:8  error  Function 'TaskCard' has too many lines (180). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/erp/TaskList/TaskList.tsx
+  31:16  error  Function 'TaskList' has too many lines (49). Maximum allowed is 30  max-lines-per-function
+  38:18  error  Arrow function has too many lines (39). Maximum allowed is 30       max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/erp/TaskList/__tests__/TaskList.test.tsx
+  52:22  error  Arrow function has too many lines (36). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/events/CustomEventModal.tsx
+  41:16  error  Function 'CustomEventModal' has too many lines (301). Maximum allowed is 30  max-lines-per-function
+  91:24  error  Async arrow function has too many lines (38). Maximum allowed is 30          max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/events/EventsList.tsx
+   59:1   error  Function 'EventCard' has too many lines (107). Maximum allowed is 30   max-lines-per-function
+  167:16  error  Function 'EventsList' has too many lines (202). Maximum allowed is 30  max-lines-per-function
+  347:1   error  File has too many lines (320). Maximum allowed is 300                  max-lines
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/events/CustomEventModal.tsx
+  41:16  error  Function 'CustomEventModal' has too many lines (301). Maximum allowed is 30  max-lines-per-function
+  91:24  error  Async arrow function has too many lines (38). Maximum allowed is 30          max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/events/EventsList.tsx
+   59:1   error  Function 'EventCard' has too many lines (107). Maximum allowed is 30   max-lines-per-function
+  167:16  error  Function 'EventsList' has too many lines (202). Maximum allowed is 30  max-lines-per-function
+  347:1   error  File has too many lines (320). Maximum allowed is 300                  max-lines
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/familytree/FamilyNodeCard.tsx
+  40:16  error  Function 'FamilyNodeCard' has too many lines (127). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/familytree/FamilyTree.tsx
+   37:16  error  Function 'FamilyTree' has too many lines (451). Maximum allowed is 30      max-lines-per-function
+   37:16  error  Function 'FamilyTree' has too many statements (27). Maximum allowed is 20  max-statements
+  136:23  error  Arrow function has too many lines (58). Maximum allowed is 30              max-lines-per-function
+  197:26  error  Arrow function has too many lines (53). Maximum allowed is 30              max-lines-per-function
+  361:1   error  File has too many lines (414). Maximum allowed is 300                      max-lines
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/familytree/KinshipFinder.tsx
+   74:1   error  Function 'PersonSelector' has too many lines (175). Maximum allowed is 30  max-lines-per-function
+  187:30  error  Arrow function has too many lines (54). Maximum allowed is 30              max-lines-per-function
+  295:16  error  Function 'KinshipFinder' has too many lines (269). Maximum allowed is 30   max-lines-per-function
+  342:1   error  File has too many lines (514). Maximum allowed is 300                      max-lines
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/familytree/LineageManager.tsx
+   55:8   error  Function 'computeGenerations' has too many lines (79). Maximum allowed is 30       max-lines-per-function
+   55:8   error  Function 'computeGenerations' has too many statements (38). Maximum allowed is 20  max-statements
+  135:8   error  Function 'computeBirthOrders' has too many lines (44). Maximum allowed is 30       max-lines-per-function
+  182:16  error  Function 'LineageManager' has too many lines (268). Maximum allowed is 30          max-lines-per-function
+  200:25  error  Arrow function has too many lines (41). Maximum allowed is 30                      max-lines-per-function
+  374:38  error  Arrow function has too many lines (49). Maximum allowed is 30                      max-lines-per-function
+  377:1   error  File has too many lines (372). Maximum allowed is 300                              max-lines
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/familytree/MindmapTree.tsx
+   60:28  error  Arrow function has too many lines (44). Maximum allowed is 30           max-lines-per-function
+  106:3   error  Arrow function has too many lines (249). Maximum allowed is 30          max-lines-per-function
+  176:13  error  Arrow function has too many lines (150). Maximum allowed is 30          max-lines-per-function
+  270:41  error  Arrow function has too many lines (50). Maximum allowed is 30           max-lines-per-function
+  337:1   error  File has too many lines (521). Maximum allowed is 300                   max-lines
+  358:16  error  Function 'MindmapTree' has too many lines (211). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/members/DashboardMemberList.tsx
+  28:16  error  Function 'DashboardMemberList' has too many lines (188). Maximum allowed is 30  max-lines-per-function
+  40:49  error  Arrow function has too many lines (33). Maximum allowed is 30                   max-lines-per-function
+  74:51  error  Arrow function has too many lines (34). Maximum allowed is 30                   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/members/DeleteMemberButton.tsx
+  31:16  error  Function 'DeleteMemberButton' has too many lines (64). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/members/MemberDetailContent.tsx
+   53:16  error  Function 'MemberDetailContent' has too many lines (413). Maximum allowed is 30  max-lines-per-function
+  287:17  error  Arrow function has too many lines (35). Maximum allowed is 30                   max-lines-per-function
+  333:1   error  File has too many lines (430). Maximum allowed is 300                           max-lines
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/members/MemberDetailModal.tsx
+  35:16  error  Function 'MemberDetailModal' has too many lines (245). Maximum allowed is 30  max-lines-per-function
+  67:5   error  Async arrow function has too many lines (45). Maximum allowed is 30           max-lines-per-function
+  67:5   error  Async arrow function has too many statements (23). Maximum allowed is 20      max-statements
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/members/MemberForm.tsx
+   52:16  error  Function 'MemberForm' has too many lines (680). Maximum allowed is 30      max-lines-per-function
+   52:16  error  Function 'MemberForm' has too many statements (27). Maximum allowed is 20  max-statements
+  122:24  error  Async arrow function has too many lines (123). Maximum allowed is 30       max-lines-per-function
+  122:24  error  Async arrow function has too many statements (44). Maximum allowed is 20   max-statements
+  358:1   error  File has too many lines (661). Maximum allowed is 300                      max-lines
+  421:20  error  Async arrow function has too many lines (32). Maximum allowed is 30        max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/members/PersonCard.tsx
+  33:16  error  Function 'PersonCard' has too many lines (127). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/members/PersonSelector.tsx
+   43:16  error  Function 'PersonSelector' has too many lines (267). Maximum allowed is 30  max-lines-per-function
+  223:40  error  Arrow function has too many lines (66). Maximum allowed is 30              max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/members/RelationshipManager.tsx
+   66:16  error  Function 'RelationshipManager' has too many lines (976). Maximum allowed is 30      max-lines-per-function
+   66:16  error  Function 'RelationshipManager' has too many statements (35). Maximum allowed is 20  max-statements
+  131:40  error  Async arrow function has too many lines (77). Maximum allowed is 30                 max-lines-per-function
+  245:31  error  Async arrow function has too many lines (43). Maximum allowed is 30                 max-lines-per-function
+  245:31  error  Async arrow function has too many statements (24). Maximum allowed is 20            max-statements
+  289:23  error  Async arrow function has too many lines (85). Maximum allowed is 30                 max-lines-per-function
+  289:23  error  Async arrow function has too many statements (36). Maximum allowed is 20            max-statements
+  375:30  error  Async arrow function has too many lines (66). Maximum allowed is 30                 max-lines-per-function
+  375:30  error  Async arrow function has too many statements (26). Maximum allowed is 20            max-statements
+  382:1   error  File has too many lines (921). Maximum allowed is 300                               max-lines
+  468:58  error  Arrow function has too many lines (99). Maximum allowed is 30                       max-lines-per-function
+  488:28  error  Arrow function has too many lines (70). Maximum allowed is 30                       max-lines-per-function
+  719:25  error  Arrow function has too many lines (40). Maximum allowed is 30                       max-lines-per-function
+  825:33  error  Arrow function has too many lines (65). Maximum allowed is 30                       max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/genealogy/stats/FamilyStats.tsx
+   49:1   error  Function 'StatCard' has too many lines (46). Maximum allowed is 30       max-lines-per-function
+   97:1   error  Function 'GenerationRow' has too many lines (31). Maximum allowed is 30  max-lines-per-function
+  129:16  error  Function 'FamilyStats' has too many lines (215). Maximum allowed is 30   max-lines-per-function
+  133:25  error  Arrow function has too many lines (56). Maximum allowed is 30            max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/members/DashboardMemberList.tsx
+  28:16  error  Function 'DashboardMemberList' has too many lines (188). Maximum allowed is 30  max-lines-per-function
+  40:49  error  Arrow function has too many lines (33). Maximum allowed is 30                   max-lines-per-function
+  74:51  error  Arrow function has too many lines (34). Maximum allowed is 30                   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/members/DeleteMemberButton.tsx
+  32:16  error  Function 'DeleteMemberButton' has too many lines (47). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/members/MemberDetailContent.tsx
+   53:16  error  Function 'MemberDetailContent' has too many lines (413). Maximum allowed is 30  max-lines-per-function
+  287:17  error  Arrow function has too many lines (35). Maximum allowed is 30                   max-lines-per-function
+  333:1   error  File has too many lines (430). Maximum allowed is 300                           max-lines
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/members/MemberDetailModal.tsx
+  35:16  error  Function 'MemberDetailModal' has too many lines (245). Maximum allowed is 30  max-lines-per-function
+  67:5   error  Async arrow function has too many lines (45). Maximum allowed is 30           max-lines-per-function
+  67:5   error  Async arrow function has too many statements (23). Maximum allowed is 20      max-statements
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/members/MemberForm.tsx
+   52:16  error  Function 'MemberForm' has too many lines (680). Maximum allowed is 30      max-lines-per-function
+   52:16  error  Function 'MemberForm' has too many statements (27). Maximum allowed is 20  max-statements
+  122:24  error  Async arrow function has too many lines (123). Maximum allowed is 30       max-lines-per-function
+  122:24  error  Async arrow function has too many statements (44). Maximum allowed is 20   max-statements
+  358:1   error  File has too many lines (661). Maximum allowed is 300                      max-lines
+  421:20  error  Async arrow function has too many lines (32). Maximum allowed is 30        max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/members/PersonCard.tsx
+  33:16  error  Function 'PersonCard' has too many lines (127). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/members/PersonSelector.tsx
+   43:16  error  Function 'PersonSelector' has too many lines (267). Maximum allowed is 30  max-lines-per-function
+  223:40  error  Arrow function has too many lines (66). Maximum allowed is 30              max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/domain/members/RelationshipManager.tsx
+   66:16  error  Function 'RelationshipManager' has too many lines (976). Maximum allowed is 30      max-lines-per-function
+   66:16  error  Function 'RelationshipManager' has too many statements (35). Maximum allowed is 20  max-statements
+  131:40  error  Async arrow function has too many lines (77). Maximum allowed is 30                 max-lines-per-function
+  245:31  error  Async arrow function has too many lines (43). Maximum allowed is 30                 max-lines-per-function
+  245:31  error  Async arrow function has too many statements (24). Maximum allowed is 20            max-statements
+  289:23  error  Async arrow function has too many lines (85). Maximum allowed is 30                 max-lines-per-function
+  289:23  error  Async arrow function has too many statements (36). Maximum allowed is 20            max-statements
+  375:30  error  Async arrow function has too many lines (66). Maximum allowed is 30                 max-lines-per-function
+  375:30  error  Async arrow function has too many statements (26). Maximum allowed is 20            max-statements
+  382:1   error  File has too many lines (921). Maximum allowed is 300                               max-lines
+  468:58  error  Arrow function has too many lines (99). Maximum allowed is 30                       max-lines-per-function
+  488:28  error  Arrow function has too many lines (70). Maximum allowed is 30                       max-lines-per-function
+  719:25  error  Arrow function has too many lines (40). Maximum allowed is 30                       max-lines-per-function
+  825:33  error  Arrow function has too many lines (65). Maximum allowed is 30                       max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/layout/DashboardContext.tsx
+  41:8  error  Function 'DashboardProvider' has too many lines (98). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/layout/DashboardViews.tsx
+  36:16  error  Function 'DashboardViews' has too many lines (87). Maximum allowed is 30  max-lines-per-function
+  44:56  error  Arrow function has too many lines (35). Maximum allowed is 30             max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/layout/announcement-banner.tsx
+  39:8  error  Function 'AnnouncementBanner' has too many lines (64). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/layout/notification-popover.tsx
+   71:8   error  Function 'NotificationPopover' has too many lines (201). Maximum allowed is 30  max-lines-per-function
+   83:28  error  Async arrow function has too many lines (40). Maximum allowed is 30             max-lines-per-function
+  188:11  error  Arrow function has too many lines (33). Maximum allowed is 30                   max-lines-per-function
+  222:13  error  Arrow function has too many lines (38). Maximum allowed is 30                   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/layout/search-dialog.tsx
+  47:8  error  Function 'SearchDialog' has too many lines (87). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/layout/sidebar.tsx
+  45:8  error  Function 'NavContent' has too many lines (52). Maximum allowed is 30  max-lines-per-function
+  98:1  error  Function 'NavLink' has too many lines (50). Maximum allowed is 30     max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/layout/tools-dialog.tsx
+  43:8  error  Function 'ToolsDialog' has too many lines (54). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/layout/topbar.tsx
+   78:8   error  Function 'Topbar' has too many lines (163). Maximum allowed is 30  max-lines-per-function
+  136:28  error  Arrow function has too many lines (33). Maximum allowed is 30      max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/ui/Avatar/DefaultAvatar.tsx
+  22:16  error  Function 'DefaultAvatar' has too many lines (38). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/ui/combobox.tsx
+   72:1  error  Function 'ComboboxInput' has too many lines (35). Maximum allowed is 30    max-lines-per-function
+  108:1  error  Function 'ComboboxContent' has too many lines (33). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/components/ui/radio-chips.tsx
+  31:8   error  Function 'RadioChips' has too many lines (51). Maximum allowed is 30  max-lines-per-function
+  46:18  error  Arrow function has too many lines (33). Maximum allowed is 30         max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/hooks/useAuth.ts
+  41:24  error  Arrow function has too many lines (142). Maximum allowed is 30            max-lines-per-function
+  46:36  error  Async arrow function has too many lines (37). Maximum allowed is 30       max-lines-per-function
+  46:36  error  Async arrow function has too many statements (23). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/hooks/useLocalStorage.ts
+  24:32  error  Arrow function has too many lines (39). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/lib/api/client.ts
+  68:1  error  Async function 'executeRequest' has too many lines (215). Maximum allowed is 30      max-lines-per-function
+  68:1  error  Async function 'executeRequest' has too many statements (68). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/lib/audit/audit-log.ts
+  87:3  error  Method 'query' has too many lines (37). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/lib/default-folders.ts
+  63:8  error  Function 'suggestFolderByTemplateCategory' has too many lines (34). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/lib/enums.ts
+  276:8  error  Function 'procedureToStandingOptions' has too many lines (62). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/lib/express/settings.ts
+  117:8  error  Async function 'saveExpressSettings' has too many lines (36). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/lib/express/track.ts
+   67:1  error  Async function 'callKdniao' has too many lines (61). Maximum allowed is 30     max-lines-per-function
+  129:1  error  Async function 'callKuaidi100' has too many lines (59). Maximum allowed is 30  max-lines-per-function
+  189:8  error  Async function 'trackExpress' has too many lines (42). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/lib/ics.ts
+  79:8  error  Function 'buildIcs' has too many lines (47). Maximum allowed is 30       max-lines-per-function
+  79:8  error  Function 'buildIcs' has too many statements (28). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/lib/imports/matter-import.ts
+  149:8  error  Function 'validateRow' has too many lines (67). Maximum allowed is 30       max-lines-per-function
+  149:8  error  Function 'validateRow' has too many statements (33). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/lib/legal-calc.ts
+   78:8  error  Function 'calcCourtFee' has too many lines (60). Maximum allowed is 30          max-lines-per-function
+  242:8  error  Function 'numberToChinese' has too many lines (42). Maximum allowed is 30       max-lines-per-function
+  242:8  error  Function 'numberToChinese' has too many statements (29). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/lib/sms-parser-ai.ts
+  37:8  error  Async function 'enrichWithAi' has too many lines (51). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/lib/sms-parser.ts
+  219:8  error  Function 'parseSms' has too many lines (130). Maximum allowed is 30      max-lines-per-function
+  219:8  error  Function 'parseSms' has too many statements (66). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/lib/telemetry/metrics.ts
+  45:8  error  Function 'recordApiRequest' has too many lines (35). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/lib/template-builder.ts
+  301:1  error  Async function 'buildT4' has too many lines (48). Maximum allowed is 30      max-lines-per-function
+  366:1  error  Async function 'buildT5' has too many lines (44). Maximum allowed is 30      max-lines-per-function
+  374:1  error  File has too many lines (724). Maximum allowed is 300                        max-lines
+  468:1  error  Async function 'buildT7' has too many lines (39). Maximum allowed is 30      max-lines-per-function
+  525:1  error  Async function 'buildT8' has too many lines (39). Maximum allowed is 30      max-lines-per-function
+  583:1  error  Async function 'buildT9' has too many lines (42). Maximum allowed is 30      max-lines-per-function
+  655:1  error  Function 'docCatalogLoopRow' has too many lines (56). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/lib/template-engine.ts
+  156:1  error  Async function 'applyOverrides' has too many lines (38). Maximum allowed is 30  max-lines-per-function
+  195:8  error  Async function 'buildContext' has too many lines (106). Maximum allowed is 30   max-lines-per-function
+  383:1  error  File has too many lines (312). Maximum allowed is 300                           max-lines
+
+/home/quangtynu/Qcoder/shelink/src/lib/yuandian/client.ts
+   91:8  error  Async function 'searchPtalCases' has too many lines (69). Maximum allowed is 30           max-lines-per-function
+   91:8  error  Async function 'searchPtalCases' has too many statements (29). Maximum allowed is 20      max-statements
+  215:8  error  Async function 'searchCasesByVector' has too many lines (59). Maximum allowed is 30       max-lines-per-function
+  215:8  error  Async function 'searchCasesByVector' has too many statements (30). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/lib/yuandian/enterprise.ts
+   62:8  error  Async function 'searchEnterpriseCandidates' has too many lines (41). Maximum allowed is 30  max-lines-per-function
+  107:8  error  Async function 'getEnterpriseBaseInfo' has too many lines (50). Maximum allowed is 30       max-lines-per-function
+  243:1  error  Function 'pickStat' has too many lines (40). Maximum allowed is 30                          max-lines-per-function
+  306:8  error  Async function 'getEnterpriseSummary' has too many lines (63). Maximum allowed is 30        max-lines-per-function
+  306:8  error  Async function 'getEnterpriseSummary' has too many statements (24). Maximum allowed is 20   max-statements
+
+/home/quangtynu/Qcoder/shelink/src/proxy.ts
+  34:16  error  Async function 'proxy' has too many lines (53). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/ai/actions.ts
+  66:8  error  Async function 'recognizeInvoiceFromImage' has too many lines (54). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/ai/batch-review-matter.ts
+  58:8  error  Async function 'batchReviewMatterDocuments' has too many lines (102). Maximum allowed is 30      max-lines-per-function
+  58:8  error  Async function 'batchReviewMatterDocuments' has too many statements (32). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/ai/draft-document.ts
+  55:8  error  Async function 'draftDocument' has too many lines (36). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/ai/matter-review-summary.ts
+  51:8  error  Async function 'getMatterReviewSummary' has too many lines (57). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/ai/parse-pleading.ts
+  105:8  error  Async function 'parsePleading' has too many lines (71). Maximum allowed is 30       max-lines-per-function
+  105:8  error  Async function 'parsePleading' has too many statements (35). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/ai/parse-summons.ts
+  58:8  error  Async function 'parseSummons' has too many lines (32). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/ai/recommend-cause.ts
+  109:8  error  Async function 'recommendCause' has too many lines (53). Maximum allowed is 30       max-lines-per-function
+  109:8  error  Async function 'recommendCause' has too many statements (26). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/ai/review-document.ts
+  87:8  error  Async function 'reviewDocument' has too many lines (84). Maximum allowed is 30       max-lines-per-function
+  87:8  error  Async function 'reviewDocument' has too many statements (30). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/ai/review-history.ts
+  44:8  error  Async function 'listReviewHistory' has too many lines (45). Maximum allowed is 30  max-lines-per-function
+  90:8  error  Async function 'getReviewRecord' has too many lines (37). Maximum allowed is 30    max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/ai/save-review.ts
+  55:1  error  Function 'buildMarkdown' has too many lines (32). Maximum allowed is 30             max-lines-per-function
+  88:8  error  Async function 'saveReviewToMatter' has too many lines (57). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/archive/actions.ts
+   46:8   error  Async function 'archiveMatter' has too many lines (114). Maximum allowed is 30              max-lines-per-function
+   46:8   error  Async function 'archiveMatter' has too many statements (30). Maximum allowed is 20          max-statements
+  110:29  error  Async arrow function has too many lines (31). Maximum allowed is 30                         max-lines-per-function
+  164:8   error  Async function 'approveArchiveRecord' has too many lines (77). Maximum allowed is 30        max-lines-per-function
+  245:8   error  Async function 'rejectArchiveRecord' has too many lines (60). Maximum allowed is 30         max-lines-per-function
+  309:8   error  Async function 'getArchivePrepData' has too many lines (73). Maximum allowed is 30          max-lines-per-function
+  379:1   error  File has too many lines (483). Maximum allowed is 300                                       max-lines
+  419:8   error  Async function 'listPendingArchiveRecords' has too many lines (33). Maximum allowed is 30   max-lines-per-function
+  514:8   error  Async function 'batchApproveArchiveRecords' has too many lines (37). Maximum allowed is 30  max-lines-per-function
+  555:8   error  Async function 'batchRejectArchiveRecords' has too many lines (39). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/archive/export.ts
+  71:8  error  Async function 'buildArchiveZip' has too many lines (235). Maximum allowed is 30      max-lines-per-function
+  71:8  error  Async function 'buildArchiveZip' has too many statements (36). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/archive/render.ts
+  108:8  error  Async function 'renderArchiveCover' has too many lines (57). Maximum allowed is 30    max-lines-per-function
+  181:8  error  Async function 'renderArchiveCatalog' has too many lines (80). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/audit-list.ts
+  69:8  error  Async function 'listAuditLogs' has too many lines (46). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/causes/actions.ts
+   56:1  error  Function 'flatten' has too many lines (31). Maximum allowed is 30             max-lines-per-function
+  122:8  error  Async function 'searchCauses' has too many lines (49). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/clients/actions.ts
+   57:8  error  Async function 'listClients' has too many lines (37). Maximum allowed is 30              max-lines-per-function
+  103:8  error  Async function 'getClientById' has too many lines (36). Maximum allowed is 30            max-lines-per-function
+  141:8  error  Async function 'getClientFinanceSummary' has too many lines (46). Maximum allowed is 30  max-lines-per-function
+  188:8  error  Async function 'createClient' has too many lines (50). Maximum allowed is 30             max-lines-per-function
+  239:8  error  Async function 'updateClient' has too many lines (45). Maximum allowed is 30             max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/conflicts/actions.ts
+  90:8  error  Async function 'runCheckAndSave' has too many lines (79). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/conflicts/algorithm.ts
+  144:8  error  Async function 'runConflictCheck' has too many lines (217). Maximum allowed is 30      max-lines-per-function
+  144:8  error  Async function 'runConflictCheck' has too many statements (54). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/cron/jobs/archive-overdue.ts
+  41:8  error  Async function 'scanArchiveOverdue' has too many lines (81). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/cron/jobs/scan-due-reminders.ts
+  85:8  error  Async function 'scanDueReminders' has too many lines (143). Maximum allowed is 30      max-lines-per-function
+  85:8  error  Async function 'scanDueReminders' has too many statements (40). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/cron/jobs/scan-seal-backfill-reminders.ts
+  33:8  error  Async function 'scanSealBackfillReminders' has too many lines (73). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/cron/scheduler.ts
+  83:8  error  Function 'registerCronJobs' has too many lines (71). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/custom-fields/actions.ts
+   72:8  error  Async function 'createCustomFieldDef' has too many lines (31). Maximum allowed is 30    max-lines-per-function
+  140:8  error  Async function 'saveMatterCustomValues' has too many lines (35). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/dashboard/actions.ts
+   69:8  error  Async function 'getDashboardKpis' has too many lines (77). Maximum allowed is 30           max-lines-per-function
+  149:8  error  Async function 'getDashboardRevenueTrend' has too many lines (42). Maximum allowed is 30   max-lines-per-function
+  225:8  error  Async function 'getDashboardSchedule' has too many lines (103). Maximum allowed is 30      max-lines-per-function
+  225:8  error  Async function 'getDashboardSchedule' has too many statements (24). Maximum allowed is 20  max-statements
+  331:8  error  Async function 'getDashboardHeroData' has too many lines (87). Maximum allowed is 30       max-lines-per-function
+  373:1  error  File has too many lines (342). Maximum allowed is 300                                      max-lines
+
+/home/quangtynu/Qcoder/shelink/src/server/document-folders/actions.ts
+   55:8  error  Async function 'createFolder' has too many lines (42). Maximum allowed is 30          max-lines-per-function
+   98:8  error  Async function 'renameFolder' has too many lines (35). Maximum allowed is 30          max-lines-per-function
+  134:8  error  Async function 'deleteFolder' has too many lines (33). Maximum allowed is 30          max-lines-per-function
+  187:8  error  Async function 'moveDocumentToFolder' has too many lines (39). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/document-templates/actions.ts
+   40:8  error  Async function 'listTemplates' has too many lines (31). Maximum allowed is 30        max-lines-per-function
+  115:8  error  Async function 'renderTemplate' has too many lines (102). Maximum allowed is 30      max-lines-per-function
+  115:8  error  Async function 'renderTemplate' has too many statements (33). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/documents/actions.ts
+   49:8  error  Async function 'uploadDocument' has too many lines (151). Maximum allowed is 30      max-lines-per-function
+   49:8  error  Async function 'uploadDocument' has too many statements (61). Maximum allowed is 20  max-statements
+  201:8  error  Async function 'deleteDocument' has too many lines (36). Maximum allowed is 30       max-lines-per-function
+  375:1  error  File has too many lines (333). Maximum allowed is 300                                max-lines
+
+/home/quangtynu/Qcoder/shelink/src/server/erp/actions.ts
+   52:8  error  Async function 'listTasks' has too many lines (33). Maximum allowed is 30   max-lines-per-function
+  111:8  error  Async function 'createTask' has too many lines (35). Maximum allowed is 30  max-lines-per-function
+  147:8  error  Async function 'updateTask' has too many lines (38). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/erp/workflow.actions.ts
+  291:8  error  Async function 'updateTransition' has too many lines (34). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/express/actions.ts
+   46:8  error  Async function 'listExpress' has too many lines (38). Maximum allowed is 30         max-lines-per-function
+  115:8  error  Async function 'createExpress' has too many lines (62). Maximum allowed is 30       max-lines-per-function
+  115:8  error  Async function 'createExpress' has too many statements (23). Maximum allowed is 20  max-statements
+  182:8  error  Async function 'refreshExpress' has too many lines (37). Maximum allowed is 30      max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/external-contacts/actions.ts
+  135:8  error  Async function 'createExternalContact' has too many lines (42). Maximum allowed is 30   max-lines-per-function
+  208:8  error  Async function 'approveExternalContact' has too many lines (38). Maximum allowed is 30  max-lines-per-function
+  247:8  error  Async function 'rejectExternalContact' has too many lines (38). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/finance/actions.ts
+  112:8   error  Async function 'createFeeEntry' has too many lines (73). Maximum allowed is 30             max-lines-per-function
+  117:45  error  Async arrow function has too many lines (55). Maximum allowed is 30                        max-lines-per-function
+  186:8   error  Async function 'deleteFeeEntry' has too many lines (36). Maximum allowed is 30             max-lines-per-function
+  262:8   error  Async function 'getMatterFinance' has too many lines (44). Maximum allowed is 30           max-lines-per-function
+  338:8   error  Async function 'getMatterInvoiceContext' has too many lines (77). Maximum allowed is 30    max-lines-per-function
+  378:1   error  File has too many lines (512). Maximum allowed is 300                                      max-lines
+  419:8   error  Async function 'createInvoiceRequest' has too many lines (94). Maximum allowed is 30       max-lines-per-function
+  419:8   error  Async function 'createInvoiceRequest' has too many statements (26). Maximum allowed is 20  max-statements
+  546:8   error  Async function 'getMonthlyRevenue' has too many lines (35). Maximum allowed is 30          max-lines-per-function
+  582:8   error  Async function 'getPersonalRevenue' has too many lines (35). Maximum allowed is 30         max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/firm-files/actions.ts
+   80:8  error  Async function 'listFirmFiles' has too many lines (54). Maximum allowed is 30              max-lines-per-function
+  135:8  error  Async function 'getFirmFileVersionHistory' has too many lines (38). Maximum allowed is 30  max-lines-per-function
+  174:8  error  Async function 'uploadFirmFile' has too many lines (86). Maximum allowed is 30             max-lines-per-function
+  174:8  error  Async function 'uploadFirmFile' has too many statements (30). Maximum allowed is 20        max-statements
+  261:8  error  Async function 'updateFirmFile' has too many lines (34). Maximum allowed is 30             max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/genealogy/actions.ts
+   89:8  error  Async function 'getPersons' has too many lines (47). Maximum allowed is 30  max-lines-per-function
+  375:1  error  File has too many lines (312). Maximum allowed is 300                       max-lines
+
+/home/quangtynu/Qcoder/shelink/src/server/imports/actions.ts
+   69:1   error  Async function 'readSheet' has too many lines (33). Maximum allowed is 30                 max-lines-per-function
+   69:1   error  Async function 'readSheet' has too many statements (21). Maximum allowed is 20            max-statements
+  118:8   error  Async function 'parseMatterImportAction' has too many lines (35). Maximum allowed is 30   max-lines-per-function
+  155:1   error  Async function 'createOneMatter' has too many lines (127). Maximum allowed is 30          max-lines-per-function
+  214:44  error  Async arrow function has too many lines (65). Maximum allowed is 30                       max-lines-per-function
+  289:8   error  Async function 'commitMatterImportAction' has too many lines (33). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/imports/template.ts
+  47:8  error  Async function 'buildMatterImportTemplate' has too many lines (50). Maximum allowed is 30       max-lines-per-function
+  47:8  error  Async function 'buildMatterImportTemplate' has too many statements (22). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/intakes/actions.ts
+   48:55  error  Async function 'listIntakes' has too many lines (63). Maximum allowed is 30             max-lines-per-function
+  119:8   error  Async function 'getIntakeById' has too many lines (46). Maximum allowed is 30           max-lines-per-function
+  175:57  error  Async function 'createIntake' has too many lines (179). Maximum allowed is 30           max-lines-per-function
+  175:57  error  Async function 'createIntake' has too many statements (28). Maximum allowed is 20       max-statements
+  386:1   error  File has too many lines (569). Maximum allowed is 300                                   max-lines
+  432:8   error  Async function 'resubmitIntake' has too many lines (42). Maximum allowed is 30          max-lines-per-function
+  484:8   error  Async function 'convertIntakeToMatter' has too many lines (230). Maximum allowed is 30  max-lines-per-function
+  522:44  error  Async arrow function has too many lines (177). Maximum allowed is 30                    max-lines-per-function
+  522:44  error  Async arrow function has too many statements (23). Maximum allowed is 20                max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/intakes/helpers.ts
+  141:8  error  Function 'assertConflictReviewAllowsConversion' has too many lines (43). Maximum allowed is 30       max-lines-per-function
+  141:8  error  Function 'assertConflictReviewAllowsConversion' has too many statements (21). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/invoices/actions.ts
+   79:8  error  Async function 'createInvoiceRequest' has too many lines (49). Maximum allowed is 30        max-lines-per-function
+  129:8  error  Async function 'listInvoiceRequests' has too many lines (35). Maximum allowed is 30         max-lines-per-function
+  188:8  error  Async function 'approveInvoiceRequest' has too many lines (117). Maximum allowed is 30      max-lines-per-function
+  188:8  error  Async function 'approveInvoiceRequest' has too many statements (35). Maximum allowed is 20  max-statements
+  315:8  error  Async function 'rejectInvoiceRequest' has too many lines (34). Maximum allowed is 30        max-lines-per-function
+  371:1  error  File has too many lines (306). Maximum allowed is 300                                       max-lines
+
+/home/quangtynu/Qcoder/shelink/src/server/matters/actions.ts
+   62:8   error  Async function 'listMatters' has too many lines (129). Maximum allowed is 30              max-lines-per-function
+  193:8   error  Async function 'updateProcedureInfo' has too many lines (182). Maximum allowed is 30      max-lines-per-function
+  193:8   error  Async function 'updateProcedureInfo' has too many statements (22). Maximum allowed is 20  max-statements
+  270:29  error  Async arrow function has too many lines (96). Maximum allowed is 30                       max-lines-per-function
+  270:29  error  Async arrow function has too many statements (26). Maximum allowed is 20                  max-statements
+  347:1   error  File has too many lines (755). Maximum allowed is 300                                     max-lines
+  392:1   error  Async function 'ensureClientParty' has too many lines (44). Maximum allowed is 30         max-lines-per-function
+  459:1   error  Function 'normalizeNewProcedureParties' has too many lines (31). Maximum allowed is 30    max-lines-per-function
+  492:8   error  Async function 'searchMattersForLink' has too many lines (34). Maximum allowed is 30      max-lines-per-function
+  578:8   error  Async function 'getMatterById' has too many lines (49). Maximum allowed is 30             max-lines-per-function
+  628:8   error  Async function 'createMatter' has too many lines (112). Maximum allowed is 30             max-lines-per-function
+  636:45  error  Async arrow function has too many lines (92). Maximum allowed is 30                       max-lines-per-function
+  747:8   error  Async function 'updateMatterTeam' has too many lines (72). Maximum allowed is 30          max-lines-per-function
+  821:8   error  Async function 'updateMatterBasicInfo' has too many lines (37). Maximum allowed is 30     max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/matters/export-xlsx.ts
+  328:1  error  Async function 'addMattersSheet' has too many lines (42). Maximum allowed is 30  max-lines-per-function
+  344:1  error  File has too many lines (982). Maximum allowed is 300                            max-lines
+  384:1  error  Function 'buildIntakeWhere' has too many lines (31). Maximum allowed is 30       max-lines-per-function
+  416:1  error  Function 'buildMatterWhere' has too many lines (32). Maximum allowed is 30       max-lines-per-function
+  511:1  error  Function 'intakeColumnsForKind' has too many lines (67). Maximum allowed is 30   max-lines-per-function
+  579:1  error  Function 'matterColumnsForKind' has too many lines (139). Maximum allowed is 30  max-lines-per-function
+  719:1  error  Function 'buildIntakeRow' has too many lines (49). Maximum allowed is 30         max-lines-per-function
+  769:1  error  Function 'buildMatterRow' has too many lines (85). Maximum allowed is 30         max-lines-per-function
+  855:1  error  Function 'buildProcedureCells' has too many lines (31). Maximum allowed is 30    max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/matters/lifecycle.ts
+   47:8  error  Async function 'closeMatter' has too many lines (37). Maximum allowed is 30   max-lines-per-function
+   94:8  error  Async function 'reopenMatter' has too many lines (39). Maximum allowed is 30  max-lines-per-function
+  137:8  error  Async function 'holdMatter' has too many lines (34). Maximum allowed is 30    max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/notes/actions.ts
+  78:8  error  Async function 'updateNote' has too many lines (32). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/preservations/actions-v2.ts
+   44:8  error  Async function 'listPreservationCases' has too many lines (47). Maximum allowed is 30   max-lines-per-function
+  121:8  error  Async function 'createPreservationCase' has too many lines (56). Maximum allowed is 30  max-lines-per-function
+  178:8  error  Async function 'updatePreservationCase' has too many lines (33). Maximum allowed is 30  max-lines-per-function
+  290:8  error  Async function 'addProperty' has too many lines (38). Maximum allowed is 30             max-lines-per-function
+  351:8  error  Async function 'renewProperty' has too many lines (38). Maximum allowed is 30           max-lines-per-function
+  372:1  error  File has too many lines (378). Maximum allowed is 300                                   max-lines
+
+/home/quangtynu/Qcoder/shelink/src/server/preservations/actions.ts
+   46:8  error  Async function 'listPreservations' has too many lines (38). Maximum allowed is 30        max-lines-per-function
+  155:8  error  Async function 'createPreservation' has too many lines (52). Maximum allowed is 30       max-lines-per-function
+  208:8  error  Async function 'updatePreservation' has too many lines (52). Maximum allowed is 30       max-lines-per-function
+  208:8  error  Async function 'updatePreservation' has too many statements (30). Maximum allowed is 20  max-statements
+  261:8  error  Async function 'renewPreservation' has too many lines (51). Maximum allowed is 30        max-lines-per-function
+  313:8  error  Async function 'liftPreservation' has too many lines (34). Maximum allowed is 30         max-lines-per-function
+  372:1  error  File has too many lines (305). Maximum allowed is 300                                    max-lines
+
+/home/quangtynu/Qcoder/shelink/src/server/procedures/actions.ts
+   49:8  error  Async function 'addProcedure' has too many lines (53). Maximum allowed is 30  max-lines-per-function
+  156:8  error  Async function 'addDeadline' has too many lines (52). Maximum allowed is 30   max-lines-per-function
+  262:8  error  Async function 'addHearing' has too many lines (55). Maximum allowed is 30    max-lines-per-function
+  371:1  error  File has too many lines (328). Maximum allowed is 300                         max-lines
+
+/home/quangtynu/Qcoder/shelink/src/server/reports/analytics.ts
+   44:8  error  Async function 'getCaseCycleAnalysis' has too many lines (42). Maximum allowed is 30         max-lines-per-function
+  107:8  error  Async function 'getReviewIssueAnalysis' has too many lines (62). Maximum allowed is 30       max-lines-per-function
+  107:8  error  Async function 'getReviewIssueAnalysis' has too many statements (22). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/reports/export-xlsx.ts
+  31:8  error  Async function 'buildReportWorkbook' has too many lines (150). Maximum allowed is 30      max-lines-per-function
+  31:8  error  Async function 'buildReportWorkbook' has too many statements (31). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/reports/push-weekly.ts
+  52:8  error  Async function 'runWeeklyReportPush' has too many lines (56). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/reports/queries.ts
+  135:8  error  Async function 'getReportData' has too many lines (143). Maximum allowed is 30      max-lines-per-function
+  135:8  error  Async function 'getReportData' has too many statements (37). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/server/reports/resolve-period.ts
+  41:8  error  Function 'resolveReportPeriod' has too many lines (38). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/reports/weekly.ts
+  56:8  error  Async function 'getLawyerWeeklyDigest' has too many lines (49). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/schedule/actions.ts
+  41:8  error  Async function 'listScheduleItems' has too many lines (144). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/seals/actions.ts
+  112:8   error  Async function 'listSealRequests' has too many lines (41). Maximum allowed is 30        max-lines-per-function
+  302:8   error  Async function 'createSealRequest' has too many lines (263). Maximum allowed is 30      max-lines-per-function
+  302:8   error  Async function 'createSealRequest' has too many statements (48). Maximum allowed is 20  max-statements
+  397:1   error  File has too many lines (628). Maximum allowed is 300                                   max-lines
+  429:45  error  Async arrow function has too many lines (80). Maximum allowed is 30                     max-lines-per-function
+  577:8   error  Async function 'approveSealRequest' has too many lines (46). Maximum allowed is 30      max-lines-per-function
+  635:8   error  Async function 'rejectSealRequest' has too many lines (47). Maximum allowed is 30       max-lines-per-function
+  686:8   error  Async function 'stampSealRequest' has too many lines (73). Maximum allowed is 30        max-lines-per-function
+  686:8   error  Async function 'stampSealRequest' has too many statements (22). Maximum allowed is 20   max-statements
+  771:8   error  Async function 'cancelSealRequest' has too many lines (32). Maximum allowed is 30       max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/search/actions.ts
+  45:8  error  Async function 'globalSearch' has too many lines (97). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/settings/actions.ts
+  57:8  error  Async function 'upsertStageTemplate' has too many lines (31). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/settings/firm-profile-actions.ts
+  54:8  error  Async function 'saveFirmProfileAction' has too many lines (50). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/shared/files.actions.ts
+  32:8  error  Async function 'uploadFile' has too many lines (37). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/shared/preservation.actions.ts
+  88:8  error  Async function 'renewPreservation' has too many lines (31). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/shared/stats.actions.ts
+  26:8  error  Async function 'getDashboardStats' has too many lines (40). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/sms/actions.ts
+   58:8  error  Async function 'parseAndSaveSms' has too many lines (62). Maximum allowed is 30          max-lines-per-function
+   58:8  error  Async function 'parseAndSaveSms' has too many statements (21). Maximum allowed is 20     max-statements
+  214:8  error  Async function 'generateHearingFromSms' has too many lines (44). Maximum allowed is 30   max-lines-per-function
+  263:8  error  Async function 'generateDeadlineFromSms' has too many lines (44). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/tasks/actions.ts
+  48:8  error  Async function 'createTask' has too many lines (52). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/yuandian/cases.ts
+  41:8  error  Async function 'searchSimilarCases' has too many lines (35). Maximum allowed is 30          max-lines-per-function
+  86:8  error  Async function 'searchSimilarCasesByVector' has too many lines (32). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/yuandian/enterprise.ts
+  130:8  error  Async function 'bindPartyToEnterprise' has too many lines (41). Maximum allowed is 30        max-lines-per-function
+  177:8  error  Async function 'unbindPartyEnterprise' has too many lines (32). Maximum allowed is 30        max-lines-per-function
+  215:8  error  Async function 'getEnterpriseSummaryByParty' has too many lines (45). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/server/yuandian/save-case.ts
+   81:8  error  Async function 'saveCaseToMatter' has too many lines (55). Maximum allowed is 30        max-lines-per-function
+  193:8  error  Async function 'saveVectorCaseToMatter' has too many lines (58). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/app/(app)/intakes/_components/use-auto-title.test.tsx
+  21:36  error  Arrow function has too many lines (43). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/app/finance-invoice-create-dialog.test.tsx
+  26:35  error  Arrow function has too many lines (34). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/ai/client.test.ts
+   42:20  error  Arrow function has too many lines (147). Maximum allowed is 30       max-lines-per-function
+  142:45  error  Async arrow function has too many lines (45). Maximum allowed is 30  max-lines-per-function
+  190:22  error  Arrow function has too many lines (82). Maximum allowed is 30        max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/ai/review-parser.test.ts
+  28:30  error  Arrow function has too many lines (155). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/ai/settings.test.ts
+   55:34  error  Arrow function has too many lines (34). Maximum allowed is 30   max-lines-per-function
+   90:34  error  Arrow function has too many lines (32). Maximum allowed is 30   max-lines-per-function
+  123:27  error  Arrow function has too many lines (36). Maximum allowed is 30   max-lines-per-function
+  160:28  error  Arrow function has too many lines (108). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/auth/options.test.ts
+  43:25  error  Arrow function has too many lines (197). Maximum allowed is 30  max-lines-per-function
+  48:45  error  Arrow function has too many lines (138). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/auth/session.test.ts
+  37:24  error  Arrow function has too many lines (32). Maximum allowed is 30  max-lines-per-function
+  70:28  error  Arrow function has too many lines (32). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/default-folders-extend.test.ts
+   7:29  error  Arrow function has too many lines (116). Maximum allowed is 30  max-lines-per-function
+   8:34  error  Arrow function has too many lines (63). Maximum allowed is 30   max-lines-per-function
+  72:47  error  Arrow function has too many lines (50). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/default-folders.test.ts
+   28:41  error  Arrow function has too many lines (48). Maximum allowed is 30   max-lines-per-function
+   77:32  error  Arrow function has too many lines (66). Maximum allowed is 30   max-lines-per-function
+  144:45  error  Arrow function has too many lines (116). Maximum allowed is 30  max-lines-per-function
+  145:37  error  Arrow function has too many lines (52). Maximum allowed is 30   max-lines-per-function
+  198:41  error  Arrow function has too many lines (39). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/enums.test.ts
+  236:44  error  Arrow function has too many statements (22). Maximum allowed is 20  max-statements
+  283:40  error  Arrow function has too many lines (127). Maximum allowed is 30      max-lines-per-function
+  283:40  error  Arrow function has too many statements (23). Maximum allowed is 20  max-statements
+  355:1   error  File has too many lines (349). Maximum allowed is 300               max-lines
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/enums/procedure-to-standing-options-all-cases.test.ts
+  53:63  error  Arrow function has too many lines (141). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/express/track.test.ts
+   25:26  error  Arrow function has too many lines (364). Maximum allowed is 30       max-lines-per-function
+   25:26  error  Arrow function has too many statements (23). Maximum allowed is 20   max-statements
+  301:45  error  Async arrow function has too many lines (34). Maximum allowed is 30  max-lines-per-function
+  336:63  error  Async arrow function has too many lines (51). Maximum allowed is 30  max-lines-per-function
+  349:1   error  File has too many lines (326). Maximum allowed is 300                max-lines
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/firm-caseno.test.ts
+  23:34  error  Arrow function has too many lines (34). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/imports/matter-import.test.ts
+  198:25  error  Arrow function has too many lines (125). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/legal-calc-edge.test.ts
+   34:52  error  Arrow function has too many lines (84). Maximum allowed is 30  max-lines-per-function
+  119:43  error  Arrow function has too many lines (68). Maximum allowed is 30  max-lines-per-function
+  188:38  error  Arrow function has too many lines (35). Maximum allowed is 30  max-lines-per-function
+  224:34  error  Arrow function has too many lines (43). Maximum allowed is 30  max-lines-per-function
+  268:42  error  Arrow function has too many lines (53). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/legal-calc.test.ts
+  29:26  error  Arrow function has too many lines (60). Maximum allowed is 30  max-lines-per-function
+  90:30  error  Arrow function has too many lines (32). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/matter-import.test.ts
+  34:25  error  Arrow function has too many lines (52). Maximum allowed is 30  max-lines-per-function
+  87:25  error  Arrow function has too many lines (34). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/permissions-full.test.ts
+  56:36  error  Arrow function has too many lines (34). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/permissions/assert-functions.test.ts
+   41:35  error  Arrow function has too many lines (57). Maximum allowed is 30  max-lines-per-function
+  159:33  error  Arrow function has too many lines (35). Maximum allowed is 30  max-lines-per-function
+  195:32  error  Arrow function has too many lines (32). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/permissions/index.test.ts
+   67:36  error  Arrow function has too many lines (37). Maximum allowed is 30  max-lines-per-function
+  105:36  error  Arrow function has too many lines (42). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/prisma-branch.test.ts
+  16:46  error  Arrow function has too many lines (46). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/prisma.test.ts
+  24:30  error  Arrow function has too many lines (67). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/review-parser.test.ts
+  23:30  error  Arrow function has too many lines (64). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/review-prompts.test.ts
+  73:25  error  Arrow function has too many lines (52). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/telemetry/metrics.test.ts
+   11:31  error  Arrow function has too many lines (276). Maximum allowed is 30  max-lines-per-function
+   85:32  error  Arrow function has too many lines (53). Maximum allowed is 30   max-lines-per-function
+  165:30  error  Arrow function has too many lines (77). Maximum allowed is 30   max-lines-per-function
+  243:45  error  Arrow function has too many lines (43). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/telemetry/server-metrics.test.ts
+  12:28  error  Arrow function has too many lines (61). Maximum allowed is 30  max-lines-per-function
+  17:27  error  Arrow function has too many lines (43). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/utils.test.ts
+  58:24  error  Arrow function has too many lines (37). Maximum allowed is 30  max-lines-per-function
+  96:23  error  Arrow function has too many lines (38). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/yuandian-client.test.ts
+  56:29  error  Arrow function has too many lines (106). Maximum allowed is 30       max-lines-per-function
+  68:29  error  Async arrow function has too many lines (46). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/yuandian-enterprise-edge.test.ts
+  29:45  error  Arrow function has too many lines (97). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/yuandian-enterprise.test.ts
+   54:1   error  Function 'aggData' has too many lines (52). Maximum allowed is 30    max-lines-per-function
+  107:34  error  Arrow function has too many lines (305). Maximum allowed is 30       max-lines-per-function
+  119:37  error  Async arrow function has too many lines (31). Maximum allowed is 30  max-lines-per-function
+  346:1   error  File has too many lines (656). Maximum allowed is 300                max-lines
+  413:42  error  Arrow function has too many lines (135). Maximum allowed is 30       max-lines-per-function
+  549:40  error  Arrow function has too many lines (82). Maximum allowed is 30        max-lines-per-function
+  632:35  error  Arrow function has too many lines (113). Maximum allowed is 30       max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/yuandian/client.test.ts
+   55:29  error  Arrow function has too many lines (359). Maximum allowed is 30       max-lines-per-function
+  230:45  error  Async arrow function has too many lines (41). Maximum allowed is 30  max-lines-per-function
+  391:1   error  File has too many lines (319). Maximum allowed is 300                max-lines
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/yuandian/enterprise.test.ts
+   34:40  error  Arrow function has too many lines (192). Maximum allowed is 30       max-lines-per-function
+  188:45  error  Async arrow function has too many lines (36). Maximum allowed is 30  max-lines-per-function
+  227:35  error  Arrow function has too many lines (202). Maximum allowed is 30       max-lines-per-function
+  238:51  error  Async arrow function has too many lines (36). Maximum allowed is 30  max-lines-per-function
+  375:1   error  File has too many lines (343). Maximum allowed is 300                max-lines
+  377:45  error  Async arrow function has too many lines (50). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/yuandian/settings.test.ts
+  32:31  error  Arrow function has too many lines (100). Maximum allowed is 30  max-lines-per-function
+  99:36  error  Arrow function has too many lines (32). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/lib/yuandian/vector-search.test.ts
+  41:33  error  Arrow function has too many lines (178). Maximum allowed is 30       max-lines-per-function
+  66:58  error  Async arrow function has too many lines (41). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/ai/recommend-cause.test.ts
+  32:28  error  Arrow function has too many lines (255). Maximum allowed is 30      max-lines-per-function
+  32:28  error  Arrow function has too many statements (21). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/audit.test.ts
+  34:19  error  Arrow function has too many lines (111). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/causes/actions.test.ts
+   28:25  error  Arrow function has too many lines (32). Maximum allowed is 30  max-lines-per-function
+   61:26  error  Arrow function has too many lines (59). Maximum allowed is 30  max-lines-per-function
+  121:26  error  Arrow function has too many lines (45). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/finance/invoice-matter-search.test.ts
+  31:38  error  Arrow function has too many lines (78). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/intake-convert.test.ts
+  115:35  error  Arrow function has too many lines (152). Maximum allowed is 30        max-lines-per-function
+  116:39  error  Async arrow function has too many lines (111). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/intake-schema.test.ts
+  48:32  error  Arrow function has too many lines (46). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/intakes/actions-convert.test.ts
+   67:35   error  Arrow function has too many lines (799). Maximum allowed is 30       max-lines-per-function
+   92:59   error  Async arrow function has too many lines (62). Maximum allowed is 30  max-lines-per-function
+  155:61   error  Async arrow function has too many lines (56). Maximum allowed is 30  max-lines-per-function
+  212:53   error  Async arrow function has too many lines (49). Maximum allowed is 30  max-lines-per-function
+  262:67   error  Async arrow function has too many lines (56). Maximum allowed is 30  max-lines-per-function
+  319:85   error  Async arrow function has too many lines (61). Maximum allowed is 30  max-lines-per-function
+  349:1    error  File has too many lines (772). Maximum allowed is 300                max-lines
+  381:67   error  Async arrow function has too many lines (69). Maximum allowed is 30  max-lines-per-function
+  453:100  error  Async arrow function has too many lines (46). Maximum allowed is 30  max-lines-per-function
+  500:107  error  Async arrow function has too many lines (46). Maximum allowed is 30  max-lines-per-function
+  547:87   error  Async arrow function has too many lines (50). Maximum allowed is 30  max-lines-per-function
+  598:87   error  Async arrow function has too many lines (50). Maximum allowed is 30  max-lines-per-function
+  649:71   error  Async arrow function has too many lines (54). Maximum allowed is 30  max-lines-per-function
+  704:72   error  Async arrow function has too many lines (54). Maximum allowed is 30  max-lines-per-function
+  759:53   error  Async arrow function has too many lines (51). Maximum allowed is 30  max-lines-per-function
+  811:61   error  Async arrow function has too many lines (53). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/intakes/actions-create.test.ts
+   55:26  error  Arrow function has too many lines (362). Maximum allowed is 30       max-lines-per-function
+   62:30  error  Async arrow function has too many lines (44). Maximum allowed is 30  max-lines-per-function
+  107:70  error  Async arrow function has too many lines (46). Maximum allowed is 30  max-lines-per-function
+  237:72  error  Async arrow function has too many lines (40). Maximum allowed is 30  max-lines-per-function
+  304:68  error  Async arrow function has too many lines (40). Maximum allowed is 30  max-lines-per-function
+  345:88  error  Async arrow function has too many lines (34). Maximum allowed is 30  max-lines-per-function
+  367:1   error  File has too many lines (342). Maximum allowed is 300                max-lines
+  380:89  error  Async arrow function has too many lines (36). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/intakes/actions-decline.test.ts
+   82:37  error  Arrow function has too many lines (33). Maximum allowed is 30  max-lines-per-function
+  116:28  error  Arrow function has too many lines (45). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/intakes/actions-get.test.ts
+  36:27  error  Arrow function has too many lines (99). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/intakes/actions-list.test.ts
+  47:25  error  Arrow function has too many lines (144). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/intakes/helpers.test.ts
+   84:38  error  Arrow function has too many lines (153). Maximum allowed is 30  max-lines-per-function
+  135:52  error  Arrow function has too many lines (84). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/intakes/schemas.test.ts
+   70:35  error  Arrow function has too many lines (37). Maximum allowed is 30  max-lines-per-function
+  134:60  error  Arrow function has too many lines (38). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/matters/schemas.test.ts
+   48:26  error  Arrow function has too many lines (126). Maximum allowed is 30  max-lines-per-function
+   90:40  error  Arrow function has too many lines (33). Maximum allowed is 30   max-lines-per-function
+   91:39  error  Arrow function has too many lines (31). Maximum allowed is 30   max-lines-per-function
+  124:35  error  Arrow function has too many lines (31). Maximum allowed is 30   max-lines-per-function
+  175:30  error  Arrow function has too many lines (108). Maximum allowed is 30  max-lines-per-function
+  284:32  error  Arrow function has too many lines (158). Maximum allowed is 30  max-lines-per-function
+  285:43  error  Arrow function has too many lines (32). Maximum allowed is 30   max-lines-per-function
+  342:1   error  File has too many lines (483). Maximum allowed is 300           max-lines
+  443:37  error  Arrow function has too many lines (44). Maximum allowed is 30   max-lines-per-function
+  488:35  error  Arrow function has too many lines (60). Maximum allowed is 30   max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/notifications/approval.test.ts
+   38:33  error  Arrow function has too many lines (89). Maximum allowed is 30  max-lines-per-function
+  128:35  error  Arrow function has too many lines (74). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/notifications/create.test.ts
+  34:32  error  Arrow function has too many lines (88). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/party-input-schema.test.ts
+  35:38  error  Arrow function has too many lines (63). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/preservations/actions.test.ts
+  105:31  error  Arrow function has too many lines (95). Maximum allowed is 30        max-lines-per-function
+  201:29  error  Arrow function has too many lines (38). Maximum allowed is 30        max-lines-per-function
+  240:39  error  Arrow function has too many lines (44). Maximum allowed is 30        max-lines-per-function
+  285:32  error  Arrow function has too many lines (100). Maximum allowed is 30       max-lines-per-function
+  370:1   error  File has too many lines (536). Maximum allowed is 300                max-lines
+  386:32  error  Arrow function has too many lines (82). Maximum allowed is 30        max-lines-per-function
+  391:49  error  Async arrow function has too many lines (33). Maximum allowed is 30  max-lines-per-function
+  469:31  error  Arrow function has too many lines (82). Maximum allowed is 30        max-lines-per-function
+  474:48  error  Async arrow function has too many lines (42). Maximum allowed is 30  max-lines-per-function
+  552:30  error  Arrow function has too many lines (57). Maximum allowed is 30        max-lines-per-function
+  610:32  error  Arrow function has too many lines (52). Maximum allowed is 30        max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/recommend-cause.test.ts
+  64:28  error  Arrow function has too many lines (120). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/reports-analytics.test.ts
+   56:34  error  Arrow function has too many lines (154). Maximum allowed is 30       max-lines-per-function
+  211:36  error  Arrow function has too many lines (150). Maximum allowed is 30       max-lines-per-function
+  289:40  error  Async arrow function has too many lines (37). Maximum allowed is 30  max-lines-per-function
+  352:1   error  File has too many lines (309). Maximum allowed is 300                max-lines
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/reports-period.test.ts
+  27:27  error  Arrow function has too many lines (44). Maximum allowed is 30  max-lines-per-function
+  72:26  error  Arrow function has too many lines (34). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/reports-weekly.test.ts
+  54:39  error  Arrow function has too many lines (31). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/reports/queries-client-receivable.test.ts
+  41:59  error  Arrow function has too many lines (86). Maximum allowed is 30        max-lines-per-function
+  46:65  error  Async arrow function has too many lines (65). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/reports/queries.test.ts
+   44:27  error  Arrow function has too many lines (33). Maximum allowed is 30        max-lines-per-function
+   78:26  error  Arrow function has too many lines (32). Maximum allowed is 30        max-lines-per-function
+  111:27  error  Arrow function has too many lines (109). Maximum allowed is 30       max-lines-per-function
+  163:45  error  Async arrow function has too many lines (32). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/tests/server/reports/weekly.test.ts
+   72:35  error  Arrow function has too many lines (61). Maximum allowed is 30  max-lines-per-function
+  134:39  error  Arrow function has too many lines (47). Maximum allowed is 30  max-lines-per-function
+
+/home/quangtynu/Qcoder/shelink/src/utils/eventHelpers.ts
+  59:1  error  Function 'nextSolarForLunar' has too many lines (32). Maximum allowed is 30   max-lines-per-function
+  97:8  error  Function 'computeEvents' has too many lines (106). Maximum allowed is 30      max-lines-per-function
+  97:8  error  Function 'computeEvents' has too many statements (30). Maximum allowed is 20  max-statements
+
+/home/quangtynu/Qcoder/shelink/src/utils/gedcom.ts
+   44:8  error  Function 'exportToGedcom' has too many lines (145). Maximum allowed is 30      max-lines-per-function
+   44:8  error  Function 'exportToGedcom' has too many statements (72). Maximum allowed is 20  max-statements
+  236:8  error  Function 'parseGedcom' has too many lines (173). Maximum allowed is 30         max-lines-per-function
+  236:8  error  Function 'parseGedcom' has too many statements (85). Maximum allowed is 20     max-statements
+  369:1  error  File has too many lines (334). Maximum allowed is 300                          max-lines
+
+/home/quangtynu/Qcoder/shelink/src/utils/kinshipHelpers.ts
+  134:1  error  Function 'resolveBloodTerms' has too many lines (171). Maximum allowed is 30      max-lines-per-function
+  134:1  error  Function 'resolveBloodTerms' has too many statements (61). Maximum allowed is 20  max-statements
+  308:1  error  Function 'getAncestryData' has too many lines (34). Maximum allowed is 30         max-lines-per-function
+  343:1  error  Function 'findBloodKinship' has too many lines (49). Maximum allowed is 30        max-lines-per-function
+  395:8  error  Function 'computeKinship' has too many lines (261). Maximum allowed is 30         max-lines-per-function
+  395:8  error  Function 'computeKinship' has too many statements (100). Maximum allowed is 20    max-statements
+  410:1  error  File has too many lines (514). Maximum allowed is 300                             max-lines
+
+✖ 939 problems (939 errors, 0 warnings)
+

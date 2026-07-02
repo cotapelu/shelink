@@ -12,12 +12,12 @@
 |--------|---------|--------|-------|
 | Health Score | 63.2* | ≥90 | ↗️ |
 | Test Coverage | **98.85%** | ≥80% | ↗️ |
-| Avg Complexity | TBD | ≤10 | ↔️ |
-| Duplication | TBD% | <5% | ↔️ |
+| Avg Complexity | HIGH (940 violations) | ≤10 | ↘️ |
+| Duplication | **0%** (0 clones) | <5% | ✅ |
 | Evolution Rate | 3 (current day) | ≥10/week | ↗️ |
 | Technical Debt | 0 warnings | -2/week | ↘️ |
 
-*Preliminary (missing complexity/duplication)
+*Preliminary (complexity violations need refactoring)
 
 ---
 
@@ -346,6 +346,38 @@
 - All 990 tests passing, coverage maintained 98.85%
 - Codebase cleaner, dead code removed, dependencies optimized
 - Next: Install complexity/duplication tooling, begin Month 2 security hardening per EVOLUTION.md
+
+
+### [CYCLE-6] - 2025-06-30 Setup Complexity & Duplication Measurement
+
+**Type**: Tooling Setup + Baseline
+**Priority**: HIGH (Month 2 foundation)
+**Duration**: ~30 minutes
+**Status**: ✅ Completed
+
+**Tooling Installed**:
+- ✅ ESLint core rules for complexity (`max-lines-per-function` 30, `max-statements` 20, `max-lines` 300)
+- ✅ `jscpd` for duplication detection (`--min-tokens 50`)
+
+**Complexity Baseline**:
+- Total violations: **940**
+- max-lines-per-function: **777**
+- max-statements: **82**
+- max-lines (file): **857**
+- Affected modules: server actions, utility functions, test files
+
+**Duplication Baseline**:
+- **0 clones** (0% duplication) ✅
+
+**Files Modified**:
+- `eslint.config.mjs` (added complexity rules)
+- `package.json` (added `complexity` and `duplication` scripts)
+
+**Notes**:
+- Complexity thresholds set to GOAL.md standards (functions ≤30, statements ≤20, files ≤300)
+- Violations are **MEDIUM** severity; will be addressed in refactor sprints
+- Duplication baseline clean (no >50 token clones)
+- Next: Begin STRIDE security audit (Task 2)
 
 ---
 

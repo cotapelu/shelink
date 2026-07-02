@@ -3,46 +3,46 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Autonomous Agent Setup & Initial Discovery",
+      "name": "Month 2: Security & Performance Hardening",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Create docs/AGENT_METRICS.md with template",
-          "status": "in_progress"
+          "content": "Setup complexity/duplication measurement tooling (COMPLETED)",
+          "status": "completed"
         },
         {
           "id": "task-2",
-          "content": "Create docs/AGENT_PROFILE.md with template",
-          "status": "pending"
+          "content": "STRIDE Security Audit: Review auth, rate limiting, encryption, JWT",
+          "status": "in_progress"
         },
         {
           "id": "task-3",
-          "content": "Create docs/EVOLUTION.md with template",
+          "content": "Implement health endpoints (/health/live, /health/ready)",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Run quality gates (lint, typecheck, test, build) and capture baseline",
+          "content": "Add Prometheus metrics (http_requests, duration, errors)",
           "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "Parse violations and categorize by severity",
+          "content": "Integrate OpenTelemetry tracing",
           "status": "pending"
         },
         {
           "id": "task-6",
-          "content": "Generate initial improvement plan from violations",
+          "content": "Database audit: Find N+1 queries, missing indexes",
           "status": "pending"
         },
         {
           "id": "task-7",
-          "content": "Perform system audit on existing codebase",
+          "content": "Performance benchmarks: Establish p50/p99 baselines",
           "status": "pending"
         },
         {
           "id": "task-8",
-          "content": "Write first evolution cycle metrics to AGENT_METRICS.md",
+          "content": "Security hardening: RBAC verification, encrypt PII fields",
           "status": "pending"
         }
       ]
@@ -50,5 +50,5 @@
   ],
   "nextTaskId": 9,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-01T09:05:42.658Z"
+  "updatedAt": "2026-07-02T09:26:07.034Z"
 }

@@ -13,7 +13,10 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-require-imports": "off",
       "react-hooks/incompatible-library": "warn",
       "react-hooks/purity": "off",
-      "react-hooks/set-state-in-effect": "off"
+      "react-hooks/set-state-in-effect": "off",
+      "max-lines": ["error", { "max": 300, "skipBlankLines": true, "skipComments": true }],
+      "max-lines-per-function": ["error", { "max": 30, "IIFEs": true }],
+      "max-statements": ["error", 20]
     }
   },
   globalIgnores([
