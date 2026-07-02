@@ -92,7 +92,6 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
     register,
     control,
     handleSubmit,
-    watch,
     setValue,
     reset,
     formState: { errors }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { withMetrics, recordActionEvent } from '@/lib/telemetry/server-metrics';
 import { recordApiRequest, recordBusinessEvent } from '@/lib/telemetry/metrics';

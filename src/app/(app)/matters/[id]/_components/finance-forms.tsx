@@ -516,7 +516,6 @@ export function EditCommissionPlanDialog({
             </p>
           ) : (
             plans.map((p, idx) => {
-              const user = userOptions.find((u) => u.id === p.userId);
               return (
                 <div
                   key={idx}

@@ -22,7 +22,6 @@
 import Link from "next/link";
 import type { Matter, PartyRole, LitigationStanding, Prisma } from "@prisma/client";
 import {
-  matterCategoryLabel,
   matterCategoryColor,
   matterCategoryShort,
   matterStatusLabel

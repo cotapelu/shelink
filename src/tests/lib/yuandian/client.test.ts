@@ -17,7 +17,8 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   searchPtalCases,
   buildCaseDetailUrl,

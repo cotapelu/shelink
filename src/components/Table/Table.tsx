@@ -81,6 +81,7 @@ export function Table<T>({
 
   const tableColumns = enableSelection ? [selectionColumn, ...columns] : columns;
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table is compatible; this is a false positive for React Compiler
   const table = useReactTable({
     data,
     columns: tableColumns,

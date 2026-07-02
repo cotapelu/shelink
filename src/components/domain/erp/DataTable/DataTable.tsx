@@ -95,6 +95,7 @@ export function DataTable<T extends Record<string, unknown>>({
 
   const filterableColumns = columns.filter((col) => col.filterable);
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table is compatible; false positive for React Compiler
   const table = useReactTable({
     data,
     columns: columns as ColumnDef<T>[],

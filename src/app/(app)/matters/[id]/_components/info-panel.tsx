@@ -25,7 +25,7 @@ import { Pencil, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { matterCategoryLabel, matterCategoryKind } from "@/lib/enums";
 import { formatDate, cn } from "@/lib/utils";
-import type { MatterPayload, UserOption, FinancePayload } from "./matter-detail-tabs";
+import type { MatterPayload, UserOption } from "./matter-detail-tabs";
 import { TeamEditorDialog } from "./team-editor-dialog";
 import { RelatedMattersField } from "./related-matters-field";
 
@@ -66,7 +66,6 @@ export function InfoPanel({
           .join("，");
   // 客户明细
   const client = matter.primaryClient;
-  const clientContact = client?.contacts?.[0] ?? null;
   const clientIdNumber = primaryClient?.idNumber ?? null;
   // Unused contact fields kept for future use
   // const clientContactName = clientContact?.name ?? null;
