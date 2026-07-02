@@ -290,9 +290,16 @@ async function seedGenealogy() {
     ]
   });
 
-  // Lineage (calculate simple for person3 with root=person1)
-  await prisma.lineage.create({
-    data: {
+  // Lineage (calculate simple for person3 with root=person1) - use upsert to avoid duplicate
+  await prisma.lineage.upsert({
+    where: {
+      personId_rootPersonId: {
+        personId: person3.id,
+        rootPersonId: person1.id
+      }
+    },
+    update: {},
+    create: {
       personId: person3.id,
       rootPersonId: person1.id,
       generation: 2,
