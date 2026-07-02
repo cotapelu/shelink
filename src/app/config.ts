@@ -17,7 +17,9 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
-export default {
+const config = {
   // Add your configuration here
   demoDomain: 'demo.example.com',
 };
+
+ export default config;

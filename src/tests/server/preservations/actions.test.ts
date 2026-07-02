@@ -1,6 +1,5 @@
 // @ts-nocheck - Test file with extensive mocking, skipping strict type checking
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import cuid from 'cuid';
 
@@ -25,7 +24,7 @@ import {
 import { prisma } from '@/lib/prisma';
 import { requireSession } from '@/lib/auth/session';
 import { revalidatePath } from 'next/cache';
-import { preservationCreateSchema, preservationUpdateSchema, preservationRenewSchema, preservationLiftSchema, preservationIdSchema } from '@/server/preservations/schemas';
+
 import { audit } from '@/server/audit';
 import { assertCanAssociateMatter } from '@/lib/permissions';
 import { assertMatterWritable } from '@/lib/archive/guard';
@@ -247,7 +246,6 @@ describe('listExpiringPreservations', () => {
     const session = mockSession();
     vi.mocked(requireSession).mockResolvedValue(session);
 
-    const now = new Date();
     const future = new Date();
     future.setDate(future.getDate() + 60);
 

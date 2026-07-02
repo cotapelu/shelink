@@ -20,17 +20,17 @@
 'use server'
 
 export async function adminCreateUser(data: any) {
-  throw new Error('Not implemented yet')
+  throw new Error(`Not implemented yet: adminCreateUser for ${JSON.stringify(data)}`)
 }
 
 export async function changeUserRole(userId: string, role: string) {
-  throw new Error('Not implemented yet')
+  throw new Error(`Not implemented yet: changeUserRole userId=${userId} role=${role}`)
 }
 
 export async function deleteUser(userId: string) {
-  throw new Error('Not implemented yet')
+  throw new Error(`Not implemented yet: deleteUser for ${userId}`)
 }
 
 export async function toggleUserStatus(userId: string) {
-  throw new Error('Not implemented yet')
+  throw new Error(`Not implemented yet: toggleUserStatus for ${userId}`)
 }

@@ -85,7 +85,7 @@ export async function deleteFile(id: string) {
 
   try {
     await unlink(file.path);
-  } catch (e) {
+  } catch {
     // ignore
   }
 

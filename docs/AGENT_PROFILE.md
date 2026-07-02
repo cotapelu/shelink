@@ -63,9 +63,13 @@ Areas where modifications consume excessive time/risk:
 
 ## Lessons Learned
 
-1. *Initial setup in progress - no failures yet*
+1. TypeScript strict mode catches subtle issues (e.g., numeric label types) – always enable `strict: true`.
+2. Test files with extensive mocking may legitimately need `@ts-nocheck`; rule `ban-ts-comment` should allow it for `*.test.ts`.
+3. Unused imports/variables accumulate quickly; integrate a linter auto-fix in pre-commit.
+4. Replacing `<img>` with `next/image` improves performance metrics and removes Next.js warnings.
+5. Stub functions should use parameters in error messages to avoid unused variable warnings.
 
 ---
 
-**Last Updated**: 2025-06-30 (Initial creation)  
+**Last Updated**: 2025-06-30 (Cycle 3 updates)  
 **Next Review**: After 5 cycles or when failure rate >5%

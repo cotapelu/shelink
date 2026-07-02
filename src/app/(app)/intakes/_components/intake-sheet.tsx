@@ -20,7 +20,7 @@
 "use client";
 
 import { useState, useTransition, useRef, useMemo, useEffect } from "react";
-import { useForm, useFieldArray, FormProvider, useWatch } from "react-hook-form";
+import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -264,7 +264,6 @@ export function IntakeSheet({
     serviceEnd,
     counselType,
     parties: watchedParties,
-    title: watchedTitle,
     causeFreeText: watchedCauseFree,
     claimAmount: watchedClaimAmount,
     claimDescription: watchedClaimDescription,
@@ -282,8 +281,9 @@ export function IntakeSheet({
 
 
   // Auto-title suggestion
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [causeName, setCauseName] = useState("");
-  const { titleTouched, setTitleTouched } = useAutoTitleSuggestion({});
+  const { setTitleTouched } = useAutoTitleSuggestion({});
 
   // 当前类别下可选程序
   const procedureOptions: ProcedureType[] = useMemo(

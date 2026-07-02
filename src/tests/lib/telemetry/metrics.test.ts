@@ -9,7 +9,7 @@ import {
 } from '@/lib/telemetry/metrics';
 
 describe('Telemetry Metrics', () => {
-  let consoleLogSpy: ReturnType<typeof vi.fn>;
+  let consoleLogSpy: any;
 
   beforeEach(() => {
     consoleLogSpy = vi.fn();
@@ -123,8 +123,8 @@ describe('Telemetry Metrics', () => {
     it('should not record error metric when status < 400 and isError false', () => {
       recordApiRequest('GET', '/api/success', 200, 50);
 
-      const calls = consoleLogSpy.mock.calls.map((c) => c[0]);
-      expect(calls.filter((c) => c.includes('http_requests_failed_total'))).toHaveLength(0);
+      const calls: string[] = consoleLogSpy.mock.calls.map((c: any) => c[0]);
+      expect(calls.filter((c: string) => c.includes('http_requests_failed_total'))).toHaveLength(0);
     });
 
     it('should record error metric when status >= 400 even without isError flag', () => {

@@ -24,7 +24,6 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import type { ClientType, Prisma } from "@prisma/client";
 import {
-  Info,
   Plus,
   Pencil,
   X

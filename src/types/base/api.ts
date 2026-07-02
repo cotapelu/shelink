@@ -58,10 +58,9 @@ export interface RequestConfig {
 
 /**
  * Configuration for mutation operations (callbacks for success/error/settled).
- * @template TVariables - Variables type (unused, kept for compatibility)
  * @template TData - Return data type
  */
-export interface MutationConfig<TVariables = unknown, TData = unknown> {
+export interface MutationConfig<TData = unknown> {
   onSuccess?: (data: TData) => void;
   onError?: (error: ApiError) => void;
   onSettled?: () => void;

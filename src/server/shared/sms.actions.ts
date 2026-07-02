@@ -22,7 +22,6 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/options';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
 
 export async function sendSms(input: { to: string; content: string; matterId?: string }) {
   const session = await getServerSession(authOptions);

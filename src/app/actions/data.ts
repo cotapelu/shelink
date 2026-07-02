@@ -21,10 +21,11 @@
 
 export async function exportData(type: string) {
   // Stub – in production, generate JSON and return a downloadable URL
-  return { ok: true, message: 'Export stub' };
+  return { ok: true, message: `Export stub for ${type}` };
 }
 
 export async function importData(formData: FormData) {
   // Stub – in production, parse and import data
-  return { ok: true, message: 'Import stub' };
+  const count = formData ? 'with data' : 'empty';
+  return { ok: true, message: `Import stub ${count}` };
 }

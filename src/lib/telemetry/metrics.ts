@@ -5,7 +5,7 @@
  */
 
 interface MetricLabels {
-  [key: string]: string;
+  [key: string]: string | number;
 }
 
 /**
@@ -13,7 +13,7 @@ interface MetricLabels {
  */
 export function recordCounter(name: string, labels: MetricLabels = {}, value: number = 1): void {
   const labelStr = Object.entries(labels)
-    .map(([k, v]) => `${k}=\"${v}\"`)
+    .map(([k, v]) => `${k}="${String(v)}"`)
     .join(',');
   console.log(`METRIC: ${name}{${labelStr}} ${value}`);
 }
@@ -23,7 +23,7 @@ export function recordCounter(name: string, labels: MetricLabels = {}, value: nu
  */
 export function recordGauge(name: string, labels: MetricLabels = {}, value: number): void {
   const labelStr = Object.entries(labels)
-    .map(([k, v]) => `${k}=\"${v}\"`)
+    .map(([k, v]) => `${k}="${String(v)}"`)
     .join(',');
   console.log(`METRIC: ${name}{${labelStr}} ${value}`);
 }
@@ -33,7 +33,7 @@ export function recordGauge(name: string, labels: MetricLabels = {}, value: numb
  */
 export function recordHistogram(name: string, labels: MetricLabels = {}, valueMs: number): void {
   const labelStr = Object.entries(labels)
-    .map(([k, v]) => `${k}=\"${v}\"`)
+    .map(([k, v]) => `${k}="${String(v)}"`)
     .join(',');
   console.log(`METRIC: ${name}{${labelStr}} ${valueMs}`);
 }
