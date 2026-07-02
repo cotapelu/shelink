@@ -22,23 +22,18 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Download,
   FileSpreadsheet,
-  Filter,
-  Calendar,
   BarChart3,
   PieChart,
   LineChart,
-  RefreshCw,
   X,
-  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/helpers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dropdown, DropdownItem, DropdownLabel, DropdownSeparator } from '@/components/Dropdown/Dropdown';
+import { Dropdown, DropdownItem, DropdownLabel } from '@/components/Dropdown/Dropdown';
 
 export interface ReportFilter {
   id: string;

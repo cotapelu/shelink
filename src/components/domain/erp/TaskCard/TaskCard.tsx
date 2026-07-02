@@ -20,7 +20,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Calendar, MoreHorizontal, User, Clock } from 'lucide-react';
+import { Calendar, MoreHorizontal, User } from 'lucide-react';
 import { cn } from '@/lib/utils/helpers';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -111,6 +111,7 @@ export function TaskCard({
   return (
     <motion.div
       data-testid="task-card"
+      data-id={id}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -2 }}

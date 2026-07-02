@@ -387,7 +387,8 @@ export async function renewProperty(input: z.infer<typeof propertyRenewSchema>) 
   return { ok: true };
 }
 
-export async function liftProperty(propertyId: string, note?: string) {
+export async function liftProperty(propertyId: string, _note?: string) {
+  void _note;
   const session = await requireSession();
   const prop = await prisma.preservationProperty.findUnique({
     where: { id: propertyId },

@@ -21,10 +21,10 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, ChevronRight, Clock, Flag, Calendar, MoreHorizontal } from 'lucide-react';
+import { ChevronDown, ChevronRight, Flag, Calendar, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils/helpers';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
 import { Dropdown, DropdownItem, DropdownSeparator, DropdownLabel } from '@/components/Dropdown/Dropdown';
 
 export interface TimelineTask {
@@ -56,13 +56,6 @@ export interface ProjectTimelineProps {
   showDependencies?: boolean;
   className?: string;
 }
-
-const statusColors = {
-  pending: 'bg-stone-200 text-stone-700',
-  in_progress: 'bg-blue-100 text-blue-700',
-  completed: 'bg-green-100 text-green-700',
-  delayed: 'bg-red-100 text-red-700',
-};
 
 const milestoneStatusColors = {
   upcoming: 'bg-blue-100 text-blue-700 border-blue-200',

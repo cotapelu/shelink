@@ -65,7 +65,6 @@ export function InfoPanel({
           .map((m) => m.role === "CO_LEAD" ? m.user.name : `${m.user.name}（助理）`)
           .join("，");
   // 客户明细
-  const client = matter.primaryClient;
   const clientIdNumber = primaryClient?.idNumber ?? null;
   // Unused contact fields kept for future use
   // const clientContactName = clientContact?.name ?? null;

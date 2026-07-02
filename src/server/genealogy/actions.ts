@@ -325,8 +325,6 @@ const CreateEventSchema = z.object({
   description: z.string().optional(),
 });
 
-const UpdateEventSchema = CreateEventSchema.partial();
-
 export async function createEvent(input: any) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');

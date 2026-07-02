@@ -19,7 +19,7 @@
  */
 "use client";
 
-import { useTransition, useRef, useState, useEffect, useMemo } from "react";
+import { useTransition, useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -63,6 +63,9 @@ import { proceduresByCategory } from "@/lib/procedures-by-category";
 import { agencyOptions } from "@/lib/china-regions";
 import { JurisdictionSelect } from "@/app/(app)/intakes/_components/jurisdiction-select";
 import { cn } from "@/lib/utils";
+
+// Chinese number mapping for auto-title
+const CN_NUM: Record<number, string> = { 1: "一", 2: "二", 3: "三", 4: "四", 5: "五", 6: "六", 7: "七", 8: "八", 9: "九", 10: "十" };
 
 // ============ AddProcedureSheet ============
 
@@ -501,22 +504,20 @@ export function AddHearingDialog({
 
   const watchedProcedureId = useWatch({ name: "procedureId", control });
 
-  const CN_NUM: Record<number, string> = { 1: "一", 2: "二", 3: "三", 4: "四", 5: "五", 6: "六", 7: "七", 8: "八", 9: "九", 10: "十" };
-
-  function autoTitle(procId: string) {
+  const autoTitle = useCallback((procId: string) => {
     const proc = procedures.find(p => p.id === procId);
     if (!proc) return;
     const count = (hearingCounts?.[procId] ?? 0) + 1;
     const numStr = CN_NUM[count] ?? String(count);
     setValue("title", `${proc.label}第${numStr}次开庭`);
-  }
+  }, [procedures, hearingCounts, setValue]);
 
   // 打开时同步默认程序 + 自动生成主题
   useEffect(() => {
     if (!open) return;
     setValue("procedureId", defaultProcedureId);
     autoTitle(defaultProcedureId);
-  }, [open, defaultProcedureId]);
+  }, [open, defaultProcedureId, autoTitle, setValue]);
 
   function handleSummonsUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

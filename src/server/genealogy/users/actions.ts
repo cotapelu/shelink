@@ -22,7 +22,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/options';
 import { prisma } from '@/lib/prisma';
-import { redirect } from 'next/navigation';
+
 
 export async function getUsers() {
   const session = await getServerSession(authOptions);

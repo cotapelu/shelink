@@ -61,7 +61,8 @@ export function getTokens(identifier: string, config: RateLimitConfig): number {
 /**
  * Reset rate limit for identifier (admin operation)
  */
-export function reset(identifier: string): void {
+export function reset(_identifier: string): void {
+  void _identifier;
   // Not implemented in memory store (would need delete)
   // For Redis, you'd DEL key
 }

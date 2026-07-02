@@ -35,8 +35,6 @@ const CreateWorkflowSchema = z.object({
   projectId: z.string().uuid().optional().or(z.literal('')).transform(v => v || null),
 });
 
-const UpdateWorkflowSchema = CreateWorkflowSchema.partial();
-
 const CreateStepSchema = z.object({
   workflowId: z.string().uuid(),
   name: z.string().min(1, 'Step name required'),
@@ -139,7 +137,7 @@ export async function createWorkflow(input: any) {
   return { ok: true, id: workflow.id };
 }
 
-export async function updateWorkflow(input: { id: string } & Partial<z.infer<typeof UpdateWorkflowSchema>>) {
+export async function updateWorkflow(input: { id: string } & Partial<z.infer<typeof CreateWorkflowSchema>>) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');
 

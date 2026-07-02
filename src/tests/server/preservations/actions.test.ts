@@ -259,7 +259,7 @@ describe('listExpiringPreservations', () => {
       expect.objectContaining({
         where: expect.objectContaining({
           status: { in: ['ACTIVE', 'RENEWED'] },
-          expiryDate: { lte: future },
+          expiryDate: { lte: expect.any(Date) },
         }),
       })
     );

@@ -40,10 +40,6 @@ import { generateCorrelationId } from '@/lib/telemetry/correlation-id';
 import { recordApiRequest } from '@/lib/telemetry/metrics';
 import { getCache, setCache, hasStaleCache, getStaleCache } from '@/lib/cache/fetch-cache';
 
-function getApiUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004/api';
-}
-
 // Configuration
 const DEFAULT_TIMEOUT = 10000; // 10 seconds
 const CIRCUIT_BREAKER_ENABLED = process.env.NODE_ENV === 'production';
@@ -122,7 +118,6 @@ async function executeRequest<T>(
   }
 
   let lastError: Error | null = null;
-  let lastStatus: number | undefined;
   const startTime = Date.now();
 
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -153,12 +148,11 @@ async function executeRequest<T>(
       let jsonData: any;
       try {
         jsonData = await response.json();
-      } catch (e) {
+      } catch {
         jsonData = undefined;
       }
 
       if (!response.ok) {
-        lastStatus = response.status;
         const errorCode = mapStatusCodeToErrorCode(response.status);
         const errorMessage =
           jsonData?.error || jsonData?.message || `Request failed with status ${response.status}`;

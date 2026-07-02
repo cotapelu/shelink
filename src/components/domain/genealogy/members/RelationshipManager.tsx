@@ -55,11 +55,6 @@ interface RelationshipApiResponse {
   note: string | null;
 }
 
-interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-}
-
 interface EnrichedRelationship {
   id: string;
   type: RelationshipType;

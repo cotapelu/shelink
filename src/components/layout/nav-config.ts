@@ -30,7 +30,6 @@ import {
   BarChart3,
   UsersRound,
   Kanban,
-  GitBranch,
 } from "lucide-react";
 
 export type NavItem = {

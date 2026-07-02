@@ -58,7 +58,8 @@ export function mapStatusCodeToErrorCode(status: number): ApiErrorCode {
   }
 }
 
-export function getUserFacingMessage(errorCode: ApiErrorCode, context?: string): string {
+export function getUserFacingMessage(errorCode: ApiErrorCode, _context?: string): string {
+  void _context;
   const messages: Record<ApiErrorCode, string> = {
     [ApiErrorCode.NETWORK_ERROR]: 'Không thể kết nối đến máy chủ. Kiểm tra kết nối mạng.',
     [ApiErrorCode.TIMEOUT]: 'Yêu cầu quá thời gian. Vui lòng thử lại.',

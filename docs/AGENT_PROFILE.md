@@ -72,7 +72,12 @@ Areas where modifications consume excessive time/risk:
 4. Replacing `<img>` with `next/image` improves performance metrics and removes Next.js warnings.
 5. Stub functions should use parameters in error messages to avoid unused variable warnings.
 
+6. Wrapping frequently used functions in `useCallback` prevents exhaustive-deps warnings and optimizes renders.
+7. Moving constant objects out of component bodies reduces GC pressure and satisfies dependency arrays.
+8. Unused parameters: either consume (e.g., `void param`) or explicitly disable lint; `_` prefix alone insufficient by default.
+9. Achieving zero lint warnings is possible via systematic batch cleanup and improves maintainability.
+
 ---
 
-**Last Updated**: 2025-06-30 (Cycle 4 updates)  
+**Last Updated**: 2025-06-30 (Cycle 5 updates)  
 **Next Review**: After 5 cycles or when failure rate >5%

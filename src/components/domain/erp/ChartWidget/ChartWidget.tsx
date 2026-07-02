@@ -38,7 +38,7 @@ import {
   Cell,
 } from 'recharts';
 import { motion } from 'framer-motion';
-import { Download, Maximize2, Settings } from 'lucide-react';
+import { Download, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils/helpers';
 import { Button } from '@/components/ui/button';
 import { Dropdown, DropdownItem, DropdownLabel } from '@/components/Dropdown/Dropdown';

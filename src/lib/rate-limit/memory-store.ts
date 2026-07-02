@@ -42,25 +42,6 @@ function cleanup(olderThanMs: number = 60 * 60 * 1000): void {
 }
 
 /**
- * Get or create record for key
- */
-function getRecord(key: string): RateLimitRecord {
-  let record = store.get(key);
-  if (!record) {
-    record = { bucket: 0, lastRefill: Date.now() };
-    store.set(key, record);
-  }
-  return record;
-}
-
-/**
- * Update record
- */
-function setRecord(key: string, record: RateLimitRecord): void {
-  store.set(key, record);
-}
-
-/**
  * Rate limit check using Token Bucket algorithm
  * @param key Unique identifier (e.g., IP+endpoint)
  * @param capacity Max tokens (burst)
