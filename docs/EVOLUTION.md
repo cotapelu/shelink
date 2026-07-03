@@ -254,6 +254,35 @@
 
 ---
 
+### [CYCLE-P1-3] - 2025-07-03 Coverage Push: ProcedureCoreSection Tests
+
+**Type**: Violation Fix (HIGH) - Coverage Gap  
+**Priority**: HIGH  
+**Duration**: ~25 min  
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: **1044 → 1050 passed** (+6 tests)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Initial drop due to increased denominator (new source files imported)
+- Covered functions: +3 (including ProcedureCoreSection)
+- Overall Func: 75.33% → 74.93% (-0.40%)
+- Local coverage of new component: >80%
+
+**Lesson**:
+- Adding tests for uncovered modules may temporarily lower overall % as total codebase grows
+- Continue adding tests to eventually push aggregate upward
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/procedure-core-section.test.tsx (new)
+- src/app/(app)/intakes/_components/lawyer-section.test.tsx (fixed Field mock to render error)
+
+---
+
 ## Upcoming Refactors (Next 3 Months)
 
 ### Month 1: Foundation & Baseline

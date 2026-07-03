@@ -864,3 +864,40 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Files Modified**:
 - src/app/(app)/intakes/_components/claim-section.test.tsx (new)
+
+---
+
+### [CYCLE-P1-3] - 2025-07-03 Coverage Push: ProcedureCoreSection Tests
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: ~25 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: **1044 → 1050 passed** (+6 tests)
+- ✅ Build: SUCCESS
+
+**Coverage After** (final):
+| Metric | Before (prev cycle) | After | Δ |
+|--------|---------------------|-------|----|
+| Statements | 86.46% (1623/1877) | **86.08% (1627/1890)** | -0.38% |
+| Branches | 78.38% (1309/1670) | **78.27% (1315/1680)** | -0.11% |
+| Functions | 75.33% (281/373) | **74.93% (284/379)** | -0.40% |
+| Lines | 86.85% (1427/1643) | **86.41% (1431/1656)** | -0.44% |
+
+**Analysis**:
+- Added tests for previously uncovered `ProcedureCoreSection` (6 tests)
+- New source files imported increased total statements/functions denominator
+- Covered functions increased (+3) but total functions grew more (+6), causing slight regression in percentage
+- Still, functional coverage of new component achieved (now >80% locally)
+
+**Lesson**:
+- Adding tests for uncovered modules initially may lower overall coverage percentage if total untested code surface grows
+- Long-term trend should be upward as more modules reach near 100%
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/procedure-core-section.test.tsx (new)
+- src/app/(app)/intakes/_components/lawyer-section.test.tsx (mock Field fix for error handling)
