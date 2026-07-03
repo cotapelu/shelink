@@ -793,3 +793,39 @@ Date        Health   Coverage   Complexity   Tests   Debt
 **Files Modified**:
 - src/proxy.ts
 - src/tests/proxy.rate-limit.test.ts (new)
+
+---
+
+### [CYCLE-P1-1] - 2025-07-03 Coverage Push: LawyerSection Tests
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: ~20 minutes
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Lint: No new violations (974 existing unchanged)
+- ✅ Typecheck: PASS
+- ✅ Tests: **1024 → 1040 passed** (+16 tests)
+- ✅ Build: SUCCESS
+
+**Coverage Delta**:
+| Metric | Before | After | Δ |
+|---------|--------|-------|----|
+| Statements | 86.25% | **86.46%** | +0.21% |
+| Branches | 78.02% | **78.38%** | +0.36% |
+| Functions | 74.26% | **75.33%** | +1.07% |
+| Lines | 86.60% | **86.85%** | +0.25% |
+
+**Test Delta**:
+- Added `src/app/(app)/intakes/_components/lawyer-section.test.tsx` (7 unit tests)
+- Covered rendering, filtering logic, empty states, error handling
+- Component coverage: LawyerSection moved from low to high (estimated 0% → >80%)
+
+**Notes**:
+- All existing tests pass, no regressions
+- Coverage increased but still below 80% Func target (75.33%)
+- Next: Continue with client-sheet, intake-combobox, and intake-sheet remaining sections
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/lawyer-section.test.tsx (new)

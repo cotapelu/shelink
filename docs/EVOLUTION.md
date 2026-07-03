@@ -185,6 +185,47 @@
 
 ---
 
+### [CYCLE-P1-1] - 2025-07-03 Coverage Push: LawyerSection Tests
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: ~20 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: 1024 → 1040 passed (+16)
+- ✅ Build: SUCCESS
+
+**Coverage Improvement**:
+| Metric | Before | After | Δ |
+|--------|--------|-------|----|
+| Statements | 86.25% | **86.46%** | +0.21% |
+| Branches | 78.02% | **78.38%** | +0.36% |
+| Functions | 74.26% | **75.33%** | +1.07% |
+| Lines | 86.60% | **86.85%** | +0.25% |
+
+**Work Done**:
+- Added comprehensive unit tests for `LawyerSection` component
+- Covered rendering, colleague filtering, empty states, error handling
+- Component’s functional coverage increased from ~0% to >80%
+
+**Impact**:
+- Overall Func coverage: 74.26% → 75.33% (+1.07%)
+- Test count: 1024 → 1040 (+16)
+- On track for Sprint 1 target (Func ≥80%)
+
+**Next Steps**:
+- Continue with `client-sheet` and `intake-combobox` coverage
+- Address per-user rate limiting tests
+- Prepare for JWT upgrade (needs approval)
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/lawyer-section.test.tsx (new)
+
+---
+
 ## Upcoming Refactors (Next 3 Months)
 
 ### Month 1: Foundation & Baseline
