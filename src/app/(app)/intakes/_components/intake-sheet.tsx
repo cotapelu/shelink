@@ -48,6 +48,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Field } from "./field";
+import { FeeSection } from "./fee-section";
 import {
   Dialog,
   DialogContent,
@@ -68,7 +70,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import {
   matterCategoryLabel,
   procedureTypeLabel,
-  litigationStandingLabel,
   feeTypeLabel,
   procedureToStandingOptions,
   userRoleLabel,
@@ -88,11 +89,7 @@ import { intakeCreateSchema, type IntakeCreateInput } from "@/server/intakes/sch
 import { createIntake } from "@/server/intakes/actions";
 import { uploadDocument } from "@/server/documents/actions";
 import { parsePleading } from "@/server/ai/parse-pleading";
-import {
-  PartyCard,
-  PARTY_GRID,
-  PARTY_GRID_NO_STANDING
-} from "@/app/(app)/matters/_components/party-card";
+
 import {
   recommendCause,
   type CauseRecommendation
@@ -106,6 +103,7 @@ import { ClientCombobox } from "./client-combobox";
 import { CauseRecommendationDialog } from "./cause-recommendation-dialog";
 import { JurisdictionSelect } from "./jurisdiction-select";
 import { useAutoTitleSuggestion } from "./use-auto-title";
+import { PartiesSection } from "./parties-section";
 import { useIntakeFormStates } from "./use-intake-form-states";
 
 const CATEGORIES: MatterCategory[] = [
@@ -119,7 +117,7 @@ const CATEGORIES: MatterCategory[] = [
   "SPECIAL_PROJECT"
 ];
 
-const FEE_TYPES: FeeType[] = ["FIXED", "CONTINGENCY", "TIMED"];
+
 
 // 我方为被动方时，可上传起诉状/申请书 OCR 识别对方
 const RECEIVING_STANDINGS = new Set<LitigationStanding>([
@@ -197,7 +195,7 @@ const defaults: IntakeCreateInput = {
   ]
 };
 
-type Colleague = { id: string; name: string; role: UserRole };
+export type Colleague = { id: string; name: string; role: UserRole };
 
 export function IntakeSheet({
   open,
@@ -705,185 +703,23 @@ export function IntakeSheet({
 
   // 当事人/相关方录入表格（按类别复用，诉讼/仲裁含诉讼地位列）
   function renderParties(mode: CategoryKind) {
-    const showStanding = mode === "litigation";
-    const grid = showStanding ? PARTY_GRID : PARTY_GRID_NO_STANDING;
-    const clientLabel =
-      mode === "counsel" ? "顾问单位" : mode === "project" ? "委托方" : "客户";
     return (
-      <div className="overflow-x-auto rounded-lg border border-border bg-muted/25 p-2">
-        <div className={cn("space-y-2", showStanding ? "min-w-[980px]" : "min-w-[840px]")}>
-          {/* 表头 */}
-          <div
-            className={cn(
-              grid,
-              "rounded-md bg-muted/70 px-2.5 py-2 text-[11px] font-medium text-muted-foreground"
-            )}
-          >
-            <span>角色</span>
-            <span>主体类型</span>
-            <span>姓名 / 名称</span>
-            <span>证件号 / 信用代码</span>
-            {showStanding && (
-              <span>
-                诉讼地位<span className="ml-0.5 text-destructive">*</span>
-              </span>
-            )}
-            <span>联系人</span>
-            <span>联系电话</span>
-            <span className="text-right">操作</span>
-          </div>
-
-          {parties.map((p, idx) => {
-            const all = (watchedParties ?? []) as { role?: string }[];
-            const role = (all[idx]?.role as PartyRole) ?? "OPPOSING_PARTY";
-            const isClient = role === "CLIENT_PARTY";
-            // 顾问类只显示委托方
-            if (mode === "counsel" && !isClient) return null;
-            return (
-              <PartyCard
-                key={p.id}
-                index={idx}
-                fieldPrefix="parties"
-                showStanding={showStanding}
-                removable={!isClient}
-                onRemove={() => removeParty(idx)}
-                errors={errors as never}
-                roleSlot={
-                  isClient ? (
-                    <div className="flex h-9 w-full items-center justify-center rounded-sm border border-primary/30 bg-primary/10 text-xs font-medium text-primary">
-                      {clientLabel}
-                    </div>
-                  ) : (
-                    <Select
-                      value={role}
-                      onValueChange={(v) =>
-                        setValue(`parties.${idx}.role`, v as PartyRole, { shouldDirty: true })
-                      }
-                    >
-                      <SelectTrigger className="h-9 w-full bg-background px-2.5 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="OPPOSING_PARTY" className="text-xs">
-                          相对方
-                        </SelectItem>
-                        <SelectItem value="THIRD_PARTY" className="text-xs">
-                          第三方
-                        </SelectItem>
-                        <SelectItem value="OTHER" className="text-xs">
-                          关联方
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )
-                }
-                standingSlot={
-                  !showStanding ? undefined : isClient ? (
-                    <div className="space-y-1">
-                      <Select
-                        value={ourStanding ?? ""}
-                        onValueChange={(v) =>
-                          setValue("ourStanding", v as LitigationStanding, {
-                            shouldDirty: true,
-                            shouldValidate: true
-                          })
-                        }
-                      >
-                        <SelectTrigger className="h-9 w-full bg-background px-2.5 text-xs">
-                          <SelectValue placeholder="诉讼地位" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(ourStandingOptions.length
-                            ? ourStandingOptions
-                            : (Object.keys(litigationStandingLabel) as LitigationStanding[])
-                          ).map((s) => (
-                            <SelectItem key={s} value={s} className="text-xs">
-                              {litigationStandingLabel[s]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.ourStanding?.message && (
-                        <p className="text-[11px] text-destructive">{errors.ourStanding.message}</p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-1">
-                      <Select
-                        value={watchedParties?.[idx]?.standing ?? ""}
-                        onValueChange={(v) =>
-                          setValue(`parties.${idx}.standing`, v as LitigationStanding, {
-                            shouldDirty: true,
-                            shouldValidate: true
-                          })
-                        }
-                      >
-                        <SelectTrigger className="h-9 w-full bg-background px-2.5 text-xs">
-                          <SelectValue placeholder="诉讼地位" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {oppositeStandingOptions.map((s) => (
-                            <SelectItem key={s} value={s} className="text-xs">
-                              {litigationStandingLabel[s]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.parties?.[idx]?.standing?.message && (
-                        <p className="text-[11px] text-destructive">
-                          {errors.parties[idx]?.standing?.message}
-                        </p>
-                      )}
-                    </div>
-                  )
-                }
-                nameSlot={
-                  isClient ? (
-                    <ClientCombobox
-                      triggerClassName="h-9 text-sm"
-                      clientId={clientId}
-                      clientName={watchedParties?.[0]?.name ?? ""}
-                      clientType={
-                        watchedParties?.[0]?.partyType === "ORGANIZATION"
-                          ? "COMPANY"
-                          : "INDIVIDUAL"
-                      }
-                      options={clientOptions}
-                      onPickExisting={(id, name) => {
-                        setValue("clientId", id, { shouldDirty: true });
-                        setValue("parties.0.name", name, {
-                          shouldDirty: true,
-                          shouldValidate: true
-                        });
-                      }}
-                      onTypeNew={(name) => {
-                        setValue("clientId", "", { shouldDirty: true });
-                        setValue("parties.0.name", name, {
-                          shouldDirty: true,
-                          shouldValidate: true
-                        });
-                      }}
-                      onPickYuandian={handlePickYuandian}
-                      onClear={() => {
-                        setValue("clientId", "", { shouldDirty: true });
-                        setValue("parties.0.name", "", { shouldDirty: true });
-                        setValue("parties.0.idNumber", "", { shouldDirty: true });
-                        setValue("parties.0.enterpriseSocialCode", "", { shouldDirty: true });
-                        setValue("parties.0.enterpriseName", "", { shouldDirty: true });
-                        setValue("parties.0.address", "", { shouldDirty: true });
-                        setValue("parties.0.legalRep", "", { shouldDirty: true });
-                      }}
-                    />
-                  ) : undefined
-                }
-              />
-            );
-          })}
-        </div>
-      </div>
+      <PartiesSection
+        mode={mode}
+        parties={parties}
+        watchedParties={watchedParties}
+        ourStanding={ourStanding}
+        ourStandingOptions={ourStandingOptions}
+        oppositeStandingOptions={oppositeStandingOptions}
+        setValue={setValue}
+        errors={errors}
+        onRemove={removeParty}
+        clientId={clientId}
+        clientOptions={clientOptions}
+        onPickYuandian={handlePickYuandian}
+      />
     );
   }
-
   const addPartyBtn = (label: string) => (
     <Button
       type="button"
@@ -1309,105 +1145,13 @@ export function IntakeSheet({
 
             {/* 3. 律师费 */}
             <Section title={kind === "counsel" ? "③ 顾问费" : "③ 律师费"}>
-              <div
-                className={cn(
-                  "grid grid-cols-1 gap-2",
-                  kind === "counsel" ? "sm:grid-cols-2" : "sm:grid-cols-3"
-                )}
-              >
-                {/* 顾问费不含风险代理 */}
-                {FEE_TYPES.filter((t) => kind !== "counsel" || t !== "CONTINGENCY").map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setValue("feeType", t, { shouldDirty: true })}
-                    className={cn(
-                      "rounded-md border px-3 py-2 text-sm transition-colors",
-                      feeType === t
-                        ? "border-primary bg-primary/15 text-primary"
-                        : "border-border bg-background text-muted-foreground hover:border-input"
-                    )}
-                  >
-                    {feeTypeLabel[t]}
-                  </button>
-                ))}
-              </div>
-
-              {feeType === "FIXED" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field label="总金额（元）" required>
-                    <Input
-                      type="number"
-                      inputMode="decimal"
-                      step="0.01"
-                      placeholder="0.00"
-                      className="font-mono"
-                      {...register("feeAmount", { valueAsNumber: true })}
-                    />
-                  </Field>
-                  <Field label="付款节点 / 分期约定">
-                    <Input
-                      placeholder="如：签约付 50%，开庭前付 30%，结案付 20%"
-                      {...register("feeSchedule")}
-                    />
-                  </Field>
-                </div>
-              )}
-
-              {feeType === "TIMED" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field label="小时费率（元 / 小时）" required>
-                    <Input
-                      type="number"
-                      inputMode="decimal"
-                      step="0.01"
-                      placeholder="0.00"
-                      className="font-mono"
-                      {...register("feeAmount", { valueAsNumber: true })}
-                    />
-                  </Field>
-                  <Field label="计费说明 / 结算周期">
-                    <Input
-                      placeholder="如：合伙人 2000 元/时、授薪律师 1000 元/时；按月结算"
-                      {...register("feeSchedule")}
-                    />
-                  </Field>
-                </div>
-              )}
-
-              {feeType === "CONTINGENCY" && (
-                <>
-                  <Field label="基础办案费（元）" required>
-                    <Input
-                      type="number"
-                      inputMode="decimal"
-                      step="0.01"
-                      placeholder="0.00"
-                      className="font-mono"
-                      {...register("feeAmount", { valueAsNumber: true })}
-                    />
-                  </Field>
-                  <Field label="风险代理收费方式" required hint="例：判决/调解执行到位后按到账金额 15% 收取；或：以胜诉金额阶梯计提：≤100 万部分 10%，>100 万部分 8%">
-                    <Textarea
-                      rows={3}
-                      placeholder="详细描述风险代理收费方式 / 触发条件 / 计提比例"
-                      {...register("contingencyTerms")}
-                    />
-                  </Field>
-                  <Field label="付款节点">
-                    <Input
-                      placeholder="如：基础办案费签约付清；风险费执行到账后 7 日内支付"
-                      {...register("feeSchedule")}
-                    />
-                  </Field>
-                </>
-              )}
-
-              {feeType && (
-                <Field label="费用备注（可选）">
-                  <Input placeholder="如：含差旅 / 含诉讼费垫付" {...register("feeNote")} />
-                </Field>
-              )}
+              <FeeSection
+                kind={kind}
+                feeType={feeType}
+                register={register}
+                setValue={setValue}
+                errors={errors}
+              />
             </Section>
 
             {/* 4. 合同 */}
@@ -1564,30 +1308,4 @@ function Section({
   );
 }
 
-function Field({
-  label,
-  required,
-  error,
-  hint,
-  className,
-  children
-}: {
-  label: string;
-  required?: boolean;
-  error?: string;
-  hint?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={cn("space-y-1.5", className)}>
-      <Label className="flex items-center gap-1 text-[13px] font-medium text-foreground">
-        {label}
-        {required && <span className="text-destructive">*</span>}
-      </Label>
-      {children}
-      {hint && !error && <p className="text-[11px] text-muted-foreground">{hint}</p>}
-      {error && <p className="text-xs text-destructive">{error}</p>}
-    </div>
-  );
-}
+
