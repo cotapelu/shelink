@@ -829,3 +829,38 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Files Modified**:
 - src/app/(app)/intakes/_components/lawyer-section.test.tsx (new)
+
+---
+
+### [CYCLE-P1-2] - 2025-07-03 Coverage Push: ClaimSection Tests
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: ~15 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: **1040 → 1044 passed** (+4 tests)
+- ✅ Build: SUCCESS
+
+**Coverage Delta**:
+| Metric | Before | After | Δ |
+|--------|--------|-------|----|
+| Statements | 86.46% | 86.46% | 0% |
+| Branches | 78.38% | 78.38% | 0% |
+| Functions | 75.33% | 75.33% | 0% |
+| Lines | 86.85% | 86.85% | 0% |
+
+**Test Delta**:
+- Added `src/app/(app)/intakes/_components/claim-section.test.tsx` (4 unit tests)
+- Covered rendering, registration of claimAmount and claimDescription fields
+
+**Notes**:
+- ClaimSection already indirectly covered by intake-sheet integration tests; direct unit tests did not increase function coverage
+- Lesson: Prioritize testing modules with ZERO existing coverage to maximize delta
+- Next: Target uncovered core modules (e.g., jurisdiction-select, client-sheet, procedure-section)
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/claim-section.test.tsx (new)

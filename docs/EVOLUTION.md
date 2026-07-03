@@ -226,6 +226,34 @@
 
 ---
 
+### [CYCLE-P1-2] - 2025-07-03 Coverage Push: ClaimSection Tests
+
+**Type**: Violation Fix (HIGH) - Coverage Gap  
+**Priority**: HIGH  
+**Duration**: ~15 min  
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: 1040 → 1044 passed (+4)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- No change in overall metrics (ClaimSection already covered via integration)
+- Nonetheless, unit tests improve isolation and test clarity
+
+**Work**:
+- Added `claim-section.test.tsx` (4 tests)
+- Verified field rendering and form registration
+
+**Lesson**: Target modules with zero coverage for maximum delta. Future tests should focus on uncovered functions (e.g., jurisdiction-select, client-sheet, procedure-section).
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/claim-section.test.tsx (new)
+
+---
+
 ## Upcoming Refactors (Next 3 Months)
 
 ### Month 1: Foundation & Baseline
