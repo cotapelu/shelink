@@ -3,52 +3,32 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Month 2: Security & Performance Hardening",
+      "name": "Phase 4: Metrics & Evolution Update",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Setup complexity/duplication measurement tooling (COMPLETED)",
-          "status": "completed"
-        },
-        {
-          "id": "task-2",
-          "content": "STRIDE Security Audit: Review auth, rate limiting, encryption, JWT",
+          "content": "Update docs/AGENT_METRICS.md with audit results",
           "status": "in_progress"
         },
         {
+          "id": "task-2",
+          "content": "Create/update docs/AGENT_PROFILE.md with weaknesses",
+          "status": "pending"
+        },
+        {
           "id": "task-3",
-          "content": "Implement health endpoints (/health/live, /health/ready)",
+          "content": "Create/update docs/EVOLUTION.md with roadmap",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Add Prometheus metrics (http_requests, duration, errors)",
-          "status": "pending"
-        },
-        {
-          "id": "task-5",
-          "content": "Integrate OpenTelemetry tracing",
-          "status": "pending"
-        },
-        {
-          "id": "task-6",
-          "content": "Database audit: Find N+1 queries, missing indexes",
-          "status": "pending"
-        },
-        {
-          "id": "task-7",
-          "content": "Performance benchmarks: Establish p50/p99 baselines",
-          "status": "pending"
-        },
-        {
-          "id": "task-8",
-          "content": "Security hardening: RBAC verification, encrypt PII fields",
+          "content": "Finalize audit summary for user",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 9,
+  "nextTaskId": 5,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-02T09:26:07.034Z"
+  "updatedAt": "2026-07-03T13:11:57.555Z"
 }

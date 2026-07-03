@@ -35,13 +35,11 @@ export default async function proxy(request: Request) {
   const url = new URL(request.url);
   const correlationId = generateCorrelationId();
 
-  // Apply rate limiting only to API routes (excluding health & auth)
+  // Apply rate limiting to all API routes (excluding health & auth)
   if (
     url.pathname.startsWith("/api/") &&
     !url.pathname.startsWith("/api/health") &&
-    !url.pathname.startsWith("/api/auth") &&
-    !url.pathname.startsWith("/api/approvals/seals") &&
-    !url.pathname.startsWith("/api/archive")
+    !url.pathname.startsWith("/api/auth")
   ) {
     const identifier = getClientIdentifier(request);
     const key = `${identifier}:${url.pathname}`;
@@ -66,9 +64,7 @@ export default async function proxy(request: Request) {
   if (
     url.pathname.startsWith("/api/") &&
     !url.pathname.startsWith("/api/health") &&
-    !url.pathname.startsWith("/api/auth") &&
-    !url.pathname.startsWith("/api/approvals/seals") &&
-    !url.pathname.startsWith("/api/archive")
+    !url.pathname.startsWith("/api/auth")
   ) {
     const identifier = getClientIdentifier(request);
     const key = `${identifier}:${url.pathname}`;
