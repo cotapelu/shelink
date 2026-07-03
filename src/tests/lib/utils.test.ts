@@ -111,10 +111,12 @@ describe("daysUntil", () => {
     expect(daysUntil(today)).toBe(0);
   });
 
-  it("accepts string date", () => {
+  it("accepts string date in YYYY-MM-DD format (local)", () => {
     const future = new Date();
     future.setDate(future.getDate() + 10);
-    expect(daysUntil(future.toISOString().split("T")[0])).toBe(10);
+    // Format as local date string (avoid timezone shift)
+    const localDate = future.getFullYear() + "-" + String(future.getMonth()+1).padStart(2,'0') + "-" + String(future.getDate()).padStart(2,'0');
+    expect(daysUntil(localDate)).toBe(10);
   });
 
   it("strips time component correctly", () => {
