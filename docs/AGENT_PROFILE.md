@@ -15,6 +15,11 @@ Modules với failure rate >5% hoặc repeated issues:
 | src/app/(app)/intakes/_components/claim-section.tsx | Uses `@ts-nocheck` (temporary); props typing incomplete | N/A (pre-integration) | 2025-07-03 | Replace `@ts-nocheck` with strict prop interfaces; ensure type safety before production |
 | src/app/(app)/intakes/_components/lawyer-section.tsx | Uses `@ts-nocheck` (temporary); props typing incomplete | N/A (pre-integration) | 2025-07-03 | Replace `@ts-nocheck` with strict prop interfaces; ensure type safety before production |
 | src/app/(app)/intakes/_components/procedure-core-section.tsx | Uses `@ts-nocheck` (temporary); props typing incomplete | N/A (pre-integration) | 2025-07-03 | Replace `@ts-nocheck` with strict prop interfaces; ensure type safety before production |
+| src/server/matters/actions.ts | Large functions (>200 lines), permission checks may be inconsistent | TBD (audit pending) | 2025-07-03 (audit) | Audit all server actions, add missing assertion wrappers, break large functions |
+| src/server/intakes/actions.ts | Large functions (~300 lines), convertIntakeToMatter lacks transaction | TBD | 2025-07-03 (audit) | Wrap multi-step ops in $transaction, add permission asserts, refactor |
+| src/server/archive/actions.ts | PendingArchiveTable.tsx 825 lines, permission checks unclear | TBD | 2025-07-03 (audit) | Refactor component, verify permission gates, add tests |
+| src/app/(app)/clients/_components/client-sheet.tsx | 615 lines, many conditional renders, test coverage ~35% | TBD | 2025-07-03 (audit) | Extract sections, increase test coverage |
+| src/app/(app)/matters/[id]/_components/procedure-content.tsx | 1357 lines (God Object), low testability | TBD | 2025-07-03 (audit) | Split into smaller components: procedure-info, hearings, deadlines, documents |
 | src/server/matters/actions.ts | Large functions (>200 lines), permission checks may be inconsistent | TBD (audit pending) | 2025-07-03 (audit) | Audit all server actions, add missing assertion helpers, break large functions |
 | src/lib/auth/options.ts | JWT HS256 (should be RS256) | HIGH (spoofing risk) | 2025-07-03 (audit) | Upgrade to RS256 algorithm, reduce session maxAge |
 | src/proxy.ts | Rate limit exemptions create DoS vector | CRITICAL | 2025-07-03 (audit) | Remove exemptions, apply rate limiting to all `/api/*` |
@@ -75,58 +80,48 @@ Areas where modifications consume excessive time/risk:
 | Lint warnings | 0 (achieved) | ✅ | Maintain 0 |
 | TODOs/FIXMEs | ~20 (estimated) | ↔️ | -2/week |
 | Missing indexes | 5-8 critical fields | ↔️ | -2/week |
+| Permission check gaps | TBD (audit needed) | ↔️ | -10 actions/week |
+| Large components (>500 lines) | 5 modules | ↘️ | -1/week |
 
 **Debt Reduction Plan**:
-- Week 1: Fix P0+P1 violations from audit (target Health 85)
-- Week 2-3: Refactor God Objects (intake-sheet, procedure-content, client-sheet) → reduce complexity violations by 300
-- Week 4: Add missing indexes, implement transactions → data integrity score 100
-- Month 2: Establish observability (structured logs, metrics) → SRE readiness
+- Week P0-P1: Fix critical violations (rate limit, JWT, permission audit, coverage)
+- Week P2: Structured logging, circuit breaker, indexes, health checks
+- Week P3: Compliance (GDPR export, SOX audit trail)
 
 ---
 
-## Recent Failures / Incidents
+## Recent Incidents / Findings
 
-| Date | Area | Failure Mode | Root Cause | Fix Applied | Recurrence Risk |
-|------|------|--------------|------------|-------------|-----------------|
-| 2025-07-03 (audit) | Security | JWT HS256 allows token forgery if secret leaks | Default NextAuth config | Plan: upgrade to RS256 | LOW after fix |
-| 2025-07-03 (audit) | Resilience | DoS possible via rate limit exemptions | Hardcoded bypass | Remove exemptions, add per-user limit | LOW after fix |
-| 2025-07-03 (audit) | Authorization | Permission checks inconsistent across actions | Manual asserts, omissions | Audit all actions, wrapper middleware | MEDIUM until complete |
+| Date | Area | Issue | Severity | Status |
+|------|------|-------|----------|--------|
+| 2025-07-03 (audit) | Security | JWT HS256 (spoofing risk) | HIGH | Pending approval |
+| 2025-07-03 (audit) | Resilience | Rate limit exemptions (DoS) | CRITICAL | ✅ Fixed (P0) |
+| 2025-07-03 (audit) | Authorization | Permission checks inconsistent | HIGH | Pending audit |
+| 2025-07-03 (audit) | Testing | Func coverage 73% <80% | HIGH | Pending test expansion |
+| 2025-07-03 (audit) | Maintainability | 61 functions >30 lines | HIGH | Pending refactor |
 
 ---
 
-## Lessons Learned (from Audit)
+## Lessons Learned (from GOAL Audit)
 
-1. **GOAL.md 10-dimension audit** revealed critical gaps that were not obvious from local testing.
+1. **10-dimension audit** revealed gaps not obvious from local testing (per-user rate limit, circuit breaker, health checks)
 2. **Security first**: JWT algorithm and rate limiting are foundational; deferring them creates systemic risk.
-3. **Permission model complexity**: Having multiple assert functions (`assertCanAccess`, `assertCanModify`, `assertCanHandle`) is good, but must be used consistently. Need static analysis to enforce.
-4. **Observability tooling cannot be afterthought**: Adding structured logging after codebase grows is major refactor. Should be integrated from start via shared logger.
-5. **Health Score metric**: Combining coverage, complexity, duplication, tests gives single number that tracks well. Need automate calculation.
-6. **Transaction boundaries**: Multi-step operations (convertIntakeToMatter) must be atomic. Prisma `$transaction` is easy but easy to forget.
-7. **Function size limits**: 30 lines is aggressive but achievable with extraction. Larger functions correlate with lower coverage and more bugs.
-8. **Compliance is cross-cutting**: GDPR data export, SOX audit trail, HIPAA encryption need early design, not bolt-on.
+3. **Permission model**: Having multiple assert functions is good, but must be used consistently. Need static analysis or wrapper middleware to enforce.
+4. **Observability cannot be afterthought**: Adding structured logging after codebase grows is major refactor. Should integrate from start via shared logger.
+5. **Transaction boundaries**: Multi-step operations must be atomic. Prisma `$transaction` is easy but easy to forget.
+6. **Function size limits**: 30 lines is aggressive but achievable with extraction. Larger functions correlate with lower coverage and more bugs.
+7. **Compliance is cross-cutting**: GDPR data export, SOX audit trail, HIPAA encryption need early design, not bolt-on.
+8. **Red line awareness**: Changes affecting authentication, database schema, or production deployment require explicit approval; autonomous agent must respect these boundaries.
 
-**Actionable takeaways for autonomous agent**:
+**Actionable takeaways**:
 - Run GOAL.md audit **every 2 weeks** (not just once)
 - Prioritize **P0** fixes immediately (rate limiting, JWT)
-- Refactor using **extract component/function** pattern (see existing refactor cycles for methodology)
+- Refactor using **extract component/function** pattern (see existing refactor cycles)
 - Maintain **Health Score** as KPI; improve 0.5%/week minimum
 - Track **function size violations** and reduce by 5/week until ≤10 functions >30 lines
 
 ---
 
-**Last Updated**: 2025-07-03 (Audit 1)
-**Next Review**: 2025-07-10 (Weekly)
-**Status**: 🔥 2 CRITICAL, 6 HIGH, 8 MEDIUM violations identified; Sprint 1 initiated
-3. Unused imports/variables accumulate quickly; integrate a linter auto-fix in pre-commit.
-4. Replacing `<img>` with `next/image` improves performance metrics and removes Next.js warnings.
-5. Stub functions should use parameters in error messages to avoid unused variable warnings.
-
-6. Wrapping frequently used functions in `useCallback` prevents exhaustive-deps warnings and optimizes renders.
-7. Moving constant objects out of component bodies reduces GC pressure and satisfies dependency arrays.
-8. Unused parameters: either consume (e.g., `void param`) or explicitly disable lint; `_` prefix alone insufficient by default.
-9. Achieving zero lint warnings is possible via systematic batch cleanup and improves maintainability.
-
----
-
-**Last Updated**: 2025-06-30 (Cycle 5 updates)  
-**Next Review**: After 5 cycles or when failure rate >5%
+**Last Updated**: 2025-07-03 (P0 fix complete)
+**Next Review**: 2025-07-10 (weekly)
+**Status**: ✅ P0 done (rate limit), awaiting approval for P1 items (JWT, permission audit, coverage, transactions)

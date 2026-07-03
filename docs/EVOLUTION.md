@@ -153,6 +153,38 @@
 
 ---
 
+### [CYCLE-P0-1] - 2025-07-03 P0: Remove Rate Limit Exemptions
+
+**Type**: Violation Fix (CRITICAL - Security)
+**Priority**: P0
+**Duration**: 30 min
+**Status**: ✅ Completed
+
+**Action**:
+- Removed hardcoded exemptions for `/api/approvals/seals` và `/api/archive` in `src/proxy.ts`
+- All `/api/*` endpoints now uniformly rate-limited (100 req/min per IP), except `/api/health` và `/api/auth`
+
+**Test Added**:
+- `src/tests/proxy.rate-limit.test.ts` (4 unit tests for token bucket behavior)
+  - Tests: initial allows, bucket exhaustion, remaining tokens, unlimited config
+
+**Security Impact**:
+- Closes DoS vector that allowed flooding `/seals` và `/archive` without triggering rate limit
+
+**Follow-up Tasks** (P1 - Awaiting Approval):
+- [ ] JWT HS256 → RS256 upgrade
+- [ ] Permission audit across all server actions
+- [ ] Func coverage ≥80% (add tests for uncovered functions)
+- [ ] Per-user rate limiting (include userId in key)
+- [ ] DB transaction boundaries for multi-step ops
+- [ ] Refactor God Functions >200 lines
+
+**Files Modified**:
+- src/proxy.ts
+- src/tests/proxy.rate-limit.test.ts (new)
+
+---
+
 ## Upcoming Refactors (Next 3 Months)
 
 ### Month 1: Foundation & Baseline

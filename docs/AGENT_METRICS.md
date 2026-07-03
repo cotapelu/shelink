@@ -744,6 +744,52 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 ---
 
-**Last Updated**: 2025-07-03 (Audit Cycle 1 completed)
-**Next Cycle**: Autonomous execution continues
-**Status**: ✅ Audit complete, moving to Sprint 1 (P1 fixes)
+**Last Updated**: 2025-07-03 (Audit + P0 fix)
+**Next Cycle**: Awaiting approval for P1 items (JWT, permission audit, coverage, transactions)
+**Status**: ✅ P0 completed, awaiting approval to proceed with P1
+
+---
+
+## [CYCLE-P0-1] - 2025-07-03 P0: Remove Rate Limit Exemptions
+
+**Type**: Violation Fix (CRITICAL)
+**Priority**: P0 (Immediate)
+**Duration**: 30 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Build: SUCCESS
+- ⚠️ Lint: 974 total (no new violations introduced in proxy.ts or new test file)
+- ✅ Tests: **1000 → 1004 passed** (+4 tests)
+
+**Coverage**: Unchanged
+- Statements: 85.81%
+- Branches: 76.58%
+- Functions: 73.02%
+- Lines: 86.19%
+
+**Action**:
+- Removed hardcoded exemptions for `/api/approvals/seals` và `/api/archive` trong `src/proxy.ts`
+- All `/api/*` endpoints now enforce rate limiting (100 req/min per IP) except `/api/health` và `/api/auth`
+- Headers added to all rate-limited responses: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After`, `X-Correlation-ID`
+
+**Test Added**:
+- `src/tests/proxy.rate-limit.test.ts` (4 unit tests for token bucket algorithm)
+  - Tests: initial allows, bucket exhaustion, remaining tokens, unlimited config
+
+**Security Impact**:
+- Closes DoS vector: Previously unrate-limited endpoints could be flooded
+- All API endpoints now uniformly protected
+
+**Follow-up Tasks** (P1 - Awaiting Approval):
+- [ ] JWT HS256 → RS256 upgrade
+- [ ] Permission audit across all server actions
+- [ ] Func coverage ≥80%
+- [ ] Per-user rate limiting
+- [ ] DB transaction boundaries
+- [ ] Refactor God Functions
+
+**Files Modified**:
+- src/proxy.ts
+- src/tests/proxy.rate-limit.test.ts (new)
