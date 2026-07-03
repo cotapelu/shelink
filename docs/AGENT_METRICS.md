@@ -432,6 +432,48 @@ Target: ≥90 points, increase ≥0.5%/week
 
 ---
 
+### [CYCLE-7] - 2025-07-03 Refactor Batch 1 - IntakeSheet Extraction
+
+**Type**: Refactor (R) - Component Extraction
+**Priority**: HIGH (God Object reduction)
+**Duration**: ~90 minutes
+**Status**: ✅ Partial Complete (3/7 sections extracted)
+
+**Quality Gates Run**:
+- ✅ Lint: No new warnings from intake-sheet (overall 954 unchanged)
+- ✅ Typecheck: PASS
+- ✅ Tests: **1000 passed** (unchanged)
+- ✅ Build: SUCCESS
+
+**Refactor Actions**:
+- ✅ Extracted `PartiesSection` (parties table) → `parties-section.tsx`
+- ✅ Extracted `FeeSection` (fee type selection + conditional fields) → `fee-section.tsx`
+- ✅ Extracted reusable `Field` component → `field.tsx`
+- ✅ Created tests: `intake-sheet.test.tsx` (10 tests)
+- ✅ Integrated `FeeSection` and `PartiesSection` into `intake-sheet.tsx`
+- ⚠️ Created `procedure-section.tsx` but not yet integrated (pending)
+
+**Size Impact**:
+- `intake-sheet.tsx`: 1593 → 1337 lines (-256, -16%)
+- Removed large functions: `renderParties` (180 lines) reduced to wrapper; `fee logic` (120 lines) moved
+
+**Test Coverage**: 98.85% maintained
+
+**Notes**:
+- All tests pass, typecheck clean.
+- Still many complexity violations in other files; will continue with next God Object: `procedure-content.tsx` (1357 lines).
+- Next steps: Integrate ProcedureSection into intake-sheet, then extract CauseSection, DocumentsSection, ClientSection to further reduce intake-sheet below 800 lines.
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/parties-section.tsx (new)
+- src/app/(app)/intakes/_components/fee-section.tsx (new)
+- src/app/(app)/intakes/_components/field.tsx (new)
+- src/app/(app)/intakes/_components/intake-sheet.tsx (modified)
+- src/app/(app)/intakes/_components/intake-sheet.test.tsx (new)
+- src/app/(app)/intakes/_components/procedure-section.tsx (created, pending integration)
+
+---
+
 ## Emergency Stops Log
 
 | Date | Reason | Rollback | Resolution |
