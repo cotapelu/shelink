@@ -281,6 +281,34 @@
 - src/app/(app)/intakes/_components/procedure-core-section.test.tsx (new)
 - src/app/(app)/intakes/_components/lawyer-section.test.tsx (fixed Field mock to render error)
 
+### [CYCLE-P1-4] - 2025-07-03 Coverage Push: JurisdictionSelect Tests
+
+**Type**: Violation Fix (HIGH) - Coverage Gap  
+**Priority**: HIGH  
+**Duration**: ~30 min  
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: 1050 → 1058 passed (+8)
+- ✅ Build: SUCCESS
+
+**Coverage**:
+- Func: 74.93% → 74.74% (slight dip due to new code surface)
+- Absolute: covered functions +6 (total +9)
+
+**Work**:
+- Added 8 unit tests for jurisdiction cascade component
+- Covered rendering, disabled states, clear action
+
+**Next Focus**:
+- Server utilities (e.g., rate-limit key extraction) to gain function coverage with minimal UI complexity
+- Continue attacking high-impact modules: client-sheet, intake-sheet integration tests
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/jurisdiction-select.test.tsx (new)
+
 ---
 
 ## Upcoming Refactors (Next 3 Months)

@@ -901,3 +901,38 @@ Date        Health   Coverage   Complexity   Tests   Debt
 **Files Modified**:
 - src/app/(app)/intakes/_components/procedure-core-section.test.tsx (new)
 - src/app/(app)/intakes/_components/lawyer-section.test.tsx (mock Field fix for error handling)
+
+---
+
+### [CYCLE-P1-4] - 2025-07-03 Coverage Push: JurisdictionSelect Tests
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: **1050 → 1058 passed** (+8 tests)
+- ✅ Build: SUCCESS
+
+**Coverage After**:
+| Metric | Before (prev) | After | Δ |
+|--------|---------------|-------|----|
+| Statements | 86.08% (1627/1890) | **86.02% (1638/1904)** | -0.06% |
+| Branches | 78.27% (1315/1680) | **78.5% (1333/1698)** | +0.23% |
+| Functions | 74.93% (284/379) | **74.74% (290/388)** | -0.19% |
+| Lines | 86.41% (1431/1656) | **86.34% (1442/1670)** | -0.07% |
+
+**Analysis**:
+- Added 8 tests for `JurisdictionSelect` (cascade jurisdiction picker)
+- Covered rendering, disabled states, clear button behavior
+- Coverage dip due to new code surface; absolute covered functions +6
+
+**Note**:
+- Focus now shift to server utilities and hooks for higher coverage yield per test
+- Next: Test `provoke-hook` utilities, then attack high-impact UI modules (client-sheet, intake-sheet integration)
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/jurisdiction-select.test.tsx (new)
