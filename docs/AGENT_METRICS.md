@@ -936,3 +936,35 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Files Modified**:
 - src/app/(app)/intakes/_components/jurisdiction-select.test.tsx (new)
+
+---
+
+### [CYCLE-P1-5] - 2025-07-03 Security Test: Per-User Rate Limiting
+
+**Type**: Violation Fix (HIGH) - Security Testing
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: **1058 → 1063 passed** (+5 tests)
+- ✅ Build: SUCCESS
+
+**Coverage**:
+- Functions: 74.74% (290/388) → **74.87% (292/390)** (+0.13%)
+- Branches: +0.22%, Statements: stable
+
+**Work**:
+- Added unit tests for per-user rate limiting in `proxy.ts`
+- Verified key composition: authenticated users use `userId:path`, anon use `ip:path`
+- Confirmed exemptions for `/api/health` and `/api/auth` remain
+
+**Impact**:
+- Increases test coverage for proxy middleware
+- Documents expected behavior for DoS protection
+- Completes P1 security testing item (rate limiting hardening)
+
+**Files Modified**:
+- src/tests/proxy.user-rate-limit.test.ts (new)

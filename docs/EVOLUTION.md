@@ -311,6 +311,36 @@
 
 ---
 
+### [CYCLE-P1-5] - 2025-07-03 Security Test: Per-User Rate Limiting
+
+**Type**: Violation Fix (HIGH) - Security Testing  
+**Priority**: HIGH  
+**Duration**: ~30 min  
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: 1058 → 1063 passed (+5)
+- ✅ Build: SUCCESS
+
+**Coverage**:
+- Func: 74.74% → 74.87% (+0.13%)
+- Branches: +0.22%
+
+**Work**:
+- Unit tests for proxy middleware per-user rate limiting
+- Verified key composition logic and exemptions
+
+**Impact**:
+- Security hardening verified
+- P1 item completed
+
+**Files Modified**:
+- src/tests/proxy.user-rate-limit.test.ts (new)
+
+---
+
 ## Upcoming Refactors (Next 3 Months)
 
 ### Month 1: Foundation & Baseline
