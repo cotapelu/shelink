@@ -1,7 +1,9 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import { isAllowed, getTokens, RateLimitConfig } from "@/lib/rate-limit/rate-limiter";
 import { generateCorrelationId } from "@/lib/telemetry/correlation-id";
+import { authOptions } from "@/lib/auth/options";
 
 
 /**
@@ -35,6 +37,10 @@ export default async function proxy(request: Request) {
   const url = new URL(request.url);
   const correlationId = generateCorrelationId();
 
+  // Get session (if available) to include userId in rate limit key
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+
   // Apply rate limiting to all API routes (excluding health & auth)
   if (
     url.pathname.startsWith("/api/") &&
@@ -42,7 +48,8 @@ export default async function proxy(request: Request) {
     !url.pathname.startsWith("/api/auth")
   ) {
     const identifier = getClientIdentifier(request);
-    const key = `${identifier}:${url.pathname}`;
+    // Per-user rate limiting: if user logged in, use userId as primary key; else fallback to IP-only
+    const key = userId ? `${userId}:${url.pathname}` : `${identifier}:${url.pathname}`;
 
     if (!isAllowed(key, RATE_LIMIT_CONFIG)) {
       return NextResponse.json(
@@ -67,7 +74,7 @@ export default async function proxy(request: Request) {
     !url.pathname.startsWith("/api/auth")
   ) {
     const identifier = getClientIdentifier(request);
-    const key = `${identifier}:${url.pathname}`;
+    const key = userId ? `${userId}:${url.pathname}` : `${identifier}:${url.pathname}`;
     const remaining = getTokens(key, RATE_LIMIT_CONFIG);
     const resetTime = Math.floor(Date.now() / 1000) + Math.floor(RATE_LIMIT_CONFIG.windowMs / 1000);
 
