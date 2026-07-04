@@ -305,14 +305,35 @@ function resolveBloodTerms(
 
 // ── Data Processing ──────────────────────────────────────────────────────────
 
-function getAncestryData(
-  id: string,
+function enqueueParents(
+  currentNode: PersonNode,
+  depth: number,
+  path: PersonNode[],
   parentMap: Map<string, string[]>,
   personsMap: Map<string, PersonNode>,
+  queue: { id: string; depth: number; path: PersonNode[] }[]
 ) {
+  const parents = parentMap.get(currentNode.id) ?? [];
+  for (const pId of parents) {
+    const pNode = personsMap.get(pId);
+    if (pNode) {
+      queue.push({
+        id: pId,
+        depth: depth + 1,
+        path: [...path, currentNode],
+      });
+    }
+  }
+}
+
+function traverseAncestors(
+  initialId: string,
+  parentMap: Map<string, string[]>,
+  personsMap: Map<string, PersonNode>
+): Map<string, { depth: number; path: PersonNode[] }> {
   const depths = new Map<string, { depth: number; path: PersonNode[] }>();
   const queue: { id: string; depth: number; path: PersonNode[] }[] = [
-    { id, depth: 0, path: [] },
+    { id: initialId, depth: 0, path: [] },
   ];
 
   while (queue.length > 0) {
@@ -323,21 +344,18 @@ function getAncestryData(
       const currentNode = personsMap.get(currentId);
       if (!currentNode) continue;
 
-      const parents = parentMap.get(currentId) ?? [];
-      for (const pId of parents) {
-        const pNode = personsMap.get(pId);
-        if (pNode) {
-          // Lưu con đường: từ người gốc lên, path chứa các nút trung gian
-          queue.push({
-            id: pId,
-            depth: depth + 1,
-            path: [...path, currentNode],
-          });
-        }
-      }
+      enqueueParents(currentNode, depth, path, parentMap, personsMap, queue);
     }
   }
   return depths;
+}
+
+function getAncestryData(
+  id: string,
+  parentMap: Map<string, string[]>,
+  personsMap: Map<string, PersonNode>,
+) {
+  return traverseAncestors(id, parentMap, personsMap);
 }
 
 function findBloodKinship(
