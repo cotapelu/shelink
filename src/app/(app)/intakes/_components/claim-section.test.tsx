@@ -9,11 +9,12 @@ vi.mock("@/components/ui/input", () => ({
   Input: ({ ...props }: any) => <input {...props} data-testid="input" />
 }));
 
-// Mock Field component
+// Mock Field component (includes error display)
 vi.mock("./field", () => ({
-  Field: ({ children, label }: any) => (
+  Field: ({ children, label, error }: any) => (
     <div>
       <label>{label}</label>
+      {error && <span role="alert">{error.message || error}</span>}
       {children}
     </div>
   )
@@ -52,5 +53,21 @@ describe("ClaimSection", () => {
     render(<ClaimSection register={mockRegister} />);
     const inputs = screen.getAllByTestId("input");
     expect(inputs).toHaveLength(2);
+  });
+
+  describe("Input Attributes", () => {
+    it("claimAmount input has type number and step 0.01", () => {
+      render(<ClaimSection register={mockRegister} />);
+      const amountInput = screen.getByPlaceholderText("0.00");
+      expect(amountInput).toHaveAttribute("type", "number");
+      expect(amountInput).toHaveAttribute("step", "0.01");
+      expect(amountInput).toHaveAttribute("inputMode", "decimal");
+    });
+
+    it("claimDescription input has correct placeholder", () => {
+      render(<ClaimSection register={mockRegister} />);
+      const descInput = screen.getByPlaceholderText(/如：请求确认合同有效/);
+      expect(descInput).toBeInTheDocument();
+    });
   });
 });

@@ -20,11 +20,12 @@ vi.mock("@/components/ui/select", () => ({
 
 // Mock Field
 vi.mock("./field", () => ({
-  Field: ({ children, label, required }: any) => (
+  Field: ({ children, label, required, error }: any) => (
     <div>
       <label>
         {label} {required && "*"}
       </label>
+      {error && <p role="alert">{error}</p>}
       {children}
     </div>
   )

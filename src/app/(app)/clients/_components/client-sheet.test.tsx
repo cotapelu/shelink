@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { useWatch } from "react-hook-form";
 import { ClientSheet } from "./client-sheet";
 
 // Mock UI components (simplified)
@@ -80,7 +81,7 @@ vi.mock("react-hook-form", async () => {
       append: vi.fn(),
       remove: vi.fn()
     }),
-    useWatch: () => undefined,
+    useWatch: vi.fn(() => undefined),
     zodResolver: () => async (data) => data
   };
 });
@@ -130,5 +131,29 @@ describe("ClientSheet", () => {
     const cancelBtn = screen.getByText("取消");
     fireEvent.click(cancelBtn);
     expect(mockOnOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  describe("Type-specific fields", () => {
+    beforeEach(() => {
+      vi.mocked(useWatch).mockReturnValue(undefined);
+    });
+
+    it("shows idNumber field for INDIVIDUAL type", () => {
+      vi.mocked(useWatch).mockImplementation((arg: any) => {
+        if (arg.name === "type") return "INDIVIDUAL";
+        return undefined;
+      });
+      render(<ClientSheet {...defaultProps} />);
+      expect(screen.getByText("身份证号")).toBeInTheDocument();
+    });
+
+    it("shows unified social credit code field for COMPANY type", () => {
+      vi.mocked(useWatch).mockImplementation((arg: any) => {
+        if (arg.name === "type") return "COMPANY";
+        return undefined;
+      });
+      render(<ClientSheet {...defaultProps} />);
+      expect(screen.getByText("统一社会信用代码")).toBeInTheDocument();
+    });
   });
 });

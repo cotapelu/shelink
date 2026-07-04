@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { ProcedureSection } from "./procedure-section";
 
 // Mock components
@@ -12,8 +12,10 @@ vi.mock("@/components/ui/select", () => ({
   Select: ({ children }: any) => <div data-testid="select">{children}</div>,
   SelectTrigger: () => <div data-testid="select-trigger" />,
   SelectContent: ({ children }: any) => <div data-testid="select-content">{children}</div>,
-  SelectItem: ({ children, value }: any) => (
-    <div data-testid={`select-item-${value}`}>{children}</div>
+  SelectItem: ({ children, value, onSelect }: any) => (
+    <div data-testid={`select-item-${value}`} onClick={() => onSelect?.(value)}>
+      {children}
+    </div>
   ),
   SelectValue: ({ placeholder }: any) => <span data-testid="select-value">{placeholder}</span>
 }));
@@ -39,6 +41,7 @@ vi.mock("@/lib/enums", () => ({
 
 describe("ProcedureSection", () => {
   const mockSetValue = vi.fn();
+  const mockOnProcedureChange = vi.fn();
   const defaultProps = {
     kind: "litigation" as "litigation",
     firstProcedureType: undefined,
@@ -54,7 +57,7 @@ describe("ProcedureSection", () => {
     register: () => ({}),
     setValue: mockSetValue,
     errors: {},
-    onProcedureChange: undefined
+    onProcedureChange: mockOnProcedureChange
   };
 
   beforeEach(() => {
@@ -97,5 +100,22 @@ describe("ProcedureSection", () => {
     render(<ProcedureSection {...defaultProps} jurisdiction="北京市" />);
     const input = screen.getByPlaceholderText("输入管辖地");
     expect(input).toHaveValue("北京市");
+  });
+
+  describe("Counterclaim", () => {
+    it("renders counterclaim select with options", () => {
+      render(<ProcedureSection {...defaultProps} />);
+      expect(screen.getByText("是否反诉")).toBeInTheDocument();
+      expect(screen.getByTestId("select-item-yes")).toBeInTheDocument();
+      expect(screen.getByTestId("select-item-no")).toBeInTheDocument();
+    });
+  });
+
+  describe("Standing selection", () => {
+    it("renders our standing options", () => {
+      render(<ProcedureSection {...defaultProps} />);
+      expect(screen.getByTestId("select-item-PLAINTIFF")).toBeInTheDocument();
+      expect(screen.getByTestId("select-item-DEFENDANT")).toBeInTheDocument();
+    });
   });
 });

@@ -334,6 +334,34 @@ describe("IntakeSheet", () => {
     });
   });
 
+  describe("Integration: Multi-Section Rendering", () => {
+    it("renders all major section headers", () => {
+      render(<IntakeSheet {...defaultProps} />);
+      const headers = ["基本信息", "案件当事人", "律师费", "委托合同 / 相关附件"];
+      headers.forEach((text) => {
+        expect(screen.getByText(text)).toBeInTheDocument();
+      });
+    });
+
+    it("renders key fields", () => {
+      render(<IntakeSheet {...defaultProps} />);
+      expect(screen.getByText("案件名称")).toBeInTheDocument();
+      expect(screen.getByText("案由")).toBeInTheDocument();
+      expect(screen.getByText("标的额（元）")).toBeInTheDocument();
+      expect(screen.getByText("主办律师")).toBeInTheDocument();
+    });
+
+    it("renders footer submit button with correct text", () => {
+      render(<IntakeSheet {...defaultProps} />);
+      expect(screen.getByRole("button", { name: /提交审批/i })).toBeInTheDocument();
+    });
+
+    it("renders cancel button", () => {
+      render(<IntakeSheet {...defaultProps} />);
+      expect(screen.getByRole("button", { name: /取消/i })).toBeInTheDocument();
+    });
+  });
+
   describe("AI Features", () => {
     it("renders AI recommendation button", () => {
       render(<IntakeSheet {...defaultProps} />);
