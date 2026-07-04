@@ -60,6 +60,8 @@ describe("eventHelpers - computeEvents", () => {
       name: "Wedding Anniversary",
       content: "Happy Marriage",
       event_date: "2023-05-20",
+      location: null,
+      created_by: null,
     };
     const persons = [createPerson()];
     const events = computeEvents(persons, [customEvent]);

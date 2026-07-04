@@ -15,8 +15,7 @@ describe("archive-no utilities", () => {
     });
 
     it("should return default '案' for unknown category", () => {
-      // @ts-expect-error - testing unknown category
-      expect(categoryShort("UNKNOWN" as MatterCategory)).toBe("案");
+      expect(categoryShort("UNKNOWN" as any)).toBe("案");
     });
   });
 
@@ -26,7 +25,7 @@ describe("archive-no utilities", () => {
         archiveRecord: {
           findMany: vi.fn().mockResolvedValue([]),
         },
-      };
+      } as any;
       const result = await nextArchiveNo(mockTx, "CIVIL_COMMERCIAL" as MatterCategory, new Date(2025, 0, 1));
       expect(result).toBe("2025-民-0001");
     });
@@ -38,7 +37,7 @@ describe("archive-no utilities", () => {
             { archiveNo: "2025-民-0010" },
           ]),
         },
-      };
+      } as any;
       const result = await nextArchiveNo(mockTx, "CIVIL_COMMERCIAL" as MatterCategory, new Date(2025, 0, 1));
       expect(result).toBe("2025-民-0011");
     });
@@ -50,7 +49,7 @@ describe("archive-no utilities", () => {
             { archiveNo: "malformed" },
           ]),
         },
-      };
+      } as any;
       const result = await nextArchiveNo(mockTx, "CIVIL_COMMERCIAL" as MatterCategory, new Date(2025, 0, 1));
       expect(result).toBe("2025-民-0001");
     });

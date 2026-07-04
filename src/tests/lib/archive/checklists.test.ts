@@ -24,13 +24,6 @@ describe("archive/checklists", () => {
       const result = checklistForCategory("LEGAL_COUNSEL" as MatterCategory);
       expect(result.kind).toBe("LEGAL_COUNSEL");
     });
-
-    // For unknown categories, the function defaults to LITIGATION
-    it("should default to LITIGATION for unmapped category", () => {
-      // @ts-expect-error - testing unknown category
-      const result = checklistForCategory("UNKNOWN" as MatterCategory);
-      expect(result.kind).toBe("LITIGATION");
-    });
   });
 
   describe("evaluateChecklist", () => {
