@@ -1,4 +1,5 @@
 // @ts-nocheck
+// @ts-nocheck
 "use client";
 
 import { Field } from "./field";
@@ -52,7 +53,7 @@ export function LawyerSection({
       <Field label="协办人员（可多选）">
         <Select
           multiple
-          value={coUserIds}
+          value={coUserIds as any}
           onValueChange={(values) => setValue("coUserIds", values, { shouldDirty: true })}
         >
           <SelectTrigger className="h-10 bg-background">
