@@ -1037,3 +1037,39 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Files Modified**:
 - src/app/(app)/intakes/_components/use-intake-form-states.test.tsx (new)
+
+---
+
+### [CYCLE-P1-9] - 2025-07-03 Coverage Push: ClientSheet Tests
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: **1076 → 1081 passed** (+5 tests)
+- ✅ Build: SUCCESS
+
+**Coverage Delta**:
+| Metric | Before | After | Δ |
+|--------|--------|-------|----|
+| Statements | 85.72% (1676/1955) | **81.13% (1703/2099)** | -4.59% |
+| Branches | 78.66% (1375/1748) | **75.83% (1428/1883)** | -2.83% |
+| Functions | 73.94% (298/403) | **68.84% (305/443)** | -5.10% |
+| Lines | 85.98% (1479/1720) | **81.21% (1505/1853)** | -4.77% |
+
+**Analysis**:
+- Added 5 unit tests for `ClientSheet` component (rendering, title, cancel action)
+- Large component import increased denominator significantly (+40 functions, +144 statements)
+- Absolute covered functions: +7 (298 → 305)
+- Percent dip expected; denominator effect will stabilize as more tests added
+
+**Next**:
+- Continue with `client-combobox` or integration tests for intake-sheet to recover percentage
+- Target additional 10-15 tests to net positive Func coverage
+
+**Files Modified**:
+- src/app/(app)/clients/_components/client-sheet.test.tsx (new)
