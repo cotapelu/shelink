@@ -11,8 +11,8 @@ vi.mock("@/components/ui/input", () => ({
 
 // Mock Field component (includes error display)
 vi.mock("./field", () => ({
-  Field: ({ children, label, error }: any) => (
-    <div>
+  Field: ({ children, label, error, className }: any) => (
+    <div className={className}>
       <label>{label}</label>
       {error && <span role="alert">{error.message || error}</span>}
       {children}
@@ -53,6 +53,19 @@ describe("ClaimSection", () => {
     render(<ClaimSection register={mockRegister} />);
     const inputs = screen.getAllByTestId("input");
     expect(inputs).toHaveLength(2);
+  });
+
+  it("applies responsive className to description field wrapper", () => {
+    render(<ClaimSection register={mockRegister} />);
+    // The Field for claimDescription should have sm:col-span-3 class
+    const fields = document.querySelectorAll('[class*="sm:col-span-3"]');
+    expect(fields.length).toBeGreaterThan(0);
+  });
+
+  it("claimAmount input has font-mono class", () => {
+    render(<ClaimSection register={mockRegister} />);
+    const amountInput = screen.getByPlaceholderText("0.00");
+    expect(amountInput.className).toContain("font-mono");
   });
 
   describe("Input Attributes", () => {

@@ -77,6 +77,27 @@ describe("CauseSection", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
+  it("AI recommendation button has correct attributes (type, className)", () => {
+    render(<CauseSection {...defaultProps} />);
+    const aiBtn = screen.getByText("AI推荐").closest("button");
+    expect(aiBtn).toHaveAttribute("type", "button");
+    expect(aiBtn.className).toContain("gap-1.5");
+  });
+
+  it("manual selection button has correct attributes", () => {
+    render(<CauseSection {...defaultProps} />);
+    const manualBtn = screen.getByText("手动选择").closest("button");
+    expect(manualBtn).toHaveAttribute("type", "button");
+    expect(manualBtn.className).toContain("gap-1.5");
+  });
+
+  it("passes category and value props to CauseCombobox", () => {
+    render(<CauseSection {...defaultProps} category="PATENT" causeId="c123" />);
+    const combo = screen.getByTestId("cause-combobox");
+    expect(combo).toHaveAttribute("data-category", "PATENT");
+    expect(combo).toHaveAttribute("data-value", "c123");
+  });
+
   describe("Error Display Tests", () => {
     it("displays error message when errors.causeId provided", () => {
       const propsWithError = {
