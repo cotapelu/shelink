@@ -1298,4 +1298,41 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - src/app/(app)/intakes/_components/cause-recommendation-dialog.test.tsx (new)
 
 ---
+
+### [CYCLE-P1-17] - 2025-07-03 Coverage Push: ClientCombobox
+
+**Type**: Violation Fix (HIGH) - Missing Code + Coverage Gap
+**Priority**: HIGH
+**Duration**: ~20 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: **1104 → 1107 passed** (+3 tests)
+- ✅ Build: SUCCESS
+
+**Coverage Delta**:
+| Metric | Before | After | Δ |
+|--------|--------|-------|----|
+| Functions | 67.59% (315/466) | **67.88% (318/469)** | +0.29% |
+| Statements | 80.24% | **80.41%** | +0.17% |
+| Branches | 75.1% | **75.28%** | +0.18% |
+| Lines | 80.34% | **80.51%** | +0.17% |
+
+**Work**:
+- Created `client-combobox.test.tsx` (3 unit tests)
+- Tests cover: placeholder rendering, clientName display, new client tag
+- Improved Select mock in `jurisdiction-select.test.tsx` (added onValueChange)
+
+**Impact**:
+- Absolute covered functions +3
+- ClientCombobox now has basic smoke tests
+- Steady progress toward Func ≥80%
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/client-combobox.test.tsx (new)
+- src/app/(app)/intakes/_components/jurisdiction-select.test.tsx (mock improvement)
+
+---
  

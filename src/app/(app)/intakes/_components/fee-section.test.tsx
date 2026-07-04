@@ -134,5 +134,21 @@ describe("FeeSection", () => {
     expect(mockRegister).toHaveBeenCalledWith("feeSchedule");
   });
 
-  // Error display tested elsewhere; skip to keep unit simple
+  it("highlights selected fee type button with primary style", () => {
+    render(<FeeSection {...defaultProps} feeType="FIXED" />);
+    const fixedBtn = screen.getByText("固定收费");
+    // Check that the button has primary border and background classes
+    expect(fixedBtn.className).toContain("border-primary");
+    expect(fixedBtn.className).toContain("bg-primary/15");
+    expect(fixedBtn.className).toContain("text-primary");
+  });
+
+  it("unselected fee type buttons have muted style", () => {
+    render(<FeeSection {...defaultProps} feeType="FIXED" />);
+    const contingencyBtn = screen.getByText("风险代理");
+    // Should NOT have primary styles
+    expect(contingencyBtn.className).not.toContain("border-primary");
+    expect(contingencyBtn.className).not.toContain("bg-primary/15");
+    expect(contingencyBtn.className).not.toContain("text-primary");
+  });
 });
