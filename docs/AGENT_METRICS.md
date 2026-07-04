@@ -1001,3 +1001,39 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Files Modified**:
 - src/app/(app)/intakes/_components/procedure-section.test.tsx (new)
+
+---
+
+### [CYCLE-P1-8] - 2025-07-03 Coverage Push: UseIntakeFormStates Hook Tests
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: ~15 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: No new violations
+- ✅ Typecheck: PASS
+- ✅ Tests: **1072 → 1076 passed** (+4 tests)
+- ✅ Build: SUCCESS
+
+**Coverage Delta**:
+| Metric | Before | After | Δ |
+|--------|--------|-------|----|
+| Statements | 85.71% (1674/1953) | **85.72% (1676/1955)** | +0.01% |
+| Branches | 78.58% (1369/1742) | **78.66% (1375/1748)** | +0.08% |
+| Functions | 73.88% (297/402) | **73.94% (298/403)** | +0.06% |
+| Lines | 85.97% (1477/1718) | **85.98% (1479/1720)** | +0.01% |
+
+**Work**:
+- Added 4 unit tests for `useIntakeFormStates` hook
+- Covered default values and watched field retrieval
+- Hook is now fully unit-tested
+
+**Impact**:
+- Minimal coverage delta due to small function size
+- Maintains momentum toward Func ≥80%
+- Total tests: 1076
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/use-intake-form-states.test.tsx (new)
