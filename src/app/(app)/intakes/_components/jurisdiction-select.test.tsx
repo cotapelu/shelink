@@ -15,15 +15,18 @@ vi.mock("@/components/ui/popover", () => ({
 }));
 
 vi.mock("@/components/ui/select", () => ({
-  Select: ({ children, value, disabled }: any) => (
+  Select: ({ children, value, onValueChange, disabled }: any) => (
     <div data-testid="select" data-value={value} data-disabled={disabled}>
       {children}
+      <input type="hidden" data-testid="select-onChange" onChange={(e) => onValueChange && onValueChange(e.target.value)} />
     </div>
   ),
   SelectTrigger: () => <div data-testid="select-trigger" />,
   SelectContent: ({ children }: any) => <div data-testid="select-content">{children}</div>,
-  SelectItem: ({ children, value }: any) => (
-    <div data-testid={`select-item-${value}`}>{children}</div>
+  SelectItem: ({ children, value, onSelect }: any) => (
+    <div data-testid={`select-item-${value}`} onClick={() => onSelect?.(value)}>
+      {children}
+    </div>
   ),
   SelectValue: ({ placeholder }: any) => <span data-testid="select-value">{placeholder}</span>
 }));
