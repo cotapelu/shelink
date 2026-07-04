@@ -122,5 +122,17 @@ describe("FeeSection", () => {
     expect(mockRegister).toHaveBeenCalledWith("feeAmount", { valueAsNumber: true });
   });
 
+  it("registers contingency fee amount", () => {
+    render(<FeeSection {...defaultProps} feeType="CONTINGENCY" />);
+    const amountInput = screen.getByPlaceholderText("0.00");
+    expect(mockRegister).toHaveBeenCalledWith("feeAmount", { valueAsNumber: true });
+  });
+
+  it("registers schedule fields for each fee type", () => {
+    render(<FeeSection {...defaultProps} feeType="FIXED" />);
+    const scheduleInput = screen.getByPlaceholderText(/签约付/);
+    expect(mockRegister).toHaveBeenCalledWith("feeSchedule");
+  });
+
   // Error display tested elsewhere; skip to keep unit simple
 });
