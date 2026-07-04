@@ -17,4 +17,5 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
+import "dotenv/config"; // Load .env first
 import "@testing-library/jest-dom/vitest";

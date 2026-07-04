@@ -94,6 +94,7 @@
     "@vitest/coverage-v8": "^4.1.9",
     "autoprefixer": "^10.4.20",
     "cuid": "^3.0.0",
+    "dotenv": "^17.4.2",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.7",
     "eslint-plugin-complexity": "^1.0.2",
