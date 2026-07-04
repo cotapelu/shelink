@@ -23,8 +23,14 @@ vi.mock("@/components/ui/select", () => ({
   ),
   SelectTrigger: () => <div data-testid="select-trigger" />,
   SelectContent: ({ children }: any) => <div data-testid="select-content">{children}</div>,
-  SelectItem: ({ children, value, onSelect }: any) => (
-    <div data-testid={`select-item-${value}`} onClick={() => onSelect?.(value)}>
+  SelectItem: ({ children, value, onSelect, onValueChange }: any) => (
+    <div
+      data-testid={`select-item-${value}`}
+      onClick={() => {
+        onSelect?.(value);
+        onValueChange?.(value);
+      }}
+    >
       {children}
     </div>
   ),
@@ -107,5 +113,11 @@ describe("JurisdictionSelect", () => {
     const clearBtn = screen.getByText("清空");
     clearBtn.click();
     expect(defaultOnChange).toHaveBeenCalledWith("");
+  });
+
+  it("populates area options after province and city selected", () => {
+    render(<JurisdictionSelect {...defaultProps} value="北京市/市辖区" />);
+    expect(screen.getByTestId("select-item-东城区")).toBeInTheDocument();
+    expect(screen.getByTestId("select-item-西城区")).toBeInTheDocument();
   });
 });
