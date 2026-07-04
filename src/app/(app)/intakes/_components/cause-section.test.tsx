@@ -76,4 +76,15 @@ describe("CauseSection", () => {
     render(<CauseSection {...defaultProps} />);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
+
+  describe("Error Display Tests", () => {
+    it("displays error message when errors.causeId provided", () => {
+      const propsWithError = {
+        ...defaultProps,
+        errors: { causeId: { message: "必须选择案由" } } as any
+      };
+      render(<CauseSection {...propsWithError} />);
+      expect(screen.getByRole("alert")).toHaveTextContent("必须选择案由");
+    });
+  });
 });
