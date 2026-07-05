@@ -1697,3 +1697,32 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - src/tests/server/archive/actions.test.ts (expanded)
 
 ---
+
+### [CYCLE-N-7] - 2025-07-05 Coverage Push: dateHelpers lunar
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: 15 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: 1010 errors (unchanged)
+- ✅ Typecheck: PASS
+- ✅ Tests: **1198 → 1202 passed** (+4)
+- ✅ Build: SUCCESS
+
+**Coverage Delta**:
+- Functions: +1 (367/519 → 70.9%)
+- Statements: 81% (80.52% → ~81%)
+- Branches: 70.89%
+- Lines: 82.27% (81.76% → 82.27%)
+
+**Work**:
+- Created `src/tests/utils/dateHelpers-lunar.test.ts` (4 unit tests)
+- Covered `getLunarDateString` null handling, non-leap, leap, error cases
+- Used mocks for `lunar-javascript` to control date conversion
+
+**Files Modified**:
+- src/tests/utils/dateHelpers-lunar.test.ts (new)
+
+---

@@ -1027,3 +1027,23 @@ Based on project context (AGENTS.md):
 - src/tests/server/archive/actions.test.ts (expanded)
 
 ---
+
+### [CYCLE-N-7] - 2025-07-05 Coverage Push: dateHelpers lunar
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: 15 min
+**Status**: ✅ Completed
+
+**Coverage Impact**:
+- Functions: +1 absolute (368/519 → 70.9%)
+- Statements: ~81%, Branches: 70.89%, Lines: 82.27%
+
+**Work**:
+- Created `src/tests/utils/dateHelpers-lunar.test.ts` (4 unit tests)
+- Covered `getLunarDateString` edge cases (null, leap, error)
+
+**Files Modified**:
+- src/tests/utils/dateHelpers-lunar.test.ts (new)
+
+---
