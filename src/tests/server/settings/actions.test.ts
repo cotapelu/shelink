@@ -1,12 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { listStageTemplates, listAuditLogs } from "@/server/settings/actions";
+import { listStageTemplates, listAuditLogs, upsertStageTemplate } from "@/server/settings/actions";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
+import { audit } from "@/server/audit";
+import { revalidatePath } from "next/cache";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     stageTemplate: {
-      findMany: vi.fn()
+      findMany: vi.fn(),
+      upsert: vi.fn()
     },
     auditLog: {
       findMany: vi.fn()
@@ -14,9 +17,13 @@ vi.mock("@/lib/prisma", () => ({
   }
 }));
 vi.mock("@/lib/auth/session", () => ({ requireSession: vi.fn() }));
+vi.mock("@/server/audit");
+vi.mock("next/cache");
 
 const mockPrisma = vi.mocked(prisma, true);
 const mockRequireSession = vi.mocked(requireSession);
+const mockAudit = vi.mocked(audit);
+const mockRevalidatePath = vi.mocked(revalidatePath);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -51,6 +58,42 @@ describe("settings actions", () => {
 
       expect(result).toEqual({ items: mockLogs, distinctActions: [] });
       expect(mockPrisma.auditLog.findMany).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("upsertStageTemplate", () => {
+    it("should upsert stage template", async () => {
+      const input = {
+        procedureType: "CIVIL",
+        name: "Civil Template",
+        steps: [{ name: "Step1", order: 1, defaultTasks: [] }]
+      } as any;
+      mockPrisma.stageTemplate.upsert.mockResolvedValue({} as any);
+
+      await upsertStageTemplate(input);
+
+      expect(mockPrisma.stageTemplate.upsert).toHaveBeenCalledWith({
+        where: { id: `default-${input.procedureType}` },
+        update: {
+          name: input.name,
+          steps: input.steps as unknown as object
+        },
+        create: {
+          id: `default-${input.procedureType}`,
+          procedureType: input.procedureType as any,
+          name: input.name,
+          isDefault: true,
+          steps: input.steps as unknown as object
+        }
+      });
+      expect(mockAudit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "STAGE_TEMPLATE_UPDATE",
+          targetId: `default-${input.procedureType}`,
+          detail: { procedureType: input.procedureType, stepCount: 1 }
+        })
+      );
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/settings/templates");
     });
   });
 });

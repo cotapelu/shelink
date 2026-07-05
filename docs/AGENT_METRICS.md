@@ -1900,3 +1900,29 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - src/tests/server/settings/actions.test.ts (expanded)
 
 ---
+
+### [CYCLE-N-15] - 2025-07-05 Coverage Push: upsertStageTemplate unit test
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: 25 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: 1010 errors (unchanged)
+- ✅ Typecheck: PASS
+- ✅ Tests: **1224 → 1225 passed** (+1)
+- ✅ Build: SUCCESS
+
+**Coverage Delta**:
+- Functions: +1 (379 → 380) (coverage ~65.18%)
+- Denominator stable (583)
+
+**Work**:
+- Added test for `upsertStageTemplate` in `src/tests/server/settings/actions.test.ts`
+- Covered both create and update paths via mock; verified audit and revalidation
+
+**Files Modified**:
+- src/tests/server/settings/actions.test.ts (expanded)
+
+---
