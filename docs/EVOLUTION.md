@@ -986,3 +986,24 @@ Based on project context (AGENTS.md):
 
 **Last Updated**: 2025-06-30 (Initial creation)  
 **Next Review**: After first cycle completion or when trajectory changes
+
+### [CYCLE-N-2] - 2025-07-05 Coverage Push: lib/archive/guard
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: 30 min
+**Status**: ✅ Completed
+
+**Coverage Impact**:
+- Functions: +4 absolute (362/519 → 69.74%)
+- Statements: 79.82%, Branches: 70.48%, Lines: 80.97%
+
+**Work**:
+- Created `src/tests/lib/archive/guard.test.ts` (15 unit tests)
+- Covered archive guard functions: `assertMatterWritable`, `isArchiveFolderName`, `assertDocumentWritable`
+- Ensured security-critical guard is fully tested
+
+**Files Modified**:
+- src/tests/lib/archive/guard.test.ts (new)
+
+---
