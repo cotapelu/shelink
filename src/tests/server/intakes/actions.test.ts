@@ -7,7 +7,8 @@ import {
   markIntakeNeedsRevision,
   resubmitIntake,
   convertIntakeToMatter,
-  listIntakes
+  listIntakes,
+  createIntake
 } from "@/server/intakes/actions";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
@@ -24,9 +25,10 @@ vi.mock("@/lib/prisma", () => ({
       findFirst: vi.fn(),
       findUnique: vi.fn(),
       update: vi.fn(),
+      create: vi.fn(),
       findMany: vi.fn(),
       count: vi.fn()
-    },
+    }, 
     matter: { create: vi.fn(), update: vi.fn() },
     audit: { create: vi.fn() },
     party: { create: vi.fn() },
@@ -337,6 +339,60 @@ describe("intakes actions", () => {
         status: "CONVERTED"
       } as any);
       await expect(convertIntakeToMatter(intakeId)).rejects.toThrow("此 Intake 已转化");
+    });
+  });
+
+  describe("createIntake", () => {
+    it("should create intake with clientId", async () => {
+      const sessionUser = { id: "u1", role: "ADMIN", name: "Admin" };
+      mockRequireSession.mockResolvedValue({ user: sessionUser } as any);
+      const clientId = cuid();
+      const input = {
+        title: "Test Intake",
+        category: "CIVIL_COMMERCIAL",
+        clientId,
+        ourStanding: "PLAINTIFF"
+      };
+      const mockClient = { id: clientId, name: "Client Name", type: "COMPANY" } as any;
+      mockPrisma.client.findUnique.mockResolvedValue(mockClient as any);
+      const mockIntake = {
+        id: "i1",
+        title: "TestIntake",
+        category: "CIVIL_COMMERCIAL",
+        clientId,
+        ourStanding: "PLAINTIFF",
+        ownerUserId: sessionUser.id,
+        coUserIds: [],
+        createdById: sessionUser.id,
+        status: "PENDING_CONFIRMATION",
+        receivedAt: expect.any(Date)
+      } as any;
+      mockPrisma.intake.create.mockResolvedValue(mockIntake as any);
+
+      await createIntake(input as any);
+
+      expect(mockPrisma.intake.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            title: "TestIntake",
+            category: "CIVIL_COMMERCIAL",
+            clientId,
+            ourStanding: "PLAINTIFF",
+            ownerUserId: sessionUser.id,
+            createdById: sessionUser.id,
+            status: "PENDING_CONFIRMATION"
+          })
+        })
+      );
+      expect(mockAudit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "INTAKE_CREATE",
+          targetId: "i1"
+        })
+      );
+      expect(mockNotifyRoleApprovers).toHaveBeenCalled();
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/intakes");
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/matters");
     });
   });
 });

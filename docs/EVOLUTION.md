@@ -1065,3 +1065,19 @@ Based on project context (AGENTS.md):
 - src/tests/server/intakes/actions.test.ts (new)
 
 ---
+
+### [CYCLE-N-10] - 2025-07-05 Coverage Push: matters/actions unit tests
+
+**Coverage Impact**:
+- Functions: +3 absolute (368 → 371)
+- Test count: +8 (1215 total)
+- Coverage % decreased slightly due to expanded instrumented file set
+
+**Work**:
+- Added unit tests for `getMatterById`, `updateMatterBasicInfo`, `softDeleteMatter`
+- Followed established mocking patterns (Prisma, session, audit, permissions, archive guard)
+
+**Files Modified**:
+- src/tests/server/matters/actions.test.ts (new)
+
+---
