@@ -6,6 +6,11 @@ import {
   rejectArchiveRecord,
   batchApproveArchiveRecords,
   batchRejectArchiveRecords,
+  getArchivePrepData,
+  listArchivedMatters,
+  listPendingArchiveRecords,
+  listRejectedArchiveRecords,
+  getLatestArchiveRecord,
   type ArchiveSubmitInput
 } from "@/server/archive/actions";
 import { prisma } from "@/lib/prisma";
@@ -23,9 +28,9 @@ import { renderArchiveCover, renderArchiveCatalog } from "@/server/archive/rende
 vi.mock("@/lib/prisma", () => {
   const db: any = {
     matter: { findUnique: vi.fn(), update: vi.fn() },
-    archiveRecord: { findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn(), create: vi.fn() },
-    timelineEvent: { create: vi.fn() },
-    document: { update: vi.fn() }
+    archiveRecord: { findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn(), create: vi.fn(), findFirst: vi.fn() },
+    timelineEvent: { create: vi.fn(), findFirst: vi.fn() },
+    document: { update: vi.fn(), findMany: vi.fn() }
   };
   db.$transaction = vi.fn().mockImplementation(async (cb: any) => await cb(db));
   return { prisma: db };
@@ -282,3 +287,99 @@ describe("server/archive/actions", () => {
     });
   });
 });
+
+describe("getArchivePrepData", () => {
+  it("should return archive prep data", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    mockAssertCanLeadMatter.mockResolvedValue(undefined);
+    mockPrisma.matter.findUnique.mockResolvedValue({
+      id: "m1",
+      title: "Matter",
+      category: "CIVIL",
+      internalCode: "INT-001",
+      archiveRecords: []
+    } as any);
+    mockChecklistForCategory.mockReturnValue([]);
+    mockPrisma.timelineEvent.findFirst.mockResolvedValue({ content: "Summary" } as any);
+    mockPrisma.document.findMany.mockResolvedValue([] as any);
+
+    const result = await getArchivePrepData("m1");
+    expect(result).toHaveProperty("matter");
+    expect(result.checklist).toEqual([]);
+    expect(result.existingSummary).toBe("Summary");
+    expect(result.docsByItem).toEqual({});
+  });
+});
+
+describe("listArchivedMatters", () => {
+  it("should list approved archive records", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    mockPrisma.archiveRecord.findMany.mockResolvedValue([
+      {
+        id: "ar1",
+        status: "APPROVED",
+        archivedAt: new Date(),
+        archiveNo: "A001",
+        summary: "Sum",
+        closedReason: "JUDGMENT",
+        completedAt: new Date(),
+        archivedBy: { id: "u2", name: "Admin" },
+        missingItems: [],
+        matter: {
+          id: "m1",
+          title: "M1",
+          firmCaseNo: "FCN1",
+          category: "CIVIL",
+          primaryClient: { name: "Client" }
+        }
+      }
+    ] as any);
+
+    const result = await listArchivedMatters();
+    expect(result).toHaveLength(1);
+    expect(result[0].archiveNo).toBe("A001");
+  });
+});
+
+describe("listPendingArchiveRecords", () => {
+  it("should list pending archive records", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
+    mockPrisma.archiveRecord.findMany.mockResolvedValue([
+      { id: "ar-p1", status: "PENDING_REVIEW", matterId: "m1" }
+    ] as any);
+
+    const result = await listPendingArchiveRecords();
+    expect(result).toHaveLength(1);
+    expect(result[0].status).toBe("PENDING_REVIEW");
+  });
+});
+
+describe("listRejectedArchiveRecords", () => {
+  it("should list rejected archive records", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    mockPrisma.archiveRecord.findMany.mockResolvedValue([
+      { id: "ar-r1", status: "REJECTED", matterId: "m1" }
+    ] as any);
+
+    const result = await listRejectedArchiveRecords();
+    expect(result).toHaveLength(1);
+    expect(result[0].status).toBe("REJECTED");
+  });
+});
+
+describe("getLatestArchiveRecord", () => {
+  it("should get latest archive record for matter", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    mockAssertCanLeadMatter.mockResolvedValue(undefined);
+    mockPrisma.archiveRecord.findFirst.mockResolvedValue({
+      id: "ar-latest",
+      status: "APPROVED",
+      archiveNo: "ARCH-2025-001",
+      summary: "Latest summary"
+    } as any);
+
+    const result = await getLatestArchiveRecord("m1");
+    expect(result).toHaveProperty("archiveNo", "ARCH-2025-001");
+  });
+});
+

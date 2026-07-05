@@ -987,7 +987,7 @@ Based on project context (AGENTS.md):
 **Last Updated**: 2025-06-30 (Initial creation)  
 **Next Review**: After first cycle completion or when trajectory changes
 
-### [CYCLE-N-2] - 2025-07-05 Coverage Push: lib/archive/guard
+### [CYCLE-N-5] - 2025-07-05 Coverage Push: lib/archive/guard
 
 **Type**: Violation Fix (HIGH) - Coverage Gap
 **Priority**: HIGH
@@ -1005,5 +1005,25 @@ Based on project context (AGENTS.md):
 
 **Files Modified**:
 - src/tests/lib/archive/guard.test.ts (new)
+
+---
+
+### [CYCLE-N-6] - 2025-07-05 Coverage Push: archive actions (remaining)
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: 20 min
+**Status**: ✅ Completed
+
+**Coverage Impact**:
+- Functions: +5 absolute (367/519 → 70.71%)
+- Statements: 80.52%, Branches: 70.6%, Lines: 81.76%
+
+**Work**:
+- Expanded `src/tests/server/archive/actions.test.ts` with tests for `getArchivePrepData`, `listArchivedMatters`, `listPendingArchiveRecords`, `listRejectedArchiveRecords`, `getLatestArchiveRecord`
+- Added mock support for `prisma.timelineEvent.findFirst`, `prisma.document.findMany`, `prisma.archiveRecord.findFirst`
+
+**Files Modified**:
+- src/tests/server/archive/actions.test.ts (expanded)
 
 ---
