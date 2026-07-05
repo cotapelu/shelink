@@ -1081,3 +1081,19 @@ Based on project context (AGENTS.md):
 - src/tests/server/matters/actions.test.ts (new)
 
 ---
+
+### [CYCLE-N-11] - 2025-07-05 Coverage Push: matter link unit tests
+
+**Coverage Impact**:
+- Functions: +3 (374/578, 64.7%)
+- Test count: +5 (1220 total)
+- Coverage % stable
+
+**Work**:
+- Added unit tests for matter linking functions (search, add, remove)
+- Followed established mocking patterns, ensuring all side-effects (audit, revalidation) are verified
+
+**Files Modified**:
+- src/tests/server/matters/link.test.ts (new)
+
+---

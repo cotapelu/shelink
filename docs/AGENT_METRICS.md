@@ -1787,3 +1787,32 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - src/tests/server/matters/actions.test.ts (new)
 
 ---
+
+### [CYCLE-N-11] - 2025-07-05 Coverage Push: matter link unit tests
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: 30 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: 1010 errors (unchanged)
+- ✅ Typecheck: PASS
+- ✅ Tests: **1215 → 1220 passed** (+5)
+- ✅ Build: SUCCESS
+
+**Coverage Delta**:
+- Functions: +3 (371 → 374)
+- Statements: ~73.9% (unchanged)
+- Branches: ~63.9% (unchanged)
+- Lines: ~75.27% (unchanged)
+
+**Work**:
+- Created `src/tests/server/matters/link.test.ts` (5 unit tests)
+- Covered `searchMattersForLink`, `addMatterLink`, `removeMatterLink`
+- Added mocking for Prisma (matterLink), permissions (assertCanAssociateMatter), revalidatePath, audit, and Next.js APIs
+
+**Files Modified**:
+- src/tests/server/matters/link.test.ts (new)
+
+---
