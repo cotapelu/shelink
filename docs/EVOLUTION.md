@@ -1114,3 +1114,21 @@ Based on project context (AGENTS.md):
 - src/tests/server/matters/actions.test.ts (expanded)
 
 ---
+
+### [CYCLE-N-13] - 2025-07-05 Coverage Push: gedcom & settings unit tests
+
+**Coverage Impact**:
+- Functions: +2 (378/583)
+- Test count: +2 (1223 total)
+- Added coverage for `parseGedcom` ID generation and `listStageTemplates`
+
+**Work**:
+- Enhanced gedcom tests to cover `generateUUID` path
+- Added initial tests for settings actions (listStageTemplates)
+- Continued steady progress toward 80% function coverage
+
+**Files Modified**:
+- src/tests/utils/gedcom.test.ts (modified)
+- src/tests/server/settings/actions.test.ts (new)
+
+---

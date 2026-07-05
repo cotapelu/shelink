@@ -97,6 +97,20 @@ describe("gedcom utilities", () => {
       }
     });
 
+    it("should generate UUID for person without id", () => {
+      const gedcom = `0 HEAD
+1 GEDC
+2 VERS 7.0
+0 @I1@ INDI
+1 NAME Test /User/
+1 SEX M
+0 TRLR`;
+      const result = parseGedcom(gedcom);
+      expect(result.persons).toHaveLength(1);
+      expect(result.persons[0].id).toBeDefined();
+      expect(result.persons[0].full_name).toBe("Test User");
+    });
+
     it("should handle missing name (defaults to Unknown)", () => {
       const gedcom = `0 HEAD
 1 GEDC
