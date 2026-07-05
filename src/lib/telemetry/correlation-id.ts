@@ -34,7 +34,7 @@ export function getCorrelationId(): string {
 /**
  * Inject correlation ID into an object (e.g., logs, metrics)
  */
-export function withCorrelationId<T extends object>(obj: T, id?: string): T {
+export function withCorrelationId<T extends object>(obj: T, id?: string): T & { correlationId: string } {
   const correlationId = id || getCorrelationId();
   return { ...obj, correlationId };
 }

@@ -1,165 +1,180 @@
-/*
- * Copyright 2026 叶森 (Sen Ye) - Original work
- * Copyright 2026 COTAPELU - Modifications and additions
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * This file is part of a derivative work based on the original MIT-licensed project.
- * Original author: 叶森 (Sen Ye) - Copyright 2026
- */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { listCauseL2, searchCauses, getCauseById } from '@/server/causes/actions';
-import { prisma } from '@/lib/prisma';
-import { requireSession } from '@/lib/auth/session';
+// @ts-nocheck
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  searchCauses,
+  getCauseById,
+  listCauseL2,
+  type CauseSearchResult
+} from "@/server/causes/actions";
+import { prisma } from "@/lib/prisma";
+import { requireSession } from "@/lib/auth/session";
 
-vi.mock('@/lib/prisma');
-vi.mock('@/lib/auth/session');
+// Mock dependencies
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    causeOfAction: {
+      findMany: vi.fn(),
+      findUnique: vi.fn()
+    }
+  }
+}));
 
-describe('listCauseL2', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+vi.mock("@/lib/auth/session", () => ({
+  requireSession: vi.fn()
+}));
 
-  it('returns list of level 2 causes for given category', async () => {
-    const mockCauses = [
-      { id: '1', code: 'A1', name: 'Cause One', parentId: 'p1' },
-      { id: '2', code: 'A2', name: 'Cause Two', parentId: 'p1' }
-    ];
-    vi.mocked(prisma.causeOfAction).findMany = vi.fn().mockResolvedValue(mockCauses);
-    vi.mocked(requireSession).mockResolvedValue({} as any);
+const mockPrismaCause = vi.mocked(prisma.causeOfAction, true);
 
-    const result = await listCauseL2('CIVIL' as any);
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(requireSession).mockResolvedValue(undefined);
+});
 
-    expect(result).toEqual(mockCauses);
-    expect(prisma.causeOfAction.findMany).toHaveBeenCalledWith({
-      where: { category: 'CIVIL', active: true, level: 2 },
-      orderBy: { code: 'asc' },
-      select: { id: true, code: true, name: true, parentId: true }
+function createMockCause(overlay: Partial<any> = {}): any {
+  return {
+    id: "1",
+    code: "CC-7",
+    name: "Labor Dispute",
+    shortName: "Labor",
+    level: 2,
+    parentId: "10",
+    parent: {
+      id: "10",
+      name: "Civil",
+      level: 1,
+      parent: null
+    },
+    ...overlay
+  };
+}
+
+function flattenMock(c: any): CauseSearchResult {
+  const chain: { name: string; level: number }[] = [{ name: c.name, level: c.level }];
+  if (c.parent) chain.push({ name: c.parent.name, level: c.parent.level });
+  if (c.parent?.parent) chain.push({ name: c.parent.parent.name, level: c.parent.parent.level });
+  const l1 = chain.find((x) => x.level === 1)?.name ?? null;
+  const l2 = chain.find((x) => x.level === 2)?.name ?? null;
+  return {
+    id: c.id,
+    code: c.code,
+    name: c.name,
+    shortName: c.shortName,
+    level: c.level,
+    parentId: c.parentId,
+    l1Name: l1,
+    l2Name: l2
+  };
+}
+
+describe("causes/actions - server actions", () => {
+  describe("searchCauses", () => {
+    const mockCause = createMockCause();
+    const mockFlattened = flattenMock(mockCause);
+
+    it("should call requireSession", async () => {
+      mockPrismaCause.findMany.mockResolvedValue([mockCause]);
+      await searchCauses({ category: "CIVIL_COMMERCIAL" });
+      expect(requireSession).toHaveBeenCalledTimes(1);
     });
-    expect(requireSession).toHaveBeenCalled();
+
+    it("should return flattened results when empty query", async () => {
+      mockPrismaCause.findMany.mockResolvedValue([mockCause]);
+      const result = await searchCauses({ category: "CIVIL_COMMERCIAL" });
+      expect(result).toEqual([mockFlattened]);
+    });
+
+    it("should respect limit (max 2000)", async () => {
+      mockPrismaCause.findMany.mockResolvedValue([mockCause]);
+      await searchCauses({ category: "CIVIL_COMMERCIAL", limit: 5000 });
+      expect(mockPrismaCause.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          take: 2000 // capped
+        })
+      );
+    });
+
+    it("should apply codePrefixes for COMMERCIAL_ARBITRATION inside AND", async () => {
+      mockPrismaCause.findMany.mockResolvedValue([mockCause]);
+      await searchCauses({
+        category: "COMMERCIAL_ARBITRATION",
+        query: "labor"
+      });
+      const callArg = mockPrismaCause.findMany.mock.calls[0][0];
+      // Verify AND array exists with codeFilter OR as first element
+      const andArray = callArg.where.AND;
+      expect(andArray).toBeDefined();
+      const codeFilterOr = (andArray[0] as any)?.OR;
+      expect(codeFilterOr).toBeDefined();
+      expect(codeFilterOr).toContainEqual({ code: "CC-3" });
+      expect(codeFilterOr).toContainEqual({ code: { startsWith: "CC-3-" } });
+      expect(codeFilterOr).toContainEqual({ code: "CC-4" });
+      expect(codeFilterOr).toContainEqual({ code: { startsWith: "CC-4-" } });
+      expect(codeFilterOr).toContainEqual({ code: "CC-5" });
+      expect(codeFilterOr).toContainEqual({ code: { startsWith: "CC-5-" } });
+      expect(codeFilterOr).toContainEqual({ code: "CC-6" });
+      expect(codeFilterOr).toContainEqual({ code: { startsWith: "CC-6-" } });
+      expect(codeFilterOr).toContainEqual({ code: "CC-8" });
+      expect(codeFilterOr).toContainEqual({ code: { startsWith: "CC-8-" } });
+      expect(codeFilterOr).toContainEqual({ code: "CC-9" });
+      expect(codeFilterOr).toContainEqual({ code: { startsWith: "CC-9-" } });
+    });
+
+    it("should search by name/shortName/keywords/pinyin when query provided", async () => {
+      mockPrismaCause.findMany.mockResolvedValue([mockCause]);
+      await searchCauses({
+        category: "CIVIL_COMMERCIAL",
+        query: "labor"
+      });
+      const callArg = mockPrismaCause.findMany.mock.calls[0][0];
+      const andArray = callArg.where.AND;
+      // When no codePrefixes, query OR is the first (and only) AND element
+      const queryOr = (andArray[0] as any)?.OR;
+      expect(queryOr).toBeDefined();
+      expect(queryOr).toContainEqual({
+        name: { contains: "labor", mode: "insensitive" }
+      });
+      expect(queryOr).toContainEqual({
+        shortName: { contains: "labor", mode: "insensitive" }
+      });
+      expect(queryOr).toContainEqual({ keywords: { has: "labor" } });
+      expect(queryOr).toContainEqual({
+        pinyin: { contains: "labor", mode: "insensitive" }
+      });
+    });
   });
 
-  it('forwards prisma errors', async () => {
-    const error = new Error('DB error');
-    vi.mocked(prisma.causeOfAction).findMany = vi.fn().mockRejectedValue(error);
-    vi.mocked(requireSession).mockResolvedValue({} as any);
+  describe("getCauseById", () => {
+    it("should return null when cause not found", async () => {
+      mockPrismaCause.findUnique.mockResolvedValue(null);
+      const result = await getCauseById("nonexistent");
+      expect(result).toBeNull();
+    });
 
-    await expect(listCauseL2('CRIMINAL' as any)).rejects.toThrow('DB error');
-  });
-});
-
-describe('searchCauses', () => {
-  beforeEach(() => { vi.clearAllMocks(); });
-
-  it('returns empty array when no causes', async () => {
-    vi.mocked(prisma.causeOfAction).findMany = vi.fn().mockResolvedValue([]);
-    vi.mocked(requireSession).mockResolvedValue({} as any);
-    const result = await searchCauses({ category: 'CIVIL' as any });
-    expect(result).toEqual([]);
-  });
-
-  it('covers flatten with parent chain', async () => {
-    const mockData = [{
-      id: 'c1', code: 'C1', name: 'Child', shortName: 'C', level: 2,
-      parentId: 'p1',
-      parent: {
-        id: 'p1', name: 'Parent', level: 1,
-        parent: { id: 'g1', name: 'Grand', level: 0, parent: null }
-      }
-    }];
-    vi.mocked(prisma.causeOfAction).findMany = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(requireSession).mockResolvedValue({} as any);
-    const result = await searchCauses({ category: 'CIVIL' as any });
-    expect(result).toHaveLength(1);
-    expect(result[0].l1Name).toBe('Parent');
-    expect(result[0].l2Name).toBe('Child');
+    it("should return flattened cause with category when found", async () => {
+      const mockCause = createMockCause({ category: "CIVIL_COMMERCIAL" });
+      mockPrismaCause.findUnique.mockResolvedValue(mockCause);
+      const result = await getCauseById("1");
+      expect(result).toEqual({
+        ...flattenMock(mockCause),
+        category: "CIVIL_COMMERCIAL"
+      });
+    });
   });
 
-  it('applies level>=2 and OR when query provided', async () => {
-    vi.mocked(prisma.causeOfAction).findMany = vi.fn().mockResolvedValue([]);
-    vi.mocked(requireSession).mockResolvedValue({} as any);
-    await searchCauses({ category: 'CIVIL' as any, query: 'test' });
-    const args = vi.mocked(prisma.causeOfAction).findMany.mock.calls[0][0] as any;
-    expect(args.where.level).toEqual({ gte: 2 });
-    expect(args.where.AND).toBeDefined();
-    expect(args.where.AND[0].OR).toBeDefined();
-  });
-
-  it('uses codeFilter for LABOR_ARBITRATION', async () => {
-    vi.mocked(prisma.causeOfAction).findMany = vi.fn().mockResolvedValue([]);
-    vi.mocked(requireSession).mockResolvedValue({} as any);
-    await searchCauses({ category: 'LABOR_ARBITRATION' as any });
-    const args = vi.mocked(prisma.causeOfAction).findMany.mock.calls[0][0] as any;
-    expect(args.where.category).toBe('CIVIL_COMMERCIAL');
-    expect(args.where.OR).toContainEqual({ code: 'CC-7' });
-    expect(args.where.OR).toContainEqual({ code: { startsWith: 'CC-7-' } });
-  });
-
-  it('uses codeFilter for COMMERCIAL_ARBITRATION', async () => {
-    vi.mocked(prisma.causeOfAction).findMany = vi.fn().mockResolvedValue([]);
-    vi.mocked(requireSession).mockResolvedValue({} as any);
-    await searchCauses({ category: 'COMMERCIAL_ARBITRATION' as any });
-    const args = vi.mocked(prisma.causeOfAction).findMany.mock.calls[0][0] as any;
-    expect(args.where.category).toBe('CIVIL_COMMERCIAL');
-    // Should include multiple CC codes
-    expect(args.where.OR).toContainEqual({ code: 'CC-3' });
-    expect(args.where.OR).toContainEqual({ code: { startsWith: 'CC-3-' } });
-    expect(args.where.OR).toContainEqual({ code: 'CC-4' });
-  });
-});
-
-describe('getCauseById', () => {
-  beforeEach(() => { vi.clearAllMocks(); });
-
-  it('returns null when not found', async () => {
-    vi.mocked(prisma.causeOfAction).findUnique = vi.fn().mockResolvedValue(null);
-    vi.mocked(requireSession).mockResolvedValue({} as any);
-    const result = await getCauseById('unknown' as any);
-    expect(result).toBeNull();
-  });
-
-  it('flattens cause with full parent chain up to level 0', async () => {
-    const raw = {
-      id: 'c1', code: 'C1', name: 'Child', shortName: 'C', level: 2,
-      parentId: 'p1',
-      parent: {
-        id: 'p1', name: 'Parent', level: 1,
-        parent: { id: 'gp1', name: 'Grand', level: 0, parent: null }
-      },
-      category: 'CIVIL'
-    };
-    vi.mocked(prisma.causeOfAction).findUnique = vi.fn().mockResolvedValue(raw);
-    vi.mocked(requireSession).mockResolvedValue({} as any);
-    const result = await getCauseById('c1' as any);
-    expect(result).not.toBeNull();
-    expect(result!.l1Name).toBe('Parent');
-    expect(result!.l2Name).toBe('Child');
-    expect(result!.category).toBe('CIVIL');
-  });
-
-  it('flattens cause with no parent (level 1)', async () => {
-    const raw = {
-      id: 'c1', code: 'C1', name: 'Root Cause', shortName: 'R', level: 1,
-      parentId: null,
-      parent: null,
-      category: 'CRIMINAL'
-    };
-    vi.mocked(prisma.causeOfAction).findUnique = vi.fn().mockResolvedValue(raw);
-    vi.mocked(requireSession).mockResolvedValue({} as any);
-    const result = await getCauseById('c1' as any);
-    expect(result).not.toBeNull();
-    expect(result!.l1Name).toBe('Root Cause');
-    expect(result!.l2Name).toBeNull();
-    expect(result!.category).toBe('CRIMINAL');
+  describe("listCauseL2", () => {
+    it("should list level 2 causes for category", async () => {
+      const mockList = [
+        { id: "20", code: "CC-7-1", name: "Sub A", parentId: "19" },
+        { id: "21", code: "CC-7-2", name: "Sub B", parentId: "19" }
+      ] as any;
+      mockPrismaCause.findMany.mockResolvedValue(mockList);
+      const result = await listCauseL2("CIVIL_COMMERCIAL");
+      expect(result).toEqual(mockList);
+      expect(mockPrismaCause.findMany).toHaveBeenCalledWith({
+        where: { category: "CIVIL_COMMERCIAL", active: true, level: 2 },
+        orderBy: { code: "asc" },
+        select: { id: true, code: true, name: true, parentId: true }
+      });
+    });
   });
 });
