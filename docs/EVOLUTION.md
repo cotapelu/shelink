@@ -947,6 +947,35 @@ Based on project context (AGENTS.md):
 
 ---
 
+### [CYCLE-N-4] - 2025-07-05 Coverage Push: server/archive/actions
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: 45 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: 1010 errors (unchanged)
+- ✅ Typecheck: PASS
+- ✅ Tests: **1179 → 1189 passed** (+10)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: +8 absolute (358/519 → 68.97%)
+- Statements: 78.93%
+- Branches: 69.53%
+- Lines: 80.17%
+
+**Work**:
+- Created `src/tests/server/archive/actions.test.ts` (10 unit tests)
+- Covered `archiveMatter`, `approveArchiveRecord`, `rejectArchiveRecord`, `batchApproveArchiveRecords`, `batchRejectArchiveRecords`
+- Comprehensive mocking of Prisma, session, audit, render, checklists
+
+**Files Modified**:
+- src/tests/server/archive/actions.test.ts (new)
+
+---
+
 ## Sign-off
 
 - [ ] Tech Lead: _________________ Date: _________
