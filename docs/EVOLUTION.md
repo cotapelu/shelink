@@ -1132,3 +1132,18 @@ Based on project context (AGENTS.md):
 - src/tests/server/settings/actions.test.ts (new)
 
 ---
+
+### [CYCLE-N-14] - 2025-07-05 Coverage Push: listAuditLogs unit test
+
+**Coverage Impact**:
+- Functions: +1 (379/583)
+- Test count: +1 (1224 total)
+
+**Work**:
+- Added test for `listAuditLogs` in settings actions
+- Completed coverage for listStageTemplates and listAuditLogs; remaining: upsertStageTemplate
+
+**Files Modified**:
+- src/tests/server/settings/actions.test.ts (expanded)
+
+---

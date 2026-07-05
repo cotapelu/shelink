@@ -1,11 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { listStageTemplates } from "@/server/settings/actions";
+import { listStageTemplates, listAuditLogs } from "@/server/settings/actions";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     stageTemplate: {
+      findMany: vi.fn()
+    },
+    auditLog: {
       findMany: vi.fn()
     }
   }
@@ -33,6 +36,21 @@ describe("settings actions", () => {
     expect(result).toEqual(mockTemplates);
     expect(mockPrisma.stageTemplate.findMany).toHaveBeenCalledWith({
       orderBy: { procedureType: "asc" }
+    });
+  });
+
+  describe("listAuditLogs", () => {
+    it("should list audit logs", async () => {
+      const mockLogs = [{ id: "a1" }] as any;
+      const mockDistinct = [] as any;
+      mockPrisma.auditLog.findMany
+        .mockResolvedValueOnce(mockLogs)
+        .mockResolvedValueOnce(mockDistinct);
+
+      const result = await listAuditLogs({});
+
+      expect(result).toEqual({ items: mockLogs, distinctActions: [] });
+      expect(mockPrisma.auditLog.findMany).toHaveBeenCalledTimes(2);
     });
   });
 });

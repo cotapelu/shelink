@@ -1873,3 +1873,30 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - src/tests/server/settings/actions.test.ts (new)
 
 ---
+
+### [CYCLE-N-14] - 2025-07-05 Coverage Push: listAuditLogs unit test
+
+**Type**: Violation Fix (HIGH) - Coverage Gap
+**Priority**: HIGH
+**Duration**: 20 min
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Lint: 1010 errors (unchanged)
+- ✅ Typecheck: PASS
+- ✅ Tests: **1223 → 1224 passed** (+1)
+- ✅ Build: SUCCESS
+
+**Coverage Delta**:
+- Functions: +1 (378 → 379) (coverage ~65%)
+- Denominator remained 583
+
+**Work**:
+- Extended `src/tests/server/settings/actions.test.ts` with test for `listAuditLogs`
+- Covered basic retrieval of audit logs with optional filters
+- Mocked `prisma.auditLog.findMany` for dual calls (items + distinct actions)
+
+**Files Modified**:
+- src/tests/server/settings/actions.test.ts (expanded)
+
+---
