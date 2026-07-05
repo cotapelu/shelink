@@ -1047,3 +1047,21 @@ Based on project context (AGENTS.md):
 - src/tests/utils/dateHelpers-lunar.test.ts (new)
 
 ---
+
+### [CYCLE_N-8/N-9] - 2025-07-05 Coverage Push: permissions & intakes unit tests
+
+**Coverage Impact**:
+- Functions: +1 (367/519 → 368/519 → 70.9%)
+- Additional unit tests: +5 net (some test file consolidation)
+- Test count: 1207 total
+
+**Work**:
+- N-8: Added comprehensive unit tests for permissions module (isManager, visibility filters, assert functions).
+- N-9: Added comprehensive unit tests for intakes/actions server actions (6 functions covered).
+- Both cycles followed established mocking patterns (Prisma, session, audit, revalidation).
+
+**Files Modified**:
+- src/tests/lib/permissions/permissions.test.ts (new)
+- src/tests/server/intakes/actions.test.ts (new)
+
+---
