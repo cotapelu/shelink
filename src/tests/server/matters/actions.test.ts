@@ -4,7 +4,8 @@ import cuid from "cuid";
 import {
   getMatterById,
   updateMatterBasicInfo,
-  softDeleteMatter
+  softDeleteMatter,
+  listMatters
 } from "@/server/matters/actions";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
@@ -19,7 +20,9 @@ vi.mock("@/lib/prisma", () => ({
     matter: {
       findFirst: vi.fn(),
       findUnique: vi.fn(),
-      update: vi.fn()
+      update: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn()
     }
   }
 }));
@@ -180,6 +183,36 @@ describe("matters actions", () => {
         })
       );
       expect(result).toEqual({ ok: true });
+    });
+  });
+
+  describe("listMatters", () => {
+    it("should list matters with default params", async () => {
+      const now = new Date();
+      const mockMatters = [
+        {
+          id: "m1",
+          title: "Matter 1",
+          updatedAt: now,
+          intakeDate: now,
+          procedures: [],
+          primaryClient: { id: "c1", name: "Client" },
+          owner: { id: "u1", name: "Owner" },
+          cause: { id: "cause1", name: "Cause" },
+          parties: [],
+          archiveRecords: [],
+          latestHearingAt: null
+        } as any
+      ];
+      mockPrisma.matter.findMany.mockResolvedValue(mockMatters);
+      mockPrisma.matter.count.mockResolvedValue(1);
+
+      const result = await listMatters({});
+
+      expect(result.items).toEqual(mockMatters);
+      expect(result.total).toBe(1);
+      expect(result.page).toBe(1);
+      expect(result.pageSize).toBe(20);
     });
   });
 });

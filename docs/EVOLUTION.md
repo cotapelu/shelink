@@ -1097,3 +1097,20 @@ Based on project context (AGENTS.md):
 - src/tests/server/matters/link.test.ts (new)
 
 ---
+
+### [CYCLE-N-12] - 2025-07-05 Coverage Push: listMatters unit test
+
+**Coverage Impact**:
+- Functions: +2 (376/578)
+- Test count: +1 (1221 total)
+- Added test for listMatters covering default case
+
+**Work**:
+- Expanded `src/tests/server/matters/actions.test.ts` with listMatters test
+- Ensured mock data includes all required nested fields (procedures, archiveRecords, etc.)
+- Verified pagination and result shape
+
+**Files Modified**:
+- src/tests/server/matters/actions.test.ts (expanded)
+
+---
