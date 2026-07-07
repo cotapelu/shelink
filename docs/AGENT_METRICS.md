@@ -2506,3 +2506,31 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Notes**: Module combines permission checks, audit, notifications, and search filters. All paths covered including PENDING_REVIEW workflow.
 
+
+---
+
+### [CYCLE-N-34] - 2025-07-06 Users Actions Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~3h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created test suite for `src/server/users/actions` (9 functions, 21 tests)
+- Covered: listUsers (admin), listActiveColleagues, createUser (hash, duplicate check), updateUserRole (self-protection), toggleUserActive, resetUserPassword, changeMyPassword (bcrypt compare), saveMyAvatar (base64 validation)
+- Mocked bcryptjs for deterministic hashing/comparison
+- Used CUID strings starting with 'c' to pass Zod `.cuid()` validation
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: PASS (~1588 total)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 548 → 557 (+9 net)
+- Total functions: 854
+- Function coverage: 65.22%
+
+**Notes**: Users module integrates bcrypt and role checks; thorough coverage includes password strength validation, admin-only barriers, and avatar size limits. Pattern for CUID validation solidified: use 25-char strings starting with 'c'.
+
