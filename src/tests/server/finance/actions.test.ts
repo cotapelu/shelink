@@ -5,7 +5,8 @@ import {
   deleteBilling,
   setCommissionPlan,
   createFeeEntry,
-  // other feeEntry functions later
+  getMatterFinance,
+  // other finance functions later
 } from "@/server/finance/actions";
 import { requireSession } from "@/lib/auth/session";
 import { audit } from "@/server/audit";
@@ -23,6 +24,7 @@ vi.mock("@/lib/prisma", () => ({
     billing: {
       create: vi.fn(),
       findUnique: vi.fn(),
+      findMany: vi.fn(),
       delete: vi.fn(),
     },
     matter: {
@@ -35,9 +37,16 @@ vi.mock("@/lib/prisma", () => ({
     },
     feeEntry: {
       create: vi.fn(),
+      findMany: vi.fn(),
     },
     timelineEvent: {
       create: vi.fn(),
+    },
+    invoice: {
+      findMany: vi.fn(),
+    },
+    invoiceRequest: {
+      findMany: vi.fn(),
     },
     $transaction: vi.fn(),
   },
@@ -373,6 +382,62 @@ describe("finance/actions", () => {
         type: "RECEIVED",
       } as any;
       await expect(createFeeEntry(input)).rejects.toThrow();
+    });
+  });
+
+  describe("getMatterFinance", () => {
+    it("should aggregate finance data for matter", async () => {
+      mockRequireSession.mockResolvedValue({
+        user: { id: CUID(1), role: "LAWYER" },
+      } as any);
+      const matterId = CUID(2);
+
+      mockPrisma.billing.findMany.mockResolvedValue([
+        { id: CUID(10), contractAmount: new Prisma.Decimal(10000) },
+      ]);
+      mockPrisma.feeEntry.findMany.mockResolvedValue([
+        { id: CUID(20), type: "RECEIVED", amount: new Prisma.Decimal(5000), occurredAt: new Date(), payerOrPayee: "Client" },
+        { id: CUID(21), type: "COMMISSION", amount: new Prisma.Decimal(500), occurredAt: new Date(), beneficiaryUserId: CUID(30) },
+      ]);
+      mockPrisma.commissionPlan.findMany.mockResolvedValue([
+        { userId: CUID(30), percent: 10, active: true },
+      ]);
+      mockPrisma.invoice.findMany.mockResolvedValue([
+        { id: CUID(40), total: new Prisma.Decimal(3000), status: "ISSUED" },
+      ]);
+      mockPrisma.invoiceRequest.findMany.mockResolvedValue([]); // no requests
+
+      const result = await getMatterFinance(matterId);
+
+      expect(mockPrisma.billing.findMany).toHaveBeenCalledWith({
+        where: { matterId },
+        orderBy: { createdAt: "desc" },
+      });
+      expect(mockPrisma.feeEntry.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { matterId },
+          orderBy: { occurredAt: "desc" },
+          include: {
+            beneficiaryUser: { select: { id: true, name: true } },
+            parentFeeEntry: { select: { id: true, type: true } },
+          },
+        })
+      );
+      expect(mockPrisma.commissionPlan.findMany).toHaveBeenCalledWith({
+        where: { matterId },
+        include: { user: { select: { id: true, name: true, role: true } } },
+        orderBy: { createdAt: "asc" },
+      });
+      expect(mockPrisma.invoiceRequest.findMany).toHaveBeenCalledWith({
+        where: { matterId, status: "ISSUED" },
+        select: { amount: true },
+      });
+
+      // Check result structure (simplified)
+      expect(result).toHaveProperty('billings');
+      expect(result).toHaveProperty('entries');
+      expect(result).toHaveProperty('plans');
+      expect(result).toHaveProperty('stats');
     });
   });
 

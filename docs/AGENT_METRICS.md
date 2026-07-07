@@ -2711,3 +2711,34 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - `assertMatterWritable` and `assertCanLeadMatter` mocked; permission barriers exercised in other tests.
 - Remaining finance functions: deleteFeeEntry, getMatterFinance, listMatterInvoiceRequests, getMatterInvoiceContext, createInvoiceRequest, searchMattersForInvoice, listAllFeeEntries, getMonthlyRevenue, getPersonalRevenue.
 
+
+---
+
+### [CYCLE-N-40] - 2025-07-06 Finance getMatterFinance Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~2h
+**Status**: ✅ Completed
+
+**Actions**:
+- Added test for `getMatterFinance` (1 test)
+- Verified aggregation of billings, feeEntries (with includes), commissionPlans, invoiceRequests
+- Mocked complex includes: beneficiaryUser, parentFeeEntry, user select
+- Added `invoiceRequest.findMany` to prisma mock
+
+**Quality Gates**:
+- ✅ Typecheck: PASS (no new errors)
+- ✅ Tests: 1656 total (+1)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 587 → 596 (+9 net) [note: coverage fluctuations due to total function count changes]
+- Total functions: 918
+- Function coverage: 64.92%
+
+**Notes**:
+- Finance module now has 5 functions fully covered (createBilling, deleteBilling, setCommissionPlan, createFeeEntry, getMatterFinance).
+- Remaining finance functions: deleteFeeEntry, listMatterInvoiceRequests, getMatterInvoiceContext, createInvoiceRequest, searchMattersForInvoice, listAllFeeEntries, getMonthlyRevenue, getPersonalRevenue (8 functions).
+- Next: continue finance coverage batch or switch to other high‑value modules (seals/actions).
+

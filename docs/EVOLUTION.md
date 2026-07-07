@@ -195,8 +195,9 @@
 - [x] Test procedures/actions (11 functions complete)
 - [x] Test settings/actions (3 functions complete)
 - [x] Test document-templates/actions (4 functions complete)
-- [x] Test finance/actions (4 functions complete)
-- [ ] Test remaining modules: seals, imports, erp (require valid CUIDs, complex schemas)
+- [x] Test finance/actions (5 functions complete)
+- [ ] Test remaining finance functions: deleteFeeEntry, listMatterInvoiceRequests, getMatterInvoiceContext, createInvoiceRequest, searchMattersForInvoice, listAllFeeEntries, getMonthlyRevenue, getPersonalRevenue (8 functions)
+- [ ] Test other modules: seals, imports, erp
 - [ ] Refactor God Functions >200 lines
 
 **Files Modified**:
