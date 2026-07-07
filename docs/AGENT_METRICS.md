@@ -2479,3 +2479,30 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Notes**: Notes module uses author ownership checks; tests reflect that. Continuing with schema-heavy modules is feasible using consistent CUID fixtures.
 
+
+---
+
+### [CYCLE-N-33] - 2025-07-06 External Contacts Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~2.5h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created test suite for `src/server/external-contacts/actions` (6 functions, 19 tests)
+- Covered: list (filter by category, search, manager view), create (status auto, notification), update (permission check), approve/reject (review flow, notify requester), archive (soft delete)
+- Handled: empty string normalization, manager vs non-manager flows, approval notifications
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: PASS (~1567 total)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 539 → 548 (+9 net)
+- Total functions: 845
+- Function coverage: 64.85%
+
+**Notes**: Module combines permission checks, audit, notifications, and search filters. All paths covered including PENDING_REVIEW workflow.
+
