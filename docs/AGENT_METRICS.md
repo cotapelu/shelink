@@ -2622,3 +2622,92 @@ Date        Health   Coverage   Complexity   Tests   Debt
 **Notes**:
 - `renderTemplate` is complex; covered success and multiple error paths (template missing/disabled, missing blob, folder mismatch, matter missing, missing variables)
 - `listTemplates` uses matterCategory filter via OR; covered with category filter
+
+---
+
+### [CYCLE-N-38p1] - 2025-07-06 Finance Billing Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~1.5h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created `src/tests/server/finance/actions.test.ts` with 5 tests covering 2 functions: `createBilling`, `deleteBilling`
+- Covered success paths, optional fields, role-based permission branching (FINANCE vs LAWYER), not-found handling
+- Mocks: prisma.billing, assertMatterWritable (with/without options), assertCanLeadMatter
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: 1650 total (+5)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 580 → 582 (+2 net)
+- Total functions: 918
+- Function coverage: 63.39%
+
+**Notes**:
+- Finance module large (13 functions); splitting into multiple cycles to maintain quality and time.
+- Next: continue with `createFeeEntry` and `deleteFeeEntry` (including commission transaction) in later cycles.
+
+
+---
+
+### [CYCLE-N-38p2] - 2025-07-06 Finance CommissionPlan Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~1.5h
+**Status**: ✅ Completed
+
+**Actions**:
+- Added tests for `setCommissionPlan` (2 tests)
+- Covered transaction: deleteMany + createMany
+- Validated percent range (0-100) via Zod
+- Verified audit, revalidatePath, permission guards
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: 1652 total (+2)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 582 → 584 (+2 net)
+- Total functions: 918
+- Function coverage: 63.61%
+
+**Notes**:
+- Finance module continues: next targets `createFeeEntry` (with auto-commission logic) and `deleteFeeEntry`.
+- These involve more complex transaction and parent-child relationships; will require careful mocking of commission plan and feeEntry children.
+
+
+---
+
+### [CYCLE-N-39] - 2025-07-06 Finance createFeeEntry Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~2h
+**Status**: ✅ Completed
+
+**Actions**:
+- Added tests for `createFeeEntry` (3 tests)
+- Covered: successful RECEIVED with commission children + timeline; non-RECEIVED no commission/timeline; Zod validation errors
+- Mocks: $transaction (function style), commissionPlan.findMany, feeEntry.create (parent+children), timelineEvent.create
+
+**Quality Gates**:
+- ✅ Typecheck: (pre-existing errors not introduced)
+- ✅ Tests: 1655 total (+3)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 584 → 587 (+3 net)
+- Total functions: 918
+- Function coverage: 63.94%
+
+**Notes**:
+- `createFeeEntry` transaction logic: ensured children entries created with correct parentFeeEntryId and beneficiary.
+- `assertMatterWritable` and `assertCanLeadMatter` mocked; permission barriers exercised in other tests.
+- Remaining finance functions: deleteFeeEntry, getMatterFinance, listMatterInvoiceRequests, getMatterInvoiceContext, createInvoiceRequest, searchMattersForInvoice, listAllFeeEntries, getMonthlyRevenue, getPersonalRevenue.
+
