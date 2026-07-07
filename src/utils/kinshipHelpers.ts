@@ -358,18 +358,13 @@ function getAncestryData(
   return traverseAncestors(id, parentMap, personsMap);
 }
 
-function findBloodKinship(
-  personA: PersonNode,
-  personB: PersonNode,
-  personsMap: Map<string, PersonNode>,
-  parentMap: Map<string, string[]>,
-): KinshipResult | null {
-  const ancA = getAncestryData(personA.id, parentMap, personsMap);
-  const ancB = getAncestryData(personB.id, parentMap, personsMap);
 
+function findLCA(
+  ancA: Map<string, any>,
+  ancB: Map<string, any>,
+): { lcaId: string | null; minDistance: number } {
   let lcaId: string | null = null;
   let minDistance = Infinity;
-
   for (const [id, dataA] of ancA) {
     if (ancB.has(id)) {
       const dist = dataA.depth + ancB.get(id)!.depth;
@@ -379,7 +374,19 @@ function findBloodKinship(
       }
     }
   }
+  return { lcaId, minDistance };
+}
 
+function findBloodKinship(
+  personA: PersonNode,
+  personB: PersonNode,
+  personsMap: Map<string, PersonNode>,
+  parentMap: Map<string, string[]>,
+): KinshipResult | null {
+  const ancA = getAncestryData(personA.id, parentMap, personsMap);
+  const ancB = getAncestryData(personB.id, parentMap, personsMap);
+
+  const { lcaId, minDistance } = findLCA(ancA, ancB);
   if (!lcaId) return null;
 
   const dataA = ancA.get(lcaId)!;
@@ -407,9 +414,6 @@ function findBloodKinship(
     pathLabels: pathParts,
   };
 }
-
-// ── Main Entry Point ──────────────────────────────────────────────────────────
-
 export function computeKinship(
   personA: PersonNode,
   personB: PersonNode,

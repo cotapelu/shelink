@@ -56,12 +56,23 @@ export interface CustomEventRecord {
  * Finds the next solar Date on which a given lunar (month, day) falls,
  * starting from `fromDate`.
  */
+function tryYearOffset(year: number, month: number, day: number, from: Date): Date | null {
+  try {
+    const l = Lunar.fromYmd(year, month, day);
+    const s = l.getSolar();
+    const candidate = new Date(s.getYear(), s.getMonth() - 1, s.getDay());
+    if (candidate >= from) return candidate;
+  } catch {
+    // ignore invalid dates
+  }
+  return null;
+}
+
 function nextSolarForLunar(
   lunarMonth: number,
   lunarDay: number,
   fromDate: Date,
 ): Date | null {
-  // Derive the current lunar year by converting today's solar date to lunar
   const todaySolar = Solar.fromYmd(
     fromDate.getFullYear(),
     fromDate.getMonth() + 1,
@@ -69,22 +80,9 @@ function nextSolarForLunar(
   );
   const currentLunarYear = todaySolar.getLunar().getYear();
 
-  // Try this lunar year and the next two (to handle leap months & edge cases)
-   
-  const LunarClass = Lunar as any;
   for (let offset = 0; offset <= 2; offset++) {
-    try {
-      const l = LunarClass.fromYmd(
-        currentLunarYear + offset,
-        lunarMonth,
-        lunarDay,
-      );
-      const s = l.getSolar();
-      const candidate = new Date(s.getYear(), s.getMonth() - 1, s.getDay());
-      if (candidate >= fromDate) return candidate;
-    } catch {
-      // lunar date may not exist in this year (e.g., leap month); try next
-    }
+    const result = tryYearOffset(currentLunarYear + offset, lunarMonth, lunarDay, fromDate);
+    if (result) return result;
   }
   return null;
 }

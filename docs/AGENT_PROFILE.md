@@ -76,7 +76,7 @@ Areas where modifications consume excessive time/risk:
 
 | Debt Type | Count (2025-07-03) | Trend | Target Reduction |
 |-----------|-------------------|-------|------------------|
-| Function size violations | 61 functions >30 lines | ↘️ (from 940) | -5/week |
+| Function size violations | 59 functions >30 lines | ↘️ (from 940) | -5/week |
 | Test Func coverage | 73.02% (<80%) | ↔️ | +2%/week |
 | Lint warnings | 0 (achieved) | ✅ | Maintain 0 |
 | TODOs/FIXMEs | ~20 (estimated) | ↔️ | -2/week |
