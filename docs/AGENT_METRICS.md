@@ -2193,3 +2193,40 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **P1 Coverage**: 62.8% still far from 80%. Next target: `files.actions` (~6 functions) to continue multi-module strategy.
 
+
+---
+
+### [CYCLE-N-23] - 2025-07-07 Intake Actions Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~1h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created comprehensive test suite for `src/server/intake/actions`
+- 19 tests covering all 7 exported functions:
+  - `listIntakes` (4 tests)
+  - `getIntake` (3 tests)
+  - `createIntake` (3 tests)
+  - `updateIntake` (2 tests)
+  - `assignIntake` (2 tests)
+  - `convertIntakeToMatter` (3 tests)
+  - `deleteIntake` (2 tests)
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: PASS (~1431 total)
+- ✅ Build: SUCCESS
+- ⚠️ Lint: 1121 violations (pre-existing, no new)
+
+**Coverage Impact**:
+- Functions: 63.11% (498/789) → (+7 functions)
+- Statements: +35
+- Branches: +12
+- Lines: +20
+
+**Cleanup**: Added `public/uploads/` to `.gitignore` to prevent committing test artifacts.
+
+**P1 Tracking**: Coverage progress slow but steady. Next: target additional server action modules (e.g., `clients.actions`, `tasks.actions`) to accelerate.
+
