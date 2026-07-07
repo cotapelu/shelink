@@ -2593,3 +2593,32 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Notes**:
 - The `listAuditLogs` distinct query originally used a hardcoded `where: { createdAt: { gte: since } }`, ignoring filters. Aligned to use the same `where` variable as the items query.
+
+---
+
+### [CYCLE-N-37] - 2025-07-06 Document Templates Actions Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~4h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created test suite for `src/server/document-templates/actions` (4 functions, 16 tests)
+- Covered: listTemplates (filters), getTemplate (with blob), toggleTemplate (admin), renderTemplate (full flow)
+- Mocks: storage (read/write), crypto (encrypt/decrypt/sha256), template engine (context, rendering, missing vars)
+- Handled nullable folderId, auth guards (assertMatterWritable, assertCanLeadMatter), audit events
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: 1645 total (+16)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 576 → 580 (+4 net)
+- Total functions: 890
+- Function coverage: 65.16%
+
+**Notes**:
+- `renderTemplate` is complex; covered success and multiple error paths (template missing/disabled, missing blob, folder mismatch, matter missing, missing variables)
+- `listTemplates` uses matterCategory filter via OR; covered with category filter

@@ -194,7 +194,8 @@
 - [x] Test users/actions (9 functions complete)
 - [x] Test procedures/actions (11 functions complete)
 - [x] Test settings/actions (3 functions complete)
-- [ ] Test remaining modules: document-templates, seals (require valid CUIDs, complex schemas)
+- [x] Test document-templates/actions (4 functions complete)
+- [ ] Test remaining modules: seals (require valid CUIDs, complex schemas)
 - [ ] Refactor God Functions >200 lines
 
 **Files Modified**:
