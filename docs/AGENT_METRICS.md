@@ -2369,3 +2369,30 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Notes**: Single-function module with permission filters and complex includes. Tests validated default date handling, permission scoping, client name resolution, sorting, and label fallback. Continue with similar simple modules to approach 80%.
 
+
+---
+
+### [CYCLE-N-29] - 2025-07-06 Firm Files Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~2.5h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created test suite for `src/server/firm-files/actions` (5 functions, 27 tests)
+- Tests cover listing, version history traversal, upload (validation, storage, hash, supersedes), update, delete
+- Module now 100% function coverage
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: PASS (~1506 total)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 503 → 514 (+11 net)
+- Total functions: 810
+- Function coverage: 63.45%
+
+**Notes**: Five-function module with file handling, storage, and transaction logic. Mock strategy: storage.writeFile, prisma.$transaction. Provided comprehensive validation tests. Continue building coverage with similar multi-function modules.
+
