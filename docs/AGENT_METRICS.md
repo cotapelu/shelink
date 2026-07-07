@@ -2162,3 +2162,34 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **P1 Coverage**: 62.6% → need 80% (≈247 more functions). Continue multi-module test addition strategy.
 
+
+---
+
+### [CYCLE-N-22] - 2025-07-07 Express Actions Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~45 minutes
+**Status**: ✅ Completed
+
+**Actions**:
+- Created comprehensive test suite for `src/server/shared/express.actions`
+- 9 tests covering all 3 exported functions:
+  - `createExpressTracking` (3 tests)
+  - `listExpressTrackings` (3 tests)
+  - `updateExpressStatus` (3 tests)
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: PASS (~1412 total)
+- ✅ Build: SUCCESS
+- ⚠️ Lint: 1121 violations (no new)
+
+**Coverage Impact**:
+- Functions: 62.64% → 62.78% (+3 functions, denominator +3)
+- Statements: 71.57% → 71.83% (+40)
+- Branches: 59.38% → 59.72% (+22)
+- Lines: 73.15% → 73.38% (+20)
+
+**P1 Coverage**: 62.8% still far from 80%. Next target: `files.actions` (~6 functions) to continue multi-module strategy.
+

@@ -46,3 +46,4 @@ tsconfig.tsbuildinfo
 
 # Working scratch (outside of project scope)
 outputs/
+public/uploads/

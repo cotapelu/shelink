@@ -178,6 +178,7 @@
 - [~] Func coverage ≥80% (in progress; +4 functions covered in N-20)
 - [~] DB transaction boundaries: approveInvoiceRequest transaction implemented (testing pending)
 - [x] Test createNotification (notification.actions complete)
+- [ ] Add tests for files.actions (~6 functions)
 - [ ] Refactor God Functions >200 lines
 
 **Files Modified**:
