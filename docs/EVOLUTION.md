@@ -179,7 +179,8 @@
 - [~] DB transaction boundaries: approveInvoiceRequest transaction implemented (testing pending)
 - [x] Test createNotification (notification.actions complete)
 - [x] Test intake.actions (7 functions complete)
-- [ ] Add tests for clients.actions (~8 functions)
+- [x] Test announcements.actions (5 functions complete)
+- [ ] Test remaining modules: clients, settings, notes, tasks (require valid CUIDs, complex schemas, permission combos)
 - [ ] Refactor God Functions >200 lines
 
 **Files Modified**:
