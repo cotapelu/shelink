@@ -2565,3 +2565,31 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - `addProcedureMemo`/`toggleProcedureMemo`/`deleteProcedureMemo` do not create audit logs (per implementation)
 - `toggleProcedureMemo` toggles `done`/`doneAt`, not `isPin`
 - All tests use CUID-valid strings (25-char starting with 'c')
+
+---
+
+### [CYCLE-N-36] - 2025-07-06 Settings Actions Coverage & Bugfix
+
+**Type**: Proactive Improvement (Coverage + Bug Fix)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~4h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created test suite for `src/server/settings/actions` (3 functions, 15 tests)
+- Covered: listStageTemplates (admin), upsertStageTemplate (create/update, validation), listAuditLogs (filtering, distinct)
+- Discovered and fixed bug in `listAuditLogs`: distinct query now respects `action` and `userId` filters (previously ignored)
+- All tests use CUID strings; validated enum handling and date math
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: 1629 total (+15)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 571 → 576 (+5 net)
+- Total functions: 873
+- Function coverage: 65.97%
+
+**Notes**:
+- The `listAuditLogs` distinct query originally used a hardcoded `where: { createdAt: { gte: since } }`, ignoring filters. Aligned to use the same `where` variable as the items query.

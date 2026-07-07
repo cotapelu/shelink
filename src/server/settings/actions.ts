@@ -114,7 +114,7 @@ export async function listAuditLogs(input: Partial<AuditQuery> = {}) {
       include: { user: { select: { id: true, name: true } } }
     }),
     prisma.auditLog.findMany({
-      where: { createdAt: { gte: since } },
+      where,
       select: { action: true },
       distinct: ["action"],
       orderBy: { action: "asc" },
