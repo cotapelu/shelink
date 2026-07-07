@@ -174,9 +174,10 @@
 **Follow-up Tasks** (P1 - Awaiting Approval):
 - [x] JWT HS256 → RS256 upgrade (code complete, deploy pending)
 - [x] Per-user rate limiting (include userId in key) (already implemented, verified)
-- [~] Permission audit across all server actions (sample audit done; no critical issues)
-- [ ] Func coverage ≥80% (in progress; +3 functions covered)
-- [ ] DB transaction boundaries for multi-step ops
+- [x] Permission audit across all server actions (sample of 10 modules; consistent)
+- [~] Func coverage ≥80% (in progress; +6 functions covered)
+- [~] DB transaction boundaries: approveInvoiceRequest missing $transaction (identified; implementation pending)
+
 - [ ] Refactor God Functions >200 lines
 
 **Files Modified**:

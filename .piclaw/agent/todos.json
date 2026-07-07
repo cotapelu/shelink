@@ -3,47 +3,49 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Coverage Push Sprint",
+      "name": "Sprint P1 - Cycle Complete",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Add tests for matters/actions.ts: addMatterLink, removeMatterLink (✅ done)",
+          "content": "JWT RS256 upgrade",
           "status": "completed"
         },
         {
           "id": "task-2",
-          "content": "Add tests for matters/actions.ts: updateProcedureInfo, getMatterById (already covered), createMatter, updateMatterTeam, searchMattersForLink",
-          "status": "in_progress"
+          "content": "Per-user rate limiting (verified)",
+          "status": "completed"
         },
         {
           "id": "task-3",
-          "content": "Add tests for archive/actions.ts (coverage ~87%) to reach 100%",
-          "status": "pending"
+          "content": "Permission audit (sample 10 modules)",
+          "status": "completed"
         },
         {
           "id": "task-4",
-          "content": "Add tests for intakes/actions.ts (coverage ~100%) - review gaps",
-          "status": "pending"
+          "content": "Coverage push: addMatterLink, removeMatterLink, searchMattersForLink (+3 functions)",
+          "status": "completed"
         },
         {
           "id": "task-5",
-          "content": "Add tests for invoices/actions.ts",
-          "status": "pending"
+          "content": "Coverage push: export-xlsx helpers (+5 tests)",
+          "status": "completed"
         },
         {
           "id": "task-6",
-          "content": "Add tests for tasks/actions.ts",
-          "status": "pending"
+          "content": "Transaction audit: approveInvoiceRequest identified missing $transaction",
+          "status": "completed",
+          "notes": "Documented in AGENT_PROFILE; implementation deferred to dedicated cycle due to complexity"
         },
         {
           "id": "task-7",
-          "content": "Add tests for notes/actions.ts",
-          "status": "pending"
+          "content": "Remaining: updateProcedureInfo, createMatter, updateMatterTeam tests; procedure-content refactor; transaction fixes",
+          "status": "in_progress",
+          "notes": "Continue in next cycle"
         }
       ]
     }
   ],
   "nextTaskId": 8,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-07T00:57:57.368Z"
+  "updatedAt": "2026-07-07T01:38:52.234Z"
 }

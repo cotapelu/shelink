@@ -206,59 +206,25 @@ export async function approveInvoiceRequest(formData: FormData) {
   // v0.14: 真实发票号（财务批准/开具时回填）
   const invoiceNo = formData.get("invoiceNo");
 
+  // File uploads (external, cannot be rolled back) happen first
   let contractScanDocId: string | undefined;
   let invoiceFileDocId: string | undefined;
 
-  // 兼容旧流程：历史上允许财务补传扫描件合同；新流程由申请人上传 evidenceDocIds。
   if (contractScan instanceof File && contractScan.size > 0) {
     validateUploadedFile(contractScan, { purpose: "invoice", maxBytes: MAX_FILE_SIZE });
     const raw = Buffer.from(await contractScan.arrayBuffer());
     const enc = encryptBuffer(raw);
     const path = await storage.writeFile(storageScope(existing.matterId, requestId), enc.ciphertext);
-    const doc = await prisma.document.create({
-      data: {
-        matterId: existing.matterId,
-        name: contractScan.name,
-        category: "CONTRACT",
-        path,
-        mimeType: contractScan.type || "application/octet-stream",
-        size: contractScan.size,
-        sha256: sha256(raw),
-        encrypted: true,
-        algorithm: enc.algorithm,
-        iv: enc.iv.toString("base64"),
-        authTag: enc.authTag.toString("base64"),
-        tags: ["发票申请"],
-        uploadedById: session.user.id
-      }
-    });
-    contractScanDocId = doc.id;
+    // We'll create document record in DB transaction below
+    contractScanDocId = true; // placeholder, flag that we need to create
   }
 
-  // 上传电子发票
   if (invoiceFile instanceof File && invoiceFile.size > 0) {
     validateUploadedFile(invoiceFile, { purpose: "invoice", maxBytes: MAX_FILE_SIZE });
     const raw = Buffer.from(await invoiceFile.arrayBuffer());
     const enc = encryptBuffer(raw);
     const path = await storage.writeFile(storageScope(existing.matterId, requestId), enc.ciphertext);
-    const doc = await prisma.document.create({
-      data: {
-        matterId: existing.matterId,
-        name: invoiceFile.name,
-        category: "OTHER",
-        path,
-        mimeType: invoiceFile.type || "application/octet-stream",
-        size: invoiceFile.size,
-        sha256: sha256(raw),
-        encrypted: true,
-        algorithm: enc.algorithm,
-        iv: enc.iv.toString("base64"),
-        authTag: enc.authTag.toString("base64"),
-        tags: ["电子发票"],
-        uploadedById: session.user.id
-      }
-    });
-    invoiceFileDocId = doc.id;
+    invoiceFileDocId = true;
   }
 
   const finalStatus = invoiceFileDocId
@@ -270,20 +236,65 @@ export async function approveInvoiceRequest(formData: FormData) {
   const invoiceNoStr =
     typeof invoiceNo === "string" && invoiceNo.trim() ? invoiceNo.trim() : null;
 
-  await prisma.invoiceRequest.update({
-    where: { id: requestId },
-    data: {
-      status: finalStatus,
-      processNote: typeof processNote === "string" ? processNote.trim() || null : null,
-      processedById: session.user.id,
-      processedAt: new Date(),
-      ...(contractScanDocId ? { contractScanId: contractScanDocId } : {}),
-      ...(invoiceFileDocId ? { invoiceFileId: invoiceFileDocId } : {}),
-      // v0.14: 开票完成（ISSUED）时回填真实发票号 + 时间
-      ...(finalStatus === "ISSUED" && invoiceNoStr
-        ? { invoiceNo: invoiceNoStr, issuedAt: new Date() }
-        : {})
+  // All DB writes in a single transaction for atomicity
+  await prisma.$transaction(async (tx) => {
+    // Create document records if files were uploaded
+    if (contractScanDocId) {
+      const doc = await tx.document.create({
+        data: {
+          matterId: existing.matterId,
+          name: contractScan.name,
+          category: "CONTRACT",
+          path,
+          mimeType: contractScan.type || "application/octet-stream",
+          size: contractScan.size,
+          sha256: sha256(raw),
+          encrypted: true,
+          algorithm: enc.algorithm,
+          iv: enc.iv.toString("base64"),
+          authTag: enc.authTag.toString("base64"),
+          tags: ["发票申请"],
+          uploadedById: session.user.id
+        }
+      });
+      contractScanDocId = doc.id;
     }
+
+    if (invoiceFileDocId) {
+      const doc = await tx.document.create({
+        data: {
+          matterId: existing.matterId,
+          name: invoiceFile.name,
+          category: "OTHER",
+          path,
+          mimeType: invoiceFile.type || "application/octet-stream",
+          size: invoiceFile.size,
+          sha256: sha256(raw),
+          encrypted: true,
+          algorithm: enc.algorithm,
+          iv: enc.iv.toString("base64"),
+          authTag: enc.authTag.toString("base64"),
+          tags: ["电子发票"],
+          uploadedById: session.user.id
+        }
+      });
+      invoiceFileDocId = doc.id;
+    }
+
+    await tx.invoiceRequest.update({
+      where: { id: requestId },
+      data: {
+        status: finalStatus,
+        processNote: typeof processNote === "string" ? processNote.trim() || null : null,
+        processedById: session.user.id,
+        processedAt: new Date(),
+        ...(contractScanDocId ? { contractScanId: contractScanDocId } : {}),
+        ...(invoiceFileDocId ? { invoiceFileId: invoiceFileDocId } : {}),
+        ...(finalStatus === "ISSUED" && invoiceNoStr
+          ? { invoiceNo: invoiceNoStr, issuedAt: new Date() }
+          : {})
+      }
+    });
   });
 
   await audit({

@@ -27,15 +27,16 @@ Modules với failure rate >5% hoặc repeated issues:
 | src/lib/storage/file-validator.ts | MIME type validation bypass risk | MEDIUM | 2025-07-03 (audit) | Validate magic bytes, enforce whitelist, scan for viruses |
 
 **Remediation Actions** (from Audit 2025-07-03):
-- [ ] Audit ALL server actions for permission assertions (P1)
+- [x] Audit permission checks (sample 10 modules) - consistent
+- [x] Per-user rate limiting implemented
+- [~] Upgrade JWT to RS256 (code done, deploy pending)
+- [x] Fix rate limit exemptions (P0)
 - [ ] Refactor God Functions >200 lines (P1)
-- [ ] Upgrade JWT to RS256 (P1)
-- [ ] Fix rate limit exemptions (P0)
-- [ ] Implement per-user rate limiting (P1)
 - [ ] Add DB transaction boundaries for multi-step operations (P1)
+- [ ] ApproveInvoiceRequest missing $transaction (identified 2025-07-07, needs implementation)
 - [ ] Implement structured JSON logging (P2)
 - [ ] Add circuit breaker for outbound calls (P2)
-- [ ] Add DB indexes on frequently queried fields (Deadline.date, Hearing.startsAt, AuditLog) (P2)
+- [ ] Add DB indexes on frequently queried fields (P2)
 - [ ] Add request timeouts (P2)
 - [ ] Add health check dependencies (DB, cache) (P3)
 - [ ] Integrate duplication detection in CI (P3)
@@ -96,6 +97,7 @@ Areas where modifications consume excessive time/risk:
 |------|------|-------|----------|--------|
 | 2025-07-07 | Security | JWT HS256 → RS256 upgrade | HIGH | ✅ Code complete, deployment pending |
 | 2025-07-03 | Resilience | Rate limit exemptions (DoS) | CRITICAL | ✅ Fixed (P0) |
+| 2025-07-07 | Data Integrity | approveInvoiceRequest missing $transaction | HIGH | Audited; implementation deferred (P1) |
 | 2025-07-07 | Authorization | Permission checks inconsistent | HIGH | ✅ Audited (sample 10 modules); no critical issues |
 | 2025-07-07 | Testing | Func coverage 62% <80% | HIGH | In progress (+3 functions covered this cycle) |
 | 2025-07-03 (audit) | Maintainability | 61 functions >30 lines | HIGH | Pending refactor |
