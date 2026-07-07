@@ -2534,3 +2534,34 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Notes**: Users module integrates bcrypt and role checks; thorough coverage includes password strength validation, admin-only barriers, and avatar size limits. Pattern for CUID validation solidified: use 25-char strings starting with 'c'.
 
+
+---
+
+### [CYCLE-N-35] - 2025-07-06 Procedures Actions Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~4h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created test suite for `src/server/procedures/actions` (11 functions, 27 tests)
+- Covered: procedure CRUD, deadline toggle, hearing CRUD, memo operations
+- Used valid enums from schema (`FIRST_INSTANCE`, `SECOND_INSTANCE`, etc.)
+- Aligned with actual behavior: `toggleProcedureMemo` toggles `done` field; no audit for memo ops
+- Verified revalidatePath, error paths, permission guards
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: 1614 total (1613 +27)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 557 → 571 (+14 net)
+- Total functions: 868
+- Function coverage: 65.78%
+
+**Notes**:
+- `addProcedureMemo`/`toggleProcedureMemo`/`deleteProcedureMemo` do not create audit logs (per implementation)
+- `toggleProcedureMemo` toggles `done`/`doneAt`, not `isPin`
+- All tests use CUID-valid strings (25-char starting with 'c')
