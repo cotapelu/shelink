@@ -209,14 +209,18 @@ export async function approveInvoiceRequest(formData: FormData) {
   // File uploads (external, cannot be rolled back) happen first
   let contractScanDocId: string | undefined;
   let invoiceFileDocId: string | undefined;
+  let contractScanMeta: { name: string; type: string; size: number; raw: Buffer; enc: ReturnType<typeof encryptBuffer>; path: string } | undefined;
+  let invoiceFileMeta: { name: string; type: string; size: number; raw: Buffer; enc: ReturnType<typeof encryptBuffer>; path: string } | undefined;
+  let createContractDoc = false;
+  let createInvoiceDoc = false;
 
   if (contractScan instanceof File && contractScan.size > 0) {
     validateUploadedFile(contractScan, { purpose: "invoice", maxBytes: MAX_FILE_SIZE });
     const raw = Buffer.from(await contractScan.arrayBuffer());
     const enc = encryptBuffer(raw);
     const path = await storage.writeFile(storageScope(existing.matterId, requestId), enc.ciphertext);
-    // We'll create document record in DB transaction below
-    contractScanDocId = true; // placeholder, flag that we need to create
+    contractScanMeta = { name: contractScan.name, type: contractScan.type, size: contractScan.size, raw, enc, path };
+    createContractDoc = true;
   }
 
   if (invoiceFile instanceof File && invoiceFile.size > 0) {
@@ -224,7 +228,8 @@ export async function approveInvoiceRequest(formData: FormData) {
     const raw = Buffer.from(await invoiceFile.arrayBuffer());
     const enc = encryptBuffer(raw);
     const path = await storage.writeFile(storageScope(existing.matterId, requestId), enc.ciphertext);
-    invoiceFileDocId = true;
+    invoiceFileMeta = { name: invoiceFile.name, type: invoiceFile.type, size: invoiceFile.size, raw, enc, path };
+    createInvoiceDoc = true;
   }
 
   const finalStatus = invoiceFileDocId
@@ -239,15 +244,16 @@ export async function approveInvoiceRequest(formData: FormData) {
   // All DB writes in a single transaction for atomicity
   await prisma.$transaction(async (tx) => {
     // Create document records if files were uploaded
-    if (contractScanDocId) {
+    if (createContractDoc && contractScanMeta) {
+      const { name, type, size, raw, enc, path } = contractScanMeta;
       const doc = await tx.document.create({
         data: {
           matterId: existing.matterId,
-          name: contractScan.name,
+          name,
           category: "CONTRACT",
           path,
-          mimeType: contractScan.type || "application/octet-stream",
-          size: contractScan.size,
+          mimeType: type || "application/octet-stream",
+          size,
           sha256: sha256(raw),
           encrypted: true,
           algorithm: enc.algorithm,
@@ -260,15 +266,16 @@ export async function approveInvoiceRequest(formData: FormData) {
       contractScanDocId = doc.id;
     }
 
-    if (invoiceFileDocId) {
+    if (createInvoiceDoc && invoiceFileMeta) {
+      const { name, type, size, raw, enc, path } = invoiceFileMeta;
       const doc = await tx.document.create({
         data: {
           matterId: existing.matterId,
-          name: invoiceFile.name,
+          name,
           category: "OTHER",
           path,
-          mimeType: invoiceFile.type || "application/octet-stream",
-          size: invoiceFile.size,
+          mimeType: type || "application/octet-stream",
+          size,
           sha256: sha256(raw),
           encrypted: true,
           algorithm: enc.algorithm,
