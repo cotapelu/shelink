@@ -2396,3 +2396,31 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Notes**: Five-function module with file handling, storage, and transaction logic. Mock strategy: storage.writeFile, prisma.$transaction. Provided comprehensive validation tests. Continue building coverage with similar multi-function modules.
 
+
+---
+
+### [CYCLE-N-30] - 2025-07-06 Clients Actions Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~3h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created test suite for `src/server/clients/actions` (8 functions, 21 tests)
+- Covered: listClients (pagination, filters), getClientById (permission, audit), getClientFinanceSummary (aggregations), createClient (code generation, emptyToNull), updateClient (manager check, contact replacement), softDeleteClient, addContact, deleteContact
+- Handled Zod enums (ClientType, ClientGender, CooperationStatus), CUID ID, permission mocks (clientVisibilityFilter, isManager)
+- Mocked `@/server/clients/code-generator` for deterministic client code
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: PASS (~1527 total)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 514 → 529 (+15 net)
+- Total functions: 826
+- Function coverage: 64.04%
+
+**Notes**: Despite Zod schema complexity, systematic approach (valid enum values, proper CUID strings) enabled full coverage. This demonstrates that remaining modules with schemas are tractable with targeted mock strategies. Continue with similar high-function modules.
+
