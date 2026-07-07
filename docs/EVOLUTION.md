@@ -177,7 +177,7 @@
 - [x] Permission audit across all server actions (sample of 10 modules; consistent)
 - [~] Func coverage ≥80% (in progress; +4 functions covered in N-20)
 - [~] DB transaction boundaries: approveInvoiceRequest transaction implemented (testing pending)
-- [ ] Test createNotification (notification.actions)
+- [x] Test createNotification (notification.actions complete)
 - [ ] Refactor God Functions >200 lines
 
 **Files Modified**:
