@@ -52,6 +52,18 @@ export interface CustomEventRecord {
   created_by: string | null;
 }
 
+type PersonInput = {
+  id: string;
+  full_name: string;
+  birth_year: number | null;
+  birth_month: number | null;
+  birth_day: number | null;
+  death_year: number | null;
+  death_month: number | null;
+  death_day: number | null;
+  is_deceased: boolean;
+};
+
 /**
  * Finds the next solar Date on which a given lunar (month, day) falls,
  * starting from `fromDate`.
@@ -88,23 +100,85 @@ function nextSolarForLunar(
   return null;
 }
 
+// ============ Helpers for computeEvents (refactor Cycle 3) ============
+
+function computeDaysUntil(date: Date, today: Date): number {
+  return Math.round((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function createBirthdayEvent(p: PersonInput, today: Date): FamilyEvent | null {
+  if (!p.birth_month || !p.birth_day) return null;
+  const thisYear = today.getFullYear();
+  let next = new Date(thisYear, p.birth_month - 1, p.birth_day);
+  if (next < today) next = new Date(thisYear + 1, p.birth_month - 1, p.birth_day);
+  const daysUntil = computeDaysUntil(next, today);
+  return {
+    personId: p.id,
+    personName: p.full_name,
+    type: "birthday",
+    nextOccurrence: next,
+    daysUntil,
+    eventDateLabel: `${p.birth_day.toString().padStart(2, "0")}/${p.birth_month.toString().padStart(2, "0")}`,
+    originYear: p.birth_year || null,
+    originMonth: p.birth_month,
+    originDay: p.birth_day,
+    isDeceased: p.is_deceased,
+  };
+}
+
+function createDeathAnniversaryEvent(p: PersonInput, today: Date): FamilyEvent | null {
+  if (!p.death_month || !p.death_day) return null;
+  try {
+    const deathYear = p.death_year ?? new Date().getFullYear();
+    const solar = Solar.fromYmd(deathYear, p.death_month, p.death_day);
+    const lunar = solar.getLunar();
+    const lMonth = Math.abs(lunar.getMonth());
+    const lDay = lunar.getDay();
+    const next = nextSolarForLunar(lMonth, lDay, today);
+    if (!next) return null;
+    const daysUntil = computeDaysUntil(next, today);
+    return {
+      personId: p.id,
+      personName: p.full_name,
+      type: "death_anniversary",
+      nextOccurrence: next,
+      daysUntil,
+      eventDateLabel: `${lDay.toString().padStart(2, "0")}/${lMonth.toString().padStart(2, "0")} ÂL`,
+      originYear: p.death_year,
+      isDeceased: p.is_deceased,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function createCustomEvent(ce: CustomEventRecord, today: Date): FamilyEvent | null {
+  if (!ce.event_date) return null;
+  const [y, m, d] = ce.event_date.split("-").map(Number);
+  if (!y || !m || !d) return null;
+  const next = new Date(y, m - 1, d);
+  const daysUntil = computeDaysUntil(next, today);
+  return {
+    personId: ce.id,
+    personName: ce.name,
+    type: "custom_event",
+    nextOccurrence: next,
+    daysUntil,
+    eventDateLabel: `${d.toString().padStart(2, "0")}/${m.toString().padStart(2, "0")}/${y}`,
+    originYear: y,
+    isDeceased: false,
+    location: ce.location,
+    content: ce.content,
+  };
+}
+
 /**
  * Computes upcoming FamilyEvents from a list of persons.
  * - Birthdays use the solar birth_month / birth_day.
  * - Death anniversaries (ngày giỗ) are observed on the *lunar* date of death.
  */
 export function computeEvents(
-  persons: {
-    id: string;
-    full_name: string;
-    birth_year: number | null;
-    birth_month: number | null;
-    birth_day: number | null;
-    death_year: number | null;
-    death_month: number | null;
-    death_day: number | null;
-    is_deceased: boolean;
-  }[],
+  persons: PersonInput[],
   customEvents: CustomEventRecord[] = []
 ): FamilyEvent[] {
   const today = new Date();
@@ -112,87 +186,15 @@ export function computeEvents(
   const events: FamilyEvent[] = [];
 
   for (const p of persons) {
-    // ── Birthday (solar) ────────────────────────────────────────────
-    if (p.birth_month && p.birth_day) {
-      const thisYear = today.getFullYear();
-      let next = new Date(thisYear, p.birth_month - 1, p.birth_day);
-      if (next < today)
-        next = new Date(thisYear + 1, p.birth_month - 1, p.birth_day);
-
-      const daysUntil = Math.round(
-        (next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-      );
-
-      events.push({
-        personId: p.id,
-        personName: p.full_name,
-        type: "birthday",
-        nextOccurrence: next,
-        daysUntil,
-        eventDateLabel: `${p.birth_day.toString().padStart(2, "0")}/${p.birth_month.toString().padStart(2, "0")}`,
-        originYear: p.birth_year || null,
-        originMonth: p.birth_month,
-        originDay: p.birth_day,
-        isDeceased: p.is_deceased,
-      });
-    }
-
-    // ── Death anniversary (lunar) ────────────────────────────────────
-    if (p.is_deceased && p.death_month && p.death_day) {
-      try {
-        // Convert the solar death date to a lunar date
-        const deathYear = p.death_year ?? new Date().getFullYear();
-        const solar = Solar.fromYmd(deathYear, p.death_month, p.death_day);
-        const lunar = solar.getLunar();
-        const lMonth = Math.abs(lunar.getMonth()); // abs to handle leap month
-        const lDay = lunar.getDay();
-
-        const next = nextSolarForLunar(lMonth, lDay, today);
-        if (!next) continue;
-
-        const daysUntil = Math.round(
-          (next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-        );
-
-        events.push({
-          personId: p.id,
-          personName: p.full_name,
-          type: "death_anniversary",
-          nextOccurrence: next,
-          daysUntil,
-          eventDateLabel: `${lDay.toString().padStart(2, "0")}/${lMonth.toString().padStart(2, "0")} ÂL`,
-          originYear: p.death_year,
-          isDeceased: p.is_deceased,
-        });
-      } catch {
-        // Skip if lunar conversion fails
-      }
-    }
+    const bday = createBirthdayEvent(p, today);
+    if (bday) events.push(bday);
+    const death = createDeathAnniversaryEvent(p, today);
+    if (death) events.push(death);
   }
 
-  // ── Custom Events (solar) ───────────────────────────────────────
   for (const ce of customEvents) {
-    if (!ce.event_date) continue;
-    const [y, m, d] = ce.event_date.split("-").map(Number);
-    if (!y || !m || !d) continue;
-
-    const next = new Date(y, m - 1, d);
-    const daysUntil = Math.round(
-      (next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    events.push({
-      personId: ce.id, // using event id here
-      personName: ce.name, // mapping custom event name to personName
-      type: "custom_event",
-      nextOccurrence: next,
-      daysUntil,
-      eventDateLabel: `${d.toString().padStart(2, "0")}/${m.toString().padStart(2, "0")}/${y}`,
-      originYear: y,
-      isDeceased: false,
-      location: ce.location,
-      content: ce.content,
-    });
+    const custom = createCustomEvent(ce, today);
+    if (custom) events.push(custom);
   }
 
   // Sort: soonest first

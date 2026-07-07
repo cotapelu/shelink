@@ -2796,3 +2796,26 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - Type errors: 0
 
 **Notes**: Next targets: computeEvents (106 lines), resolveBloodTerms (171 lines), file size reductions.
+
+### [CYCLE-3] - 2025-07-07 Refactor computeEvents
+
+**Type**: Violation Fix (Lint - Function Size / Statements)
+**Priority**: HIGH
+**Duration**: ~60 min
+**Status**: ✅ Completed (1 task)
+
+**Tasks**:
+- [R] eventHelpers.ts: Refactored computeEvents (106 lines → ~25 lines, 30 statements → ~12) by extracting `createBirthdayEvent`, `createDeathAnniversaryEvent` and using `createCustomEvent`. Added `PersonInput` type.
+
+**Verification**:
+- npm run lint: errors reduced from 1180 to 1178 (total 1255 → 1253)
+- npm run typecheck: PASS
+- Build: PASS
+- Tests: 4 passed (eventHelpers)
+
+**Metrics**:
+- Lint violations delta: -2 errors, -2 total
+- Functions >30 lines reduced: 1
+- Complexity: improved
+
+**Notes**: Next targets: parseGedcom, exportToGedcom (gedcom.ts).
