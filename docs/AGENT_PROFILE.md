@@ -83,6 +83,7 @@ Areas where modifications consume excessive time/risk:
 | Missing indexes | 5-8 critical fields | ↔️ | -2/week |
 | Permission check gaps | TBD (audit needed) | ↔️ | -10 actions/week |
 | Large components (>500 lines) | 5 modules | ↘️ | -1/week |
+| Test type bypass (@ts-nocheck) | 3 test files | ↗️ | -3 files/week |
 
 **Debt Reduction Plan**:
 - Week P0-P1: Fix critical violations (rate limit, JWT, permission audit, coverage)

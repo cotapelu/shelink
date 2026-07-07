@@ -6,6 +6,9 @@ import {
   setCommissionPlan,
   createFeeEntry,
   getMatterFinance,
+  listMatterInvoiceRequests,
+  getMatterInvoiceContext,
+  listAllFeeEntries,
   // other finance functions later
 } from "@/server/finance/actions";
 import { requireSession } from "@/lib/auth/session";
@@ -14,7 +17,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { assertMatterWritable } from "@/lib/archive/guard";
-import { assertCanLeadMatter } from "@/lib/permissions";
+import { assertCanAccessMatter, assertCanAssociateMatter, assertCanLeadMatter, isManager, matterVisibilityFilter } from "@/lib/permissions";
 
 vi.mock("@/lib/auth/session");
 vi.mock("@/server/audit");
@@ -29,6 +32,12 @@ vi.mock("@/lib/prisma", () => ({
     },
     matter: {
       findUnique: vi.fn(),
+    },
+    client: {
+      findUnique: vi.fn(),
+    },
+    intake: {
+      findFirst: vi.fn(),
     },
     commissionPlan: {
       findMany: vi.fn(),
@@ -51,8 +60,16 @@ vi.mock("@/lib/prisma", () => ({
     $transaction: vi.fn(),
   },
 }));
-vi.mock("@/lib/archive/guard");
-vi.mock("@/lib/permissions");
+vi.mock("@/lib/archive/guard", () => ({
+  assertMatterWritable: vi.fn(),
+}));
+vi.mock("@/lib/permissions", () => ({
+  assertCanAccessMatter: vi.fn(),
+  assertCanAssociateMatter: vi.fn(),
+  assertCanLeadMatter: vi.fn(),
+  isManager: vi.fn(),
+  matterVisibilityFilter: vi.fn(),
+}));
 
 const mockRequireSession = vi.mocked(requireSession, true);
 const mockAudit = vi.mocked(audit, true);
@@ -68,6 +85,8 @@ mockPrisma.$transaction = vi.fn().mockImplementation(async (arg) => {
 }) as any;
 const mockAssertMatterWritable = vi.mocked(assertMatterWritable, true);
 const mockAssertCanLeadMatter = vi.mocked(assertCanLeadMatter, true);
+const mockAssertCanAccessMatter = vi.mocked(assertCanAccessMatter, true);
+const mockIsManager = vi.mocked(isManager, true);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -76,6 +95,8 @@ beforeEach(() => {
   } as any);
   mockAssertMatterWritable.mockResolvedValue(undefined);
   mockAssertCanLeadMatter.mockResolvedValue(undefined);
+  mockAssertCanAccessMatter.mockResolvedValue(undefined);
+  mockIsManager.mockReturnValue(false);
 });
 
 const CUID = (n: number) => `c${n.toString().padStart(24, "0")}`;
@@ -438,6 +459,106 @@ describe("finance/actions", () => {
       expect(result).toHaveProperty('entries');
       expect(result).toHaveProperty('plans');
       expect(result).toHaveProperty('stats');
+    });
+  });
+
+  describe("listMatterInvoiceRequests", () => {
+    it("should list invoice requests for matter", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: CUID(1), role: "LAWYER" } } as any);
+      mockAssertCanAccessMatter.mockResolvedValue(undefined);
+      const matterId = CUID(2);
+      mockPrisma.invoiceRequest.findMany.mockResolvedValue([
+        { id: CUID(10), amount: 1000, status: "ISSUED", title: "Inv1", requestedAt: new Date(), processedAt: new Date(), invoiceType: "INVOICE", invoiceItem: "Service", buyerName: "Client", buyerTaxNo: "123", evidenceDocIds: ["doc1"], invoiceNo: "INV-001", issuedAt: new Date() },
+      ]);
+
+      const result = await listMatterInvoiceRequests(matterId);
+
+      expect(mockAssertCanAccessMatter).toHaveBeenCalledWith(CUID(1), "LAWYER", matterId);
+      expect(mockPrisma.invoiceRequest.findMany).toHaveBeenCalledWith({
+        where: { matterId },
+        orderBy: { requestedAt: "desc" },
+        select: {
+          id: true,
+          amount: true,
+          title: true,
+          status: true,
+          processNote: true,
+          requestedAt: true,
+          processedAt: true,
+          invoiceType: true,
+          invoiceItem: true,
+          buyerName: true,
+          buyerTaxNo: true,
+          evidenceDocIds: true,
+          invoiceNo: true,
+          issuedAt: true,
+        },
+      });
+      expect(result).toHaveLength(1);
+    });
+
+    it("should throw if access denied", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: CUID(1), role: "LAWYER" } } as any);
+      mockAssertCanAccessMatter.mockRejectedValue(new Error("No access"));
+      await expect(listMatterInvoiceRequests(CUID(2))).rejects.toThrow("No access");
+    });
+  });
+
+  describe("getMatterInvoiceContext", () => {
+    it("should return context with intake", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: CUID(1) } } as any);
+      const matterId = CUID(2);
+      mockPrisma.matter.findUnique.mockResolvedValue({ id: matterId, internalCode: "INV-001", clientId: CUID(100) });
+      mockPrisma.client.findUnique.mockResolvedValue({ id: CUID(100), name: "Client Co", taxNumber: "123456" });
+      mockPrisma.intake.findFirst.mockResolvedValue({ id: CUID(200) });
+
+      const result = await getMatterInvoiceContext(matterId);
+
+      expect(mockPrisma.matter.findUnique).toHaveBeenCalledWith({ where: { id: matterId }, select: { id: true, internalCode: true, clientId: true } });
+      expect(mockPrisma.client.findUnique).toHaveBeenCalledWith({ where: { id: CUID(100) }, select: { id: true, name: true, taxNumber: true } });
+      expect(mockPrisma.intake.findFirst).toHaveBeenCalledWith({ where: { matterId }, select: { id: true } });
+      expect(result).toEqual({ clientName: "Client Co", clientTaxNo: "123456", matterInternalCode: "INV-001", intakeId: CUID(200) });
+    });
+
+    it("should handle missing intake", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: CUID(1) } } as any);
+      const matterId = CUID(2);
+      mockPrisma.matter.findUnique.mockResolvedValue({ id: matterId, internalCode: "INV-002", clientId: CUID(100) });
+      mockPrisma.client.findUnique.mockResolvedValue({ id: CUID(100), name: "Client", taxNumber: "789" });
+      mockPrisma.intake.findFirst.mockResolvedValue(null);
+
+      const result = await getMatterInvoiceContext(matterId);
+      expect(result.intakeId).toBeUndefined();
+    });
+  });
+
+  describe("listAllFeeEntries", () => {
+    it("should require manager or finance", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: CUID(1), role: "LAWYER" } } as any);
+      mockIsManager.mockReturnValue(false);
+      await expect(listAllFeeEntries({})).rejects.toThrow("仅管理员或财务可查看全局收付款");
+    });
+
+    it("should list entries with filters and includes", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: CUID(1), role: "ADMIN" } } as any);
+      mockIsManager.mockReturnValue(true);
+      const entries = [{ id: CUID(10), type: "RECEIVED", amount: new Prisma.Decimal(100) }];
+      mockPrisma.feeEntry.findMany.mockResolvedValue(entries);
+
+      const result = await listAllFeeEntries({ matterId: CUID(2) });
+
+      expect(mockPrisma.feeEntry.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ matterId: CUID(2) }),
+          orderBy: { occurredAt: "desc" },
+          include: {
+            beneficiaryUser: { select: { id: true, name: true } },
+            parentFeeEntry: { select: { id: true, type: true } },
+            billing: { select: { id: true, title: true } },
+          },
+        })
+      );
+      expect(result).toEqual(entries);
     });
   });
 

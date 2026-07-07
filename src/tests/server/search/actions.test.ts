@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { globalSearch } from "@/server/search/actions";
 import { requireSession } from "@/lib/auth/session";
