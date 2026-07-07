@@ -188,7 +188,8 @@
 - [x] Test schedule/actions (1 function complete)
 - [x] Test firm-files/actions (5 functions complete)
 - [x] Test clients/actions (8 functions complete)
-- [ ] Test remaining modules: settings, notes, tasks (require valid CUIDs, complex schemas, permission combos)
+- [x] Test tasks/actions (5 functions complete)
+- [ ] Test remaining modules: settings, notes, procedures, external-contacts, document-templates (require valid CUIDs, complex schemas)
 - [ ] Refactor God Functions >200 lines
 
 **Files Modified**:

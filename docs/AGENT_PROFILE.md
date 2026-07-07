@@ -99,7 +99,7 @@ Areas where modifications consume excessive time/risk:
 | 2025-07-03 | Resilience | Rate limit exemptions (DoS) | CRITICAL | ✅ Fixed (P0) |
 | 2025-07-07 | Data Integrity | approveInvoiceRequest missing $transaction | HIGH | Audited; implementation deferred (P1) |
 | 2025-07-07 | Authorization | Permission checks inconsistent | HIGH | ✅ Audited (sample 10 modules); no critical issues |
-| 2025-07-07 | Testing | Func coverage ~65% <80% | HIGH | In progress (+40 functions across 10 modules: notification, express, intake, announcements, analytics, genealogy, search, schedule, firm-files, clients); added clients (8 functions); 64.04% coverage
+| 2025-07-07 | Testing | Func coverage ~65% <80% | HIGH | In progress (+45 functions across 11 modules: notification, express, intake, announcements, analytics, genealogy, search, schedule, firm-files, clients, tasks); added tasks (5 functions); 64.25% coverage
 | 2025-07-03 (audit) | Maintainability | 61 functions >30 lines | HIGH | Pending refactor |
 
 ---

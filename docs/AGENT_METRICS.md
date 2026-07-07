@@ -2424,3 +2424,31 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Notes**: Despite Zod schema complexity, systematic approach (valid enum values, proper CUID strings) enabled full coverage. This demonstrates that remaining modules with schemas are tractable with targeted mock strategies. Continue with similar high-function modules.
 
+
+---
+
+### [CYCLE-N-31] - 2025-07-06 Tasks Actions Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~3.5h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created test suite for `src/server/tasks/actions` (5 functions, 15 tests)
+- Covered: createTask (audit, timeline, notification), updateTask (revalidate), deleteTask (audit), getTask, listTasks (filters)
+- Overcame CUID validation by using 25-char CUID strings; corrected assert expectations
+- Adjusted tests for proper matterId, assigneeId handling
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: PASS (~1542 total)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 529 → 534 (+5 net)
+- Total functions: 831
+- Function coverage: 64.25%
+
+**Notes**: Zod CUID validation strict (length 25). Use consistent CUID fixtures. Continue with other schema-heavy modules now that pattern is established.
+
