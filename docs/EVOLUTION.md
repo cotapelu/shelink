@@ -175,9 +175,9 @@
 - [x] JWT HS256 → RS256 upgrade (code complete, deploy pending)
 - [x] Per-user rate limiting (include userId in key) (already implemented, verified)
 - [x] Permission audit across all server actions (sample of 10 modules; consistent)
-- [~] Func coverage ≥80% (in progress; +6 functions covered)
-- [~] DB transaction boundaries: approveInvoiceRequest missing $transaction (identified; implementation pending)
-
+- [~] Func coverage ≥80% (in progress; +4 functions covered in N-20)
+- [~] DB transaction boundaries: approveInvoiceRequest transaction implemented (testing pending)
+- [ ] Test createNotification (notification.actions)
 - [ ] Refactor God Functions >200 lines
 
 **Files Modified**:

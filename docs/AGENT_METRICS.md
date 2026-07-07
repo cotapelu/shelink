@@ -2097,3 +2097,38 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Next**: Add tests for approveInvoiceRequest transaction behavior (success, partial failure rollback). Continue coverage push.
 
+
+---
+
+### [CYCLE-N-20] - 2025-07-07 Coverage Push: Export-xlsx & Notifications
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~1.5h
+**Status**: ✅ Completed
+
+**Actions**:
+- Added 12 edge case tests for `resolveMattersExportParams` (branch coverage +)
+- Added 13 tests for `notification.actions` covering 4/5 functions:
+  - `listNotifications` (4 tests)
+  - `getUnreadNotificationCount` (3 tests)
+  - `markNotificationRead` (2 tests)
+  - `markAllNotificationsRead` (4 tests)
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: PASS (~1400 total)
+- ✅ Build: SUCCESS
+- ⚠️ Lint: 1121 violations (no new; pre-existing)
+
+**Coverage Impact**:
+- Functions: 62.40% → 62.51% (483→487/774→779)
+- Statements: 71.39% → 71.57% (2912→2951/4079→4123)
+- Branches: 59.21% → 59.38% (2107→2127/3558→3582)
+- Lines: 73% → 73.15% (2634→2665/3608→3643)
+- **Net +4 functions covered** (denominator +5 due to new module)
+
+**Notes**: Coverage increment small due to denominator growth. To accelerate, next cycle will add `createNotification` test and target additional untested modules with multiple exports (e.g., `express.actions`, `files.actions`).
+
+**P1 Status**: Coverage 62.5% → still far from 80%; continue multi-module testing strategy.
+

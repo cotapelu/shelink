@@ -61,4 +61,89 @@ describe("resolveMattersExportParams", () => {
 
     expect(result.search).toBe("test query");
   });
+
+  describe("edge cases and defaults", () => {
+    it("should default tab to 'active' when invalid", () => {
+      const params = new URLSearchParams("tab=invalid");
+      const result = resolveMattersExportParams(params);
+      expect(result.tab).toBe("active");
+    });
+
+    it("should accept all valid tab values", () => {
+      const tabs = ["intake", "active", "archived", "revision", "all"] as const;
+      tabs.forEach(tab => {
+        const params = new URLSearchParams(`tab=${tab}`);
+        expect(resolveMattersExportParams(params).tab).toBe(tab);
+      });
+    });
+
+    it("should normalize sortBy to default for tab when invalid", () => {
+      const params = new URLSearchParams("tab=active&sortBy=invalid");
+      const result = resolveMattersExportParams(params);
+      // defaultSortByForTab('active') returns 'hearing'
+      expect(result.sortBy).toBe("hearing");
+    });
+
+    it("should keep sortBy when valid for tab", () => {
+      const params = new URLSearchParams("tab=active&sortBy=hearing");
+      expect(resolveMattersExportParams(params).sortBy).toBe("hearing");
+      const params2 = new URLSearchParams("tab=intake&sortBy=intakeDate");
+      expect(resolveMattersExportParams(params2).sortBy).toBe("intakeDate");
+    });
+
+    it("should set category to undefined when invalid", () => {
+      const params = new URLSearchParams("category=INVALID");
+      expect(resolveMattersExportParams(params).category).toBeUndefined();
+    });
+
+    it("should accept valid categories", () => {
+      const valid = [
+        "CIVIL_COMMERCIAL",
+        "LABOR_ARBITRATION",
+        "COMMERCIAL_ARBITRATION",
+        "CRIMINAL",
+        "ADMINISTRATIVE",
+        "NON_LITIGATION",
+        "LEGAL_COUNSEL",
+        "SPECIAL_PROJECT"
+      ] as const;
+      valid.forEach(cat => {
+        const params = new URLSearchParams(`category=${cat}`);
+        expect(resolveMattersExportParams(params).category).toBe(cat);
+      });
+    });
+
+    it("should set status to undefined when missing", () => {
+      const params = new URLSearchParams();
+      expect(resolveMattersExportParams(params).status).toBeUndefined();
+    });
+
+    it("should clean status text", () => {
+      const params = new URLSearchParams("status=  in_progress  ");
+      expect(resolveMattersExportParams(params).status).toBe("in_progress");
+    });
+
+    it("should return undefined for non-date format", () => {
+      const params = new URLSearchParams("from=not-a-date");
+      expect(resolveMattersExportParams(params).from).toBeUndefined();
+    });
+
+    it("should accept date in YYYY-MM-DD format even if semantically invalid", () => {
+      // cleanDateText only checks format, not validity of month/day
+      const params = new URLSearchParams("from=2025-13-01");
+      expect(resolveMattersExportParams(params).from).toBe("2025-13-01");
+    });
+
+    it("should default sortDir to 'desc' when not 'asc'", () => {
+      const params = new URLSearchParams("sortDir=desc");
+      expect(resolveMattersExportParams(params).sortDir).toBe("desc");
+      const params2 = new URLSearchParams("sortDir="); // empty
+      expect(resolveMattersExportParams(params2).sortDir).toBe("desc");
+    });
+
+    it("should accept 'asc' sortDir", () => {
+      const params = new URLSearchParams("sortDir=asc");
+      expect(resolveMattersExportParams(params).sortDir).toBe("asc");
+    });
+  });
 });
