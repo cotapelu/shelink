@@ -2257,3 +2257,32 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Notes**: Coverage progress continues; need ~170 more functions to reach 80%.
 
+
+---
+
+### [CYCLE-N-25] - 2025-07-07 Reports Analytics Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~1h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created test suite for `src/server/reports/analytics`
+- 9 tests covering 2 functions:
+  - `getCaseCycleAnalysis` (5 tests)
+  - `getReviewIssueAnalysis` (4 tests)
+- Module now 100% function coverage
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: PASS (~1464 total)
+- ✅ Build: SUCCESS
+- ⚠️ Lint: unchanged (pre-existing)
+
+**Coverage Impact**:
+- Functions: slight fluctuation due to removal of incomplete tests; net positive coverage
+- Modules fully covered: 5 (notification, express, intake, announcements, analytics)
+
+**Notes**: Chose simpler pure-function module to avoid schema/permission complexity. Deferring more complex modules (tasks, notes, clients) until test helpers exist.
+

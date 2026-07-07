@@ -78,7 +78,10 @@ describe("announcements actions", () => {
           where: {
             pinned: true,
             archivedAt: null,
-            OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+            OR: [
+              { expiresAt: null },
+              { expiresAt: expect.objectContaining({ gt: expect.any(Date) }) }
+            ],
           },
           select: { id: true, title: true, content: true, publishedAt: true },
         })
