@@ -2286,3 +2286,33 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Notes**: Chose simpler pure-function module to avoid schema/permission complexity. Deferring more complex modules (tasks, notes, clients) until test helpers exist.
 
+
+---
+
+### [CYCLE-N-26] - 2025-07-06 Simple Server Actions Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~2h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created test suites for:
+  - `src/server/reminders/actions` (1 function, 5 tests)
+  - `src/server/genealogy/users/actions` (1 function, 7 tests)
+  - `src/server/ai/actions` (1 function, 10 tests)
+- Fixed flaky test in `announcements/actions` (timestamp precision)
+- Modules with full coverage now: 6 (notification, express, intake, announcements, analytics, genealogy/users)
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: PASS (~1465 total)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 493 → 494 (+1 net) due to test file cleanups
+- Total functions: 790
+- Function coverage: 62.53%
+
+**Notes**: Focus on 1-function modules with minimal dependencies. Deferred complex modules (clients, settings, notes, tasks) still require test helpers. Next: continue with similar simple modules (imports, causes) or build helper utilities to tackle complex schemas.
+

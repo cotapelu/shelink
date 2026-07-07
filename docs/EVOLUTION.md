@@ -181,6 +181,9 @@
 - [x] Test intake.actions (7 functions complete)
 - [x] Test announcements.actions (5 functions complete)
 - [x] Test analytics.actions (2 functions complete)
+- [x] Test reminders.actions (1 function complete)
+- [x] Test genealogy/users.actions (1 function complete)
+- [x] Test ai/actions (1 function complete)
 - [ ] Test remaining modules: clients, settings, notes, tasks (require valid CUIDs, complex schemas, permission combos)
 - [ ] Refactor God Functions >200 lines
 

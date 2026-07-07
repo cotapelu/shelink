@@ -32,17 +32,27 @@ describe("genealogy/users/actions", () => {
         id: "user1",
         email: "admin@lawlink.com",
         name: "Admin",
+        passwordHash: "hashed1",
         role: "ADMIN",
+        phone: null,
+        avatar: null,
         active: true,
+        lastLoginAt: null,
         createdAt: now,
+        updatedAt: now,
       },
       {
         id: "user2",
         email: "lawyer@lawlink.com",
         name: "Lawyer",
+        passwordHash: "hashed2",
         role: "LAWYER",
+        phone: null,
+        avatar: null,
         active: true,
+        lastLoginAt: null,
         createdAt: now,
+        updatedAt: now,
       },
     ]);
 
@@ -62,14 +72,20 @@ describe("genealogy/users/actions", () => {
     mockGetServerSession.mockResolvedValue({
       user: { id: "u2", role: "LAWYER" },
     } as any);
+    const now2 = new Date();
     mockPrisma.user.findMany.mockResolvedValue([
       {
         id: "user3",
         email: "lawyer2@lawlink.com",
         name: "Lawyer2",
+        passwordHash: "hashed3",
         role: "LAWYER",
+        phone: null,
+        avatar: null,
         active: false,
-        createdAt: new Date(),
+        lastLoginAt: null,
+        createdAt: now2,
+        updatedAt: now2,
       },
     ]);
 
@@ -120,9 +136,14 @@ describe("genealogy/users/actions", () => {
         id: "u6",
         email: "test@test.com",
         name: "Test",
+        passwordHash: "x",
         role: "LAWYER",
+        phone: null,
+        avatar: null,
         active: true,
+        lastLoginAt: null,
         createdAt: date,
+        updatedAt: date,
       },
     ]);
 
