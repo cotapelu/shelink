@@ -9,7 +9,6 @@ import {
 } from "@/server/custom-fields/actions";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
-import { requireAdmin } from "@/server/custom-fields/actions"; // in same file
 import { audit } from "@/server/audit";
 import { revalidatePath } from "next/cache";
 import { assertMatterWritable } from "@/lib/archive/guard";
@@ -82,7 +81,13 @@ describe("custom-fields actions", () => {
       mockRequireSession.mockResolvedValue({
         user: { id: "admin", role: "ADMIN", name: "Admin" }
       } as any);
-      mockPrisma.customFieldDef.aggregate.mockResolvedValue({ _max: { order: 5 } });
+      mockPrisma.customFieldDef.aggregate.mockResolvedValue({
+        _max: { order: 5 },
+        _min: undefined,
+        _avg: undefined,
+        _sum: undefined,
+        _count: { _all: 0 }
+      });
       mockPrisma.customFieldDef.create.mockResolvedValue({
         id: "newDef",
         key: "cf_abcd1234",

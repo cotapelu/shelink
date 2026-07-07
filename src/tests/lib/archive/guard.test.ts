@@ -53,7 +53,8 @@ describe('archive guard', () => {
         archivedAt: null
       } as any);
       mockRequireSession.mockResolvedValue({
-        user: { id: 'u1', role: 'LAWYER' }
+        user: { id: 'u1', role: 'LAWYER', avatar: null },
+        expires: new Date().toISOString()
       });
 
       await expect(
@@ -67,7 +68,8 @@ describe('archive guard', () => {
         archivedAt: new Date()
       } as any);
       mockRequireSession.mockResolvedValue({
-        user: { id: 'u1', role: 'LAWYER' }
+        user: { id: 'u1', role: 'LAWYER', avatar: null },
+        expires: new Date().toISOString()
       });
 
       await expect(
@@ -81,7 +83,8 @@ describe('archive guard', () => {
         archivedAt: new Date()
       } as any);
       mockRequireSession.mockResolvedValue({
-        user: { id: 'u1', role: 'LAWYER' }
+        user: { id: 'u1', role: 'LAWYER', avatar: null },
+        expires: new Date().toISOString()
       });
 
       await expect(
@@ -92,7 +95,8 @@ describe('archive guard', () => {
     it('throws if matter not found', async () => {
       mockFindFirst.mockResolvedValue(null as any);
       mockRequireSession.mockResolvedValue({
-        user: { id: 'u1', role: 'LAWYER' }
+        user: { id: 'u1', role: 'LAWYER', avatar: null },
+        expires: new Date().toISOString()
       });
 
       await expect(
@@ -106,7 +110,8 @@ describe('archive guard', () => {
         archivedAt: null
       } as any);
       mockRequireSession.mockResolvedValue({
-        user: { id: 'u1', role: 'LAWYER' }
+        user: { id: 'u1', role: 'LAWYER', avatar: null },
+        expires: new Date().toISOString()
       });
 
       await expect(
@@ -123,7 +128,8 @@ describe('archive guard', () => {
         archivedAt: new Date()
       } as any);
       mockRequireSession.mockResolvedValue({
-        user: { id: 'u1', role: 'LAWYER' }
+        user: { id: 'u1', role: 'LAWYER', avatar: null },
+        expires: new Date().toISOString()
       });
 
       await expect(
@@ -137,7 +143,8 @@ describe('archive guard', () => {
         archivedAt: new Date()
       } as any);
       mockRequireSession.mockResolvedValue({
-        user: { id: 'u1', role: 'LAWYER' }
+        user: { id: 'u1', role: 'LAWYER', avatar: null },
+        expires: new Date().toISOString()
       });
 
       await expect(
@@ -151,7 +158,8 @@ describe('archive guard', () => {
         archivedAt: new Date()
       } as any);
       mockRequireSession.mockResolvedValue({
-        user: { id: 'u1', role: 'LAWYER' }
+        user: { id: 'u1', role: 'LAWYER', avatar: null },
+        expires: new Date().toISOString()
       });
 
       await expect(
@@ -165,7 +173,8 @@ describe('archive guard', () => {
         archivedAt: new Date()
       } as any);
       mockRequireSession.mockResolvedValue({
-        user: { id: 'u1', 'role': 'LAWYER' }
+        user: { id: 'u1', 'role': 'LAWYER', avatar: null },
+        expires: new Date().toISOString()
       });
 
       await expect(
@@ -179,7 +188,8 @@ describe('archive guard', () => {
         archivedAt: null
       } as any);
       mockRequireSession.mockResolvedValue({
-        user: { id: 'u1', role: 'LAWYER' }
+        user: { id: 'u1', role: 'LAWYER', avatar: null },
+        expires: new Date().toISOString()
       });
 
       await expect(
@@ -193,7 +203,8 @@ describe('archive guard', () => {
         archivedAt: new Date()
       } as any);
       mockRequireSession.mockResolvedValue({
-        user: { id: 'u1', role: 'LAWYER' }
+        user: { id: 'u1', role: 'LAWYER', avatar: null },
+        expires: new Date().toISOString()
       });
 
       await expect(

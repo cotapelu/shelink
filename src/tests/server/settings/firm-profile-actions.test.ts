@@ -31,7 +31,24 @@ describe("firm-profile-actions", () => {
       logoDataUrl: null,
       categoryWords: {}
     };
-    mockSaveFirmProfile.mockResolvedValue(undefined);
+    mockSaveFirmProfile.mockResolvedValue({
+      firmName: "Test Firm",
+      firmSubtitle: "Legal Experts",
+      matterCodePrefix: "TF",
+      firmShortName: "TF",
+      caseNoTemplate: "TF-{year}-{seq}",
+      logoDataUrl: null,
+      categoryWords: {
+        CIVIL_COMMERCIAL: "Dân sự",
+        LABOR_ARBITRATION: "Lao động & Trọng tài",
+        COMMERCIAL_ARBITRATION: "Thương mại & Trọng tài",
+        CRIMINAL: "Hình sự",
+        ADMINISTRATIVE: "Hành chính",
+        NON_LITIGATION: "Phi tố tụng",
+        LEGAL_COUNSEL: "Tư vấn",
+        SPECIAL_PROJECT: "Dự án đặc biệt"
+      }
+    } as any);
 
     await saveFirmProfileAction(input as any);
 

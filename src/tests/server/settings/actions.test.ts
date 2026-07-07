@@ -27,7 +27,10 @@ const mockRevalidatePath = vi.mocked(revalidatePath);
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "ADMIN", name: "Admin" } });
+  mockRequireSession.mockResolvedValue({ 
+    user: { id: "u1", role: "ADMIN", name: "Admin", avatar: null },
+    expires: new Date().toISOString()
+  });
 });
 
 describe("settings actions", () => {

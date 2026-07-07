@@ -112,7 +112,7 @@ describe("notes actions", () => {
         matterId: "cjx4omfcw0000ml5tyivrzcse"
       } as any);
       mockAssertMatterWritable.mockResolvedValue(undefined as any);
-      mockPrisma.note.update.mockResolvedValue({ id: noteId, ...updateInput } as any);
+      mockPrisma.note.update.mockResolvedValue({ ...updateInput } as any);
 
       const result = await updateNote(updateInput as any);
 

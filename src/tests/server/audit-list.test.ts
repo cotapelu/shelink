@@ -113,8 +113,14 @@ describe("audit-list", () => {
 
   describe("getAuditFilterOptions", () => {
     it("should return distinct actions, targetTypes, and active users", async () => {
-      const actionsRaw = [{ action: "CREATE" }, { action: "UPDATE" }];
-      const targetsRaw = [{ targetType: "Matter" }, { targetType: "Client" }];
+      const actionsRaw = [
+        { id: "a1", createdAt: new Date(), userId: null, action: "CREATE", targetType: null, targetId: null, detail: {}, ip: null, userAgent: null },
+        { id: "a2", createdAt: new Date(), userId: null, action: "UPDATE", targetType: null, targetId: null, detail: {}, ip: null, userAgent: null }
+      ];
+      const targetsRaw = [
+        { id: "t1", createdAt: new Date(), userId: null, action: "", targetType: "Matter", targetId: null, detail: {}, ip: null, userAgent: null },
+        { id: "t2", createdAt: new Date(), userId: null, action: "", targetType: "Client", targetId: null, detail: {}, ip: null, userAgent: null }
+      ];
       const users = [{ id: "u1", name: "Alice" }, { id: "u2", name: "Bob" }] as any;
 
       mockPrisma.auditLog.findMany

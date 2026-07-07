@@ -15,7 +15,7 @@ describe("CircuitBreaker", () => {
     const cb = new CircuitBreaker(fn);
     const result = await cb.call();
     expect(result).toBe("ok");
-    expect(cb.state).toBe(CircuitState.CLOSED);
+    expect(cb.getState()).toBe(CircuitState.CLOSED);
   });
 
   it("should trip OPEN after failures exceed threshold", async () => {
@@ -24,10 +24,10 @@ describe("CircuitBreaker", () => {
 
     // First two calls fail and increment failureCount
     await expect(cb.call()).rejects.toThrow("fail");
-    expect(cb.state).toBe(CircuitState.CLOSED);
+    expect(cb.getState()).toBe(CircuitState.CLOSED);
     await expect(cb.call()).rejects.toThrow("fail");
     // After second failure, circuit opens
-    expect(cb.state).toBe(CircuitState.OPEN);
+    expect(cb.getState()).toBe(CircuitState.OPEN);
 
     // Subsequent call fast-fails with circuit breaker error
     await expect(cb.call()).rejects.toThrow("Circuit breaker is OPEN");
@@ -38,7 +38,7 @@ describe("CircuitBreaker", () => {
     const cb = new CircuitBreaker(fn, { failureThreshold: 1, resetTimeout: 60000 });
 
     await expect(cb.call()).rejects.toThrow("fail");
-    expect(cb.state).toBe(CircuitState.OPEN);
+    expect(cb.getState()).toBe(CircuitState.OPEN);
 
     // Advance past reset timeout
     vi.advanceTimersByTime(60000);
@@ -46,7 +46,7 @@ describe("CircuitBreaker", () => {
     // First call after timeout enters HALF_OPEN; it fails, but that's okay
     await expect(cb.call()).rejects.toThrow("fail");
     // After failure in HALF_OPEN, circuit goes back to OPEN
-    expect(cb.state).toBe(CircuitState.OPEN);
+    expect(cb.getState()).toBe(CircuitState.OPEN);
   });
 
   it("should succeed and reset failure count on success", async () => {
@@ -58,7 +58,7 @@ describe("CircuitBreaker", () => {
 
     await cb.call();
     await cb.call();
-    expect(cb.state).toBe(CircuitState.CLOSED);
+    expect(cb.getState()).toBe(CircuitState.CLOSED);
   });
 
   it("execute is alias for call", async () => {
@@ -74,12 +74,12 @@ describe("CircuitBreaker", () => {
 
     // Open circuit
     await expect(cb.call()).rejects.toThrow("fail");
-    expect(cb.state).toBe(CircuitState.OPEN);
+    expect(cb.getState()).toBe(CircuitState.OPEN);
 
     vi.advanceTimersByTime(1000);
     // Two calls allowed in HALF_OPEN, both fail
     await expect(cb.call()).rejects.toThrow("fail");
-    expect(cb.state).toBe(CircuitState.OPEN); // failure in half-open trips open
+    expect(cb.getState()).toBe(CircuitState.OPEN); // failure in half-open trips open
     await expect(cb.call()).rejects.toThrow("OPEN"); // subsequent calls fast-fail
   });
 

@@ -64,13 +64,13 @@ describe("conflicts actions", () => {
       expect(createCall.data.intakeId).toBe(intakeId);
       expect(createCall.data.conclusion).toBe("DIFFERENT");
       expect(createCall.data.decidedById).toBe("u1");
-      expect(createCall.data.hits.create).toEqual([]);
+      expect(createCall.data.hits?.create).toEqual([]);
       expect(createCall.data.note).toBe("系统自动标记：未命中历史案件冲突。");
       // audit should include hitCount 0 and autoConclusion DIFFERENT
       const auditCall = mockAudit.mock.calls[0][0];
       expect(auditCall.action).toBe("CONFLICT_CHECK_RUN");
-      expect(auditCall.detail.hitCount).toBe(0);
-      expect(auditCall.detail.autoConclusion).toBe("DIFFERENT");
+      expect(auditCall.detail?.hitCount).toBe(0);
+      expect(auditCall.detail?.autoConclusion).toBe("DIFFERENT");
     });
 
     it("should create pending check with hits", async () => {
@@ -140,7 +140,7 @@ describe("conflicts actions", () => {
       const auditCall = mockAudit.mock.calls[0][0];
       expect(auditCall.action).toBe("CONFLICT_CONCLUSION_SET");
       expect(auditCall.targetId).toBe(checkId);
-      expect(auditCall.detail.conclusion).toBe("SAME_SUBJECT");
+      expect(auditCall.detail?.conclusion).toBe("SAME_SUBJECT");
       expect(mockRevalidatePath).toHaveBeenCalledWith("/intakes/intake1");
     });
 

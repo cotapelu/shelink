@@ -91,7 +91,7 @@ describe("yuandian save-case", () => {
       // audit
       const auditCall = mockAudit.mock.calls[0][0];
       expect(auditCall.action).toBe("YUANDIAN_CASE_SAVE");
-      expect(auditCall.detail.caseId).toBe(caseHit.id);
+      expect(auditCall.detail?.caseId).toBe(caseHit.id);
       expect(mockRevalidatePath).toHaveBeenCalledWith("/matters/m123");
     });
 
@@ -151,7 +151,7 @@ describe("yuandian save-case", () => {
       expect(createArgs.data.matterId).toBe("m123");
       expect(createArgs.data.name).toContain("类案_");
       expect(createArgs.data.category).toBe("JUDGMENT");
-      expect(createArgs.data.tags.some((t: string) => t === "语义")).toBe(true);
+      expect((createArgs.data.tags as string[]).some((t: string) => t === "语义")).toBe(true);
     });
 
     it("should throw if matter not found", async () => {

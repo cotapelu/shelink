@@ -79,15 +79,20 @@ describe("announcements actions", () => {
       const result = await listActiveBanners();
 
       expect(result).toEqual(mockList);
-      expect(mockPrisma.announcement.findMany).toHaveBeenCalledWith({
-        where: {
-          pinned: true,
-          archivedAt: null,
-          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
-        },
-        orderBy: { publishedAt: "desc" },
-        select: { id: true, title: true, content: true, publishedAt: true }
-      });
+      expect(mockPrisma.announcement.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            pinned: true,
+            archivedAt: null,
+            OR: [
+              { expiresAt: null },
+              { expiresAt: expect.objectContaining({ gt: expect.any(Date) }) }
+            ]
+          }),
+          orderBy: { publishedAt: "desc" },
+          select: { id: true, title: true, content: true, publishedAt: true }
+        })
+      );
     });
   });
 

@@ -18,18 +18,31 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 import type { NextAuthOptions } from "next-auth";
+import type { JWTEncodeParams, JWTDecodeParams } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { encode as jwtEncode, decode as jwtDecode } from "./jwt";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1)
 });
 
+// Validate JWT keys at module load (fails fast if misconfigured)
+const privateKey = process.env.JWT_PRIVATE_KEY;
+const publicKey = process.env.JWT_PUBLIC_KEY;
+
+if (!privateKey || !publicKey) {
+  throw new Error(
+    "JWT_PRIVATE_KEY and JWT_PUBLIC_KEY must be set in environment. " +
+    "Generate with: ssh-keygen -t rsa -b 4096 -f jwt -m PEM"
+  );
+}
+
 export const authOptions: NextAuthOptions = {
-  session: { strategy: "jwt", maxAge: 12 * 60 * 60 }, // 12h
+  session: { strategy: "jwt", maxAge: 4 * 60 * 60 }, // 4h (reduced from 12h)
   pages: {
     signIn: "/login"
   },
@@ -70,6 +83,12 @@ export const authOptions: NextAuthOptions = {
       }
     })
   ],
+  jwt: {
+    // Custom RS256 encode/decode (see ./jwt.ts)
+    encode: jwtEncode,
+    decode: jwtDecode,
+    maxAge: 4 * 60 * 60, // 4 hours
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {

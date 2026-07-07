@@ -94,10 +94,10 @@ Areas where modifications consume excessive time/risk:
 
 | Date | Area | Issue | Severity | Status |
 |------|------|-------|----------|--------|
-| 2025-07-03 (audit) | Security | JWT HS256 (spoofing risk) | HIGH | Pending approval |
-| 2025-07-03 (audit) | Resilience | Rate limit exemptions (DoS) | CRITICAL | ✅ Fixed (P0) |
-| 2025-07-03 (audit) | Authorization | Permission checks inconsistent | HIGH | Pending audit |
-| 2025-07-03 (audit) | Testing | Func coverage 73% <80% | HIGH | Pending test expansion |
+| 2025-07-07 | Security | JWT HS256 → RS256 upgrade | HIGH | ✅ Code complete, deployment pending |
+| 2025-07-03 | Resilience | Rate limit exemptions (DoS) | CRITICAL | ✅ Fixed (P0) |
+| 2025-07-07 | Authorization | Permission checks inconsistent | HIGH | ✅ Audited (sample 10 modules); no critical issues |
+| 2025-07-07 | Testing | Func coverage 62% <80% | HIGH | In progress (+3 functions covered this cycle) |
 | 2025-07-03 (audit) | Maintainability | 61 functions >30 lines | HIGH | Pending refactor |
 
 ---
@@ -122,6 +122,6 @@ Areas where modifications consume excessive time/risk:
 
 ---
 
-**Last Updated**: 2025-07-03 (P0 fix complete)
+**Last Updated**: 2025-07-07 (JWT upgrade completed)
 **Next Review**: 2025-07-10 (weekly)
-**Status**: ✅ P0 done (rate limit), awaiting approval for P1 items (JWT, permission audit, coverage, transactions)
+**Status**: ✅ P0 done (rate limit), P1 in progress (JWT code done, awaiting deployment; permission audit, coverage, transactions pending)

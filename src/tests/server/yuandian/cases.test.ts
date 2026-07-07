@@ -63,7 +63,7 @@ describe("yuandian cases", () => {
       const result = await searchSimilarCases({
         ay: ["CIVIL"],
         qw: "contract",
-        xzqh_p: "BEIJING"
+        xzqh_p: ["BEIJING"]
       });
 
       expect(result.total).toBe(1);
@@ -90,7 +90,7 @@ describe("yuandian cases", () => {
 
       await searchSimilarCases({
         ay: [],
-        xzqh_p: "",
+        xzqh_p: [],
         matterId: "m123"
       });
 
@@ -124,8 +124,8 @@ describe("yuandian cases", () => {
       mockSearchCasesByVector.mockResolvedValueOnce(mockResponse as any);
 
       const result = await searchSimilarCasesByVector({
-        content: "contract dispute",
-        limit: 5
+        query: "contract dispute",
+        return_num: 5
       });
 
       expect(result.items).toHaveLength(1);

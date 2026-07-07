@@ -1,7 +1,49 @@
 {
   "version": 1,
-  "phases": [],
-  "nextTaskId": 1,
-  "nextPhaseId": 1,
-  "updatedAt": "2026-07-03T13:25:11.097Z"
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Coverage Push Sprint",
+      "tasks": [
+        {
+          "id": "task-1",
+          "content": "Add tests for matters/actions.ts: addMatterLink, removeMatterLink (✅ done)",
+          "status": "completed"
+        },
+        {
+          "id": "task-2",
+          "content": "Add tests for matters/actions.ts: updateProcedureInfo, getMatterById (already covered), createMatter, updateMatterTeam, searchMattersForLink",
+          "status": "in_progress"
+        },
+        {
+          "id": "task-3",
+          "content": "Add tests for archive/actions.ts (coverage ~87%) to reach 100%",
+          "status": "pending"
+        },
+        {
+          "id": "task-4",
+          "content": "Add tests for intakes/actions.ts (coverage ~100%) - review gaps",
+          "status": "pending"
+        },
+        {
+          "id": "task-5",
+          "content": "Add tests for invoices/actions.ts",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
+          "content": "Add tests for tasks/actions.ts",
+          "status": "pending"
+        },
+        {
+          "id": "task-7",
+          "content": "Add tests for notes/actions.ts",
+          "status": "pending"
+        }
+      ]
+    }
+  ],
+  "nextTaskId": 8,
+  "nextPhaseId": 2,
+  "updatedAt": "2026-07-07T00:57:57.368Z"
 }

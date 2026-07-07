@@ -42,7 +42,7 @@ describe("firm-profile", () => {
           matterCodePrefix: "MF",
           firmShortName: "MF",
           caseNoTemplate: "MF-{year}",
-          categoryWords: { CIVIL_COMMERCIAL: "Dân sự" }
+          categoryWords: { ...CATEGORY_WORD_DEFAULTS }
         } as any
       };
       (mockPrisma.systemSetting.findUnique as any).mockResolvedValue(saved as any);
@@ -63,7 +63,7 @@ describe("firm-profile", () => {
         matterCodePrefix: "NF",
         firmShortName: "NF",
         caseNoTemplate: "NF-{seq}",
-        categoryWords: { CRIMINAL: "Hình sự" }
+        categoryWords: { ...CATEGORY_WORD_DEFAULTS }
       };
 
       await saveFirmProfile(profile);

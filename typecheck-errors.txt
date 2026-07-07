@@ -1,0 +1,61 @@
+
+> shelink@0.0.1 typecheck
+> NEXT_DIST_DIR=.next-dev next typegen && tsc --noEmit
+
+Generating route types...
+✓ Types generated successfully
+src/tests/lib/api/circuit-breaker.test.ts(18,15): error TS2341: Property 'state' is private and only accessible within class 'CircuitBreaker<T>'.
+src/tests/lib/api/circuit-breaker.test.ts(27,15): error TS2341: Property 'state' is private and only accessible within class 'CircuitBreaker<T>'.
+src/tests/lib/api/circuit-breaker.test.ts(30,15): error TS2341: Property 'state' is private and only accessible within class 'CircuitBreaker<T>'.
+src/tests/lib/api/circuit-breaker.test.ts(41,15): error TS2341: Property 'state' is private and only accessible within class 'CircuitBreaker<T>'.
+src/tests/lib/api/circuit-breaker.test.ts(49,15): error TS2341: Property 'state' is private and only accessible within class 'CircuitBreaker<T>'.
+src/tests/lib/api/circuit-breaker.test.ts(61,15): error TS2341: Property 'state' is private and only accessible within class 'CircuitBreaker<T>'.
+src/tests/lib/api/circuit-breaker.test.ts(77,15): error TS2341: Property 'state' is private and only accessible within class 'CircuitBreaker<T>'.
+src/tests/lib/api/circuit-breaker.test.ts(82,15): error TS2341: Property 'state' is private and only accessible within class 'CircuitBreaker<T>'.
+src/tests/lib/archive/guard.test.ts(56,9): error TS2322: Type '{ id: string; role: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/lib/archive/guard.test.ts(70,9): error TS2322: Type '{ id: string; role: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/lib/archive/guard.test.ts(84,9): error TS2322: Type '{ id: string; role: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/lib/archive/guard.test.ts(95,9): error TS2322: Type '{ id: string; role: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/lib/archive/guard.test.ts(109,9): error TS2322: Type '{ id: string; role: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/lib/archive/guard.test.ts(126,9): error TS2322: Type '{ id: string; role: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/lib/archive/guard.test.ts(140,9): error TS2322: Type '{ id: string; role: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/lib/archive/guard.test.ts(154,9): error TS2322: Type '{ id: string; role: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/lib/archive/guard.test.ts(168,9): error TS2322: Type '{ id: string; role: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/lib/archive/guard.test.ts(182,9): error TS2322: Type '{ id: string; role: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/lib/archive/guard.test.ts(196,9): error TS2322: Type '{ id: string; role: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/server/audit-list.test.ts(121,32): error TS2345: Argument of type '{ action: string; }[]' is not assignable to parameter of type '{ id: string; createdAt: Date; userId: string | null; action: string; targetType: string | null; targetId: string | null; detail: JsonValue; ip: string | null; userAgent: string | null; }[]'.
+  Type '{ action: string; }' is missing the following properties from type '{ id: string; createdAt: Date; userId: string | null; action: string; targetType: string | null; targetId: string | null; detail: JsonValue; ip: string | null; userAgent: string | null; }': id, createdAt, userId, targetType, and 4 more.
+src/tests/server/audit-list.test.ts(122,32): error TS2345: Argument of type '{ targetType: string; }[]' is not assignable to parameter of type '{ id: string; createdAt: Date; userId: string | null; action: string; targetType: string | null; targetId: string | null; detail: JsonValue; ip: string | null; userAgent: string | null; }[]'.
+  Type '{ targetType: string; }' is missing the following properties from type '{ id: string; createdAt: Date; userId: string | null; action: string; targetType: string | null; targetId: string | null; detail: JsonValue; ip: string | null; userAgent: string | null; }': id, createdAt, userId, action, and 4 more.
+src/tests/server/conflicts/actions.test.ts(67,14): error TS18048: 'createCall.data.hits' is possibly 'undefined'.
+src/tests/server/conflicts/actions.test.ts(72,14): error TS18048: 'auditCall.detail' is possibly 'undefined'.
+src/tests/server/conflicts/actions.test.ts(73,14): error TS18048: 'auditCall.detail' is possibly 'undefined'.
+src/tests/server/conflicts/actions.test.ts(143,14): error TS18048: 'auditCall.detail' is possibly 'undefined'.
+src/tests/server/custom-fields/actions.test.ts(12,10): error TS2459: Module '"@/server/custom-fields/actions"' declares 'requireAdmin' locally, but it is not exported.
+src/tests/server/custom-fields/actions.test.ts(85,61): error TS2345: Argument of type '{ _max: { order: number; }; }' is not assignable to parameter of type 'GetCustomFieldDefAggregateType<CustomFieldDefAggregateArgs<DefaultArgs>>'.
+  Type '{ _max: { order: number; }; }' is missing the following properties from type 'GetCustomFieldDefAggregateType<CustomFieldDefAggregateArgs<DefaultArgs>>': _count, _avg, _sum, _min
+src/tests/server/notes/actions.test.ts(115,50): error TS2783: 'id' is specified more than once, so this usage will be overwritten.
+src/tests/server/settings/actions.test.ts(30,42): error TS2322: Type '{ id: string; role: string; name: string; }' is not assignable to type '{ id: string; role: string; avatar: string | null; } & { name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+  Property 'avatar' is missing in type '{ id: string; role: string; name: string; }' but required in type '{ id: string; role: string; avatar: string | null; }'.
+src/tests/server/settings/firm-profile-actions.test.ts(34,43): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'FirmProfile'.
+src/tests/server/settings/firm-profile.test.ts(69,29): error TS2345: Argument of type '{ firmName: string; firmSubtitle: string; logoDataUrl: null; matterCodePrefix: string; firmShortName: string; caseNoTemplate: string; categoryWords: { CRIMINAL: string; }; }' is not assignable to parameter of type 'Partial<FirmProfile>'.
+  Types of property 'categoryWords' are incompatible.
+    Type '{ CRIMINAL: string; }' is missing the following properties from type 'Record<MatterCategory, string>': CIVIL_COMMERCIAL, LABOR_ARBITRATION, COMMERCIAL_ARBITRATION, ADMINISTRATIVE, and 3 more.
+src/tests/server/yuandian/cases.test.ts(66,9): error TS2322: Type 'string' is not assignable to type 'string[]'.
+src/tests/server/yuandian/cases.test.ts(93,9): error TS2322: Type 'string' is not assignable to type 'string[]'.
+src/tests/server/yuandian/cases.test.ts(127,9): error TS2353: Object literal may only specify known properties, and 'content' does not exist in type 'VectorSearchParams & { matterId?: string | undefined; }'.
+src/tests/server/yuandian/save-case.test.ts(94,14): error TS18048: 'auditCall.detail' is possibly 'undefined'.
+src/tests/server/yuandian/save-case.test.ts(154,14): error TS18048: 'createArgs.data.tags' is possibly 'undefined'.
+src/tests/server/yuandian/save-case.test.ts(154,35): error TS2339: Property 'some' does not exist on type 'string[] | DocumentCreatetagsInput'.
+  Property 'some' does not exist on type 'DocumentCreatetagsInput'.
