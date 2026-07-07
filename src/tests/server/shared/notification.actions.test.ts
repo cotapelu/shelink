@@ -5,6 +5,7 @@ import {
   getUnreadNotificationCount,
   markNotificationRead,
   markAllNotificationsRead,
+  createNotification,
 } from "@/server/shared/notification.actions";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -17,6 +18,7 @@ vi.mock("@/lib/prisma", () => ({
       count: vi.fn(),
       update: vi.fn(),
       updateMany: vi.fn(),
+      create: vi.fn(),
     },
   },
 }));
@@ -161,6 +163,49 @@ describe("notification actions", () => {
     it("should throw when unauthorized", async () => {
       mockGetServerSession.mockResolvedValue(null);
       await expect(markAllNotificationsRead()).rejects.toThrow("Unauthorized");
+    });
+  });
+
+  describe("createNotification", () => {
+    it("should create notification with required fields", async () => {
+      const mockCreated = { id: "n1", userId: "u2", type: "ALERT", title: "Test", message: null, metadata: null, read: false };
+      mockPrisma.notification.create.mockResolvedValue(mockCreated);
+
+      const result = await createNotification({ userId: "u2", type: "ALERT", title: "Test" });
+      expect(result).toEqual(mockCreated);
+      expect(mockPrisma.notification.create).toHaveBeenCalledWith({
+        data: {
+          userId: "u2",
+          type: "ALERT",
+          title: "Test",
+          message: null,
+          metadata: null,
+          read: false,
+        } as any,
+      });
+    });
+
+    it("should create notification with optional message and metadata", async () => {
+      const mockCreated = { id: "n2", userId: "u3", type: "INFO", title: "Info", message: "Details", metadata: { key: "value" }, read: false };
+      mockPrisma.notification.create.mockResolvedValue(mockCreated);
+
+      const result = await createNotification({ userId: "u3", type: "INFO", title: "Info", message: "Details", metadata: { key: "value" } });
+      expect(result).toEqual(mockCreated);
+      expect(mockPrisma.notification.create).toHaveBeenCalledWith({
+        data: {
+          userId: "u3",
+          type: "INFO",
+          title: "Info",
+          message: "Details",
+          metadata: { key: "value" },
+          read: false,
+        } as any,
+      });
+    });
+
+    it("should throw when unauthorized", async () => {
+      mockGetServerSession.mockResolvedValue(null);
+      await expect(createNotification({ userId: "u2", type: "ALERT", title: "Test" })).rejects.toThrow("Unauthorized");
     });
   });
 });
