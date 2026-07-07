@@ -2452,3 +2452,30 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Notes**: Zod CUID validation strict (length 25). Use consistent CUID fixtures. Continue with other schema-heavy modules now that pattern is established.
 
+
+---
+
+### [CYCLE-N-32] - 2025-07-06 Notes Actions Coverage
+
+**Type**: Proactive Improvement (Coverage)
+**Priority**: P1 (Functions ≥80%)
+**Duration**: ~2.5h
+**Status**: ✅ Completed
+
+**Actions**:
+- Created test suite for `src/server/notes/actions` (4 functions, 6 tests)
+- Covered: createNote (audit, revalidate), updateNote (author check, revalidate), deleteNote (soft delete, revalidate), listNotes (matter filter, author include)
+- Adjusted expectations: authorId match, `deletedAt` filter, audit details variance
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: PASS (~1548 total)
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Functions: 534 → 539 (+5 net)
+- Total functions: 836
+- Function coverage: 64.47%
+
+**Notes**: Notes module uses author ownership checks; tests reflect that. Continuing with schema-heavy modules is feasible using consistent CUID fixtures.
+
