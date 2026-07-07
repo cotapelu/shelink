@@ -1,0 +1,58 @@
+function formatPersonName(person: GedcomPerson): string {
+  if (!person.full_name) return "1 NAME Unknown /Unknown/\n";
+  const parts = person.full_name.trim().split(" ");
+  const lastName = parts.length > 1 ? parts.pop()! : "";
+  const firstName = parts.join(" ");
+  return `1 NAME ${firstName} /${lastName}/\n`;
+}
+function formatPersonSex(person: GedcomPerson): string {
+  if (person.gender === "male") return "1 SEX M\n";
+  if (person.gender === "female") return "1 SEX F\n";
+  return "1 SEX U\n";
+}
+function formatPersonBirth(person: GedcomPerson): string {
+  if (!person.birth_year && !person.birth_month && !person.birth_day) return "";
+  let s = "1 BIRT\n";
+  const day = formatNum(person.birth_day ?? null);
+  const mont = getMonthName(person.birth_month ?? null);
+  const yea = person.birth_year ? String(person.birth_year) : "";
+  const dateParts = [day, mont, yea].filter(Boolean);
+  if (dateParts.length > 0) {
+    s += `2 DATE ${dateParts.join(" ")}\n`;
+  }
+  return s;
+}
+function formatPersonDeath(person: GedcomPerson): string {
+  if (!person.is_deceased) return "";
+  let s = "1 DEAT Y\n";
+  if (person.death_year || person.death_month || person.death_day) {
+    const day = formatNum(person.death_day ?? null);
+    const mont = getMonthName(person.death_month ?? null);
+    const yea = person.death_year ? String(person.death_year) : "";
+    const dateParts = [day, mont, yea].filter(Boolean);
+    if (dateParts.length > 0) {
+      s += `2 DATE ${dateParts.join(" ")}\n`;
+    }
+  }
+  return s;
+}
+function formatPersonNote(person: GedcomPerson): string {
+  if (!person.note) return "";
+  const lines = person.note.split("\n");
+  let s = `1 NOTE ${lines[0]}\n`;
+  for (let i = 1; i < lines.length; i++) {
+    s += `2 CONT ${lines[i]}\n`;
+  }
+  return s;
+}
+
+function buildPersonRecord(person: GedcomPerson): string {
+  if (!person.id) return "";
+  let s = `0 @I${person.id.replace(/-/g, "")}@ INDI\n`;
+  s += formatPersonName(person);
+  s += formatPersonSex(person);
+  s += formatPersonBirth(person);
+  s += formatPersonDeath(person);
+  s += formatPersonNote(person);
+  return s;
+}
