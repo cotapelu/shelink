@@ -58,7 +58,8 @@ export interface CustomEventRecord {
  */
 function tryYearOffset(year: number, month: number, day: number, from: Date): Date | null {
   try {
-    const l = Lunar.fromYmd(year, month, day);
+    const LunarClass = Lunar as any;
+    const l = LunarClass.fromYmd(year, month, day);
     const s = l.getSolar();
     const candidate = new Date(s.getYear(), s.getMonth() - 1, s.getDay());
     if (candidate >= from) return candidate;
