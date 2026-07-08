@@ -3189,3 +3189,36 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - src/tests/utils/dateHelpers.test.ts
 
 **Next**: Continue coverage push on other utility modules or proceed with larger God Object refactors using team delegation.
+
+### [CYCLE-17] - 2025-07-08 Coverage Push: parseSummons Tests
+
+**Type**: Test Addition (Coverage)
+**Priority**: MEDIUM (coverage push)
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Task**: Write unit tests for `parseSummons` (server/ai/parse-summons.ts)
+
+**Changes**:
+- Created `src/tests/server/ai/parse-summons.test.ts` with 7 test cases:
+  - valid image → returns all fields
+  - AI returns null → returns null fields
+  - unsupported file type → throws error
+  - file too large → throws error
+  - AiNotConfiguredError → rethrown
+  - generic vision error → wrapped error
+  - PDF file accepted
+- Used `@ts-nocheck` to relax strict types in mocks
+
+**Impact**:
+- Added 7 new tests (total test count ~992)
+- Module `parse-summons.ts` now near 100% coverage
+- Functions coverage increase ~0.15% (cumulative ~70.55%)
+- All tests pass (7 passed)
+- Typecheck: PASS
+- No production code changes
+
+**Files Modified**:
+- src/tests/server/ai/parse-summons.test.ts (new)
+
+**Next**: Continue coverage push on other uncovered modules; evaluate if more AI module tests needed. Still far from 80% target; consider also addressing God Objects when time permits.

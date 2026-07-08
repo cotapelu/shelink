@@ -15,6 +15,26 @@ describe("dateHelpers", () => {
     it("should handle null gracefully", () => {
       expect(formatDisplayDate(null, null, null)).toBe("Chưa rõ");
     });
+
+    it("should format with only day and month", () => {
+      expect(formatDisplayDate(null, 12, 25)).toBe("25/12");
+    });
+
+    it("should format with only year and month", () => {
+      expect(formatDisplayDate(2024, 1, null)).toBe("01/2024");
+    });
+
+    it("should format with only year", () => {
+      expect(formatDisplayDate(2025, null, null)).toBe("2025");
+    });
+
+    it("should format with day only", () => {
+      expect(formatDisplayDate(null, null, 7)).toBe("07");
+    });
+
+    it("should handle zeros as falsy (no value)", () => {
+      expect(formatDisplayDate(0, 0, 0)).toBe("Chưa rõ");
+    });
   });
 
   describe("calculateAge", () => {

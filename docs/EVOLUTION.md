@@ -1288,3 +1288,10 @@ Based on project context (AGENTS.md):
 - Demonstrated systematic approach to increase branch coverage: test all transition dates between zodiac signs
 - Coverage trend: Functions ~70% → ~70.4% (slow but steady)
 - Next: Continue adding boundary tests for other functions with complex conditional logic (e.g., `suggestHandlingAgency` already covered, but could add edge cases).
+
+### 2025-07-08: Continued AI Module Testing
+
+- Added tests for `parseSummons` (7 tests, ~100% coverage)
+- AI modules (parse-express, parse-summons) now fully covered
+- Coverage trend: Functions ~70% → ~70.55% (incremental progress)
+- Reminder: Target 80% coverage still far; need to address many utility and server action modules.
