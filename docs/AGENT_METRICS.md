@@ -3269,3 +3269,26 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - Strategy: Continue incremental coverage on remaining utilities or consider team delegation for large extractions.
 
 **Files Modified**: None
+
+### [CYCLE-20] - 2025-07-08 Documentation: Add JSDoc
+
+**Type**: Documentation (JSDoc)
+**Priority**: LOW
+**Duration**: ~10 min
+**Status**: ✅ Completed
+
+**Task**: Add JSDoc comments for `getLunarDateString` and `calculateAge`
+
+**Changes**:
+- Added comprehensive JSDoc for two public utility functions in `src/utils/dateHelpers.ts`
+- Documented parameters, return types, and descriptions
+
+**Impact**:
+- Improves API documentation coverage
+- Better developer experience for consumers of these utilities
+- No change to functionality or tests
+
+**Files Modified**:
+- src/utils/dateHelpers.ts
+
+**Next**: Continue coverage push or address remaining God Objects.

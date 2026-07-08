@@ -130,5 +130,25 @@ describe("dateHelpers", () => {
       // 2023-01-01 solar corresponds to lunar year 2022 (Dần)
       expect(getZodiacAnimal(2023, 1, 1)).toBe("Dần");
     });
+
+    it("should cover full 12‑animal cycle (1900‑2024)", () => {
+      expect(getZodiacAnimal(1900)).toBe("Tý");   // Rat
+      expect(getZodiacAnimal(1901)).toBe("Sửu");  // Ox
+      expect(getZodiacAnimal(1902)).toBe("Dần");  // Tiger
+      expect(getZodiacAnimal(1903)).toBe("Mão");  // Rabbit
+      expect(getZodiacAnimal(1904)).toBe("Thìn"); // Dragon
+      expect(getZodiacAnimal(1905)).toBe("Tỵ");   // Snake
+      expect(getZodiacAnimal(1906)).toBe("Ngọ");  // Horse
+      expect(getZodiacAnimal(1907)).toBe("Mùi");  // Goat
+      expect(getZodiacAnimal(1908)).toBe("Thân"); // Monkey
+      expect(getZodiacAnimal(1909)).toBe("Dậu");  // Rooster
+      expect(getZodiacAnimal(1910)).toBe("Tuất"); // Dog
+      expect(getZodiacAnimal(1911)).toBe("Hợi");  // Boar
+      // Spot‑check modern years
+      expect(getZodiacAnimal(2020)).toBe("Tý");
+      expect(getZodiacAnimal(2021)).toBe("Sửu");
+      expect(getZodiacAnimal(2022)).toBe("Dần");
+      expect(getZodiacAnimal(2023)).toBe("Mão");
+    });
   });
 });
