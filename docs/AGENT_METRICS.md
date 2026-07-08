@@ -3557,3 +3557,14 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - **Performance**: N/A
 - **Security**: N/A
 - **Notes**: Extracted ApproveDialog from pending-archive-table.tsx into approve-dialog.tsx; refactored to keep all functions ≤30 lines; fixed duplicate import; typecheck, build, lint clean.
+
+## [2026-07-08 18:35] Cycle 38 - Task: Extract RejectDialog + Cleanup
+- **Type**: Refactor (Extraction) + Code Cleanup
+- **Priority**: HIGH
+- **Duration**: 15 minutes
+- **Status**: ✅ Success
+- **Test Delta**: 0
+- **Coverage Delta**: unchanged
+- **Performance**: N/A
+- **Security**: N/A
+- **Notes**: Extracted RejectDialog into reject-dialog.tsx; all functions ≤30 lines. Cleaned pending-archive-table.tsx: removed unused imports (useTransition, useRouter, toast, Loader2, AlertTriangle, approve/rejectArchiveRecord, Textarea, Label). Lint reduced from ~15 issues to only 4 errors (PendingArchiveTable, one arrow, DetailDialog, file size) and 0 warnings.

@@ -29,19 +29,13 @@ import {
   X
 } from "lucide-react";
 import { CLOSED_REASON_CN } from "@/server/archive/schemas";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
+
 import type { PendingRecord } from "./batch-reject-dialog";
 import { BatchRejectDialog } from "./batch-reject-dialog";
 import { BatchApproveDialog } from "./batch-approve-dialog";
 import { ApproveDialog } from "./approve-dialog";
 import { RejectDialog } from "./reject-dialog";
+import { DetailDialog } from "./detail-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -277,111 +271,3 @@ export function PendingArchiveTable({ records }: { records: PendingRecord[] }) {
 
 
 
-function DetailDialog({
-  record,
-  onClose
-}: {
-  record: PendingRecord;
-  onClose: () => void;
-}) {
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-[#9B7BF7]" />
-            归档申请详情
-          </DialogTitle>
-          <DialogDescription>
-            <span className="font-mono text-[#9B7BF7]">{record.archiveNo}</span>
-            <span className="text-muted-foreground"> · 申请人 {record.archivedBy}</span>
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3 text-sm">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <Field
-              label="案件"
-              value={`${record.matter.internalCode} · ${record.matter.title}`}
-            />
-            <Field
-              label="委托方"
-              value={record.matter.primaryClient?.name ?? "—"}
-            />
-            <Field
-              label="结案方式"
-              value={
-                record.closedReason
-                  ? CLOSED_REASON_CN[
-                      record.closedReason as keyof typeof CLOSED_REASON_CN
-                    ]
-                  : "—"
-              }
-            />
-            <Field
-              label="结案日期"
-              value={
-                record.completedAt
-                  ? record.completedAt.toISOString().slice(0, 10)
-                  : "—"
-              }
-            />
-          </div>
-          {record.judgmentSummary && (
-            <Section title="裁判结果摘要">{record.judgmentSummary}</Section>
-          )}
-          <Section title="结案小结">{record.summary}</Section>
-          {record.missingItems.length > 0 && (
-            <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2">
-              <div className="text-xs font-medium text-amber-700 mb-1">
-                缺项材料（{record.missingItems.length}）
-              </div>
-              <div className="text-xs text-amber-700/80 break-all">
-                {record.missingItems.join("、")}
-              </div>
-            </div>
-          )}
-          <div className="rounded-md border border-border/60 bg-muted/20 px-3 py-2">
-            <Link
-              href={`/matters/${record.matter.id}`}
-              target="_blank"
-              className="text-xs text-[#5B8DEF] hover:underline"
-            >
-              → 打开案件详情查看完整材料与卷宗
-            </Link>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            关闭
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <div className="text-muted-foreground">{label}</div>
-      <div className="mt-0.5">{value}</div>
-    </div>
-  );
-}
-
-function Section({
-  title,
-  children
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <div className="text-xs text-muted-foreground mb-1">{title}</div>
-      <div className="rounded-md border border-border/60 px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap">
-        {children}
-      </div>
-    </div>
-  );
-}
