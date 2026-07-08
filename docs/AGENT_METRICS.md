@@ -3163,3 +3163,29 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - Or break a large extraction into a micro‑task (e.g., extract `SealDocumentUpload` from seal‑request‑sheet).
 
 **Files Modified**: None
+
+### [CYCLE-16] - 2025-07-08 Coverage Push: Zodiac Sign Boundary Tests
+
+**Type**: Test Addition (Coverage)
+**Priority**: MEDIUM (coverage push)
+**Duration**: ~25 min
+**Status**: ✅ Completed
+
+**Task**: Add boundary tests for `getZodiacSign` function
+
+**Changes**:
+- Extended `src/tests/utils/dateHelpers.test.ts` with 15 new test cases covering all zodiac sign boundaries (Pisces through Aquarius).
+- Tests verify exact transition dates for each sign, increasing branch coverage significantly.
+
+**Impact**:
+- Added 15 new tests (total test count ~985)
+- `getZodiacSign` function now near 100% branch coverage
+- Functions coverage increase ~0.3% (approaching target 80%)
+- All tests pass (21 passed)
+- Typecheck: PASS
+- No production code changes
+
+**Files Modified**:
+- src/tests/utils/dateHelpers.test.ts
+
+**Next**: Continue coverage push on other utility modules or proceed with larger God Object refactors using team delegation.

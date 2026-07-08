@@ -1281,3 +1281,10 @@ Based on project context (AGENTS.md):
 - No task suitable for ≤30 min window identified.
 - Minification and small‑refactor resources exhausted; remaining work are large extractions.
 - Pending: continue systematic God‑object decomposition using team delegation or micro‑task breakdown.
+
+### 2025-07-08: Coverage Increase via Boundary Tests
+
+- Added 15 boundary tests for `getZodiacSign` (dateHelpers)
+- Demonstrated systematic approach to increase branch coverage: test all transition dates between zodiac signs
+- Coverage trend: Functions ~70% → ~70.4% (slow but steady)
+- Next: Continue adding boundary tests for other functions with complex conditional logic (e.g., `suggestHandlingAgency` already covered, but could add edge cases).
