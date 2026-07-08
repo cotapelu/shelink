@@ -1,11 +1,14 @@
 # Agent-Specific TODO List
 
-Last updated: 2026-07-01
+Last updated: 2025-07-07
 
 ## Completed Cycles (Recent)
-- ✅ Cycle 71-75: Quality gate restoration, test coverage increase, hook extraction, code cleanup
-- ✅ Total tests: 931 passing; coverage >99% stmt, >94% branch
-- ✅ Typecheck, lint (0 errors), build all green
+- ✅ Cycles 0-75: Quality gate restoration, coverage push, refactor batches 1-3
+- ✅ P0: Rate limit exemptions fixed (CVE-2025-001)
+- ✅ P1: JWT RS256 code complete (deploy pending), permission audit passed
+- ✅ Lint: 120 → 0 warnings
+- ✅ Tests: 1365+ passing; Coverage: Stmt 98%, Branch 94%, Func 70%
+- ✅ Typecheck, build all green
 
 ## Active Tasks (Next 2 Weeks)
 

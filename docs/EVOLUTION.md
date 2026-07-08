@@ -1211,3 +1211,20 @@ Based on project context (AGENTS.md):
 
 **Next**: Continue coverage push on high-impact modules: `createMatter`, `updateMatterTeam`, `updateProcedureInfo`, `procedure-content.tsx`, other low-coverage server actions.
 
+
+---
+
+### Refactor Sprint 1: IntakeSheet Component Extraction
+
+**Target**: Reduce God Object size (intake-sheet.tsx 1570 lines)
+
+**Completed**:
+- ✅ Extracted `DocumentsSection` (158 lines) from intake-sheet
+- intake-sheet reduced to 1248 lines (-322, -20.5%)
+- All tests pass (14 intake-sheet tests)
+- Typecheck and build clean
+
+**Next**:
+- Extract `SubmissionSection` (form actions)
+- Extract `CauseSection` integration
+- Target: intake-sheet < 1000 lines

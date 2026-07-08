@@ -18,7 +18,8 @@ Modules với failure rate >5% hoặc repeated issues:
 | src/server/matters/actions.ts | Large functions (>200 lines), permission checks may be inconsistent | TBD (audit pending) | 2025-07-03 (audit) | Audit all server actions, add missing assertion wrappers, break large functions |
 | src/server/intakes/actions.ts | Large functions (~300 lines), convertIntakeToMatter lacks transaction | TBD | 2025-07-03 (audit) | Wrap multi-step ops in $transaction, add permission asserts, refactor |
 | src/server/archive/actions.ts | PendingArchiveTable.tsx 825 lines, permission checks unclear | TBD | 2025-07-03 (audit) | Refactor component, verify permission gates, add tests |
-| src/app/(app)/clients/_components/client-sheet.tsx | 615 lines, many conditional renders, test coverage ~35% | TBD | 2025-07-03 (audit) | Extract sections, increase test coverage |
+| src/app/(app)/intakes/_components/client-sheet.tsx | 615 lines, many conditional renders, test coverage ~35% | TBD | 2025-07-03 (audit) | Extract sections, increase test coverage |
+| src/app/(app)/intakes/_components/intake-sheet.tsx | 1248 lines (God Object); extracted DocumentsSection; still need SubmissionSection, CauseSection | TBD | 2025-07-07 (refactor) | Continue extraction to reduce below 1000 lines |
 | src/app/(app)/matters/[id]/_components/procedure-content.tsx | 1357 lines (God Object), low testability | TBD | 2025-07-03 (audit) | Split into smaller components: procedure-info, hearings, deadlines, documents |
 | src/server/matters/actions.ts | Large functions (>200 lines), permission checks may be inconsistent | TBD (audit pending) | 2025-07-03 (audit) | Audit all server actions, add missing assertion helpers, break large functions |
 | src/lib/auth/options.ts | JWT HS256 (should be RS256) | HIGH (spoofing risk) | 2025-07-03 (audit) | Upgrade to RS256 algorithm, reduce session maxAge |

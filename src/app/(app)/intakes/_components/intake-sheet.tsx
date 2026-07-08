@@ -28,13 +28,11 @@ import { toast } from "sonner";
 import {
   Loader2,
   Plus,
-  Paperclip,
-  FileText,
-  X,
   CalendarDays,
   ScanLine,
   ChevronDown
 } from "lucide-react";
+import { DocumentsSection } from "./documents-section";
 import type {
   MatterCategory,
   ProcedureType,
@@ -1141,61 +1139,13 @@ export function IntakeSheet({
               />
             </Section>
 
-            {/* 4. 合同 */}
-            <Section
-              title="④ 委托合同 / 相关附件"
-              headerAction={
-                <>
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => handleFiles(e.target.files)}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileRef.current?.click()}
-                    className="h-7 gap-1"
-                  >
-                    <Paperclip className="h-3 w-3" />
-                    添加
-                  </Button>
-                </>
-              }
-            >
-              {contracts.length === 0 ? (
-                <p className="rounded-md border border-dashed border-border bg-background py-3 text-center text-xs text-muted-foreground">
-                  上传委托代理合同、授权委托书等（加密存储，单文件 ≤ 20MB）
-                </p>
-              ) : (
-                <ul className="space-y-1.5">
-                  {contracts.map((f, i) => (
-                    <li
-                      key={i}
-                      className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-xs"
-                    >
-                      <FileText className="h-3.5 w-3.5 text-primary" />
-                      <span className="flex-1 truncate">{f.name}</span>
-                      <span className="font-mono text-[10px] text-muted-foreground tabular">
-                        {(f.size / 1024).toFixed(0)} KB
-                      </span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setContracts((c) => c.filter((_, j) => j !== i))}
-                        className="h-5 w-5 p-0 text-destructive"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Section>
+            <DocumentsSection
+              contracts={contracts}
+              onContractsChange={setContracts}
+              ocrPending={ocrPending}
+              onOcrPendingChange={setOcrPending}
+              onPleadingFile={handlePleadingFile}
+            />
           </div>
 
           <DialogFooter className="border-t border-border bg-card px-6 py-4">

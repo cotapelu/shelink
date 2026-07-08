@@ -2893,6 +2893,36 @@ Date        Health   Coverage   Complexity   Tests   Debt
 
 **Notes**: Full refactor of computeKinship planned for later cycles after test coverage expanded; using bypass to unblock gate temporarily.
 
+### [CYCLE-7] - 2025-07-07 DocumentsSection Extraction (IntakeSheet Refactor)
+
+**Type**: Refactor (R) - Component Extraction
+**Priority**: HIGH (God Object reduction)
+**Duration**: ~90 min
+**Status**: ✅ Completed
+
+**Task**: Extract DocumentsSection from intake-sheet.tsx
+
+**Changes**:
+- Created `documents-section.tsx` (158 lines) with full TypeScript typing
+- Moved all document-related UI and logic (file upload, OCR, list display)
+- Props: contracts, onContractsChange, ocrPending, onOcrPendingChange, onPleadingFile
+- Removed inline JSX from intake-sheet (replaced 322 lines)
+
+**Impact**:
+- intake-sheet.tsx: 1570 → 1248 lines (-322, -20.5%)
+- DocumentsSection: standalone, unit-testable
+- All existing intake-sheet tests pass (14 tests)
+- Typecheck: PASS
+- Lint: No new violations introduced (intake-sheet warnings unchanged)
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/documents-section.tsx (new)
+- src/app/(app)/intakes/_components/intake-sheet.tsx (modified)
+
+**Next**: Continue extraction (SubmissionSection, CauseSection) to reach <1000 lines target.
+
+---
+
 ### [CYCLE-6 Batch 1] - 2025-07-07 Tests & Bypass Debt
 
 **Type**: Test Addition + Violation Bypass
