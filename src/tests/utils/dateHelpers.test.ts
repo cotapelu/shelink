@@ -53,6 +53,50 @@ describe("dateHelpers", () => {
     it("should return null for invalid date", () => {
       expect(getZodiacSign(null, null)).toBeNull();
     });
+
+    // Boundary tests for all 12 signs
+    it("should return Pisces for Feb 19 - Mar 20", () => {
+      expect(getZodiacSign(19, 2)).toBe("Song Ngư");
+      expect(getZodiacSign(20, 3)).toBe("Song Ngư");
+    });
+
+    it("should return Taurus for Apr 20 - May 20", () => {
+      expect(getZodiacSign(20, 4)).toBe("Kim Ngưu");
+    });
+
+    it("should return Gemini for May 21 - Jun 20", () => {
+      expect(getZodiacSign(21, 5)).toBe("Song Tử");
+    });
+
+    it("should return Leo for Jul 23 - Aug 22", () => {
+      expect(getZodiacSign(23, 7)).toBe("Sư Tử");
+    });
+
+    it("should return Virgo for Aug 23 - Sep 22", () => {
+      expect(getZodiacSign(23, 8)).toBe("Xử Nữ");
+    });
+
+    it("should return Libra for Sep 23 - Oct 22", () => {
+      expect(getZodiacSign(23, 9)).toBe("Thiên Bình");
+    });
+
+    it("should return Scorpio for Oct 24 - Nov 21", () => {
+      expect(getZodiacSign(24, 10)).toBe("Thiên Yết");
+      expect(getZodiacSign(21, 11)).toBe("Thiên Yết");
+    });
+
+    it("should return Sagittarius for Nov 22 - Dec 21", () => {
+      expect(getZodiacSign(22, 11)).toBe("Nhân Mã");
+    });
+
+    it("should return Capricorn for Dec 22 - Jan 19", () => {
+      expect(getZodiacSign(22, 12)).toBe("Ma Kết");
+      expect(getZodiacSign(19, 1)).toBe("Ma Kết");
+    });
+
+    it("should return Aquarius for Jan 20 - Feb 18", () => {
+      expect(getZodiacSign(20, 1)).toBe("Bảo Bình");
+    });
   });
 
   describe("getZodiacAnimal", () => {

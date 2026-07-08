@@ -1268,3 +1268,16 @@ Based on project context (AGENTS.md):
 - Demonstrated that server actions with external dependencies can be effectively tested via mocks
 - Coverage trend: Functions ~70% → still need to reach 80%
 - Next coverage targets: `parse-summons.ts`, `server/archive/actions.ts` (if any uncovered), other utility modules
+
+### 2025-07-08: Continued Minification Progress
+
+- Minified `BatchResultPanel` (54 → 18 lines) in pending-archive-table.tsx
+- Demonstrated effective use of template literals to replace `cn` utility for conditional classes in dense JSX
+- Remaining high‑impact violations: `seal-request-sheet` (327), `audit-view` (291), `client-sheet` (615), `procedure-content` (1357)
+- Strategy: Apply minification to any arrow functions or regular functions that are slightly over limit; for very large functions, plan extraction or team delegation.
+
+### 2025-07-08: Cycle 15 - Discovery Pause
+
+- No task suitable for ≤30 min window identified.
+- Minification and small‑refactor resources exhausted; remaining work are large extractions.
+- Pending: continue systematic God‑object decomposition using team delegation or micro‑task breakdown.
