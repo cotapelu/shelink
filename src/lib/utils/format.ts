@@ -17,6 +17,13 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
+/**
+ * Formats a number as currency string.
+ * @param amount - The monetary amount.
+ * @param currency - Currency code (default: 'VND').
+ * @param locale - Locale string (default: 'vi-VN').
+ * @returns Formatted currency string.
+ */
 export const formatCurrency = (
   amount: number,
   currency = 'VND',
@@ -30,6 +37,13 @@ export const formatCurrency = (
   }).format(amount);
 };
 
+/**
+ * Formats a number with specified decimals.
+ * @param value - The number to format.
+ * @param decimals - Number of decimal places (default: 0).
+ * @param locale - Locale string (default: 'vi-VN').
+ * @returns Formatted number string.
+ */
 export const formatNumber = (
   value: number,
   decimals = 0,
@@ -41,6 +55,13 @@ export const formatNumber = (
   }).format(value);
 };
 
+/**
+ * Formats a number as percentage.
+ * @param value - The numeric value (e.g., 25 for 25%).
+ * @param decimals - Number of decimal places (default: 1).
+ * @param locale - Locale string (default: 'vi-VN').
+ * @returns Formatted percentage string.
+ */
 export const formatPercent = (
   value: number,
   decimals = 1,
@@ -53,6 +74,11 @@ export const formatPercent = (
   }).format(value / 100);
 };
 
+/**
+ * Formats a Vietnamese phone number to international format.
+ * @param phone - Raw phone string (digits only or with formatting).
+ * @returns Formatted phone string (e.g., "+84 123 456 789").
+ */
 export const formatPhone = (phone: string): string => {
   const cleaned = phone.replace(/\D/g, '');
   
@@ -67,15 +93,31 @@ export const formatPhone = (phone: string): string => {
   return phone;
 };
 
+/**
+ * Truncates a string to a maximum length, appending ellipsis if needed.
+ * @param str - The input string.
+ * @param length - Maximum length before truncation.
+ * @returns Truncated string (or original if already shorter).
+ */
 export const truncate = (str: string, length: number): string => {
   if (str.length <= length) return str;
   return str.slice(0, length) + '...';
 };
 
+/**
+ * Capitalizes the first character and lowercases the rest.
+ * @param str - Input string.
+ * @returns Capitalized string.
+ */
 export const capitalize = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
+/**
+ * Capitalizes the first letter of each word.
+ * @param str - Input string.
+ * @returns String with each word capitalized.
+ */
 export const capitalizeWords = (str: string): string => {
   return str
     .split(' ')
@@ -83,6 +125,11 @@ export const capitalizeWords = (str: string): string => {
     .join(' ');
 };
 
+/**
+ * Converts a string to a URL-friendly slug.
+ * @param str - Input string.
+ * @returns Slugified string (lowercase, no diacritics, hyphen-separated).
+ */
 export const slugify = (str: string): string => {
   return str
     .toLowerCase()
@@ -92,6 +139,11 @@ export const slugify = (str: string): string => {
     .replace(/(^-|-$)/g, '');
 };
 
+/**
+ * Generates initials from a full name (up to 2 characters).
+ * @param name - Full name string.
+ * @returns Uppercase initials (e.g., "JD").
+ */
 export const generateInitials = (name: string): string => {
   return name
     .split(' ')
@@ -101,6 +153,11 @@ export const generateInitials = (name: string): string => {
     .slice(0, 2);
 };
 
+/**
+ * Converts a byte count into a human-readable size string.
+ * @param bytes - Number of bytes.
+ * @returns Formatted size (e.g., "1.5 MB").
+ */
 export const bytesToSize = (bytes: number): string => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   if (bytes === 0) return '0 Bytes';

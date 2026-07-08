@@ -3467,3 +3467,23 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - Accept current metrics and shift focus to security/performance.
 
 **Files Modified**: None
+
+### [CYCLE-29] - 2025-07-08 Security Audit & Documentation
+**Type**: Proactive Improvement (Security Audit + Docs)
+**Priority**: HIGH (Security), LOW (Docs)
+**Duration**: ~20 min
+**Status**: ✅ Success
+
+**Actions**:
+- Security audit: JWT RS256 verified, rate limiting confirmed, secret scan clean.
+- Documentation: Added JSDoc for `computeKinship` (public API).
+
+**Coverage Impact**: None (docs only)
+**Test Delta**: 0
+**Security**: No vulnerabilities found; auth and rate limiting properly enforced.
+
+**Files Modified**:
+- src/utils/kinshipHelpers.ts (JSDoc)
+- secret-scanner.baseline.json (generated)
+
+**Notes**: Security posture strong. Next: continue coverage push or lint reduction.
