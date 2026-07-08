@@ -3487,3 +3487,22 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - secret-scanner.baseline.json (generated)
 
 **Notes**: Security posture strong. Next: continue coverage push or lint reduction.
+
+### [CYCLE-31] - 2025-07-08 Documentation: JSDoc for format utilities
+**Type**: Proactive Improvement (Documentation)
+**Priority**: LOW
+**Duration**: ~15 min
+**Status**: ✅ Success
+
+**Actions**:
+- Added comprehensive JSDoc for all 10 exported functions in `src/lib/utils/format.ts`:
+  - formatCurrency, formatNumber, formatPercent, formatPhone, truncate, capitalize, capitalizeWords, slugify, generateInitials, bytesToSize
+
+**Coverage Impact**: None (documentation only)
+**Test Delta**: 0
+**Security**: N/A
+
+**Files Modified**:
+- src/lib/utils/format.ts
+
+**Notes**: Improves documentation coverage and developer experience. No coverage change.

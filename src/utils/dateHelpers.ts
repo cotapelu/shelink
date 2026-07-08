@@ -19,6 +19,14 @@
  */
 import { Solar } from "lunar-javascript";
 
+/**
+ * Formats a date (year, month, day) into a display string "dd/mm/yyyy".
+ * If a component is missing, it is omitted. If all missing, returns "Chưa rõ".
+ * @param year - Year (e.g., 2024) or null.
+ * @param month - Month (1-12) or null.
+ * @param day - Day (1-31) or null.
+ * @returns Formatted date string.
+ */
 export function formatDisplayDate(
   year: number | null,
   month: number | null,
