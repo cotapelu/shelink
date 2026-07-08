@@ -2843,3 +2843,28 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - Bypass debt: 2 functions with eslint-disable (parsePersonRecord, buildFamilySection)
 
 **Notes**: Further splitting of `parsePersonRecord` and `buildFamilySection` required for full compliance without bypass; recorded as technical debt in AGENT_PROFILE.
+
+### [CYCLE-4 Batch 1] - 2025-07-07 Refactor Client Components (Function Size)
+
+**Type**: Violation Fix (Lint - Function Size)
+**Priority**: HIGH
+**Duration**: ~180 min
+**Status**: ✅ Completed (3 tasks)
+
+**Tasks**:
+- [R] client-info-section.tsx: Extracted `renderHeader`, `renderInfoGrid`, `renderFinanceStats`. Main component reduced from ~97 lines → ~20 lines.
+- [R] contacts-section.tsx: Extracted `renderEmpty`, `renderTable`. Main component reduced from ~40 lines → ~10 lines.
+- [R] matters-section.tsx: Extracted `renderEmpty`, `renderMattersTable`. Main component reduced from ~45 lines → ~10 lines.
+
+**Verification**:
+- npm run lint: errors reduced from 1249 to 1247 (total violations)
+- npm run typecheck: PASS
+- Build: PASS
+- Tests: All related tests pass (client-info-section: 7, matters-section: 4, contacts-section: 3)
+
+**Metrics**:
+- Lint violations delta: -2 errors
+- Functions >30 lines reduced: 3
+- Coverage: unchanged (79.98% statements)
+
+**Notes**: More UI components remain >30 lines; continue systematic extraction. Pattern: extract empty states and tables into helper functions within same file to preserve simplicity.

@@ -1,28 +1,17 @@
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import {
-  User,
-  Building2,
-  Briefcase
-} from "lucide-react";
-import {
-  clientTypeLabel,
-  cooperationStatusLabel,
-  genderLabel
-} from "@/lib/enums";
-import type { Client } from "@prisma/client";
+const fs = require('fs');
+const path = 'src/app/(app)/clients/[id]/_components/client-info-section.tsx';
+const original = fs.readFileSync(path, 'utf8');
 
-const COOP_TONE: Record<string, string> = {
-  POTENTIAL: "bg-amber-100 text-amber-800",
-  NEGOTIATING: "bg-sky-100 text-sky-800",
-  SIGNED: "bg-emerald-100 text-emerald-800",
-  TERMINATED: "bg-muted text-muted-foreground"
-};
+const startMarker = 'export function ClientInfoSection(';
+const startIdx = original.indexOf(startMarker);
+if (startIdx === -1) {
+  console.error('Could not find ClientInfoSection');
+  process.exit(1);
+}
 
-const yuan = (n: number) => `¥${n.toLocaleString()}`;
-const dash = <span className="text-muted-foreground/50">—</span>;
+const before = original.slice(0, startIdx);
 
-
+const newBlock = `
 // Extracted components (refactor Cycle 4)
 
 function renderHeader({ client, TypeIcon }: { client: Client; TypeIcon: any }) {
@@ -109,3 +98,7 @@ export function ClientInfoSection({
     </section>
   );
 }
+`;
+
+fs.writeFileSync(path, before + newBlock);
+console.log('Refactored ClientInfoSection successfully.');

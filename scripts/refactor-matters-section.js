@@ -1,17 +1,17 @@
-"use client";
+const fs = require('fs');
+const path = 'src/app/(app)/clients/[id]/_components/matters-section.tsx';
+const original = fs.readFileSync(path, 'utf8');
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import type { Matter, Billing } from "@prisma/client";
-
-const yuan = (n: number) => `¥${n.toLocaleString()}`;
-
-interface MattersSectionProps {
-  matters: Matter[];
-  billingsMap: Map<string, Billing[]>;
+const startMarker = 'export function MattersSection(';
+const startIdx = original.indexOf(startMarker);
+if (startIdx === -1) {
+  console.error('Could not find MattersSection');
+  process.exit(1);
 }
 
+const before = original.slice(0, startIdx);
 
+const newBlock = `
 function renderEmpty() {
   return (
     <section className="rounded-xl border border-border bg-card p-4">
@@ -38,7 +38,7 @@ function renderMattersTable({ matters, billingsMap }: { matters: Matter[]; billi
           {matters.flatMap((m) => {
             const billings = billingsMap.get(m.id) ?? [];
             return billings.map((b) => (
-              <TableRow key={`${m.id}-${b.id}`}>
+              <TableRow key={\`\${m.id}-\${b.id}\`}>
                 <TableCell className="font-mono text-xs">{m.internalCode}</TableCell>
                 <TableCell className="max-w-[200px] truncate">{m.title}</TableCell>
                 <TableCell>
@@ -66,3 +66,7 @@ export function MattersSection({ matters, billingsMap }: MattersSectionProps) {
     </section>
   );
 }
+`;
+
+fs.writeFileSync(path, before + newBlock);
+console.log('Refactored MattersSection successfully.');

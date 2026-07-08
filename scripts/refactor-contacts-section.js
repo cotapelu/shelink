@@ -1,9 +1,17 @@
-"use client";
+const fs = require('fs');
+const path = 'src/app/(app)/clients/[id]/_components/contacts-section.tsx';
+const original = fs.readFileSync(path, 'utf8');
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Contact } from "@prisma/client";
+const startMarker = 'export function ContactsSection(';
+const startIdx = original.indexOf(startMarker);
+if (startIdx === -1) {
+  console.error('Could not find ContactsSection');
+  process.exit(1);
+}
 
+const before = original.slice(0, startIdx);
 
+const newBlock = `
 function renderEmpty() {
   return (
     <section className="rounded-xl border border-border bg-card p-4">
@@ -53,3 +61,7 @@ export function ContactsSection({ contacts }: { contacts: Contact[] }) {
     </section>
   );
 }
+`;
+
+fs.writeFileSync(path, before + newBlock);
+console.log('Refactored ContactsSection successfully.');
