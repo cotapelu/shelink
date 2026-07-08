@@ -1319,3 +1319,9 @@ Based on project context (AGENTS.md):
 - Added comprehensive tests for `format.ts` utilities (17 tests)
 - Coverage progression: Functions ~70.73% → ~70.88%
 - Strategy continues: target small, isolated utility modules for quick coverage gains.
+
+### 2025-07-08: Added computeKinship Tests
+
+- First tests for complex kinship algorithm (5 tests, covering main relationship types)
+- Coverage progression: Functions ~70.88% → ~70.96%
+- Demonstrates that even complex business logic can be tested with small, focused datasets if we isolate the public function.

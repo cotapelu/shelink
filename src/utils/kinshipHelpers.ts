@@ -416,6 +416,14 @@ function findBloodKinship(
   };
 }
 // eslint-disable-next-line max-lines-per-function, max-statements
+/**
+ * Computes the kinship relationship between two persons.
+ * @param a - The first person (PersonNode).
+ * @param b - The second person (PersonNode).
+ * @param persons - Array of all persons in the graph.
+ * @param relationships - Array of relationship edges.
+ * @returns The computed KinshipResult, or null if no relationship is found within the data scope.
+ */
 export function computeKinship(
   personA: PersonNode,
   personB: PersonNode,
