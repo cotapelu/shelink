@@ -628,22 +628,11 @@ function Field({
   );
 }
 
-function TagInput({
-  tags,
-  onAdd,
-  onRemove
-}: {
-  tags: string[];
-  onAdd: (t: string) => void;
-  onRemove: (t: string) => void;
-}) {
+function TagInput({ tags, onAdd, onRemove }: { tags: string[]; onAdd: (t: string) => void; onRemove: (t: string) => void }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5 rounded-md border border-input bg-background px-2 py-1.5 focus-within:border-primary">
       {tags.map((t) => (
-        <span
-          key={t}
-          className="inline-flex items-center gap-1 rounded-md bg-primary/15 px-2 py-0.5 text-xs text-primary"
-        >
+        <span key={t} className="inline-flex items-center gap-1 rounded-md bg-primary/15 px-2 py-0.5 text-xs text-primary">
           {t}
           <button
             type="button"
