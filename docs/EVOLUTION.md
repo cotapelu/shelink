@@ -1236,3 +1236,10 @@ Based on project context (AGENTS.md):
 - Maintained zero new violations despite test additions
 - Learned: Prefer testing public API over private helpers (avoided testing `emptyToNull`)
 - Next: Expand coverage to finance actions and server/matters functions
+
+### 2025-07-08: Quality Gate Enforcement
+
+- Fixed max-lines violation in `matters-section` by extracting `MattersTable` (15 min task)
+- Verified pattern: small, focused extractions can incrementally improve code health without large risk
+- Remaining high-priority violations: `seal-request-sheet` (327 lines), `pending-archive-table` (213+ lines functions), `audit-view` (291 lines), `client-sheet` (615 lines), `procedure-content` (1357 lines)
+- Strategy: Continue with small extraction tasks (<30 min each) to systematically reduce God Objects and fix quality gate failures

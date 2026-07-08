@@ -2977,3 +2977,31 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - src/tests/lib/procedures-by-category.test.ts (new)
 
 **Next**: Continue coverage push on remaining uncovered modules; address God Objects (procedure-content, export-xlsx, finance-forms)
+
+### [CYCLE-9] - 2025-07-08 Max-Lines Violation Fix
+
+**Type**: Violation Fix (Quality Gate)
+**Priority**: HIGH (lint error)
+**Duration**: ~15 min
+**Status**: ✅ Completed
+
+**Task**: Extract `MattersTable` component from `matters-section.tsx`
+
+**Changes**:
+- Created `matters-table.tsx` (25 lines after simplification)
+- Removed `renderMattersTable` helper function (33 lines) from `matters-section.tsx`
+- Inlined currency formatting to reduce lines
+- `matters-section.tsx` now ~40 lines total, no max-lines violations
+
+**Impact**:
+- Fixed lint error: max-lines-per-function violation (33 → removed)
+- New component `MattersTable` is reusable and testable
+- All existing tests pass (4 tests in matters-section.test.tsx)
+- Typecheck: PASS
+- No new violations introduced
+
+**Files Modified**:
+- src/app/(app)/clients/[id]/_components/matters-table.tsx (new)
+- src/app/(app)/clients/[id]/_components/matters-section.tsx (modified)
+
+**Next**: Continue addressing max-lines violations in other God Objects (seal-request-sheet, pending-archive-table, audit-view, client-sheet, etc.)

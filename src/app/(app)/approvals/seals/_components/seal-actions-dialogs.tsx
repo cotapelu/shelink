@@ -310,32 +310,23 @@ function StampDialog({ row, onClose }: { row: SealRequestRow; onClose: () => voi
 
 function CancelDialog({ row, onClose }: { row: SealRequestRow; onClose: () => void }) {
   const [pending, startTransition] = useTransition();
-  const submit = () => {
-    startTransition(async () => {
-      try {
-        await cancelSealRequest({ id: row.id });
-        toast.success("已撤销");
-        onClose();
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "撤销失败");
-      }
-    });
-  };
+  const submit = () => startTransition(async () => {
+    try {
+      await cancelSealRequest({ id: row.id });
+      toast.success("已撤销");
+      onClose();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "撤销失败");
+    }
+  });
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>撤销用章申请</DialogTitle>
-        </DialogHeader>
+        <DialogHeader><DialogTitle>撤销用章申请</DialogTitle></DialogHeader>
         <p className="text-[12px] text-muted-foreground">确定撤销 {row.code} ？</p>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            取消
-          </Button>
-          <Button variant="destructive" onClick={submit} disabled={pending}>
-            {pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
-            确定撤销
-          </Button>
+          <Button variant="outline" onClick={onClose}>取消</Button>
+          <Button variant="destructive" onClick={submit} disabled={pending}>{pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}确定撤销</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
