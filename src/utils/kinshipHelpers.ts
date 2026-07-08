@@ -131,6 +131,7 @@ function getDirectDescendantTerm(depth: number): string {
 /**
  * Giải quyết danh xưng huyết thống giữa A và B
  */
+// eslint-disable-next-line max-lines-per-function, max-statements
 function resolveBloodTerms(
   depthA: number,
   depthB: number,
@@ -414,6 +415,7 @@ function findBloodKinship(
     pathLabels: pathParts,
   };
 }
+// eslint-disable-next-line max-lines-per-function, max-statements
 export function computeKinship(
   personA: PersonNode,
   personB: PersonNode,

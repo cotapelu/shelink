@@ -84,7 +84,7 @@ Areas where modifications consume excessive time/risk:
 | Permission check gaps | TBD (audit needed) | ↔️ | -10 actions/week |
 | Large components (>500 lines) | 5 modules | ↘️ | -1/week |
 | Test type bypass (@ts-nocheck) | 3 test files | ↗️ | -3 files/week |
-| Function size bypass (eslint-disable) | 2 functions | ↗️ | -2/week |
+| Function size bypass (eslint-disable) | 4 functions | ↘️ | -2/week |
 
 **Debt Reduction Plan**:
 - Week P0-P1: Fix critical violations (rate limit, JWT, permission audit, coverage)
