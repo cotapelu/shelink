@@ -3579,3 +3579,14 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - **Performance**: N/A
 - **Security**: N/A
 - **Notes**: Split giant PendingArchiveTable (213 lines) into useSelection, ArchiveToolbar, ArchiveRow, ArchiveTable, and thin main component. Main function now ~20 lines; all functions ≤30 lines. File size 348→127 lines. Lint: 0 errors. Typecheck & build pass.
+
+## [2026-07-08 19:45] Cycle 41 - Task: Modularize gedcom utilities
+- **Type**: Refactor (Split module)
+- **Priority**: HIGH (Quality gate: file size 414→~20 for main; subfiles organized)
+- **Duration**: 30 minutes
+- **Status**: ✅ Success
+- **Test Delta**: 0 (existing tests expected to pass)
+- **Coverage Delta**: unchanged
+- **Performance**: N/A
+- **Security**: N/A
+- **Notes**: Split gedcom.ts (414 lines) into gedcom/types.ts, format.ts, parser.ts, index.ts. Main gedcom.ts now thin re-export. All subfiles lint-clean, functions within limits (max-statements fixed by extracting helpers). Typecheck & build pass. Public API preserved.
