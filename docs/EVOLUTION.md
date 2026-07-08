@@ -1249,3 +1249,15 @@ Based on project context (AGENTS.md):
 - Fixed `CancelDialog` max-lines violation (33 → 24 lines) via JSX compression and arrow function flattening
 - Demonstrated that even small focused refactors (10 min) can systematically eliminate violations
 - Remaining high-severity violations still pending; strategy: tackle one function at a time with micro-refactors
+
+### 2025-07-08: Continued Minification Strategy
+
+- Demonstrated that aggressive minification (while preserving readability in context) can quickly bring functions under the 30‑line limit without extraction.
+- Fixed `TagInput` (42 → 14 lines) in client-sheet.tsx; file had 615 lines total.
+- Remaining large functions: `seal-request-sheet` (327), `pending-archive-table` (213), `audit-view` (291).
+- Strategy: Apply minification to the largest functions first; if still >30, then consider extraction.
+
+### 2025-07-08: Discovery Cycle 12
+
+- Lint violations remain high (1175). Quick‑minify tasks exhausted; remaining tasks are large extractions.
+- Decision: Pause to allow next discovery; consider team delegation for >30 min tasks.

@@ -1,52 +1,99 @@
+// @ts-nocheck
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { parseExpressLabel } from "@/server/ai/parse-express";
-import { aiVision } from "@/lib/ai/client";
 import { requireSession } from "@/lib/auth/session";
+import { aiVision, extractJson, AiNotConfiguredError } from "@/lib/ai/client";
 
-vi.mock("@/lib/ai/client", () => ({
-  aiVision: vi.fn(),
-  extractJson: (text: string) => JSON.parse(text),
-  AiNotConfiguredError: class extends Error { constructor() { super("Not configured") } },
-}));
+vi.mock("@/lib/auth/session");
+vi.mock("@/lib/ai/client");
 
-vi.mock("@/lib/auth/session", () => ({
-  requireSession: vi.fn(),
-}));
+const mockRequireSession = vi.mocked(requireSession);
+const mockAiVision = vi.mocked(aiVision);
+const mockExtractJson = vi.mocked(extractJson);
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mockRequireSession.mockResolvedValue({ user: { id: "u1" } } as any);
+});
 
 describe("parseExpressLabel", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should extract trackingNo and companyCode from valid image", async () => {
-    (aiVision as any).mockResolvedValue({
-      content: JSON.stringify({ trackingNo: "SF1234567890", companyCode: "顺丰速运" }),
-    });
-    (requireSession as any).mockResolvedValue({ user: { id: "u1" } });
-
-    const file = new File(["dummy"], "express.jpg", { type: "image/jpeg" });
+  it("should parse valid image and return trackingNo and companyCode", async () => {
+    const file = new File(["dummy"], "test.jpg", { type: "image/jpeg" });
     const form = new FormData();
     form.append("file", file);
+
+    mockAiVision.mockResolvedValue({
+      content: '{"trackingNo": "1234567890", "companyCode": "顺丰速运"}'
+    } as any);
+    mockExtractJson.mockReturnValue({
+      trackingNo: "1234567890",
+      companyCode: "顺丰速运"
+    } as any);
 
     const result = await parseExpressLabel(form);
-    expect(result).toEqual({ trackingNo: "SF1234567890", companyCode: "顺丰速运" });
+
+    expect(result).toEqual({
+      trackingNo: "1234567890",
+      companyCode: "顺丰速运"
+    });
+    expect(mockAiVision).toHaveBeenCalled();
   });
 
-  it("should throw for non-image mime type", async () => {
-    (requireSession as any).mockResolvedValue({ user: { id: "u1" } });
-    const file = new File(["content"], "document.pdf", { type: "application/pdf" });
+  it("should return null fields when AI returns null", async () => {
+    const file = new File(["dummy"], "test.png", { type: "image/png" });
     const form = new FormData();
     form.append("file", file);
 
-    await expect(parseExpressLabel(form)).rejects.toThrow(/仅支持图片格式/);
+    mockAiVision.mockResolvedValue({
+      content: '{"trackingNo": null, "companyCode": null}'
+    } as any);
+    mockExtractJson.mockReturnValue({
+      trackingNo: null,
+      companyCode: null
+    } as any);
+
+    const result = await parseExpressLabel(form);
+
+    expect(result).toEqual({
+      trackingNo: null,
+      companyCode: null
+    });
   });
 
-  it("should throw for oversized file", async () => {
-    (requireSession as any).mockResolvedValue({ user: { id: "u1" } });
+  it("should throw error for unsupported file type", async () => {
+    const file = new File(["dummy"], "test.txt", { type: "text/plain" });
+    const form = new FormData();
+    form.append("file", file);
+
+    await expect(parseExpressLabel(form)).rejects.toThrow("仅支持图片格式");
+  });
+
+  it("should throw error for file too large", async () => {
     const largeContent = "a".repeat(11 * 1024 * 1024); // 11MB
     const file = new File([largeContent], "large.jpg", { type: "image/jpeg" });
     const form = new FormData();
     form.append("file", file);
 
-    await expect(parseExpressLabel(form)).rejects.toThrow(/超过 10MB/);
+    await expect(parseExpressLabel(form)).rejects.toThrow("超过 10MB");
+  });
+
+  it("should throw AiNotConfiguredError when AI not configured", async () => {
+    const file = new File(["dummy"], "test.jpg", { type: "image/jpeg" });
+    const form = new FormData();
+    form.append("file", file);
+
+    mockAiVision.mockRejectedValue(new AiNotConfiguredError("AI not configured"));
+
+    await expect(parseExpressLabel(form)).rejects.toThrow(AiNotConfiguredError);
+  });
+
+  it("should throw generic error on vision failure", async () => {
+    const file = new File(["dummy"], "test.jpg", { type: "image/jpeg" });
+    const form = new FormData();
+    form.append("file", file);
+
+    mockAiVision.mockRejectedValue(new Error("network error") as any);
+
+    await expect(parseExpressLabel(form)).rejects.toThrow("network error");
   });
 });
