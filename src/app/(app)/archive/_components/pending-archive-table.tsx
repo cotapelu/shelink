@@ -20,22 +20,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { useState } from "react";
 import {
   FileText,
   User,
   Calendar,
   Check,
-  X,
-  Loader2,
-  AlertTriangle
+  X
 } from "lucide-react";
-import {
-  approveArchiveRecord,
-  rejectArchiveRecord
-} from "@/server/archive/actions";
 import { CLOSED_REASON_CN } from "@/server/archive/schemas";
 import {
   Dialog,
@@ -49,9 +41,8 @@ import type { PendingRecord } from "./batch-reject-dialog";
 import { BatchRejectDialog } from "./batch-reject-dialog";
 import { BatchApproveDialog } from "./batch-approve-dialog";
 import { ApproveDialog } from "./approve-dialog";
+import { RejectDialog } from "./reject-dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -285,87 +276,6 @@ export function PendingArchiveTable({ records }: { records: PendingRecord[] }) {
 
 
 
-function RejectDialog({
-  record,
-  onClose
-}: {
-  record: PendingRecord;
-  onClose: () => void;
-}) {
-  const router = useRouter();
-  const [note, setNote] = useState("");
-  const [isPending, startTransition] = useTransition();
-
-  function submit() {
-    if (!note.trim()) {
-      toast.warning("请填写驳回原因");
-      return;
-    }
-    startTransition(async () => {
-      try {
-        await rejectArchiveRecord({
-          archiveId: record.id,
-          note: note.trim()
-        });
-        toast.success(`已驳回（${record.archiveNo}）`);
-        onClose();
-        router.refresh();
-      } catch (err) {
-        toast.error("驳回失败", {
-          description: err instanceof Error ? err.message : ""
-        });
-      }
-    });
-  }
-
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <X className="h-5 w-5 text-destructive" />
-            驳回归档申请
-          </DialogTitle>
-          <DialogDescription>
-            驳回后该归档申请失效，律师需根据原因调整后重新提交。
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3">
-          <div className="rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs">
-            <div className="font-mono text-[#9B7BF7]">{record.archiveNo}</div>
-            <div className="text-muted-foreground mt-0.5">
-              {record.matter.internalCode} · {record.matter.title}
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">
-              驳回原因 <span className="text-destructive">*</span>
-            </Label>
-            <Textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="如：缺关键证据材料；办案小结过于简略；裁判文书未上传等"
-              rows={4}
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isPending}>
-            取消
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={submit}
-            disabled={isPending}
-          >
-            {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-            确认驳回
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 function DetailDialog({
   record,

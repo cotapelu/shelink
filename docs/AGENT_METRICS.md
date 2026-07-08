@@ -3546,3 +3546,14 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - **Performance**: N/A
 - **Security**: N/A
 - **Notes**: Extracted BatchApproveDialog from pending-archive-table.tsx into batch-approve-dialog.tsx; refactored to keep all functions ≤30 lines; removed unused imports (batchApproveArchiveRecords, batchRejectArchiveRecords, BatchResultPanel, cn) and unused BatchResult type; typecheck and build pass; new file lint-clean.
+
+## [2026-07-08 18:20] Cycle 37 - Task: Extract ApproveDialog
+- **Type**: Refactor (Extraction)
+- **Priority**: HIGH (Quality gate: function size)
+- **Duration**: 15 minutes
+- **Status**: ✅ Success
+- **Test Delta**: 0
+- **Coverage Delta**: unchanged
+- **Performance**: N/A
+- **Security**: N/A
+- **Notes**: Extracted ApproveDialog from pending-archive-table.tsx into approve-dialog.tsx; refactored to keep all functions ≤30 lines; fixed duplicate import; typecheck, build, lint clean.
