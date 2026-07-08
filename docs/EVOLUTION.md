@@ -1261,3 +1261,10 @@ Based on project context (AGENTS.md):
 
 - Lint violations remain high (1175). Quick‑minify tasks exhausted; remaining tasks are large extractions.
 - Decision: Pause to allow next discovery; consider team delegation for >30 min tasks.
+
+### 2025-07-08: Coverage Increase via AI Module Tests
+
+- Added tests for `parseExpressLabel` (6 tests, ~100% coverage for that module)
+- Demonstrated that server actions with external dependencies can be effectively tested via mocks
+- Coverage trend: Functions ~70% → still need to reach 80%
+- Next coverage targets: `parse-summons.ts`, `server/archive/actions.ts` (if any uncovered), other utility modules

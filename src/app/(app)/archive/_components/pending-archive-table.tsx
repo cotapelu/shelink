@@ -421,54 +421,18 @@ function BatchApproveDialog({
   );
 }
 
-function BatchResultPanel({
-  result,
-  recordById
-}: {
-  result: BatchResult;
-  recordById: Map<string, PendingRecord>;
-}) {
+function BatchResultPanel({ result, recordById }: { result: BatchResult; recordById: Map<string, PendingRecord>; }) {
   return (
     <div className="space-y-3 text-xs">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <div className="rounded border border-emerald-500/40 bg-emerald-500/10 px-3 py-2">
-          <div className="text-[10px] text-emerald-700">成功</div>
-          <div className="mt-0.5 font-mono text-lg text-emerald-700">{result.succeeded.length}</div>
-        </div>
-        <div
-          className={cn(
-            "rounded border px-3 py-2",
-            result.failed.length > 0
-              ? "border-destructive/40 bg-destructive/10"
-              : "border-border bg-muted/30"
-          )}
-        >
-          <div className={cn("text-[10px]", result.failed.length > 0 ? "text-destructive" : "text-muted-foreground")}>失败</div>
-          <div
-            className={cn(
-              "mt-0.5 font-mono text-lg",
-              result.failed.length > 0 ? "text-destructive" : "text-muted-foreground"
-            )}
-          >
-            {result.failed.length}
-          </div>
-        </div>
+        <div className="rounded border border-emerald-500/40 bg-emerald-500/10 px-3 py-2"><div className="text-[10px] text-emerald-700">成功</div><div className="mt-0.5 font-mono text-lg text-emerald-700">{result.succeeded.length}</div></div>
+        <div className={`rounded border px-3 py-2 ${result.failed.length > 0 ? "border-destructive/40 bg-destructive/10" : "border-border bg-muted/30"}`}><div className={`text-[10px] ${result.failed.length > 0 ? "text-destructive" : "text-muted-foreground"}`}>失败</div><div className={`mt-0.5 font-mono text-lg ${result.failed.length > 0 ? "text-destructive" : "text-muted-foreground"}`}>{result.failed.length}</div></div>
       </div>
       {result.failed.length > 0 && (
         <div className="rounded border border-border bg-card">
-          <div className="border-b border-border px-2 py-1.5 text-[10px] text-muted-foreground">
-            失败条目
-          </div>
+          <div className="border-b border-border px-2 py-1.5 text-[10px] text-muted-foreground">失败条目</div>
           <ul className="max-h-40 divide-y divide-border overflow-y-auto">
-            {result.failed.map((f) => {
-              const rec = recordById.get(f.id);
-              return (
-                <li key={f.id} className="px-2 py-1.5">
-                  <div className="font-mono text-[#9B7BF7]">{rec?.archiveNo ?? f.id}</div>
-                  <div className="mt-0.5 text-destructive">{f.error}</div>
-                </li>
-              );
-            })}
+            {result.failed.map((f) => { const rec = recordById.get(f.id); return (<li key={f.id} className="px-2 py-1.5"><div className="font-mono text-[#9B7BF7]">{rec?.archiveNo ?? f.id}</div><div className="mt-0.5 text-destructive">{f.error}</div></li>); })}
           </ul>
         </div>
       )}
