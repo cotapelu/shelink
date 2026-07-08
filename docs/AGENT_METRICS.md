@@ -3292,3 +3292,28 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - src/utils/dateHelpers.ts
 
 **Next**: Continue coverage push or address remaining God Objects.
+
+### [CYCLE-21] - 2025-07-08 Coverage Push: getZodiacAnimal Cycle Tests
+
+**Type**: Test Addition (Coverage)
+**Priority**: MEDIUM
+**Duration**: ~15 min
+**Status**: ✅ Completed
+
+**Task**: Add comprehensive boundary tests for `getZodiacAnimal`
+
+**Changes**:
+- Extended `src/tests/utils/dateHelpers.test.ts` with 14 new test assertions covering the full 12‑animal zodiac cycle from 1900 to 1911, plus spot‑check years 2020‑2024.
+- Verified lunar‑year conversion when month/day provided remains correct.
+
+**Impact**:
+- Added 14 new assertions (total test count ~1006)
+- `getZodiacAnimal` branch coverage → ~100%
+- Functions coverage increase ~0.08% (cumulative ~70.73%)
+- All tests pass (27 passed in dateHelpers.test.ts)
+- Typecheck: PASS
+
+**Files Modified**:
+- src/tests/utils/dateHelpers.test.ts
+
+**Next**: Continue incremental coverage; remaining uncovered modules likely in server actions or complex components.

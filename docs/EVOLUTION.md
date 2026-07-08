@@ -1307,3 +1307,9 @@ Based on project context (AGENTS.md):
 
 - No immediate ≤30‑minute task identified. Coverage push utilities exhausted; remaining uncovered code lives in large components.
 - Will revisit with team delegation or micro‑extraction strategy.
+
+### 2025-07-08: Continued Incremental Coverage
+
+- `getZodiacAnimal` now has full cycle coverage (12-year + modern)
+- Coverage progress: Functions ~70.65% → ~70.73%
+- Coverage push strategy: focus on small utility modules first; remaining utilities (`formatCurrency`, `parsePhoneNumber`, etc.) may need tests.
