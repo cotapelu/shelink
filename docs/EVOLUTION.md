@@ -1228,3 +1228,11 @@ Based on project context (AGENTS.md):
 - Extract `SubmissionSection` (form actions)
 - Extract `CauseSection` integration
 - Target: intake-sheet < 1000 lines
+
+### 2025-07-08: Coverage Push Progress
+
+- Added 31 tests for `procedures-by-category` module
+- Functions coverage trending upward (70% → ~71-72%)
+- Maintained zero new violations despite test additions
+- Learned: Prefer testing public API over private helpers (avoided testing `emptyToNull`)
+- Next: Expand coverage to finance actions and server/matters functions

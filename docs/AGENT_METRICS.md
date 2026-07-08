@@ -2946,3 +2946,34 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - Bypass debt increase: 2 functions (total 6)
 
 **Notes**: Need to expand kinship tests to cover grandparent, uncle, cousin scenarios; plan to later refactor computeKinship and resolveBloodTerms to reduce size and remove bypasses.
+
+### [CYCLE-8] - 2025-07-08 Test Coverage Push
+
+**Type**: Proactive Improvement (Tests)
+**Priority**: MEDIUM (coverage push)
+**Duration**: ~20 min
+**Status**: ✅ Completed
+
+**Task**: Add comprehensive tests for procedures-by-category module
+
+**Changes**:
+- Created `src/tests/lib/procedures-by-category.test.ts` (170 lines)
+- Tests cover:
+  - `suggestHandlingAgency`: 15 test cases for all procedure types
+  - `proceduresByCategory`: validation for all 8 categories
+  - `standingsByCategory`: validation for all 8 categories
+  - `matterCategoryCode`: mapping verification
+
+**Impact**:
+- ~31 new test cases added
+- Module procedures-by-category now near 100% coverage
+- Functions coverage increase ~1-2% (approaching target 80%)
+- No production code changed
+- All tests pass (31 passed)
+- Typecheck: PASS
+- No new violations
+
+**Files Modified**:
+- src/tests/lib/procedures-by-category.test.ts (new)
+
+**Next**: Continue coverage push on remaining uncovered modules; address God Objects (procedure-content, export-xlsx, finance-forms)
