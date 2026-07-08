@@ -3317,3 +3317,100 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - src/tests/utils/dateHelpers.test.ts
 
 **Next**: Continue incremental coverage; remaining uncovered modules likely in server actions or complex components.
+
+### [CYCLE-22] - 2025-07-08 Coverage Push: Format Utilities Tests
+
+**Type**: Test Addition (Coverage)
+**Priority**: MEDIUM
+**Duration**: ~25 min
+**Status**: ✅ Completed
+
+**Task**: Write unit tests for utility functions in `src/lib/utils/format.ts`
+
+**Changes**:
+- Created `src/tests/utils/format.test.ts` with tests for 10 functions:
+  - `formatCurrency` (VND, USD)
+  - `formatNumber` (decimals)
+  - `formatPercent` (percent formatting)
+  - `formatPhone` (Vietnamese phone formatting)
+  - `truncate` (string truncation)
+  - `capitalize` / `capitalizeWords`
+  - `slugify` (diacritics removal)
+  - `generateInitials`
+  - `bytesToSize`
+- Total 17 test cases covering typical usage and edge cases.
+
+**Impact**:
+- Added 17 new tests (total test count ~1023)
+- `format.ts` module now near 100% coverage
+- Functions coverage increase ~0.15% (cumulative ~70.88%)
+- All tests pass
+- Typecheck: PASS
+
+**Files Modified**:
+- src/tests/utils/format.test.ts (new)
+
+**Next**: Continue coverage push on remaining uncovered modules; still far from 80% target.
+
+### [CYCLE-23] - 2025-07-08 Discovery Only
+
+**Type**: Discovery Cycle (No Suitable ≤30‑min Task)
+**Priority**: N/A
+**Duration**: ~10 min
+**Status**: ⚠️ No Action
+
+**Discovery Findings**:
+- Coverage: ~70.88%
+- Lint errors: 1177
+- Remaining uncovered modules are either:
+  - Large, complex server actions (e.g., `archiveMatter` in `src/server/archive/actions.ts`) requiring extensive Prisma/session mocking.
+  - Heavy business logic modules (`kinshipHelpers.ts`, `procedure-content.tsx`) with intricate algorithms that need detailed test data setup (likely >1h per module).
+- Strategy options:
+  1. **Increase time budget**: Allow some tasks to exceed 30 min (risk: cycle duration too long).
+  2. **Team delegation**: Use `team_run` to split large test tasks into parallel sub‑tasks (requires session support).
+  3. **Target low‑hanging fruit**: Find simpler utility modules not yet covered (e.g., `parsePhoneNumber`, `validateEmail`) but these appear to be already inline in components.
+
+**Files Modified**: None
+
+### [CYCLE-24] - 2025-07-08 Discovery & Abort
+
+**Type**: Discovery → Task Abort
+**Priority**: N/A
+**Duration**: ~20 min
+**Status**: ❌ Aborted
+
+**Discovery & Attempt**:
+- Explored `kinshipHelpers.ts` to test `compareSeniority` (pure helper).
+- Realized these are **private functions**; only `computeKinship` is exported.
+- Testing `computeKinship` requires extensive data setup (persons, relationships graphs) → >30 min.
+- Considered `web-vitals.ts` (React hook) but requires complex React/Next.js test setup.
+- No other small exported utility modules found without heavy mocking.
+
+**Lesson**: Need better filtering for "testable in ≤30 min" modules:
+- Must be pure functions or server actions with minimal dependencies.
+- Should have existing test scaffolding (mocks) to copy pattern.
+- Avoid functions that require building large data graphs or component rendering.
+
+**Files Modified**: None (tests not committed)
+
+### [CYCLE-25] - 2025-07-08 Discovery: No Viable Task
+
+**Type**: Discovery Only
+**Priority**: N/A
+**Duration**: ~15 min
+**Status**: ⚠️ No Action
+
+**Findings**:
+- Remaining uncovered code lives in large, complex modules (kinshipHelpers, archiveMatter, procedureContent, pendingArchiveTable).
+- Small pure functions inside these are not exported or require extensive data setup.
+- Simple utilities already covered (format, dateHelpers, zodiac).
+- Function size violations: 59 functions >30 lines — but most are deeply nested in God Objects; extracting requires >30 min due to dependency analysis.
+
+**Strategic Pause**:
+- Coverage stall at ~70.88% indicates diminishing returns on utility-only testing.
+- Should either:
+  a) Allocate 45–60 min per task for complex module testing, OR
+  b) Use team_run to parallelize test-writing for large modules, OR
+  c) Accept current coverage and focus on other quality gates (lint, complexity, security).
+
+**Files Modified**: None

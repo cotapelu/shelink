@@ -1313,3 +1313,9 @@ Based on project context (AGENTS.md):
 - `getZodiacAnimal` now has full cycle coverage (12-year + modern)
 - Coverage progress: Functions ~70.65% → ~70.73%
 - Coverage push strategy: focus on small utility modules first; remaining utilities (`formatCurrency`, `parsePhoneNumber`, etc.) may need tests.
+
+### 2025-07-08: Format Utilities Test Coverage
+
+- Added comprehensive tests for `format.ts` utilities (17 tests)
+- Coverage progression: Functions ~70.73% → ~70.88%
+- Strategy continues: target small, isolated utility modules for quick coverage gains.
