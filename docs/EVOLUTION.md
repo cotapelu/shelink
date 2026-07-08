@@ -1295,3 +1295,15 @@ Based on project context (AGENTS.md):
 - AI modules (parse-express, parse-summons) now fully covered
 - Coverage trend: Functions ~70% → ~70.55% (incremental progress)
 - Reminder: Target 80% coverage still far; need to address many utility and server action modules.
+
+### 2025-07-08: Continued Coverage Increase
+
+- Added 6 edge case tests for `formatDisplayDate`
+- Total coverage progress: Functions ~70% → ~70.65%
+- Strategy: Incrementally add tests to utility modules (dateHelpers, cn, etc.) to push coverage toward 80%
+- Note: `cn` tests abandoned due to mock complexity; will revisit if needed.
+
+### 2025-07-08: Cycle 19 - Discovery Pause
+
+- No immediate ≤30‑minute task identified. Coverage push utilities exhausted; remaining uncovered code lives in large components.
+- Will revisit with team delegation or micro‑extraction strategy.

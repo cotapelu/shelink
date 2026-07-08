@@ -34,6 +34,13 @@ export function formatDisplayDate(
   return parts.join("/");
 }
 
+/**
+ * Converts a solar date to a Vietnamese lunar date string.
+ * @param year - Solar year (e.g., 2024)
+ * @param month - Solar month (1-12)
+ * @param day - Solar day (1-31)
+ * @returns Lunar date as "dd/mm/yyyy" or "dd/mm nhuận/yyyy", or null if input invalid.
+ */
 export function getLunarDateString(
   year: number | null,
   month: number | null,
@@ -62,6 +69,12 @@ export function getLunarDateString(
   }
 }
 
+/**
+ * Calculates age given birth year and optional death year.
+ * @param birthYear - Birth year (e.g., 1990)
+ * @param deathYear - Optional death year; if provided, calculates age at death.
+ * @returns Object with age (number) and isDeceased (boolean), or null if birthYear missing.
+ */
 export function calculateAge(
   birthYear: number | null,
   deathYear?: number | null,

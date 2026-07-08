@@ -3222,3 +3222,50 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - src/tests/server/ai/parse-summons.test.ts (new)
 
 **Next**: Continue coverage push on other uncovered modules; evaluate if more AI module tests needed. Still far from 80% target; consider also addressing God Objects when time permits.
+
+### [CYCLE-18] - 2025-07-08 Coverage Push: formatDisplayDate Tests
+
+**Type**: Test Addition (Coverage)
+**Priority**: MEDIUM (coverage push)
+**Duration**: ~20 min
+**Status**: ✅ Completed
+
+**Task**: Add boundary and edge case tests for `formatDisplayDate`
+
+**Changes**:
+- Extended `src/tests/utils/dateHelpers.test.ts` with 6 new test cases:
+  - formatting with only day+month
+  - formatting with only year+month
+  - formatting with only year
+  - formatting with only day
+  - handling zero values (treated as falsy -> default)
+- Maintained existing tests for `getZodiacSign` boundary cases
+
+**Impact**:
+- Added 6 new tests (total test count ~992)
+- `formatDisplayDate` branch coverage improved
+- Functions coverage increase ~0.1% (cumulative ~70.65%)
+- All tests pass (26 passed in dateHelpers.test.ts)
+- Typecheck: PASS
+- No production code changes
+
+**Files Modified**:
+- src/tests/utils/dateHelpers.test.ts
+
+**Next**: Continue coverage push; still far from 80% target. Consider testing other utility modules or server actions.
+
+### [CYCLE-19] - 2025-07-08 Discovery Only
+
+**Type**: Discovery Cycle (No Suitable Task)
+**Priority**: N/A
+**Duration**: ~10 min
+**Status**: ⚠️ No Action
+
+**Discovery Findings**:
+- Lint errors: 1177 (stable)
+- Coverage: ~70.65%
+- All small utility modules either fully covered or too trivial to test effectively.
+- Remaining uncovered functions are within large God Objects (seal‑request‑sheet, pending‑archive‑table, etc.) or complex server actions requiring extensive mocking.
+- Strategy: Continue incremental coverage on remaining utilities or consider team delegation for large extractions.
+
+**Files Modified**: None
