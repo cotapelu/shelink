@@ -3524,3 +3524,14 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - src/utils/dateHelpers.ts
 
 **Notes**: Continuation of documentation push. Public API docs improved.
+
+## [2026-07-08 17:45] Cycle 35 - Task: Extract BatchRejectDialog
+- **Type**: Refactor (Extraction)
+- **Priority**: MEDIUM
+- **Duration**: 25 minutes
+- **Status**: ✅ Success
+- **Test Delta**: 0 (no new tests)
+- **Coverage Delta**: unchanged (~70.9%)
+- **Performance**: N/A
+- **Security**: N/A
+- **Notes**: Extracted BatchRejectDialog and BatchResultPanel into batch-reject-dialog.tsx; refactored to keep all functions ≤30 lines; typecheck and build pass; lint clean.

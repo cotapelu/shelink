@@ -34,9 +34,7 @@ import {
 } from "lucide-react";
 import {
   approveArchiveRecord,
-  rejectArchiveRecord,
-  batchApproveArchiveRecords,
-  batchRejectArchiveRecords
+  rejectArchiveRecord
 } from "@/server/archive/actions";
 import { CLOSED_REASON_CN } from "@/server/archive/schemas";
 import {
@@ -48,13 +46,14 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 import type { PendingRecord } from "./batch-reject-dialog";
-import { BatchRejectDialog, BatchResultPanel } from "./batch-reject-dialog";
+import { BatchRejectDialog } from "./batch-reject-dialog";
+import { BatchApproveDialog } from "./batch-approve-dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
+
 
 const CATEGORY_CN: Record<string, string> = {
   CIVIL_COMMERCIAL: "民商",
@@ -281,128 +280,6 @@ export function PendingArchiveTable({ records }: { records: PendingRecord[] }) {
   );
 }
 
-type BatchResult = {
-  succeeded: string[];
-  failed: { id: string; error: string }[];
-};
-
-function BatchApproveDialog({
-  records,
-  onClose
-}: {
-  records: PendingRecord[];
-  onClose: (succeeded: boolean) => void;
-}) {
-  const router = useRouter();
-  const [note, setNote] = useState("");
-  const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<BatchResult | null>(null);
-  const withMissing = records.filter((r) => r.missingItems.length > 0);
-  const recordById = new Map(records.map((r) => [r.id, r]));
-
-  function submit(ids?: string[]) {
-    const targetIds = ids ?? records.map((r) => r.id);
-    startTransition(async () => {
-      try {
-        const res = await batchApproveArchiveRecords({
-          archiveIds: targetIds,
-          note: note.trim() || undefined
-        });
-        setResult({ succeeded: res.succeeded, failed: res.failed });
-        if (res.failed.length === 0) {
-          toast.success(`已批量通过 ${res.succeeded.length} 条`);
-        } else {
-          toast.warning(
-            `部分成功：${res.succeeded.length} 成功，${res.failed.length} 失败`
-          );
-        }
-        router.refresh();
-      } catch (err) {
-        toast.error("批量通过失败", {
-          description: err instanceof Error ? err.message : ""
-        });
-      }
-    });
-  }
-
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose(false)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Check className="h-5 w-5 text-emerald-500" />
-            批量通过 {records.length} 条归档申请
-          </DialogTitle>
-          <DialogDescription>
-            通过后涉案件全部进入「已归档」只读状态，且通知申请人。
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3">
-          {withMissing.length > 0 && (
-            <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700">
-              <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-              <span>
-                有 {withMissing.length} 条申请存在材料缺项（
-                {withMissing
-                  .slice(0, 3)
-                  .map((r) => r.archiveNo)
-                  .join("、")}
-                {withMissing.length > 3 ? "…" : ""}）。确认知悉后再通过。
-              </span>
-            </div>
-          )}
-          {result === null && (
-            <div className="space-y-1.5">
-              <Label className="text-xs">统一审批备注（可选）</Label>
-              <Textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="备注会写入每条归档记录"
-                rows={2}
-              />
-            </div>
-          )}
-          {result !== null && (
-            <BatchResultPanel result={result} recordById={recordById} />
-          )}
-        </div>
-        <DialogFooter>
-          {result === null ? (
-            <>
-              <Button variant="outline" onClick={() => onClose(false)} disabled={isPending}>
-                取消
-              </Button>
-              <Button
-                onClick={() => submit()}
-                disabled={isPending}
-                className="bg-emerald-600 text-white hover:bg-emerald-700"
-              >
-                {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-                确认通过 {records.length} 条
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline" onClick={() => onClose(true)}>
-                完成
-              </Button>
-              {result.failed.length > 0 && (
-                <Button
-                  onClick={() => submit(result.failed.map((f) => f.id))}
-                  disabled={isPending}
-                  className="bg-emerald-600 text-white hover:bg-emerald-700"
-                >
-                  {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-                  重试失败的 {result.failed.length} 条
-                </Button>
-              )}
-            </>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 
 
