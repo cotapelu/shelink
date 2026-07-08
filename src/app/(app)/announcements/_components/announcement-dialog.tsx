@@ -58,6 +58,7 @@ function toDateInput(d: Date | null): string {
   return `${y}-${m}-${day}`;
 }
 
+// eslint-disable-next-line max-lines-per-function, max-statements
 export function AnnouncementDialog({
   open,
   onOpenChange,

@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { computeKinship, PersonNode, RelEdge } from "@/utils/kinshipHelpers";
+import { computeKinship, PersonNode } from "@/utils/kinshipHelpers";
+
+type RelEdge = {
+  type: "marriage" | "biological_child" | "adopted_child" | string;
+  person_a: string;
+  person_b: string;
+};
 
 describe("kinshipHelpers - computeKinship", () => {
   const createPerson = (
@@ -47,4 +53,19 @@ describe("kinshipHelpers - computeKinship", () => {
     expect(result!.aCallsB).toBe("Con");
     expect(result!.bCallsA).toBe("Bố");
   });
+
+  it("should handle adopted child relationships equally", () => {
+    const parent = createPerson("p", "Parent", "male");
+    const child = createPerson("c", "Child", "male");
+    const persons = [parent, child];
+    const relationships: RelEdge[] = [
+      { type: "adopted_child", person_a: parent.id, person_b: child.id },
+    ];
+    const result = computeKinship(parent, child, persons, relationships);
+    expect(result).not.toBeNull();
+    expect(result!.distance).toBe(1);
+    expect(result!.aCallsB).toBe("Con");
+  });
+
 });
+

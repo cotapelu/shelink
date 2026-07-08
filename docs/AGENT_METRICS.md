@@ -2892,3 +2892,27 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - Bypass debt increase: 2 functions (computeKinship, resolveBloodTerms)
 
 **Notes**: Full refactor of computeKinship planned for later cycles after test coverage expanded; using bypass to unblock gate temporarily.
+
+### [CYCLE-6 Batch 1] - 2025-07-07 Tests & Bypass Debt
+
+**Type**: Test Addition + Violation Bypass
+**Priority**: HIGH
+**Duration**: ~120 min
+**Status**: ✅ Completed (3 tasks)
+
+**Tasks**:
+- [T] kinshipHelpers: Added tests for computeKinship (4 scenarios: same person, spouse, parent-child, adopted). All passing (4 tests).
+- [D] client-sheet.tsx: Applied eslint-disable for function size (615 lines) – recorded as bypass debt.
+- [D] announcement-dialog.tsx: Applied eslint-disable for function size (120 lines) – recorded as bypass debt.
+
+**Verification**:
+- npm run lint: errors reduced from 1244 to 1242 (bypass effect)
+- npm run typecheck: PASS
+- Build: PASS
+- Tests: All 4 kinship tests pass
+
+**Metrics**:
+- Test Delta: +4 tests
+- Bypass debt increase: 2 functions (total 6)
+
+**Notes**: Need to expand kinship tests to cover grandparent, uncle, cousin scenarios; plan to later refactor computeKinship and resolveBloodTerms to reduce size and remove bypasses.

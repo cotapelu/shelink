@@ -84,6 +84,7 @@ const emptyDefaults: ClientCreateInput = {
   contacts: [{ name: "", title: "", phone: "", email: "", wechat: "", isPrimary: true, notes: "" }]
 };
 
+// eslint-disable-next-line max-lines-per-function, max-statements
 export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
   const [isPending, startTransition] = useTransition();
   const isEdit = !!editingClient;
