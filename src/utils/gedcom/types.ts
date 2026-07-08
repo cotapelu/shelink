@@ -17,5 +17,27 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
-// Compatibility barrel: re-export from modularized internal structure
-export * from "./gedcom/index";
+
+export interface GedcomPerson {
+  id?: string;
+  full_name?: string | null;
+  gender?: "male" | "female" | "other" | string;
+  birth_year?: number | null;
+  birth_month?: number | null;
+  birth_day?: number | null;
+  death_year?: number | null;
+  death_month?: number | null;
+  death_day?: number | null;
+  is_deceased?: boolean;
+  is_in_law?: boolean;
+  birth_order?: number | null;
+  generation?: number | null;
+  avatar_url?: string | null;
+  note?: string | null;
+}
+
+export interface GedcomRelationship {
+  type?: string;
+  person_a?: string;
+  person_b?: string;
+}

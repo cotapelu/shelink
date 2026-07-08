@@ -3568,3 +3568,14 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - **Performance**: N/A
 - **Security**: N/A
 - **Notes**: Extracted RejectDialog into reject-dialog.tsx; all functions ≤30 lines. Cleaned pending-archive-table.tsx: removed unused imports (useTransition, useRouter, toast, Loader2, AlertTriangle, approve/rejectArchiveRecord, Textarea, Label). Lint reduced from ~15 issues to only 4 errors (PendingArchiveTable, one arrow, DetailDialog, file size) and 0 warnings.
+
+## [2026-07-08 19:10] Cycle 40 - Task: Refactor PendingArchiveTable
+- **Type**: Refactor (Split components)
+- **Priority**: HIGH (Quality gate)
+- **Duration**: 25 minutes
+- **Status**: ✅ Success
+- **Test Delta**: 0
+- **Coverage Delta**: unchanged
+- **Performance**: N/A
+- **Security**: N/A
+- **Notes**: Split giant PendingArchiveTable (213 lines) into useSelection, ArchiveToolbar, ArchiveRow, ArchiveTable, and thin main component. Main function now ~20 lines; all functions ≤30 lines. File size 348→127 lines. Lint: 0 errors. Typecheck & build pass.

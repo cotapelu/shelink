@@ -17,5 +17,6 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
-// Compatibility barrel: re-export from modularized internal structure
-export * from "./gedcom/index";
+export * from "./types";
+export * from "./format";
+export * from "./parser";
