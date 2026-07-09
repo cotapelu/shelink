@@ -3,36 +3,36 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Refactor Sprint",
+      "name": "UI Extraction Sprint",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Extract bulk add logic (handler + state) into custom hook 'useBulkAdd' to reduce RelationshipManager size",
+          "content": "Extract AddButtons component from RelationshipManager (buttons + condition)",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Extract quick add spouse logic into custom hook 'useQuickAddSpouse'",
+          "content": "Extract ErrorDisplay component for error rendering",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Extract search & recent members state into custom hook 'useRelationshipSearch' (includes SearchInput/Results) and useRecentMembers",
+          "content": "Extract FormsRenderer component to encapsulate add/edit/quick/bulk forms conditionals",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Split RelationshipManager UI into smaller subcomponents (RelationshipToolbar, RelationList/RelationshipSection wrapper) to achieve file <300 lines and main function <30 lines",
+          "content": "Refactor main RelationshipManager to use these subcomponents and verify file <300 lines, main function <30 lines",
           "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "Run lint, typecheck, build and verify no new violations introduced; ensure RelationshipManager and all new subcomponents pass quality gates",
+          "content": "Run lint, typecheck, build; verify no new violations",
           "status": "pending"
         },
         {
           "id": "task-6",
-          "content": "Update AGENT_METRICS.md, AGENT_PROFILE.md, EVOLUTION.md after completing refactor batch",
+          "content": "Update AGENT_METRICS.md, AGENT_PROFILE.md",
           "status": "pending"
         }
       ]
@@ -40,5 +40,5 @@
   ],
   "nextTaskId": 7,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-09T06:13:10.321Z"
+  "updatedAt": "2026-07-09T06:35:05.539Z"
 }

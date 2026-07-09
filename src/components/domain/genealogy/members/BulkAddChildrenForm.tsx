@@ -1,13 +1,13 @@
 "use client";
 
-interface BulkChild {
+export interface BulkChild {
   name: string;
   gender: "male" | "female" | "other";
   birthYear: string;
   isProcessing: boolean;
 }
 
-interface SpouseOption {
+export interface SpouseOption {
   id: string;
   full_name: string;
   note: string | null;

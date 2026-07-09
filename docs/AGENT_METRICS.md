@@ -3777,3 +3777,34 @@ Date        Health   Coverage   Complexity   Tests   Debt
 **Test Delta**: 0  
 **Coverage Delta**: negligible  
 
+
+### [2025-07-09 15:45] Cycle 51 - Task: Integrate custom hooks & further reduction
+
+**Type**: Refactor (R)  
+**Priority**: HIGH  
+**Duration**: ~1 hour  
+**Status**: ✅ Completed  
+
+**Quality Gates**:
+- ✅ Typecheck: PASS  
+- ✅ Build: SUCCESS  
+- ⚠️ Lint: 306 lines (still >300), main function >30 lines; need further extraction (next sprint)  
+
+**Files Modified**:
+- src/components/domain/genealogy/members/RelationshipManager.tsx (refactored to use useBulkAdd and useQuickAddSpouse hooks; removed bulk/quick state and handlers; reduced file from ~535 to 306 lines)
+- src/components/domain/genealogy/members/use-bulk-add.ts (new)
+- src/components/domain/genealogy/members/use-quick-add-spouse.ts (new)
+
+**Notes**:
+- Extracted bulk add and quick add spouse logic into separate reusable hooks.
+- Removed `handleBulkAdd` and `handleQuickAddSpouse` functions from component.
+- Replaced `spouseOptions` memo with inline compute in BulkAddChildrenForm.
+- Used `deleteRelationship` from `useRelationshipData` instead of local `handleDelete`.
+- Still above 300-file limit; plan to split JSX into smaller subcomponents (AddButtons, ErrorDisplay, FormsRenderer) to meet 300-line and 30-line function targets.
+
+**Next Steps**:
+- Continue extracting UI pieces (AddButtons, ErrorDisplay, FormsRenderer) to reduce main component under 300 lines and function under 30 lines.
+- Then address remaining function-size violations across other components.
+
+**Test Delta**: 0  
+**Coverage Delta**: negligible
