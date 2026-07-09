@@ -3,42 +3,37 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "UI Extraction Sprint",
+      "name": "Size Compliance Sprint",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Extract AddButtons component from RelationshipManager (buttons + condition)",
+          "content": "Refactor AddRelationshipForm to split into smaller subcomponents (FormFields, FormButtons, etc.) to achieve ≤30 lines",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Extract ErrorDisplay component for error rendering",
+          "content": "Check BulkAddChildrenForm and QuickAddSpouseForm for size violations and split if needed",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Extract FormsRenderer component to encapsulate add/edit/quick/bulk forms conditionals",
+          "content": "Verify RelationshipSection and RelationshipCard comply with size limits",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Refactor main RelationshipManager to use these subcomponents and verify file <300 lines, main function <30 lines",
+          "content": "Run final lint on genealogy/members directory; ensure no new violations",
           "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "Run lint, typecheck, build; verify no new violations",
-          "status": "pending"
-        },
-        {
-          "id": "task-6",
-          "content": "Update AGENT_METRICS.md, AGENT_PROFILE.md",
+          "content": "Update AGENT_METRICS.md and AGENT_PROFILE.md with final status",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 7,
+  "nextTaskId": 6,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-09T06:35:05.539Z"
+  "updatedAt": "2026-07-09T07:05:42.564Z"
 }
