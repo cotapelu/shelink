@@ -25,9 +25,12 @@ import { Stamp, Plus, FileText, AlertOctagon, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  SealRequestSheet
+  SealRequestSheet,
 } from "./seal-request-sheet";
 import { SealActionsDialogs } from "./seal-actions-dialogs";
+import { KpiCard } from "./kpi-card";
+import { TabBtn, Count } from "./tab-btn";
+import { emptySealsText } from "./seals-helpers";
 import {
   type SealRequestRow,
   type SealTypeConfigRow,
@@ -37,7 +40,7 @@ import {
   SEAL_STATUS_COLOR
 } from "./seal-types";
 
-type Tab = "allMine" | "pending" | "processed" | "toApprove" | "firm";
+export type Tab = "allMine" | "pending" | "processed" | "toApprove" | "firm";
 
 export function SealsView({
   mine,
@@ -175,7 +178,7 @@ export function SealsView({
         {rows.length === 0 ? (
           <div className="ll-surface rounded-lg p-12 text-center text-sm text-muted-foreground">
             <FileText className="mx-auto mb-2 h-6 w-6 opacity-40" />
-            {emptyText(tab, firmTabLabel)}
+            {emptySealsText(tab, firmTabLabel)}
           </div>
         ) : (
           <div className="ll-surface overflow-hidden rounded-lg">
@@ -224,76 +227,6 @@ export function SealsView({
       )}
     </div>
   );
-}
-
-function KpiCard({
-  icon,
-  label,
-  value,
-  accent
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-  accent: string;
-}) {
-  return (
-    <div className="ll-surface rounded-lg p-4">
-      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-        <span style={{ color: accent }}>{icon}</span>
-        {label}
-      </div>
-      <p className="mt-2 text-3xl" style={{ color: accent }}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function TabBtn({
-  active,
-  onClick,
-  children
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "relative inline-flex items-center gap-1.5 pb-2.5 pt-1 text-[13px] transition-colors",
-        active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-      )}
-    >
-      {children}
-      {active && <span className="absolute -bottom-px left-0 right-0 h-[2px] bg-primary" />}
-    </button>
-  );
-}
-
-function Count({ n, hot }: { n: number; hot?: boolean }) {
-  if (n === 0) return null;
-  return (
-    <span
-      className={cn(
-        "ml-1 inline-flex items-center justify-center rounded-full px-1.5 font-mono text-[10px]",
-        hot ? "bg-amber-500/15 text-amber-700" : "bg-muted/60 text-muted-foreground"
-      )}
-    >
-      {n}
-    </span>
-  );
-}
-
-function emptyText(tab: Tab, firmTabLabel: string) {
-  if (tab === "pending") return "暂无待审批申请";
-  if (tab === "processed") return "暂无已审批申请";
-  if (tab === "toApprove") return "暂无待你审批的申请";
-  if (tab === "firm") return `暂无${firmTabLabel}记录`;
-  return "你还没有用章申请";
 }
 
 function SealRow({

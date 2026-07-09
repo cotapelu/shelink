@@ -65,6 +65,31 @@ Technologies或patterns dễ sai:
 
 ---
 
+## Anti-Patterns Tracked (GOAL.md v1.0 - 12 Patterns)
+
+Agent phải actively phát hiện và fix các anti-patterns sau:
+
+| # | Pattern | Description | Fix Strategy |
+|---|---------|-------------|-------------|
+| 1 | God Object | Class >300 lines OR >10 methods | Split responsibilities, extract classes |
+| 2 | Arrow Code | Nesting >3 levels | Guard clauses, early returns |
+| 3 | Magic Constants | Unnamed numbers/strings | Named constants, enums |
+| 4 | Shotgun Surgery | >2 duplications across codebase | Extract method, DRY |
+| 5 | Circular Dependency | Module cycles | Inversion of control, interfaces |
+| 6 | Deep Inheritance | >2 levels hierarchy | Composition over inheritance |
+| 7 | Feature Envy | Accessing other object's data >3x | Move method to that object |
+| 8 | N+1 Queries | Loop with DB calls | Batch queries, JOINs |
+| 9 | Blocking I/O in async | sync operations in async context | Use async APIs, offload to worker |
+| 10 | O(n²) algorithms | Nested loops over same data | Hash maps, indexing, reduce complexity |
+| 11 | Unbounded Cache | No TTL/eviction | Add TTL, LRU, size limits |
+| 12 | Sync Rate Limiting | Blocking rate limiter | Token bucket, leaky bucket, non-blocking |
+
+**Thresholds (AGENT v1.0)**:
+- Function lines ≤20 (business), ≤50 (UI)
+- Cyclomatic complexity ≤10
+- Nesting depth ≤3
+- No clones >5 lines
+
 ## High-Cost Changes
 
 Areas where modifications consume excessive time/risk:

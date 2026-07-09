@@ -96,6 +96,25 @@ export function buildPersonRecord(person: GedcomPerson): string {
 }
 
 // eslint-disable-next-line max-lines-per-function
+function determineSpouseRoles(pA: GedcomPerson, pB: GedcomPerson): { husb?: string; wife?: string } {
+  return {
+    husb: pA.gender === "male" ? pA.id : pB.gender === "male" ? pB.id : pA.id,
+    wife:
+      pA.gender === "female" ? pA.id : pB.gender === "female" ? pB.id : pB.id,
+  };
+}
+
+function validateMarriage(
+  marriage: GedcomRelationship,
+  personMap: Map<string, GedcomPerson>
+): { husb?: string; wife?: string } | null {
+  if (!marriage.person_a || !marriage.person_b) return null;
+  const pA = personMap.get(marriage.person_a!);
+  const pB = personMap.get(marriage.person_b!);
+  if (!pA || !pB || !pA.id || !pB.id) return null;
+  return determineSpouseRoles(pA, pB);
+}
+
 function buildInitialFamilies(
   marriages: GedcomRelationship[],
   personMap: Map<string, GedcomPerson>
@@ -103,20 +122,46 @@ function buildInitialFamilies(
   let familyCounter = 1;
   const families: { id: string; husb?: string; wife?: string; children: string[] }[] = [];
   for (const marriage of marriages) {
-    if (!marriage.person_a || !marriage.person_b) continue;
-    const pA = personMap.get(marriage.person_a!);
-    const pB = personMap.get(marriage.person_b!);
-    if (!pA || !pB || !pA.id || !pB.id) continue;
-    const fam = {
+    const roles = validateMarriage(marriage, personMap);
+    if (!roles) continue;
+    families.push({
       id: `F${familyCounter++}`,
-      husb: pA.gender === "male" ? pA.id : pB.gender === "male" ? pB.id : pA.id,
-      wife:
-        pA.gender === "female" ? pA.id : pB.gender === "female" ? pB.id : pB.id,
+      husb: roles.husb,
+      wife: roles.wife,
       children: [],
-    };
-    families.push(fam);
+    });
   }
   return families;
+}
+
+function createFamilyForParent(parentId: string, personMap: Map<string, GedcomPerson>): { id: string; husb?: string; wife?: string; children: string[] } {
+  const pP = personMap.get(parentId)!;
+  return {
+    id: `F${Date.now()}${Math.random().toString(36).substr(2, 5)}`,
+    husb: (pP.gender as string) === "male" ? parentId : undefined,
+    wife: (pP.gender as string) === "female" ? parentId : undefined,
+    children: [],
+  };
+}
+
+function processChildRelationship(
+  families: { id: string; husb?: string; wife?: string; children: string[] }[],
+  childRel: GedcomRelationship,
+  personMap: Map<string, GedcomPerson>
+) {
+  const parentId = childRel.person_a;
+  const childId = childRel.person_b;
+  if (!parentId || !childId) return;
+  let fam = families.find((f) => f.husb === parentId || f.wife === parentId);
+  if (!fam) {
+    const pP = personMap.get(parentId);
+    if (!pP) return;
+    fam = createFamilyForParent(parentId, personMap);
+    families.push(fam);
+  }
+  if (!fam.children.includes(childId)) {
+    fam.children.push(childId);
+  }
 }
 
 function assignChildrenToFamilies(
@@ -124,29 +169,7 @@ function assignChildrenToFamilies(
   childrenRels: GedcomRelationship[],
   personMap: Map<string, GedcomPerson>
 ) {
-  for (const childRel of childrenRels) {
-    const parentId = childRel.person_a;
-    const childId = childRel.person_b;
-    if (!parentId || !childId) continue;
-
-    let fam = families.find((f) => f.husb === parentId || f.wife === parentId);
-
-    if (!fam) {
-      const pP = personMap.get(parentId);
-      if (!pP) continue;
-      fam = {
-        id: `F${Date.now()}${Math.random().toString(36).substr(2, 5)}`, // quick unique; but should use counter
-        husb: (pP.gender as string) === "male" ? parentId : undefined,
-        wife: (pP.gender as string) === "female" ? parentId : undefined,
-        children: [],
-      };
-      families.push(fam);
-    }
-
-    if (!fam.children.includes(childId)) {
-      fam.children.push(childId);
-    }
-  }
+  childrenRels.forEach(rel => processChildRelationship(families, rel, personMap));
 }
 
 function renderFamilies(families: { id: string; husb?: string; wife?: string; children: string[] }[]): string {

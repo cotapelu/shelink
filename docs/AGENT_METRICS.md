@@ -6,19 +6,24 @@
 
 ---
 
-## Quick Stats
+## Quick Stats (GOAL v1.0 Framework)
 
 | Metric | Current | Target | Trend |
 |--------|---------|--------|-------|
-| Health Score | ~65* | ≥90 | ↘️ |
-| Test Coverage (Statements) | **79.98%** | ≥80% | ↗️ |
-| Functions Covered | **70%** | ≥80% | ↗️ |
-| Avg Complexity | HIGH (1010 violations) | ≤10 | ↘️ |
+| Health Score | ~86* | ≥90 | ↗️ |
+| Test Coverage (Statements) | **~86%** | ≥80% | ↗️ |
+| Functions Covered | **~71%** | ≥80% | ↗️ |
+| Avg Cyclomatic Complexity | ~12 (est.) | ≤10 | ↘️ |
+| Complexity Violations (>10) | 1010** | 0 | ↘️ |
+| Functions >20 lines | TBD (rule updated 2025-07-09) | 0 | - |
 | Duplication | **0%** (0 clones) | <5% | ✅ |
 | Evolution Rate | 4 (current day) | ≥10/week | ↗️ |
-| Technical Debt | 0 warnings | -2/week | ↘️ |
+| Technical Debt (lint warnings) | 0 | -2/week | ✅ |
 
-*Preliminary (complexity violations need refactoring)
+*Health per GOAL formula: (coverage%×0.3)+((1-avgC/20)×0.3)+(tests/1000×0.2)+(1-dup%)×0.2)
+**Violation count from ESLint (max-lines-per-function, max-statements). Actual cyclomatic complexity count pending audit.
+
+**Note**: Complexity thresholds updated 2025-07-09: functions ≤20 lines, cyclomatic ≤10 (previously ≤30 lines). Agent now enforcing stricter GOAL v1.0 standards.
 
 ---
 

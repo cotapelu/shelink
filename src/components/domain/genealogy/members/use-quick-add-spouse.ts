@@ -12,7 +12,7 @@ interface UseQuickAddSpouseProps {
   fetchRelationships: () => Promise<void>;
 }
 
-function handleQuickAddSpouseLogic({
+async function handleQuickAddSpouseLogic({
   personId,
   personGender,
   newSpouseName,

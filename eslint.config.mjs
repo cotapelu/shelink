@@ -15,8 +15,9 @@ const eslintConfig = defineConfig([
       "react-hooks/purity": "off",
       "react-hooks/set-state-in-effect": "off",
       "max-lines": ["error", { "max": 300, "skipBlankLines": true, "skipComments": true }],
-      "max-lines-per-function": ["error", { "max": 30, "IIFEs": true }],
-      "max-statements": ["error", 20]
+      "max-lines-per-function": ["error", { "max": 20, "IIFEs": true }],
+      "max-statements": ["error", 20],
+      "complexity": ["error", 10]
     }
   },
   globalIgnores([

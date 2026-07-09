@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 
 interface BulkChild {
   name: string;
@@ -14,7 +15,7 @@ interface UseBulkAddProps {
   fetchRelationships: () => Promise<void>;
 }
 
-function handleBulkAddLogic({
+async function handleBulkAddLogic({
   personId,
   bulkChildren,
   selectedSpouseId,

@@ -633,32 +633,51 @@
 
 ---
 
-### Month 2: Security & Performance Hardening
+### Month 2: Security, Observability & Resilience Hardening
 
-**Focus**: STRIDE security audit, performance bottlenecks, observability
+**Focus**: STRIDE security audit, performance bottlenecks, observability, resilience patterns
 
 - **Security Hardening**:
-  - Implement RBAC for sensitive operations
-  - ✅ JWT RS256 enforcement (implemented)
-  - Add rate limiting to APIs
-  - Encrypt sensitive PII fields
-  - Audit logging for all state changes
+  - Implement RBAC for sensitive operations (complete permission audit)
+  - ✅ JWT RS256 enforcement (implemented, pending deployment)
+  - Add per-user rate limiting (completed)
+  - Encrypt sensitive PII fields at rest (e.g., ID numbers, contacts)
+  - Audit logging for all state changes with PII scrubbing
+  - File upload validation (magic bytes, virus scan)
 
-- **Performance Optimization**:
-  - Identify N+1 queries (Prisma)
-  - Add caching for frequent lookups
-  - Optimize database indexes
-  - Reduce bundle size (code splitting)
+- **Compliance Endpoints**:
+  - GDPR data export endpoint (`/api/me/data-export`) returning JSON of all user PII
+  - GDPR right to erasure implementation (soft delete + anonymization workflow)
+  - SOX audit trail for financial calculations (immutable logs, tamper-evident)
+  - Retention policies: automated archival/deletion based on data category
 
 - **Observability Enhancement**:
-  - Add structured JSON logs with correlation IDs
-  - Implement health endpoints (/health/live, /health/ready)
-  - Add Prometheus metrics
-  - Integrate OpenTelemetry tracing
 
-**Estimated Effort**: 60-80 hours  
-**Risk**: Medium (security changes may break flows)  
-**Rollback**: Feature flags + thorough testing
+  - Add structured JSON logs with correlation IDs (replace console.log)
+  - Implement health endpoints (/health/live, /health/ready) with dependency checks
+  - Add Prometheus metrics endpoint (/metrics) for key business & SLO metrics
+  - Integrate OpenTelemetry tracing for cross-service calls
+  - Ensure all public APIs log request/response context (user ID, matter ID)
+
+- **Resilience Patterns** (5/7 minimum per GOAL):
+  - Retry: Exponential backoff + jitter for outbound HTTP/DB (max 3-5 attempts)
+  - Timeout: All I/O operations (DB, HTTP, file) with configurable timeouts (default 10s)
+  - Circuit Breaker: Failure threshold 5, timeout 60s, half-open state for downstream services
+  - Bulkhead: Isolate resource pools (DB connections, HTTP agents) per service/tenant
+  - Fallback: Cache/default/degraded mode when primary fails (e.g., read from replica if master down)
+  - Health Checks: As above (live/ready) and component-specific
+  - Graceful Shutdown: Handle SIGTERM/SIGINT, stop accepting new requests, finish in-flight, cleanup
+
+- **Performance Optimization**:
+  - Identify N+1 queries (Prisma) via logging or EXPLAIN
+  - Add caching (Redis/memory) for frequent lookups (e.g., users, matters)
+  - Optimize database indexes on frequently queried fields (Deadline.date, Hearing.startsAt, Matter.status)
+  - Reduce bundle size (code splitting, lazy loading for heavy components)
+  - Establish performance benchmarks: p50<100ms, p99<200ms via k6/Lighthouse
+
+**Estimated Effort**: 80-120 hours  
+**Risk**: Medium (security/observability changes may introduce latency, need careful integration)  
+**Rollback**: Feature flags + thorough testing, keep old logging path temporarily
 
 ---
 
