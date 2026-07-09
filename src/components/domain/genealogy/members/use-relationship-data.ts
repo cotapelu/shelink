@@ -24,12 +24,23 @@ import { useRouter } from "next/navigation";
 import api from "@/lib/api/client";
 import { getToken } from "@/lib/storage/auth";
 import { Person, RelationshipType } from "@/types";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
 
 export interface EnrichedRelationship {
   id: string;
   type: RelationshipType;
   direction: "parent" | "child" | "spouse" | "child_in_law";
   targetPerson: Person;
+  note: string | null;
+}
+
+interface RelationshipApiResponse {
+  id: string;
+  type: RelationshipType;
+  person_a: string;
+  person_b: string;
+  person_a_data?: Person;
+  person_b_data?: Person;
   note: string | null;
 }
 
@@ -64,20 +75,85 @@ export function useRelationshipData({ personId }: UseRelationshipDataProps) {
     }
   }, []);
 
+  // Fetch relationships helpers
+  const buildBaseEnrichedRels = useCallback((data: RelationshipApiResponse[], pid: string): EnrichedRelationship[] => {
+    const formattedRels: EnrichedRelationship[] = [];
+    data.forEach((r) => {
+      let direction: "parent" | "child" | "spouse" | "child_in_law" = "spouse";
+      if (r.type === "marriage") direction = "spouse";
+      else if (r.type === "biological_child" || r.type === "adopted_child") {
+        direction = r.person_a === pid ? "child" : "parent";
+      }
+
+      formattedRels.push({
+        id: r.id,
+        type: r.type,
+        direction,
+        targetPerson: r.person_a === pid
+          ? (r.person_b_data as Person)
+          : (r.person_a_data as Person),
+        note: r.note,
+      });
+    });
+    return formattedRels;
+  }, []);
+
+  const fetchChildInLawRels = useCallback(async (childrenIds: string[]): Promise<EnrichedRelationship[]> => {
+    if (childrenIds.length === 0) return [];
+    const marriagesResult = await api.get<RelationshipApiResponse[]>(
+      API_ENDPOINTS.RELATIONSHIPS_LIST,
+      {
+        params: {
+          type: "marriage",
+          person_ids: childrenIds.join(","),
+        },
+      }
+    );
+    const inLawRels: EnrichedRelationship[] = [];
+    marriagesResult.data?.forEach((m) => {
+      const isAChild = childrenIds.includes(m.person_a);
+      const childPerson = isAChild ? m.person_a_data : m.person_b_data;
+      const spousePerson = isAChild ? m.person_b_data : m.person_a_data;
+      if (!spousePerson || !childPerson) return;
+      const spouseGender = spousePerson.gender;
+      let noteLabel = `Vợ/chồng của ${childPerson.full_name}`;
+      if (spouseGender === "female")
+        noteLabel = `Con dâu (vợ của ${childPerson.full_name})`;
+      if (spouseGender === "male")
+        noteLabel = `Con rể (chồng của ${childPerson.full_name})`;
+      if (m.note) noteLabel += ` - ${m.note}`;
+      inLawRels.push({
+        id: m.id + "_inlaw",
+        type: "marriage",
+        direction: "child_in_law",
+        targetPerson: spousePerson,
+        note: noteLabel,
+      });
+    });
+    return inLawRels;
+  }, []);
+
   // Fetch relationships
   const fetchRelationships = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get<EnrichedRelationship[]>(
-        `/api/relationships?personId=${personId}`
+      const res = await api.get<RelationshipApiResponse[]>(
+        API_ENDPOINTS.RELATIONSHIPS_LIST,
+        { params: { person_id: personId } }
       );
-      setRelationships(res.data ?? []);
+      if (res.error) throw new Error(res.error);
+      const baseRels = buildBaseEnrichedRels(res.data ?? [], personId);
+      const childrenIds = baseRels
+        .filter((r) => r.direction === "child")
+        .map((r) => r.targetPerson.id);
+      const inLawRels = await fetchChildInLawRels(childrenIds);
+      setRelationships([...baseRels, ...inLawRels]);
     } catch (err) {
       console.error("Failed to fetch relationships:", err);
     } finally {
       setLoading(false);
     }
-  }, [personId]);
+  }, [personId, buildBaseEnrichedRels, fetchChildInLawRels]);
 
   useEffect(() => {
     fetchRelationships();
