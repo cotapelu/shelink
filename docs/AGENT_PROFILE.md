@@ -27,6 +27,7 @@ Modules với failure rate >5% hoặc repeated issues:
 | src/app/api/documents/[id]/download/route.ts | File download token validation? | TBD | 2025-07-03 (audit) | Ensure download links have short-lived signed tokens |
 | src/lib/storage/file-validator.ts | MIME type validation bypass risk | MEDIUM | 2025-07-03 (audit) | Validate magic bytes, enforce whitelist, scan for viruses |
 | src/app/(app)/approvals/seals/_components/seal-request-sheet.tsx | Refactored to ~230 lines using hook + subcomponents. Main function now thin UI wrapper (<50 lines). Remaining violations: none if subcomponents counted separately; main file size still >200 lines due to JSX but acceptable given modularity. | TBD | 2025-07-09 (refactor complete) | No further action needed unless further reduction desired.
+| src/components/domain/genealogy/members/RelationshipManager.tsx | File size >300 lines, main function >30 lines after partial refactor; needs further splitting | TBD | 2025-07-09 (partial refactor) | Continue extraction: bulk/quick hooks, UI components to achieve <300 lines, functions ≤30 |
 
 **Remediation Actions** (from Audit 2025-07-03):
 - [x] Audit permission checks (sample 10 modules) - consistent

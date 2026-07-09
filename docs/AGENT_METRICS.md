@@ -3733,3 +3733,47 @@ Date        Health   Coverage   Complexity   Tests   Debt
   - Fixed type error: changed `setSelectedTargetId(null)` to `setSelectedTargetId("")` to match hook's string type.
   - Main component function remains large; further extraction needed to meet quality gate (function ≤30 lines, file <300 lines).
 - **Next**: Continue extracting UI subcomponents from RelationshipManager (e.g., RelationshipTree, RelationshipCard, AddRelationshipDialog) to reduce file size further. 
+
+### [CYCLE-50] - 2025-07-09 - Relationship Manager Extraction Batch 2
+
+**Type**: Refactor (R) - Component Extraction  
+**Priority**: HIGH (God Object reduction)  
+**Duration**: ~2 hours  
+**Status**: ✅ Completed  
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS  
+- ✅ Build: SUCCESS  
+- ⚠️ Lint: Extracted components have ≤30 lines per function; RelationshipManager still violates file size (>300) and function size (>30) – will address next cycle.  
+- ✅ Tests: All existing tests pass (no new tests added)  
+
+**Coverage**: Unchanged (~71% Functions)  
+
+**Files Modified**:
+- src/components/domain/genealogy/members/RelationshipManager.tsx (simplified, map replaced)
+- src/components/domain/genealogy/members/AddRelationshipForm.tsx (new)
+- src/components/domain/genealogy/members/BulkAddChildrenForm.tsx (new)
+- src/components/domain/genealogy/members/EditRelationshipDialog.tsx (new)
+- src/components/domain/genealogy/members/QuickAddSpouseForm.tsx (new)
+- src/components/domain/genealogy/members/RelationshipCard.tsx (new)
+- src/components/domain/genealogy/members/RelationshipSection.tsx (new)
+
+**Notes**:
+- Extracted multiple UI components from RelationshipManager:
+  - `RelationshipCard`, `EditRelationshipDialog`, `AddRelationshipForm`, `BulkAddChildrenForm`, `QuickAddSpouseForm`, `RelationshipSection`.
+- Replaced giant map with `<RelationshipSection>` reducing file from ~976 → ~535 lines.
+- All new components obey quality gates (≤30 lines/function, file <300).
+- Remaining violations: RelationshipManager main function still ~483 lines; needs further extraction (bulk/quick handlers, search state) to reach file <300 and functions ≤30.
+- Next steps: Move bulk/quick add logic into custom hooks or external helpers; split RelationshipManager UI into smaller subcomponents (e.g., RelationshipToolbar, RelationshipSections).
+
+**Next Actions**:
+- [ ] Extract bulk add logic into `useBulkAdd` custom hook
+- [ ] Extract quick add spouse logic into `useQuickAddSpouse` hook
+- [ ] Extract search state into `useRelationshipSearch` hook
+- [ ] Split RelationshipManager further to achieve file <300, functions ≤30
+- [ ] Run lint to verify no new violations
+- [ ] Update metrics after finalization
+
+**Test Delta**: 0  
+**Coverage Delta**: negligible  
+
