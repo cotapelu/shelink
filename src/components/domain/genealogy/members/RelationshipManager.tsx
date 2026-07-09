@@ -26,8 +26,14 @@ import api from "@/lib/api/client";
 import API_ENDPOINTS from "@/lib/api/endpoints";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useRelationshipData } from "./use-relationship-data";
+import RelationshipCard from "./RelationshipCard";
+import EditRelationshipDialog from "./EditRelationshipDialog";
+import AddRelationshipForm from "./AddRelationshipForm";
+import BulkAddChildrenForm from "./BulkAddChildrenForm";
+import QuickAddSpouseForm from "./QuickAddSpouseForm";
+import RelationshipSection from "./RelationshipSection";
 import DefaultAvatar from "@/components/ui/Avatar/DefaultAvatar";
 
 interface RelationshipManagerProps {
@@ -69,7 +75,16 @@ export default function RelationshipManager({
     setNewRelTargetPersonId: setSelectedTargetId,
     newRelNote,
     setNewRelNote,
-    fetchRelationships
+    fetchRelationships,
+    updateRelationship,
+    editingId,
+    setEditingId,
+    editRelType,
+    setEditRelType,
+    editRelTargetPersonId,
+    setEditRelTargetPersonId,
+    editRelNote,
+    setEditRelNote,
   } = relationshipData;
 
 
@@ -79,6 +94,26 @@ export default function RelationshipManager({
       setMemberModalId(id);
     } else {
       router.push(`/dashboard/members/${id}`);
+    }
+  };
+
+  // Edit relationship
+  const handleEdit = (rel: EnrichedRelationship) => {
+    setEditingId(rel.id);
+    setEditRelType(rel.type);
+    setEditRelTargetPersonId(rel.targetPerson.id);
+    setEditRelNote(rel.note || "");
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId) return;
+    setProcessing(true);
+    try {
+      await updateRelationship(editingId);
+      setEditingId(null);
+      setEditRelNote("");
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -313,6 +348,16 @@ const handleDelete = async (relId: string) => {
   const groupByType = (type: string) =>
     relationships.filter((r) => r.direction === type);
 
+  const spouseOptions = useMemo(() => {
+    return groupByType("spouse").map((rel) => ({
+      id: rel.targetPerson.id,
+      full_name: rel.targetPerson.full_name,
+      note: rel.note,
+    }));
+  }, [relationships]);
+
+  const editRel = editingId ? relationships.find(r => r.id === editingId) ?? null : null;
+
   if (loading)
     return (
       <div className="text-stone-500 text-sm">
@@ -322,109 +367,38 @@ const handleDelete = async (relId: string) => {
 
   return (
     <div className="space-y-6">
-      {/* List Sections */}
-      {["parent", "spouse", "child", "child_in_law"].map((group) => {
-        const items = groupByType(group);
-        let title = "";
-        if (group === "parent") title = "Bố / Mẹ";
-        if (group === "spouse") title = "Vợ / Chồng";
-        if (group === "child") title = "Con cái";
-        if (group === "child_in_law") title = "Con dâu / Con rể";
+      {["parent", "spouse", "child", "child_in_law"].map((group) => (
+        <RelationshipSection
+          key={group}
+          group={group}
+          items={groupByType(group)}
+          isAdmin={isAdmin}
+          canEdit={canEdit}
+          onPersonClick={handlePersonClick}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      ))}
 
-        if (items.length === 0 && !isAdmin) return null; // Hide empty sections for members? Or show empty state?
-
-        return (
-          <div
-            key={group}
-            className="border-b border-stone-100 pb-4 last:border-0"
-          >
-            <h4 className="font-bold text-stone-700 mb-3 flex justify-between items-center text-sm uppercase tracking-wide">
-              {title}
-            </h4>
-            {items.length > 0 ? (
-              <ul className="space-y-3">
-                {items.map((rel) => (
-                  <li
-                    key={rel.id}
-                    className="flex items-center justify-between group"
-                  >
-                    <button
-                      onClick={() => handlePersonClick(rel.targetPerson.id)}
-                      className="flex items-center gap-3 hover:bg-stone-100 p-2.5 -mx-2.5 rounded-xl transition-all duration-200 flex-1 text-left"
-                    >
-                      <div
-                        className={`h-8 w-8 rounded-full flex items-center justify-center text-xs text-white overflow-hidden
-                            ${rel.targetPerson.gender === "male" ? "bg-sky-700" : rel.targetPerson.gender === "female" ? "bg-rose-700" : "bg-stone-500"}`}
-                      >
-                        {rel.targetPerson.avatar_url ? (
-                          <Image
-                            unoptimized
-                            src={rel.targetPerson.avatar_url}
-                            alt={rel.targetPerson.full_name}
-                            className="h-full w-full object-cover"
-                            width={32}
-                            height={32}
-                          />
-                        ) : (
-                          <DefaultAvatar gender={rel.targetPerson.gender} />
-                        )}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-stone-900 font-medium text-sm">
-                          {rel.targetPerson.full_name}
-                        </span>
-                        {rel.note && (
-                          <span className="text-xs text-amber-600 font-medium italic mt-0.5">
-                            ({rel.note})
-                          </span>
-                        )}
-                        {rel.type === "adopted_child" && (
-                          <span className="text-xs text-stone-400 italic mt-0.5">
-                            (Con nuôi)
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                    {canEdit && rel.direction !== "child_in_law" && (
-                      <button
-                        onClick={() => handleDelete(rel.id)}
-                        className="text-stone-300 hover:text-red-500 hover:bg-red-50 p-2 sm:p-2.5 rounded-lg transition-colors flex items-center justify-center ml-2"
-                        title="Xóa mối quan hệ"
-                        aria-label="Xóa mối quan hệ"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M3 6h18" />
-                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                          <line x1="10" x2="10" y1="11" y2="17" />
-                          <line x1="14" x2="14" y1="11" y2="17" />
-                        </svg>
-                      </button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-xs text-stone-400 italic">
-                Chưa có thông tin.
-              </p>
-            )}
-          </div>
-        );
-      })}
+      {/* Edit Relationship Dialog */}
+      {editingId && editRel && (
+        <EditRelationshipDialog
+          rel={editRel}
+          type={editRelType}
+          setType={setEditRelType}
+          note={editRelNote}
+          setNote={setEditRelNote}
+          onSave={handleSaveEdit}
+          onCancel={() => {
+            setEditingId(null);
+            setEditRelNote("");
+          }}
+          processing={processing}
+        />
+      )}
 
       {/* Add Button (Admin) */}
-      {canEdit && !isAdding && !isAddingBulk && !isAddingSpouse && (
+      {canEdit && !isAdding && !isAddingBulk && !isAddingSpouse && !editingId && (
         <div className="flex flex-col sm:flex-row gap-3 mt-4">
           <button
             onClick={() => setIsAdding(true)}
@@ -490,412 +464,72 @@ const handleDelete = async (relId: string) => {
 
       {/* Add Form (Admin) */}
       {canEdit && isAdding && (
-        <div className="mt-4 bg-stone-50/50 p-4 sm:p-5 rounded-xl border border-stone-200 shadow-sm">
-          <h4 className="font-bold text-stone-800 mb-3 text-sm">
-            Thêm Quan Hệ Mới
-          </h4>
-
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">
-                Ghi chú mối quan hệ (tuỳ chọn)
-              </label>
-              <input
-                type="text"
-                placeholder="VD: Vợ cả, Vợ hai, Chồng trước..."
-                value={newRelNote}
-                onChange={(e) => setNewRelNote(e.target.value)}
-                className="bg-white text-stone-900 placeholder-stone-400 block w-full text-sm rounded-md sm:rounded-lg border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 p-2 sm:p-2.5 border mb-3 transition-colors"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">
-                Loại quan hệ
-              </label>
-              <div className="flex gap-2">
-                <select
-                  value={newRelDirection}
-                  onChange={(e) =>
-                    setNewRelDirection(
-                      e.target.value as "parent" | "child" | "spouse",
-                    )
-                  }
-                  className="bg-white text-stone-900 placeholder-stone-400 block w-full text-sm rounded-md sm:rounded-lg border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 p-2 sm:p-2.5 border transition-colors"
-                >
-                  <option value="parent">Người này là Con của...</option>
-                  <option value="spouse">Người này là Vợ/Chồng của...</option>
-                  <option value="child">Người này là Bố/Mẹ của...</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Child Type Sub-selection */}
-            {(newRelDirection === "child" || newRelDirection === "parent") && (
-              <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">
-                  Chi tiết
-                </label>
-                <select
-                  value={newRelType}
-                  onChange={(e) =>
-                    setNewRelType(e.target.value as RelationshipType)
-                  }
-                  className="bg-white text-stone-900 placeholder-stone-400 block w-full text-sm rounded-md sm:rounded-lg border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 p-2 sm:p-2.5 border transition-colors"
-                >
-                  <option value="biological_child">Con ruột</option>
-                  <option value="adopted_child">Con nuôi</option>
-                </select>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">
-                Tìm người thân
-              </label>
-              <input
-                type="text"
-                placeholder="Nhập tên để tìm..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-white text-stone-900 placeholder-stone-400 block w-full text-sm rounded-md sm:rounded-lg border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 p-2 sm:p-2.5 border transition-colors"
-              />
-              {/* Search Results Dropdown */}
-              {(searchResults.length > 0 ||
-                (searchTerm.length === 0 &&
-                  !selectedTargetId &&
-                  recentMembers.length > 0)) && (
-                <div className="mt-2 bg-white border border-stone-200 rounded-md shadow-lg max-h-[250px] overflow-y-auto">
-                  <div className="px-3 py-1.5 bg-stone-100 text-[10px] font-bold text-stone-500 uppercase tracking-wide border-b border-stone-200 sticky top-0 z-10">
-                    {searchResults.length > 0
-                      ? "Kết quả tìm kiếm"
-                      : "Thành viên vừa thêm gần đây"}
-                  </div>
-                  {(searchResults.length > 0
-                    ? searchResults
-                    : recentMembers
-                  ).map((p) => (
-                    <button
-                      key={p.id}
-                      onClick={() => {
-                        setSelectedTargetId(p.id);
-                        setSearchTerm(p.full_name);
-                        setSearchResults([]);
-                      }}
-                      className="px-3 py-2 hover:bg-amber-50 text-sm flex items-center justify-between border-b border-stone-100 last:border-0"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`flex items-center justify-center text-[8px] font-bold size-3 rounded-full text-white shrink-0
-                               ${
-                                 p.gender === "male"
-                                   ? "bg-sky-500"
-                                   : p.gender === "female"
-                                     ? "bg-rose-500"
-                                     : "bg-stone-400"
-                               }`}
-                        >
-                          {p.gender === "male"
-                            ? "♂"
-                            : p.gender === "female"
-                              ? "♀"
-                              : "?"}
-                        </span>
-                        <span className="font-medium text-stone-800">
-                          {p.full_name}
-                        </span>
-                      </div>
-                      <span className="text-[10px] text-stone-400">
-                        {formatDisplayDate(
-                          p.birth_year,
-                          p.birth_month,
-                          p.birth_day,
-                        )}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-              {selectedTargetId && (
-                <p className="text-xs text-green-600 mt-1">
-                  Đã chọn: {searchTerm}
-                </p>
-              )}
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={() => {
-                  relationshipData.addRelationship();
-                  setSearchTerm("");
-                }}
-                disabled={!selectedTargetId || processing}
-                className="flex-1 bg-amber-700 text-white py-2 sm:py-2.5 rounded-md sm:rounded-lg text-sm font-medium hover:bg-amber-800 disabled:opacity-50 transition-colors"
-              >
-                {processing ? "Đang lưu..." : "Lưu"}
-              </button>
-              <button
-                onClick={() => {
-                  setIsAdding(false);
-                  setSelectedTargetId("");
-                  setSearchTerm("");
-                  setNewRelNote("");
-                }}
-                className="px-4 py-2 sm:py-2.5 bg-white border border-stone-300 text-stone-700 rounded-md sm:rounded-lg text-sm hover:bg-stone-50 transition-colors"
-              >
-                Hủy
-              </button>
-            </div>
-          </div>
-        </div>
+        <AddRelationshipForm
+          personId={personId}
+          newRelNote={newRelNote}
+          setNewRelNote={setNewRelNote}
+          newRelDirection={newRelDirection}
+          setNewRelDirection={setNewRelDirection}
+          newRelType={newRelType}
+          setNewRelType={setNewRelType}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          searchResults={searchResults}
+          setSearchResults={setSearchResults}
+          recentMembers={recentMembers}
+          selectedTargetId={selectedTargetId}
+          setSelectedTargetId={setSelectedTargetId}
+          addRelationship={relationshipData.addRelationship}
+          processing={processing}
+          onCancel={() => {
+            setIsAdding(false);
+            setSelectedTargetId("");
+            setSearchTerm("");
+            setNewRelNote("");
+          }}
+        />
       )}
 
       {/* Bulk Add Children Form (Admin) */}
       {canEdit && isAddingBulk && (
-        <div className="mt-4 bg-sky-50/50 p-4 sm:p-5 rounded-xl border border-sky-200 shadow-sm">
-          <h4 className="font-bold text-sky-800 mb-3 text-sm">
-            Thêm Nhanh Nhiều Con
-          </h4>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">
-                Chọn người mẹ/cha còn lại
-              </label>
-              <select
-                value={selectedSpouseId}
-                onChange={(e) => setSelectedSpouseId(e.target.value)}
-                className="flex-1 bg-white text-stone-900 placeholder-stone-400 text-sm rounded-md sm:rounded-lg border-stone-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2 sm:p-2.5 border transition-colors"
-              >
-                <option value="unknown">
-                  Không rõ (hoặc Vợ/Chồng khác chưa thêm)
-                </option>
-                {groupByType("spouse").map((rel) => (
-                  <option key={rel.id} value={rel.targetPerson.id}>
-                    {rel.targetPerson.full_name}{" "}
-                    {rel.note ? `(${rel.note})` : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-xs font-medium text-stone-500 mb-1">
-                Danh sách các con
-              </label>
-              {bulkChildren.map((child, index) => (
-                <div key={index} className="flex gap-2 items-center">
-                  <span className="text-stone-400 text-xs w-4">
-                    {index + 1}.
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Họ và tên..."
-                    value={child.name}
-                    onChange={(e) => {
-                      const newBulk = [...bulkChildren];
-                      newBulk[index].name = e.target.value;
-                      setBulkChildren(newBulk);
-                    }}
-                    className="flex-2 bg-white text-stone-900 placeholder-stone-400 text-sm rounded-md border-stone-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2 border"
-                  />
-                  <select
-                    value={child.gender}
-                    onChange={(e) => {
-                      const newBulk = [...bulkChildren];
-                      newBulk[index].gender = e.target.value as
-                        | "male"
-                        | "female"
-                        | "other";
-                      setBulkChildren(newBulk);
-                    }}
-                    className="flex-1 bg-white text-stone-900 text-sm rounded-md border-stone-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2 border"
-                  >
-                    <option value="male">Nam</option>
-                    <option value="female">Nữ</option>
-                    <option value="other">Khác</option>
-                  </select>
-                  <input
-                    type="number"
-                    placeholder="Năm sinh"
-                    value={child.birthYear}
-                    onChange={(e) => {
-                      const newBulk = [...bulkChildren];
-                      newBulk[index].birthYear = e.target.value;
-                      setBulkChildren(newBulk);
-                    }}
-                    className="flex-1 bg-white text-stone-900 placeholder-stone-400 text-sm rounded-md border-stone-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2 border w-24"
-                  />
-                  <button
-                    onClick={() => {
-                      const newBulk = bulkChildren.filter(
-                        (_, i) => i !== index,
-                      );
-                      // Always keep at least one row
-                      if (newBulk.length === 0) {
-                        newBulk.push({
-                          name: "",
-                          gender: "male",
-                          birthYear: "",
-                          isProcessing: false,
-                        });
-                      }
-                      setBulkChildren(newBulk);
-                    }}
-                    className="text-stone-400 hover:text-red-500 p-2"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-
-              <button
-                onClick={() => {
-                  setBulkChildren([
-                    ...bulkChildren,
-                    {
-                      name: "",
-                      gender: "male",
-                      birthYear: "",
-                      isProcessing: false,
-                    },
-                  ]);
-                }}
-                className="text-sky-600 text-xs font-semibold hover:text-sky-800 mt-2 px-6"
-              >
-                + Thêm dòng
-              </button>
-            </div>
-
-            <div className="flex gap-2 pt-4 border-t border-stone-200">
-              <button
-                onClick={handleBulkAdd}
-                disabled={
-                  processing || bulkChildren.every((c) => c.name.trim() === "")
-                }
-                className="flex-1 bg-sky-600 text-white py-2 sm:py-2.5 rounded-md sm:rounded-lg text-sm font-medium hover:bg-sky-700 disabled:opacity-50 transition-colors"
-              >
-                {processing ? "Đang lưu..." : "Lưu Tất Cả"}
-              </button>
-              <button
-                onClick={() => {
-                  setIsAddingBulk(false);
-                  setBulkChildren([
-                    {
-                      name: "",
-                      gender: "male",
-                      birthYear: "",
-                      isProcessing: false,
-                    },
-                  ]);
-                  setSelectedSpouseId("");
-                }}
-                className="px-4 py-2 sm:py-2.5 bg-white border border-stone-300 text-stone-700 rounded-md sm:rounded-lg text-sm hover:bg-stone-50 transition-colors"
-              >
-                Hủy
-              </button>
-            </div>
-          </div>
-        </div>
+        <BulkAddChildrenForm
+          spouses={spouseOptions}
+          selectedSpouseId={selectedSpouseId}
+          setSelectedSpouseId={setSelectedSpouseId}
+          bulkChildren={bulkChildren}
+          setBulkChildren={setBulkChildren}
+          processing={processing}
+          onSave={handleBulkAdd}
+          onCancel={() => {
+            setIsAddingBulk(false);
+            setBulkChildren([
+              { name: "", gender: "male", birthYear: "", isProcessing: false },
+            ]);
+            setSelectedSpouseId("");
+          }}
+        />
       )}
 
       {/* Quick Add Spouse Form (Admin) */}
       {canEdit && isAddingSpouse && (
-        <div className="mt-4 bg-rose-50/50 p-4 sm:p-5 rounded-xl border border-rose-200 shadow-sm">
-          <h4 className="font-bold text-rose-800 mb-3 text-sm">
-            Thêm Nhanh Vợ/Chồng
-          </h4>
-
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-rose-700 mb-1">
-                Họ và Tên *
-              </label>
-              <input
-                type="text"
-                placeholder="Nhập họ và tên..."
-                value={newSpouseName}
-                onChange={(e) => setNewSpouseName(e.target.value)}
-                className="bg-white text-stone-900 placeholder-stone-400 block w-full text-sm rounded-md sm:rounded-lg border-stone-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 p-2 sm:p-2.5 border transition-colors"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-rose-700 mb-1">
-                Năm sinh (Tuỳ chọn)
-              </label>
-              <input
-                type="number"
-                placeholder="VD: 1980"
-                value={newSpouseBirthYear}
-                onChange={(e) => setNewSpouseBirthYear(e.target.value)}
-                className="bg-white text-stone-900 placeholder-stone-400 block w-full text-sm rounded-md sm:rounded-lg border-stone-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 p-2 sm:p-2.5 border transition-colors"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-rose-700 mb-1">
-                Ghi chú mối quan hệ (Ví dụ: Vợ cả, Chồng thứ...)
-              </label>
-              <input
-                type="text"
-                placeholder="Tuỳ chọn..."
-                value={newSpouseNote}
-                onChange={(e) => setNewSpouseNote(e.target.value)}
-                className="bg-white text-stone-900 placeholder-stone-400 block w-full text-sm rounded-md sm:rounded-lg border-stone-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 p-2 sm:p-2.5 border transition-colors"
-              />
-            </div>
-
-            <p className="text-xs text-stone-500 italic mt-1">
-              * Giới tính sẽ tự động gán là{" "}
-              {personGender === "male"
-                ? "Nữ"
-                : personGender === "female"
-                  ? "Nam"
-                  : "Nữ"}{" "}
-              (dựa theo giới tính người hiện tại).
-            </p>
-
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={handleQuickAddSpouse}
-                disabled={!newSpouseName.trim() || processing}
-                className="flex-1 bg-rose-600 text-white py-2 sm:py-2.5 rounded-md sm:rounded-lg text-sm font-medium hover:bg-rose-700 disabled:opacity-50 transition-colors"
-              >
-                {processing ? "Đang lưu..." : "Lưu"}
-              </button>
-              <button
-                onClick={() => {
-                  setIsAddingSpouse(false);
-                  setNewSpouseName("");
-                  setNewSpouseBirthYear("");
-                  setNewSpouseNote("");
-                }}
-                className="px-4 py-2 sm:py-2.5 bg-white border border-stone-300 text-stone-700 rounded-md sm:rounded-lg text-sm hover:bg-stone-50 transition-colors"
-              >
-                Hủy
-              </button>
-            </div>
-            {error && (
-              <div className="mt-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
-                <svg
-                  className="w-4 h-4 shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                {error}
-              </div>
-            )}
-          </div>
-        </div>
+        <QuickAddSpouseForm
+          personGender={personGender}
+          newSpouseName={newSpouseName}
+          setNewSpouseName={setNewSpouseName}
+          newSpouseBirthYear={newSpouseBirthYear}
+          setNewSpouseBirthYear={setNewSpouseBirthYear}
+          newSpouseNote={newSpouseNote}
+          setNewSpouseNote={setNewSpouseNote}
+          processing={processing}
+          onSave={handleQuickAddSpouse}
+          onCancel={() => {
+            setIsAddingSpouse(false);
+            setNewSpouseName("");
+            setNewSpouseBirthYear("");
+            setNewSpouseNote("");
+          }}
+          error={error}
+        />
       )}
     </div>
   );
