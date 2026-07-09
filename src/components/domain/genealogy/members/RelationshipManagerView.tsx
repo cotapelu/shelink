@@ -21,6 +21,7 @@ interface RelationshipManagerViewProps {
   setError: (err: string | null) => void;
   relationshipData: {
     relationships: EnrichedRelationship[];
+    loading: boolean;
     isAdding: boolean;
     setIsAdding: (v: boolean) => void;
     newRelNote: string;
@@ -29,8 +30,8 @@ interface RelationshipManagerViewProps {
     setNewRelDirection: (d: "parent" | "child" | "spouse") => void;
     newRelType: RelationshipType;
     setNewRelType: (t: RelationshipType) => void;
-    selectedTargetId: string;
-    setSelectedTargetId: (id: string) => void;
+    newRelTargetPersonId: string;
+    setNewRelTargetPersonId: (id: string) => void;
     addRelationship: () => Promise<void>;
     editingId: string | null;
     editRelType: RelationshipType;
@@ -73,18 +74,65 @@ interface RelationshipManagerViewProps {
 }
 
 export default function RelationshipManagerView(p: RelationshipManagerViewProps) {
-  const { isAdmin, canEdit, personGender, processing, error, setError, relationshipData, bulkAdd, quickAdd, search, handlePersonClick, handleEdit, handleSaveEdit, deleteRelationship } = p;
-  const { relationships, isAdding, setIsAdding, newRelNote, setNewRelNote, newRelDirection, setNewRelDirection, newRelType, setNewRelType, selectedTargetId, setSelectedTargetId, addRelationship, editingId, editRelType, setEditRelType, editRelNote, setEditRelNote, setEditingId } = relationshipData;
+  const {
+    isAdmin,
+    canEdit,
+    personGender,
+    processing,
+    error,
+    setError,
+    relationshipData,
+    bulkAdd,
+    quickAdd,
+    search,
+    handlePersonClick,
+    handleEdit,
+    handleSaveEdit,
+    deleteRelationship,
+  } = p;
+  const {
+    relationships,
+    isAdding,
+    setIsAdding,
+    newRelNote,
+    setNewRelNote,
+    newRelDirection,
+    setNewRelDirection,
+    newRelType,
+    setNewRelType,
+    newRelTargetPersonId,
+    setNewRelTargetPersonId,
+    addRelationship,
+    editingId,
+    editRelType,
+    setEditRelType,
+    editRelNote,
+    setEditRelNote,
+    setEditingId,
+  } = relationshipData;
   const groupByType = (type: string) => relationships.filter(r => r.direction === type);
-  const spouseOptions = groupByType("spouse").map(rel => ({ id: rel.targetPerson.id, full_name: rel.targetPerson.full_name, note: rel.note }));
+  const spouseOptions = groupByType("spouse").map(rel => ({
+    id: rel.targetPerson.id,
+    full_name: rel.targetPerson.full_name,
+    note: rel.note,
+  }));
   const editRel = editingId ? relationships.find(r => r.id === editingId) ?? null : null;
   return (
     <div className="space-y-6">
       {["parent", "spouse", "child", "child_in_law"].map(group => (
-        <RelationshipSection key={group} group={group} items={groupByType(group)} isAdmin={isAdmin} canEdit={canEdit} onPersonClick={handlePersonClick} onEdit={handleEdit} onDelete={deleteRelationship} />
+        <RelationshipSection
+          key={group}
+          group={group}
+          items={groupByType(group)}
+          isAdmin={isAdmin}
+          canEdit={canEdit}
+          onPersonClick={handlePersonClick}
+          onEdit={handleEdit}
+          onDelete={deleteRelationship}
+        />
       ))}
       <EditRelationshipDialog
-        rel={editRel}
+        rel={editRel!}
         type={editRelType}
         setType={setEditRelType}
         note={editRelNote}
@@ -124,14 +172,19 @@ export default function RelationshipManagerView(p: RelationshipManagerViewProps)
           searchResults={search.searchResults}
           setSearchResults={search.setSearchResults}
           recentMembers={search.recentMembers}
-          selectedTargetId={selectedTargetId}
-          setSelectedTargetId={setSelectedTargetId}
+          selectedTargetId={newRelTargetPersonId}
+          setSelectedTargetId={setNewRelTargetPersonId}
           addRelationship={addRelationship}
           processing={processing}
-          onCancel={() => { setIsAdding(false); setSelectedTargetId(""); search.setSearchTerm(""); setNewRelNote(""); }}
+          onCancel={() => {
+            setIsAdding(false);
+            setNewRelTargetPersonId("");
+            search.setSearchTerm("");
+            setNewRelNote("");
+          }}
         />
       )}
-      {canEdit && isAddingBulk && (
+      {canEdit && bulkAdd.isAddingBulk && (
         <BulkAddChildrenForm
           spouses={spouseOptions}
           selectedSpouseId={bulkAdd.selectedSpouseId}
@@ -140,10 +193,16 @@ export default function RelationshipManagerView(p: RelationshipManagerViewProps)
           setBulkChildren={bulkAdd.setBulkChildren}
           processing={processing}
           onSave={bulkAdd.handleBulkAdd}
-          onCancel={() => { bulkAdd.setIsAddingBulk(false); bulkAdd.setBulkChildren([{ name: "", gender: "male", birthYear: "", isProcessing: false }]); bulkAdd.setSelectedSpouseId(""); }}
+          onCancel={() => {
+            bulkAdd.setIsAddingBulk(false);
+            bulkAdd.setBulkChildren([
+              { name: "", gender: "male", birthYear: "", isProcessing: false },
+            ]);
+            bulkAdd.setSelectedSpouseId("");
+          }}
         />
       )}
-      {canEdit && isAddingSpouse && (
+      {canEdit && quickAdd.isAddingSpouse && (
         <QuickAddSpouseForm
           personGender={personGender}
           newSpouseName={quickAdd.newSpouseName}
@@ -154,7 +213,12 @@ export default function RelationshipManagerView(p: RelationshipManagerViewProps)
           setNewSpouseNote={quickAdd.setNewSpouseNote}
           processing={processing}
           onSave={quickAdd.handleQuickAddSpouse}
-          onCancel={() => { quickAdd.setIsAddingSpouse(false); quickAdd.setNewSpouseName(""); quickAdd.setNewSpouseBirthYear(""); quickAdd.setNewSpouseNote(""); }}
+          onCancel={() => {
+            quickAdd.setIsAddingSpouse(false);
+            quickAdd.setNewSpouseName("");
+            quickAdd.setNewSpouseBirthYear("");
+            quickAdd.setNewSpouseNote("");
+          }}
           error={error}
         />
       )}
