@@ -105,6 +105,72 @@ function PurposeSection({
   );
 }
 
+function PageOptionsSection({
+  pageCount,
+  setPageCount,
+  copies,
+  setCopies,
+  crossPage,
+  setCrossPage,
+  urgency,
+  setUrgency,
+}: {
+  pageCount: number;
+  setPageCount: (v: number) => void;
+  copies: number;
+  setCopies: (v: number) => void;
+  crossPage: boolean;
+  setCrossPage: (v: boolean) => void;
+  urgency: "NORMAL" | "URGENT";
+  setUrgency: (v: "NORMAL" | "URGENT") => void;
+}) {
+  return (
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <Label className="text-[11px]">页数</Label>
+          <Input
+            type="number"
+            min={1}
+            value={pageCount}
+            onChange={(e) => setPageCount(Math.max(1, parseInt(e.target.value) || 1))}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label className="text-[11px]">份数</Label>
+          <Input
+            type="number"
+            min={1}
+            value={copies}
+            onChange={(e) => setCopies(Math.max(1, parseInt(e.target.value) || 1))}
+            className="mt-1"
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between md:col-span-2">
+        <label className="flex items-center gap-2 text-[12px]">
+          <Checkbox
+            checked={crossPage}
+            onCheckedChange={(v) => setCrossPage(v === true)}
+          />
+          需要骑缝章
+        </label>
+        <RadioChips
+          size="sm"
+          items={[
+            { value: "NORMAL", label: "普通" },
+            { value: "URGENT", label: "紧急", accent: "#DC2626" }
+          ]}
+          value={urgency}
+          onChange={(v) => setUrgency(v as "NORMAL" | "URGENT")}
+        />
+      </div>
+    </>
+  );
+}
+
 export function SealRequestSheet({
   open,
   onOpenChange,
@@ -322,47 +388,16 @@ export function SealRequestSheet({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <Label className="text-[11px]">页数</Label>
-              <Input
-                type="number"
-                min={1}
-                value={pageCount}
-                onChange={(e) => setPageCount(Math.max(1, parseInt(e.target.value) || 1))}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-[11px]">份数</Label>
-              <Input
-                type="number"
-                min={1}
-                value={copies}
-                onChange={(e) => setCopies(Math.max(1, parseInt(e.target.value) || 1))}
-                className="mt-1"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between md:col-span-2">
-            <label className="flex items-center gap-2 text-[12px]">
-              <Checkbox
-                checked={crossPage}
-                onCheckedChange={(v) => setCrossPage(v === true)}
-              />
-              需要骑缝章
-            </label>
-            <RadioChips
-              size="sm"
-              items={[
-                { value: "NORMAL", label: "普通" },
-                { value: "URGENT", label: "紧急", accent: "#DC2626" }
-              ]}
-              value={urgency}
-              onChange={(v) => setUrgency(v as "NORMAL" | "URGENT")}
-            />
-          </div>
+          <PageOptionsSection
+            pageCount={pageCount}
+            setPageCount={setPageCount}
+            copies={copies}
+            setCopies={setCopies}
+            crossPage={crossPage}
+            setCrossPage={setCrossPage}
+            urgency={urgency}
+            setUrgency={setUrgency}
+          />
 
           <div className="md:col-span-2">
             <Label className="text-[11px]">备注</Label>
