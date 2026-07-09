@@ -56,6 +56,9 @@ export function useRelationshipData({ personId }: UseRelationshipDataProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newRelType, setNewRelType] =
     useState<RelationshipType>("biological_child");
+  const [newRelDirection, setNewRelDirection] = useState<
+    "parent" | "child" | "spouse"
+  >("parent");
   const [newRelTargetPersonId, setNewRelTargetPersonId] = useState("");
   const [newRelNote, setNewRelNote] = useState("");
 
@@ -163,10 +166,21 @@ export function useRelationshipData({ personId }: UseRelationshipDataProps) {
   const addRelationship = useCallback(async () => {
     if (!newRelTargetPersonId) return;
     try {
+      let personA = personId;
+      let personB = newRelTargetPersonId;
+      let type: RelationshipType = newRelType;
+
+      if (newRelDirection === "parent") {
+        personA = newRelTargetPersonId;
+        personB = personId;
+      } else if (newRelDirection === "spouse") {
+        type = "marriage";
+      }
+
       await api.post("/api/relationships", {
-        person_a: personId,
-        person_b: newRelTargetPersonId,
-        type: newRelType,
+        person_a: personA,
+        person_b: personB,
+        type,
         note: newRelNote || null,
       });
       setIsAdding(false);
@@ -176,7 +190,7 @@ export function useRelationshipData({ personId }: UseRelationshipDataProps) {
     } catch (err) {
       console.error("Failed to add relationship:", err);
     }
-  }, [personId, newRelTargetPersonId, newRelType, newRelNote, fetchRelationships]);
+  }, [personId, newRelTargetPersonId, newRelDirection, newRelType, newRelNote, fetchRelationships]);
 
   // Update relationship
   const updateRelationship = useCallback(
@@ -217,6 +231,8 @@ export function useRelationshipData({ personId }: UseRelationshipDataProps) {
     setIsAdding,
     newRelType,
     setNewRelType,
+    newRelDirection,
+    setNewRelDirection,
     newRelTargetPersonId,
     setNewRelTargetPersonId,
     newRelNote,

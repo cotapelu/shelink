@@ -24,10 +24,10 @@ import { Person, RelationshipType } from "@/types";
 import { formatDisplayDate } from "@/utils/dateHelpers";
 import api from "@/lib/api/client";
 import API_ENDPOINTS from "@/lib/api/endpoints";
-import { getToken } from "@/lib/storage/auth";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
+import { useRelationshipData } from "./use-relationship-data";
 import DefaultAvatar from "@/components/ui/Avatar/DefaultAvatar";
 
 interface RelationshipManagerProps {
@@ -35,24 +35,6 @@ interface RelationshipManagerProps {
   isAdmin: boolean;
   canEdit?: boolean;
   personGender: string;
-}
-
-interface EnrichedRelationship {
-  id: string;
-  type: RelationshipType;
-  direction: "parent" | "child" | "spouse" | "child_in_law";
-  targetPerson: Person;
-  note: string | null;
-}
-
-interface RelationshipApiResponse {
-  id: string;
-  type: RelationshipType;
-  person_a: string;
-  person_b: string;
-  person_a_data?: Person;
-  person_b_data?: Person;
-  note: string | null;
 }
 
 interface EnrichedRelationship {
@@ -73,12 +55,23 @@ export default function RelationshipManager({
   const { setMemberModalId } = useDashboard();
   const router = useRouter();
 
-  useEffect(() => {
-    const token = getToken();
-    if (token) {
-      api.setToken(token);
-    }
-  }, []);
+  const relationshipData = useRelationshipData({ personId });
+  const {
+    relationships,
+    loading,
+    isAdding,
+    setIsAdding,
+    newRelType,
+    setNewRelType,
+    newRelDirection,
+    setNewRelDirection,
+    newRelTargetPersonId: selectedTargetId,
+    setNewRelTargetPersonId: setSelectedTargetId,
+    newRelNote,
+    setNewRelNote,
+    fetchRelationships
+  } = relationshipData;
+
 
   // If inside DashboardProvider → open modal; otherwise → navigate to full page
   const handlePersonClick = (id: string) => {
@@ -89,23 +82,10 @@ export default function RelationshipManager({
     }
   };
 
-  const [relationships, setRelationships] = useState<EnrichedRelationship[]>(
-    [],
-  );
-  const [loading, setLoading] = useState(true);
-
-  // Add Relationship State
-  const [isAdding, setIsAdding] = useState(false);
-  const [newRelType, setNewRelType] =
-    useState<RelationshipType>("biological_child");
-  const [newRelDirection, setNewRelDirection] = useState<
-    "parent" | "child" | "spouse"
-  >("parent");
-  const [newRelNote, setNewRelNote] = useState("");
+  // UI state (search, etc.)
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Person[]>([]);
   const [recentMembers, setRecentMembers] = useState<Person[]>([]);
-  const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -127,88 +107,8 @@ export default function RelationshipManager({
   const [newSpouseBirthYear, setNewSpouseBirthYear] = useState("");
   const [newSpouseNote, setNewSpouseNote] = useState("");
 
-  // Fetch relationships
-const fetchRelationships = useCallback(async () => {
-    try {
-      const relsResult = await api.get<RelationshipApiResponse[]>(
-        API_ENDPOINTS.RELATIONSHIPS_LIST,
-        { params: { person_id: personId } }
-      );
 
-      if (relsResult.error) throw new Error(relsResult.error);
-
-      const formattedRels: EnrichedRelationship[] = [];
-
-      relsResult.data?.forEach((r) => {
-        let direction: "parent" | "child" | "spouse" = "spouse";
-        if (r.type === "marriage") direction = "spouse";
-        else if (r.type === "biological_child" || r.type === "adopted_child") {
-          direction = r.person_a === personId ? "child" : "parent";
-        }
-
-        formattedRels.push({
-          id: r.id,
-          type: r.type,
-          direction,
-          targetPerson: r.person_a === personId 
-            ? (r.person_b_data as Person) 
-            : (r.person_a_data as Person),
-          note: r.note,
-        });
-      });
-
-      const childrenIds = formattedRels
-        .filter((r) => r.direction === "child")
-        .map((r) => r.targetPerson.id);
-
-      if (childrenIds.length > 0) {
-        const marriagesResult = await api.get<RelationshipApiResponse[]>(
-          API_ENDPOINTS.RELATIONSHIPS_LIST,
-          {
-            params: {
-              type: "marriage",
-              person_ids: childrenIds.join(","),
-            },
-          }
-        );
-
-        marriagesResult.data?.forEach((m) => {
-          const isAChild = childrenIds.includes(m.person_a);
-          const childPerson = isAChild ? m.person_a_data : m.person_b_data;
-          const spousePerson = isAChild ? m.person_b_data : m.person_a_data;
-
-          if (spousePerson && childPerson) {
-            const spouseGender = spousePerson.gender;
-            let noteLabel = `Vợ/chồng của ${childPerson.full_name}`;
-            if (spouseGender === "female")
-              noteLabel = `Con dâu (vợ của ${childPerson.full_name})`;
-            if (spouseGender === "male")
-              noteLabel = `Con rể (chồng của ${childPerson.full_name})`;
-
-            if (m.note) noteLabel += ` - ${m.note}`;
-
-            formattedRels.push({
-              id: m.id + "_inlaw",
-              type: "marriage",
-              direction: "child_in_law",
-              targetPerson: spousePerson,
-              note: noteLabel,
-            });
-          }
-        });
-      }
-
-      setRelationships(formattedRels);
-    } catch (err) {
-      console.error("Error fetching relationships:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [personId]);
-
-  useEffect(() => {
-    fetchRelationships();
-  }, [fetchRelationships]);
+  // Search for people to add
 
   // Search for people to add
   useEffect(() => {
@@ -242,49 +142,7 @@ const fetchRelationships = useCallback(async () => {
     }
   }, [isAdding, personId, recentMembers.length]);
 
-const handleAddRelationship = async () => {
-  if (!selectedTargetId) return;
-  setProcessing(true);
-  setError(null);
 
-  try {
-    let personA = personId;
-    let personB = selectedTargetId;
-
-    if (newRelDirection === "parent") {
-      personA = selectedTargetId;
-      personB = personId;
-    } else if (newRelDirection === "child") {
-      personA = personId;
-      personB = selectedTargetId;
-    }
-
-    let type: RelationshipType = "biological_child";
-    if (newRelDirection === "spouse") type = "marriage";
-    else if (newRelType === "adopted_child") type = "adopted_child";
-
-    const result = await api.post(API_ENDPOINTS.RELATIONSHIPS_CREATE, {
-      person_a: personA,
-      person_b: personB,
-      type,
-      note: newRelNote || null,
-    });
-
-    if (result.error) throw new Error(result.error);
-
-    setIsAdding(false);
-    setSearchTerm("");
-    setSelectedTargetId(null);
-    setNewRelNote("");
-    fetchRelationships();
-  } catch (err: unknown) {
-    const e = err as Error;
-    setError("Không thể thêm mối quan hệ: " + e.message);
-    setTimeout(() => setError(null), 5000);
-  } finally {
-    setProcessing(false);
-  }
-};
 
 const handleBulkAdd = async () => {
   // Filter out rows without a name
@@ -767,7 +625,10 @@ const handleDelete = async (relId: string) => {
 
             <div className="flex gap-2 pt-2">
               <button
-                onClick={handleAddRelationship}
+                onClick={() => {
+                  relationshipData.addRelationship();
+                  setSearchTerm("");
+                }}
                 disabled={!selectedTargetId || processing}
                 className="flex-1 bg-amber-700 text-white py-2 sm:py-2.5 rounded-md sm:rounded-lg text-sm font-medium hover:bg-amber-800 disabled:opacity-50 transition-colors"
               >
@@ -776,7 +637,7 @@ const handleDelete = async (relId: string) => {
               <button
                 onClick={() => {
                   setIsAdding(false);
-                  setSelectedTargetId(null);
+                  setSelectedTargetId("");
                   setSearchTerm("");
                   setNewRelNote("");
                 }}

@@ -3695,3 +3695,41 @@ Date        Health   Coverage   Complexity   Tests   Debt
   - Wrote 8 comprehensive unit tests for `cn` utility covering class merging, conditional classes, objects, arrays, deduplication, and edge cases. All tests pass, contributing to coverage improvement.
   - Quality gates (typecheck, lint, build) all passed for new files.
 - **Next**: Integrate `useRelationshipData` into RelationshipManager to reduce its size substantially; add tests for the hook; continue coverage push to reach 80% functions.
+
+## [2025-07-09 14:00] Cycle 48 - Task: Enhance useRelationshipData fetch logic
+
+- **Type**: Refactor (R)
+- **Priority**: HIGH (quality gate reduction)
+- **Duration**: ~30 min
+- **Status**: ✅ Success
+- **Test Delta**: 0
+- **Coverage Delta**: unchanged
+- **Files Modified**:
+  - src/components/domain/genealogy/members/use-relationship-data.ts (enhanced fetch with child_in_law)
+  - docs/AGENT_METRICS.md (this entry)
+- **Notes**:
+  - Replaced simple fetch with full enrichment logic matching RelationshipManager behavior: computes direction, fetches spouse-of-child relationships (child_in_law), builds proper enriched relationships.
+  - Split fetch logic into three small functions: buildBaseEnrichedRels, fetchChildInLawRels, fetchRelationships (all ≤30 lines).
+  - Typecheck & lint pass; no new violations introduced (verified).
+- **Next**: Integrate useRelationshipData into RelationshipManager to eliminate its large fetch function and reduce component size; aim to bring component under 300 lines and main function under 30 lines.
+
+## [2025-07-09 14:45] Cycle 49 - Task: Integrate useRelationshipData into RelationshipManager
+
+- **Type**: Refactor (R)
+- **Priority**: HIGH (quality gate reduction)
+- **Duration**: ~30 min
+- **Status**: ✅ Success
+- **Test Delta**: 0
+- **Coverage Delta**: unchanged (~71% Func)
+- **Files Modified**:
+  - src/components/domain/genealogy/members/RelationshipManager.tsx (integration)
+  - src/components/domain/genealogy/members/use-relationship-data.ts (added direction support)
+  - docs/AGENT_METRICS.md (this entry)
+- **Notes**:
+  - Replaced internal state & fetch logic with `useRelationshipData` hook.
+  - Removed token init effect, duplicate interfaces, and `handleAddRelationship` function.
+  - Destructured hook values to preserve existing variable names (isAdding, selectedTargetId, etc.) to minimize JSX changes.
+  - Updated Add button to call `relationshipData.addRelationship()` and clear search term.
+  - Fixed type error: changed `setSelectedTargetId(null)` to `setSelectedTargetId("")` to match hook's string type.
+  - Main component function remains large; further extraction needed to meet quality gate (function ≤30 lines, file <300 lines).
+- **Next**: Continue extracting UI subcomponents from RelationshipManager (e.g., RelationshipTree, RelationshipCard, AddRelationshipDialog) to reduce file size further. 
