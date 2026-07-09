@@ -19,10 +19,7 @@
  */
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2, Link2 } from "lucide-react";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -33,163 +30,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioChips } from "@/components/ui/radio-chips";
-import { createSealRequest } from "@/server/seals/actions";
+
 import {
   type SealTypeConfigRow,
   type MatterOption,
   SEAL_TYPE_CN
 } from "./seal-types";
 import { MatterCombobox } from "./matter-combobox";
+import { PurposeSection, type PurposePreset } from "./purpose-section";
+import { PageOptionsSection } from "./page-options-section";
 import { FileUploadSection } from "./file-upload-section";
-
-const PURPOSE_PRESETS = ["委托合同", "法律意见书", "所函", "证明", "其他"] as const;
-type PurposePreset = typeof PURPOSE_PRESETS[number];
-
-function isPdfFile(file: File) {
-  return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-}
-
-function PurposeOtherInput({
-  purposeOther,
-  setPurposeOther,
-}: {
-  purposeOther: string;
-  setPurposeOther: (v: string) => void;
-}) {
-  return (
-    <div className="space-y-1">
-      <Label>其他事由具体说明 <span className="text-destructive">*</span></Label>
-      <Textarea
-        value={purposeOther}
-        onChange={(e) => setPurposeOther(e.target.value)}
-        placeholder="请说明具体用印事由"
-        rows={2}
-        className="mt-2 text-[12px]"
-      />
-      <p className="text-[11px] text-muted-foreground">
-        当选择「其他」时必须填写
-      </p>
-    </div>
-  );
-}
-
-function PurposeSection({
-  purposePreset,
-  setPurposePreset,
-  purposeOther,
-  setPurposeOther,
-}: {
-  purposePreset: PurposePreset | "";
-  setPurposePreset: (v: PurposePreset | "") => void;
-  purposeOther: string;
-  setPurposeOther: (v: string) => void;
-}) {
-  return (
-    <div className="space-y-3">
-      <div className="space-y-1">
-        <Label>用印事由 <span className="text-destructive">*</span></Label>
-        <RadioChips
-          items={PURPOSE_PRESETS.map((p) => ({ value: p, label: p }))}
-          value={purposePreset || null}
-          onChange={(v) => setPurposePreset(v as PurposePreset)}
-          className="mt-2"
-        />
-      </div>
-      {purposePreset === "其他" && (
-        <PurposeOtherInput purposeOther={purposeOther} setPurposeOther={setPurposeOther} />
-      )}
-    </div>
-  );
-}
-
-function PageOptionsSection({
-  pageCount,
-  setPageCount,
-  copies,
-  setCopies,
-  crossPage,
-  setCrossPage,
-  urgency,
-  setUrgency,
-}: {
-  pageCount: number;
-  setPageCount: (v: number) => void;
-  copies: number;
-  setCopies: (v: number) => void;
-  crossPage: boolean;
-  setCrossPage: (v: boolean) => void;
-  urgency: "NORMAL" | "URGENT";
-  setUrgency: (v: "NORMAL" | "URGENT") => void;
-}) {
-  return (
-    <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <Label className="text-[11px]">页数</Label>
-          <Input
-            type="number"
-            min={1}
-            value={pageCount}
-            onChange={(e) => setPageCount(Math.max(1, parseInt(e.target.value) || 1))}
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label className="text-[11px]">份数</Label>
-          <Input
-            type="number"
-            min={1}
-            value={copies}
-            onChange={(e) => setCopies(Math.max(1, parseInt(e.target.value) || 1))}
-            className="mt-1"
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between md:col-span-2">
-        <label className="flex items-center gap-2 text-[12px]">
-          <Checkbox
-            checked={crossPage}
-            onCheckedChange={(v) => setCrossPage(v === true)}
-          />
-          需要骑缝章
-        </label>
-        <RadioChips
-          size="sm"
-          items={[
-            { value: "NORMAL", label: "普通" },
-            { value: "URGENT", label: "紧急", accent: "#DC2626" }
-          ]}
-          value={urgency}
-          onChange={(v) => setUrgency(v as "NORMAL" | "URGENT")}
-        />
-      </div>
-    </>
-  );
-}
-
-function RequestNoteSection({
-  requestNote,
-  setRequestNote,
-}: {
-  requestNote: string;
-  setRequestNote: (v: string) => void;
-}) {
-  return (
-    <div className="md:col-span-2">
-      <Label className="text-[11px]">备注</Label>
-      <Textarea
-        value={requestNote}
-        onChange={(e) => setRequestNote(e.target.value)}
-        rows={2}
-        className="mt-1 text-[12px]"
-      />
-    </div>
-  );
-}
+import { RequestNoteSection } from "./request-note-section";
+import { useSealRequestForm } from "./use-seal-request-form";
 
 export function SealRequestSheet({
   open,
@@ -208,110 +62,37 @@ export function SealRequestSheet({
     documentTitle?: string;
   } | null;
 }) {
-  const [sealType, setSealType] = useState<string>("");
-  const [matterId, setMatterId] = useState<string>("");
-  const [purposePreset, setPurposePreset] = useState<PurposePreset | "">("");
-  const [purposeOther, setPurposeOther] = useState("");
-  const [documentTitle, setDocumentTitle] = useState("");
-  const [pageCount, setPageCount] = useState(1);
-  const [crossPage, setCrossPage] = useState(false);
-  const [copies, setCopies] = useState(1);
-  const [urgency, setUrgency] = useState<"NORMAL" | "URGENT">("NORMAL");
-  const [requestNote, setRequestNote] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [alsoLegalRep, setAlsoLegalRep] = useState(false);
-  const [pending, startTransition] = useTransition();
-  const router = useRouter();
-
-  // 卷宗联动预填
-  useEffect(() => {
-    if (preset?.matterId) setMatterId(preset.matterId);
-    if (preset?.documentTitle) setDocumentTitle(preset.documentTitle);
-  }, [preset]);
-
-  const reset = () => {
-    setSealType("");
-    setMatterId("");
-    setPurposePreset("");
-    setPurposeOther("");
-    setDocumentTitle("");
-    setPageCount(1);
-    setCrossPage(false);
-    setCopies(1);
-    setUrgency("NORMAL");
-    setRequestNote("");
-    setFile(null);
-    setAlsoLegalRep(false);
-  };
-
-  // 拼出实际入库的 purpose 字符串
-  const resolvedPurpose =
-    purposePreset === "其他"
-      ? purposeOther.trim()
-        ? `其他：${purposeOther.trim()}`
-        : ""
-      : purposePreset;
+  const {
+    sealType,
+    setSealType,
+    matterId,
+    setMatterId,
+    purposePreset,
+    setPurposePreset,
+    purposeOther,
+    setPurposeOther,
+    documentTitle,
+    setDocumentTitle,
+    pageCount,
+    setPageCount,
+    crossPage,
+    setCrossPage,
+    copies,
+    setCopies,
+    urgency,
+    setUrgency,
+    requestNote,
+    setRequestNote,
+    file,
+    setFile,
+    alsoLegalRep,
+    setAlsoLegalRep,
+    pending,
+    submit,
+  } = useSealRequestForm({ configs, matters, preset, onOpenChange });
 
   const enabledConfigs = configs.filter((c) => c.enabled);
   const hasExisting = !!preset?.draftDocId;
-
-  const submit = () => {
-    if (!sealType) {
-      toast.error("请选择章种类");
-      return;
-    }
-    if (!purposePreset) {
-      toast.error("请选择用印事由");
-      return;
-    }
-    if (purposePreset === "其他" && !purposeOther.trim()) {
-      toast.error("请填写「其他」用印事由的具体说明");
-      return;
-    }
-    if (!documentTitle.trim()) {
-      toast.error("请填写文件标题");
-      return;
-    }
-    if (!hasExisting && !file) {
-      toast.error("请上传待盖章稿");
-      return;
-    }
-    if (!hasExisting && file && !isPdfFile(file)) {
-      toast.error("需上传 pdf 格式文件");
-      return;
-    }
-
-    const fd = new FormData();
-    fd.set("sealType", sealType);
-    if (matterId) fd.set("matterId", matterId);
-    fd.set("purpose", resolvedPurpose);
-    fd.set("documentTitle", documentTitle.trim());
-    fd.set("pageCount", String(pageCount));
-    fd.set("requireCrossPageSeal", String(crossPage));
-    fd.set("copies", String(copies));
-    fd.set("urgency", urgency);
-    fd.set("requestNote", requestNote.trim());
-    if (alsoLegalRep && sealType !== "LEGAL_REP_SEAL") {
-      fd.set("alsoLegalRep", "true");
-    }
-    if (hasExisting && preset?.draftDocId) {
-      fd.set("existingDraftDocId", preset.draftDocId);
-    } else if (file) {
-      fd.set("draftDoc", file);
-    }
-
-    startTransition(async () => {
-      try {
-        const res = await createSealRequest(fd);
-        toast.success(`已提交 ${res.code}${alsoLegalRep && sealType !== "LEGAL_REP_SEAL" ? "（含法人章配套申请）" : ""}`);
-        reset();
-        onOpenChange(false);
-        router.refresh();
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "提交失败");
-      }
-    });
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -372,7 +153,6 @@ export function SealRequestSheet({
             <Label className="text-[11px]">关联案件 (可选)</Label>
             <div className="mt-1">
               {preset?.matterId ? (
-                // 从案件详情页发起时，case 已锁定，不展示可切换的下拉
                 <div className="flex h-9 items-center gap-2 rounded-md border border-border bg-muted/40 px-2.5 text-[12px]">
                   <span className="text-[10px] text-muted-foreground">已关联</span>
                   <span className="truncate">
@@ -429,17 +209,18 @@ export function SealRequestSheet({
             onFileChange={setFile}
             hasExisting={hasExisting}
           />
-        </div>
 
-        <DialogFooter className="mt-6">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
-          </Button>
-          <Button onClick={submit} disabled={pending}>
-            {pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
-            提交申请
-          </Button>
-        </DialogFooter>
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              取消
+            </Button>
+            <Button onClick={submit} disabled={pending}>
+              {/* Submit handled by hook; we need to trigger submit from hook */}
+              {pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
+              提交申请
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
