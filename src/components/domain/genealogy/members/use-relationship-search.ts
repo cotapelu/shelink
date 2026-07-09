@@ -15,44 +15,23 @@ export function useRelationshipSearch({ personId, isAdding }: UseRelationshipSea
   const [searchResults, setSearchResults] = useState<Person[]>([]);
   const [recentMembers, setRecentMembers] = useState<Person[]>([]);
 
-  // Search for people
   useEffect(() => {
-    const searchPeople = async () => {
-      if (searchTerm.length < 2) {
-        setSearchResults([]);
-        return;
-      }
-
-      const result = await api.get<Person[]>(API_ENDPOINTS.PERSONS_LIST, {
-        params: { search: searchTerm, exclude_id: personId, limit: 5 },
-      });
-
+    if (searchTerm.length < 2) { setSearchResults([]); return; }
+    const timeout = setTimeout(async () => {
+      const result = await api.get<Person[]>(API_ENDPOINTS.PERSONS_LIST, { params: { search: searchTerm, exclude_id: personId, limit: 5 } });
       if (result.data) setSearchResults(result.data);
-    };
-
-    const timeoutId = setTimeout(searchPeople, 300);
-    return () => clearTimeout(timeoutId);
+    }, 300);
+    return () => clearTimeout(timeout);
   }, [searchTerm, personId]);
 
-  // Fetch recent members when opening Add form
   useEffect(() => {
     if (isAdding && recentMembers.length === 0) {
-      const fetchRecent = async () => {
-        const result = await api.get<Person[]>(API_ENDPOINTS.PERSONS_LIST, {
-          params: { exclude_id: personId, order: "created_at.desc", limit: 10 },
-        });
+      (async () => {
+        const result = await api.get<Person[]>(API_ENDPOINTS.PERSONS_LIST, { params: { exclude_id: personId, order: "created_at.desc", limit: 10 } });
         if (result.data) setRecentMembers(result.data);
-      };
-      fetchRecent();
+      })();
     }
   }, [isAdding, personId, recentMembers.length]);
 
-  return {
-    searchTerm,
-    setSearchTerm,
-    searchResults,
-    setSearchResults,
-    recentMembers,
-    setRecentMembers,
-  };
+  return { searchTerm, setSearchTerm, searchResults, setSearchResults, recentMembers, setRecentMembers };
 }
