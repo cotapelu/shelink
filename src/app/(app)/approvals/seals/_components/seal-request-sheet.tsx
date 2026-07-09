@@ -21,7 +21,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, Loader2, Paperclip, Link2 } from "lucide-react";
+import { Loader2, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -35,7 +35,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-
 import { RadioChips } from "@/components/ui/radio-chips";
 import { createSealRequest } from "@/server/seals/actions";
 import {
@@ -44,6 +43,7 @@ import {
   SEAL_TYPE_CN
 } from "./seal-types";
 import { MatterCombobox } from "./matter-combobox";
+import { FileUploadSection } from "./file-upload-section";
 
 const PURPOSE_PRESETS = ["委托合同", "法律意见书", "所函", "证明", "其他"] as const;
 type PurposePreset = typeof PURPOSE_PRESETS[number];
@@ -168,6 +168,26 @@ function PageOptionsSection({
         />
       </div>
     </>
+  );
+}
+
+function RequestNoteSection({
+  requestNote,
+  setRequestNote,
+}: {
+  requestNote: string;
+  setRequestNote: (v: string) => void;
+}) {
+  return (
+    <div className="md:col-span-2">
+      <Label className="text-[11px]">备注</Label>
+      <Textarea
+        value={requestNote}
+        onChange={(e) => setRequestNote(e.target.value)}
+        rows={2}
+        className="mt-1 text-[12px]"
+      />
+    </div>
   );
 }
 
@@ -399,49 +419,16 @@ export function SealRequestSheet({
             setUrgency={setUrgency}
           />
 
-          <div className="md:col-span-2">
-            <Label className="text-[11px]">备注</Label>
-            <Textarea
-              value={requestNote}
-              onChange={(e) => setRequestNote(e.target.value)}
-              rows={2}
-              className="mt-1 text-[12px]"
-            />
-          </div>
+          <RequestNoteSection
+            requestNote={requestNote}
+            setRequestNote={setRequestNote}
+          />
 
-          {!hasExisting && (
-            <div className="md:col-span-2">
-              <Label className="text-[11px]">待盖章稿 *</Label>
-              <div className="mt-1">
-                <label className="flex cursor-pointer items-center gap-2 rounded border border-dashed border-border px-3 py-3 text-[12px] text-muted-foreground hover:bg-muted/30">
-                  <Paperclip className="h-3.5 w-3.5" />
-                  {file ? (
-                    <span className="flex items-center gap-1 text-foreground">
-                      <FileText className="h-3 w-3" />
-                      {file.name}
-                    </span>
-                  ) : (
-                    "选择 PDF 文件"
-                  )}
-                  <input
-                    type="file"
-                    accept="application/pdf,.pdf"
-                    className="hidden"
-                    onChange={(e) => {
-                      const picked = e.target.files?.[0] ?? null;
-                      if (picked && !isPdfFile(picked)) {
-                        toast.error("需上传 pdf 格式文件");
-                        e.target.value = "";
-                        setFile(null);
-                        return;
-                      }
-                      setFile(picked);
-                    }}
-                  />
-                </label>
-              </div>
-            </div>
-          )}
+          <FileUploadSection
+            file={file}
+            onFileChange={setFile}
+            hasExisting={hasExisting}
+          />
         </div>
 
         <DialogFooter className="mt-6">
