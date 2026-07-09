@@ -3,37 +3,27 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Size Compliance Sprint",
+      "name": "Size Compliance Sprint 2",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Refactor AddRelationshipForm to split into smaller subcomponents (FormFields, FormButtons, etc.) to achieve ≤30 lines",
+          "content": "Compress AddButtons to ≤30 lines (remove blank lines, combine declarations)",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Check BulkAddChildrenForm and QuickAddSpouseForm for size violations and split if needed",
+          "content": "Compress ErrorDisplay to ≤30 lines",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Verify RelationshipSection and RelationshipCard comply with size limits",
-          "status": "pending"
-        },
-        {
-          "id": "task-4",
-          "content": "Run final lint on genealogy/members directory; ensure no new violations",
-          "status": "pending"
-        },
-        {
-          "id": "task-5",
-          "content": "Update AGENT_METRICS.md and AGENT_PROFILE.md with final status",
+          "content": "Split QuickAddSpouseForm into smaller components or compress to ≤30 lines",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 6,
+  "nextTaskId": 4,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-09T07:05:42.564Z"
+  "updatedAt": "2026-07-09T07:30:35.479Z"
 }

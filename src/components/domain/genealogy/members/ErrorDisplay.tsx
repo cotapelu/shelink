@@ -1,13 +1,5 @@
 "use client";
-
-interface ErrorDisplayProps {
-  error: string | null;
-  onClose: () => void;
-  isAdding: boolean;
-  isAddingBulk: boolean;
-  isAddingSpouse: boolean;
-}
-
+interface ErrorDisplayProps { error: string | null; onClose: () => void; isAdding: boolean; isAddingBulk: boolean; isAddingSpouse: boolean; }
 export default function ErrorDisplay({ error, onClose, isAdding, isAddingBulk, isAddingSpouse }: ErrorDisplayProps) {
   if (!error || isAdding || isAddingBulk || isAddingSpouse) return null;
   return (

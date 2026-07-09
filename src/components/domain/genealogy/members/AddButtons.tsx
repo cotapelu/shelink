@@ -1,16 +1,5 @@
 "use client";
-
-interface AddButtonsProps {
-  onAdd: () => void;
-  onBulkAdd: () => void;
-  onQuickAddSpouse: () => void;
-  canEdit: boolean;
-  isAdding: boolean;
-  isAddingBulk: boolean;
-  isAddingSpouse: boolean;
-  editingId: string | null;
-}
-
+interface AddButtonsProps { onAdd: () => void; onBulkAdd: () => void; onQuickAddSpouse: () => void; canEdit: boolean; isAdding: boolean; isAddingBulk: boolean; isAddingSpouse: boolean; editingId: string | null; }
 export default function AddButtons({ onAdd, onBulkAdd, onQuickAddSpouse, canEdit, isAdding, isAddingBulk, isAddingSpouse, editingId }: AddButtonsProps) {
   if (!canEdit || isAdding || isAddingBulk || isAddingSpouse || editingId) return null;
   return (
