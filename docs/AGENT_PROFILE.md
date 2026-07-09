@@ -26,6 +26,7 @@ Modules với failure rate >5% hoặc repeated issues:
 | src/proxy.ts | Rate limit exemptions create DoS vector | CRITICAL | 2025-07-03 (audit) | Remove exemptions, apply rate limiting to all `/api/*` |
 | src/app/api/documents/[id]/download/route.ts | File download token validation? | TBD | 2025-07-03 (audit) | Ensure download links have short-lived signed tokens |
 | src/lib/storage/file-validator.ts | MIME type validation bypass risk | MEDIUM | 2025-07-03 (audit) | Validate magic bytes, enforce whitelist, scan for viruses |
+| src/app/(app)/approvals/seals/_components/seal-request-sheet.tsx | File >300 lines (317), main function 317 lines, high complexity | TBD | 2025-07-09 (refactor) | Continue extracting sub-components (PurposeSection done, next: PageCountSection, DocumentSection, FileUploadSection, ActionButtons). Aim <300 lines file, each function ≤30 lines. |
 
 **Remediation Actions** (from Audit 2025-07-03):
 - [x] Audit permission checks (sample 10 modules) - consistent

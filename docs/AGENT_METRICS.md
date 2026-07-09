@@ -3590,3 +3590,29 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - **Performance**: N/A
 - **Security**: N/A
 - **Notes**: Split gedcom.ts (414 lines) into gedcom/types.ts, format.ts, parser.ts, index.ts. Main gedcom.ts now thin re-export. All subfiles lint-clean, functions within limits (max-statements fixed by extracting helpers). Typecheck & build pass. Public API preserved.
+
+## [2026-07-08 20:20] Cycle 42 - Task: Modularize kinshipHelpers
+- **Type**: Refactor (Split module)
+- **Priority**: HIGH (Quality gate: file size 538→~15 for main)
+- **Duration**: 25 minutes
+- **Status**: ✅ Success
+- **Test Delta**: 0
+- **Coverage Delta**: unchanged
+- **Performance**: N/A
+- **Security**: N/A
+- **Notes**: Created utils/kinship/{types,compute,index}. Main kinshipHelpers.ts now thin re-export. compute.ts contains algorithm (Kinship) and still has function size violations (computeKinship >30 lines). These will be addressed in subsequent cycles. Typecheck & build pass.
+
+## [2025-07-09 10:45] Cycle 43 - Task: Extract PurposeSection from SealRequestSheet
+- **Type**: Refactor (R) - Component Extraction
+- **Priority**: HIGH (Quality Gate: function size)
+- **Duration**: ~15 minutes
+- **Status**: ✅ Success
+- **Test Delta**: 0 (no new tests)
+- **Coverage Delta**: unchanged (~70.9% Func)
+- **Performance**: N/A
+- **Security**: N/A
+- **Files Modified**:
+  - src/app/(app)/approvals/seals/_components/seal-request-sheet.tsx (modified)
+  - Created PurposeSection and PurposeOtherInput components
+- **Notes**: Reduced SealRequestSheet from 327→317 lines; extracted purpose selection to separate component; all new functions ≤30 lines; lint clean; typecheck & build pass. Next: continue extracting page count/section to further reduce.
+

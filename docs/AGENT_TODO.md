@@ -1,6 +1,6 @@
 # Agent-Specific TODO List
 
-Last updated: 2025-07-07
+Last updated: 2025-07-09
 
 ## Completed Cycles (Recent)
 - ✅ Cycles 0-75: Quality gate restoration, coverage push, refactor batches 1-3
@@ -9,6 +9,7 @@ Last updated: 2025-07-07
 - ✅ Lint: 120 → 0 warnings
 - ✅ Tests: 1365+ passing; Coverage: Stmt 98%, Branch 94%, Func 70%
 - ✅ Typecheck, build all green
+- ✅ Refactor: Extracted PurposeSection from seal-request-sheet (327→317 lines)
 
 ## Active Tasks (Next 2 Weeks)
 
@@ -18,6 +19,9 @@ Last updated: 2025-07-07
   - [ ] `procedure-content.tsx` (1357 lines): split into procedure-form, procedure-info, procedure-documents
   - [ ] `export-xlsx.ts` (1058 lines): modularize export logic by domain
   - [ ] `finance-forms.tsx` (747 lines): separate fee entry, invoice creation
+  - [ ] `seal-request-sheet.tsx` (currently 317 lines): continue extracting PageCountSection, DocumentSection, FileUploadSection, ActionButtons; target <300 lines file
+  - [ ] `client-sheet.tsx` (604 lines), `seals-view.tsx` (376 lines), `conflicts-view.tsx` (226 lines)
+- [ ] **Coverage Push**: Function coverage target ≥80% (currently 70%)
 - [ ] **Reduce Lint Warnings**: Address remaining ~117 warnings (unused vars, img元素, incompatible-library) where appropriate
 - [ ] **Observability Integration**: Wrap more server actions (archive, ai, clients) with `withMetrics` to activate recorded metrics
 - [ ] **Enable Branch Protection**: Configure GitHub Actions to require `quality.yml` on main/develop branches

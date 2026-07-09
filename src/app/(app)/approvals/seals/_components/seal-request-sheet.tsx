@@ -52,6 +52,59 @@ function isPdfFile(file: File) {
   return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 }
 
+function PurposeOtherInput({
+  purposeOther,
+  setPurposeOther,
+}: {
+  purposeOther: string;
+  setPurposeOther: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-1">
+      <Label>其他事由具体说明 <span className="text-destructive">*</span></Label>
+      <Textarea
+        value={purposeOther}
+        onChange={(e) => setPurposeOther(e.target.value)}
+        placeholder="请说明具体用印事由"
+        rows={2}
+        className="mt-2 text-[12px]"
+      />
+      <p className="text-[11px] text-muted-foreground">
+        当选择「其他」时必须填写
+      </p>
+    </div>
+  );
+}
+
+function PurposeSection({
+  purposePreset,
+  setPurposePreset,
+  purposeOther,
+  setPurposeOther,
+}: {
+  purposePreset: PurposePreset | "";
+  setPurposePreset: (v: PurposePreset | "") => void;
+  purposeOther: string;
+  setPurposeOther: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1">
+        <Label>用印事由 <span className="text-destructive">*</span></Label>
+        <RadioChips
+          items={PURPOSE_PRESETS.map((p) => ({ value: p, label: p }))}
+          value={purposePreset || null}
+          onChange={(v) => setPurposePreset(v as PurposePreset)}
+          className="mt-2"
+        />
+      </div>
+      {purposePreset === "其他" && (
+        <PurposeOtherInput purposeOther={purposeOther} setPurposeOther={setPurposeOther} />
+      )}
+    </div>
+  );
+}
+
 export function SealRequestSheet({
   open,
   onOpenChange,
@@ -252,22 +305,12 @@ export function SealRequestSheet({
           </div>
 
           <div className="md:col-span-2">
-            <Label className="text-[11px]">用印事由 *</Label>
-            <RadioChips
-              className="mt-2"
-              items={PURPOSE_PRESETS.map((p) => ({ value: p, label: p }))}
-              value={purposePreset || null}
-              onChange={(v) => setPurposePreset(v as PurposePreset)}
+            <PurposeSection
+              purposePreset={purposePreset}
+              setPurposePreset={setPurposePreset}
+              purposeOther={purposeOther}
+              setPurposeOther={setPurposeOther}
             />
-            {purposePreset === "其他" && (
-              <Textarea
-                value={purposeOther}
-                onChange={(e) => setPurposeOther(e.target.value)}
-                placeholder="请说明具体事由"
-                rows={2}
-                className="mt-2 text-[12px]"
-              />
-            )}
           </div>
 
           <div className="md:col-span-2">
