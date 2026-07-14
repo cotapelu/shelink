@@ -17,7 +17,7 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
-import { Solar } from "lunar-javascript";
+import { Solar, Lunar } from "lunar-javascript";
 
 /**
  * Formats a date (year, month, day) into a display string "dd/mm/yyyy".
@@ -42,6 +42,15 @@ export function formatDisplayDate(
   return parts.join("/");
 }
 
+function formatLunar(lunar: Lunar): string {
+  const lDay = lunar.getDay().toString().padStart(2, "0");
+  const lMonthRaw = lunar.getMonth();
+  const isLeap = lMonthRaw < 0;
+  const lMonth = Math.abs(lMonthRaw).toString().padStart(2, "0");
+  const lYear = lunar.getYear();
+  return `${lDay}/${lMonth}${isLeap ? " nhuận" : ""}/${lYear}`;
+}
+
 /**
  * Converts a solar date to a Vietnamese lunar date string.
  * @param year - Solar year (e.g., 2024)
@@ -57,20 +66,9 @@ export function getLunarDateString(
   if (!year || !month || !day) return null;
 
   try {
-    const solar = Solar.fromYmd(
-      year,
-      parseInt(month.toString()),
-      parseInt(day.toString()),
-    );
+    const solar = Solar.fromYmd(year, month, day);
     const lunar = solar.getLunar();
-
-    const lDay = lunar.getDay().toString().padStart(2, "0");
-    const lMonthRaw = lunar.getMonth();
-    const isLeap = lMonthRaw < 0;
-    const lMonth = Math.abs(lMonthRaw).toString().padStart(2, "0");
-    const lYear = lunar.getYear();
-
-    return `${lDay}/${lMonth}${isLeap ? " nhuận" : ""}/${lYear}`;
+    return formatLunar(lunar);
   } catch (error) {
     console.error("Lunar conversion error:", error);
     return null;
@@ -96,25 +94,26 @@ export function calculateAge(
   return { age: new Date().getFullYear() - birthYear, isDeceased: false };
 }
 
+const ZODIAC_THRESHOLDS: Record<number, { day: number; sign1: string; sign2: string }> = {
+  1: { day: 20, sign1: "Ma Kết", sign2: "Bảo Bình" },
+  2: { day: 19, sign1: "Bảo Bình", sign2: "Song Ngư" },
+  3: { day: 21, sign1: "Song Ngư", sign2: "Bạch Dương" },
+  4: { day: 20, sign1: "Bạch Dương", sign2: "Kim Ngưu" },
+  5: { day: 21, sign1: "Kim Ngưu", sign2: "Song Tử" },
+  6: { day: 22, sign1: "Song Tử", sign2: "Cự Giải" },
+  7: { day: 23, sign1: "Cự Giải", sign2: "Sư Tử" },
+  8: { day: 23, sign1: "Sư Tử", sign2: "Xử Nữ" },
+  9: { day: 23, sign1: "Xử Nữ", sign2: "Thiên Bình" },
+  10: { day: 24, sign1: "Thiên Bình", sign2: "Thiên Yết" },
+  11: { day: 22, sign1: "Thiên Yết", sign2: "Nhân Mã" },
+  12: { day: 22, sign1: "Nhân Mã", sign2: "Ma Kết" },
+};
+
 export function getZodiacSign(day: number | null, month: number | null): string | null {
   if (!day || !month) return null;
-  const d = day;
-  const m = month;
-
-  if ((m === 3 && d >= 21) || (m === 4 && d <= 19)) return "Bạch Dương";
-  if ((m === 4 && d >= 20) || (m === 5 && d <= 20)) return "Kim Ngưu";
-  if ((m === 5 && d >= 21) || (m === 6 && d <= 21)) return "Song Tử";
-  if ((m === 6 && d >= 22) || (m === 7 && d <= 22)) return "Cự Giải";
-  if ((m === 7 && d >= 23) || (m === 8 && d <= 22)) return "Sư Tử";
-  if ((m === 8 && d >= 23) || (m === 9 && d <= 22)) return "Xử Nữ";
-  if ((m === 9 && d >= 23) || (m === 10 && d <= 23)) return "Thiên Bình";
-  if ((m === 10 && d >= 24) || (m === 11 && d <= 21)) return "Thiên Yết";
-  if ((m === 11 && d >= 22) || (m === 12 && d <= 21)) return "Nhân Mã";
-  if ((m === 12 && d >= 22) || (m === 1 && d <= 19)) return "Ma Kết";
-  if ((m === 1 && d >= 20) || (m === 2 && d <= 18)) return "Bảo Bình";
-  if ((m === 2 && d >= 19) || (m === 3 && d <= 20)) return "Song Ngư";
-
-  return null;
+  const threshold = ZODIAC_THRESHOLDS[month];
+  if (!threshold) return null;
+  return day < threshold.day ? threshold.sign1 : threshold.sign2;
 }
 
 export function getZodiacAnimal(year: number | null, month: number | null = null, day: number | null = null): string | null {

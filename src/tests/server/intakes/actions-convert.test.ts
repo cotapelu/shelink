@@ -17,6 +17,7 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
+/* eslint-disable max-lines-per-function, max-lines, max-statements, complexity */
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
 vi.mock("@/lib/auth/session");

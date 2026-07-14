@@ -20,6 +20,15 @@ const eslintConfig = defineConfig([
       "complexity": ["error", 10]
     }
   },
+  {
+    files: ["**/*.test.ts", "**/*.test.tsx"],
+    rules: {
+      "max-lines-per-function": "off",
+      "max-lines": "off",
+      "max-statements": "off",
+      "complexity": "off"
+    }
+  },
   globalIgnores([
     ".next/**",
     ".next-dev/**",

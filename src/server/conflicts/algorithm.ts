@@ -71,9 +71,9 @@ const matterInfoSelect = {
   owner: { select: { name: true } }
 } as const;
 
-type SelectedMatterInfo = Prisma.MatterGetPayload<{ select: typeof matterInfoSelect }>;
+export type SelectedMatterInfo = Prisma.MatterGetPayload<{ select: typeof matterInfoSelect }>;
 
-function toMatterInfo(
+export function toMatterInfo(
   matter: SelectedMatterInfo,
   partyRole: PartyRole,
   partyStanding: LitigationStanding | null
