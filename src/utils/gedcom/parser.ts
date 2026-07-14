@@ -61,24 +61,20 @@ type ParseRecord = {
 };
 
 function splitIntoRecords(gedcom: string): ParseRecord[] {
-  const lines = gedcom.split(/\r?\n/).filter((line) => line.trim().length > 0);
+  const lines = gedcom.split(/\r?\n/).filter(l => l.trim());
   const records: ParseRecord[] = [];
-  let currentRecord: ParseRecord | null = null;
+  let cur: ParseRecord | null = null;
 
   for (const line of lines) {
     if (line.startsWith("0 ")) {
-      if (currentRecord) records.push(currentRecord);
-      const match = line.match(/^0\s+@([^@]+)@\s+(INDI|FAM)/);
-      if (match) {
-        currentRecord = { id: match[1], type: match[2] as "INDI" | "FAM", lines: [] };
-      } else {
-        currentRecord = null;
-      }
-    } else if (currentRecord) {
-      currentRecord.lines.push(line.trim());
+      if (cur) records.push(cur);
+      const m = line.match(/^0\s+@([^@]+)@\s+(INDI|FAM)/);
+      cur = m ? { id: m[1], type: m[2] as "INDI" | "FAM", lines: [] } : null;
+    } else if (cur) {
+      cur.lines.push(line.trim());
     }
   }
-  if (currentRecord) records.push(currentRecord);
+  if (cur) records.push(cur);
   return records;
 }
 
@@ -202,24 +198,19 @@ function parseFamilyRecord(record: ParseRecord, idMap: Map<string, string>): { m
   return { marriage, children: createChildRelationships(husb || wife, children) };
 }
 
-export function parseGedcom(gedcom: string): {
-  persons: GedcomPerson[];
-  relationships: GedcomRelationship[];
-} {
+export function parseGedcom(gedcom: string): { persons: GedcomPerson[]; relationships: GedcomRelationship[] } {
   const records = splitIntoRecords(gedcom);
   const persons: GedcomPerson[] = [];
   const relationships: GedcomRelationship[] = [];
   const idMap = new Map<string, string>();
 
-  for (const record of records.filter(r => r.type === "INDI")) {
-    persons.push(parsePersonRecord(record, idMap));
+  for (const r of records) {
+    if (r.type === "INDI") persons.push(parsePersonRecord(r, idMap));
+    else if (r.type === "FAM") {
+      const { marriage, children } = parseFamilyRecord(r, idMap);
+      if (marriage) relationships.push(marriage);
+      relationships.push(...children);
+    }
   }
-
-  for (const record of records.filter(r => r.type === "FAM")) {
-    const { marriage, children } = parseFamilyRecord(record, idMap);
-    if (marriage) relationships.push(marriage);
-    relationships.push(...children);
-  }
-
   return { persons, relationships };
 }
