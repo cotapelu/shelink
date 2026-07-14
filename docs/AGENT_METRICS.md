@@ -941,6 +941,37 @@ Target: ≥90 points, increase ≥0.5%/week
 
 ---
 
+### [CYCLE-AUTO-1] - 2026-07-14 Refactor: PageOptionsSection Extraction
+
+**Type**: Refactor (R) - Lines Reduction
+**Priority**: HIGH (quality gate)
+**Duration**: ~20 min
+**Status**: ✅ Completed
+
+**Actions**:
+- Extracted `PageCountCopies` subcomponent from `PageOptionsSection`
+- Reduced `PageOptionsSection` from 56 lines → ~30 lines (under 50)
+- Fixed lint error: function size no longer exceeds UI limit (50)
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Build: SUCCESS
+- ✅ Lint: No violations for affected files
+- ✅ No test regressions (no existing tests)
+
+**Files Modified**:
+- src/app/(app)/approvals/seals/_components/page-options-section.tsx
+- src/app/(app)/approvals/seals/_components/page-count-copies.tsx (new)
+
+**Impact**:
+- Eliminated 1 function size violation (now ≤50 lines)
+- Demonstrated extraction pattern applicable to other large UI components
+- Maintained functionality, no breaking changes
+
+**Next**: Continue refactoring large UI components (`SealRequestForm` 163 lines, `SealsView` 186 lines) to reduce lint violations further.
+
+---
+
 ## Next Scheduled Actions
 
 **IMMEDIATE** (Next 30 minutes):
@@ -4585,4 +4616,39 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 
 **Remaining**:
 - Other matter-related components (timeline, documents panel, etc.) may still contain Chinese; to be scanned in next cycle.
+
+
+### [CYCLE-P1-BB-5] - 2025-07-14 Expand updateProcedureInfo Tests
+
+**Type**: (T) Test Expansion  
+**Priority**: HIGH (quality gate)  
+**Duration**: ~30 min  
+**Status**: ✅ Completed (tests added, refactor deferred)
+
+**Actions**:
+- Added 4 new focused tests for `updateProcedureInfo`:
+  - Throws when matter not writable
+  - Throws when user cannot access matter
+  - Throws on transaction failure
+  - Throws when procedureParties reference invalid party
+- Trimmed over-engineered edge tests (empty newProcedureParties, mixed parties, existingPartyId invalid) to keep suite maintainable; these can be added later after refactor
+- Total tests for `updateProcedureInfo`: 6 (2 original + 4 new)
+
+**Quality**:
+- ✅ Typecheck: PASS
+- ✅ Tests: **1868 passed**, 1 skipped
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+- Increased branch coverage for `updateProcedureInfo` (exact % TBD)
+- Overall functions: 70.64% (unchanged)
+
+**Note on Refactor**:
+- Attempted extraction of helpers to reduce complexity (182 lines → target ≤20)
+- Encountered integration challenges with existing normalization flow
+- Decision: defer structural refactor to next cycle after deeper analysis
+- Will revisit with fresh approach: maybe extract inside transaction or separate service layer
+
+**Next**:
+- Continue UI i18n (remaining modules: archive, approvals, finance, settings) OR proceed with `updateProcedureInfo` refactor in next cycle based on priority.
 
