@@ -330,7 +330,7 @@ describe("IntakeSheet", () => {
   describe("Submission", () => {
     it("renders submit button in footer", () => {
       render(<IntakeSheet {...defaultProps} />);
-      expect(screen.getByRole("button", { name: /新建收案|保存|提交/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Gửi xét duyệt/i })).toBeInTheDocument();
     });
   });
 
@@ -345,20 +345,20 @@ describe("IntakeSheet", () => {
 
     it("renders key fields", () => {
       render(<IntakeSheet {...defaultProps} />);
-      expect(screen.getByText("Tên vụ án")).toBeInTheDocument();
-      expect(screen.getByText("Nguyên nhân vụ án")).toBeInTheDocument();
-      expect(screen.getByText("Giá trị yêu cầu (VNĐ)")).toBeInTheDocument();
-      expect(screen.getByText("Luật sư phụ trách")).toBeInTheDocument();
+      expect(screen.getByText(/Tên vụ án/)).toBeInTheDocument();
+      expect(screen.getByText(/Nguyên nhân vụ án/)).toBeInTheDocument();
+      expect(screen.getByText(/Giá trị yêu cầu \(VNĐ\)/)).toBeInTheDocument();
+      expect(screen.getByText(/Luật sư phụ trách/)).toBeInTheDocument();
     });
 
     it("renders footer submit button with correct text", () => {
       render(<IntakeSheet {...defaultProps} />);
-      expect(screen.getByRole("button", { name: /提交审批/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Gửi xét duyệt/i })).toBeInTheDocument();
     });
 
     it("renders cancel button", () => {
       render(<IntakeSheet {...defaultProps} />);
-      expect(screen.getByRole("button", { name: /取消/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Hủy/i })).toBeInTheDocument();
     });
   });
 

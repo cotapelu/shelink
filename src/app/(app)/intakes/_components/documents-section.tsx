@@ -55,7 +55,7 @@ export function DocumentsSection({
             IV
           </span>
           <span className="text-base font-semibold tracking-tight">
-            委托合同 / 相关附件
+            Hợp đồng ủy quyền / Tài liệu liên quan
             <span className="ml-1 text-destructive">*</span>
           </span>
         </h3>
@@ -75,7 +75,7 @@ export function DocumentsSection({
             className="h-7 gap-1"
           >
             <Paperclip className="h-3 w-3" />
-            添加
+            Thêm
           </Button>
         </>
       </div>

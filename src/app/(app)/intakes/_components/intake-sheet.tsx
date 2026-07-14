@@ -274,7 +274,7 @@ export function IntakeSheet({
   // v0.31: 案件类别决定表单结构（诉讼/仲裁 vs 非诉/专项 vs 顾问）
   const kind: CategoryKind = matterCategoryKind(category);
   const nameLabel =
-    kind === "counsel" ? "顾问事项名称" : kind === "project" ? "项目名称" : "案件名称";
+    kind === "counsel" ? "Tên vấn đề tư vấn" : kind === "project" ? "Tên dự án" : "Tên vụ án";
 
 
 
@@ -771,10 +771,10 @@ export function IntakeSheet({
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-hidden">
           <div className="flex-1 space-y-4 overflow-y-auto bg-muted/35 px-6 py-5">
             {/* ① 基本信息（共用：类别 / 名称 / 收案 / 经办）*/}
-            <Section title="① 基本信息" required>
+            <Section title="Thông tin cơ bản" required>
               {/* 案件类别 | 收案时间（与类别等宽）| 案件名称（剩余）*/}
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-[160px_160px_minmax(0,1fr)]">
-                <Field label="案件类别" required>
+                <Field label="Loại vụ án" required>
                   <Select
                     value={category}
                     onValueChange={(v) => setValue("category", v as MatterCategory)}
@@ -791,7 +791,7 @@ export function IntakeSheet({
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field label="收案时间">
+                <Field label="Thời gian nhận vụ án">
                   <div className="relative">
                     <Input
                       type="date"
@@ -829,7 +829,7 @@ export function IntakeSheet({
                 <>
                 {/* 案由 | 当前程序 | 管辖地 | 争议解决机构 */}
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
-                  <Field label="案由" required>
+                  <Field label="Nguyên nhân vụ án" required>
                     <CauseCombobox
                       category={category}
                       value={watchedCauseId || ""}
@@ -1065,7 +1065,7 @@ export function IntakeSheet({
             {/* ③ 当事人 / 相关方（按类别）*/}
             {kind === "litigation" && (
             <Section
-              title="② 案件当事人"
+              title="Bên liên quan vụ án"
               required
               headerAction={addPartyBtn("添加当事人")}
             >
@@ -1129,7 +1129,7 @@ export function IntakeSheet({
             )}
 
             {/* 3. 律师费 */}
-            <Section title={kind === "counsel" ? "③ 顾问费" : "③ 律师费"}>
+            <Section title={kind === "counsel" ? "Phí tư vấn" : "Phí luật sư"}>
               <FeeSection
                 kind={kind}
                 feeType={feeType}
@@ -1155,11 +1155,11 @@ export function IntakeSheet({
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              取消
+              Hủy
             </Button>
             <Button type="submit" disabled={isPending} className="gap-1.5 px-5">
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              提交审批
+              Gửi xét duyệt
             </Button>
           </DialogFooter>
         </form>
