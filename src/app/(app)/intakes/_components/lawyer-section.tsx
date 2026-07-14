@@ -29,13 +29,13 @@ export function LawyerSection({
   return (
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
       {/* 主办律师 */}
-      <Field label="主办律师" required>
+      <Field label="Luật sư phụ trách" required>
         <Select
           value={ownerUserId || ""}
           onValueChange={(v) => setValue("ownerUserId", v, { shouldDirty: true })}
         >
           <SelectTrigger className="h-10 bg-background">
-            <SelectValue placeholder="选择主办律师" />
+            <SelectValue placeholder="Chọn luật sư phụ trách" />
           </SelectTrigger>
           <SelectContent>
             {colleagues
@@ -50,14 +50,14 @@ export function LawyerSection({
       </Field>
 
       {/* 协办人员 */}
-      <Field label="协办人员（可多选）">
+      <Field label="Nhân sự hỗ trợ (có thể chọn nhiều)">
         <Select
           multiple
           value={coUserIds as any}
           onValueChange={(values) => setValue("coUserIds", values, { shouldDirty: true })}
         >
           <SelectTrigger className="h-10 bg-background">
-            <SelectValue placeholder="选择协办人员" />
+            <SelectValue placeholder="Chọn nhân sự hỗ trợ" />
           </SelectTrigger>
           <SelectContent>
             {colleagues
@@ -71,14 +71,14 @@ export function LawyerSection({
         </Select>
       </Field>
 
-      {/* 是否需向律协备案 */}
-      <Field label="是否需向律协备案">
+      {/* Cần备案 cho hiệp hội luật sư? */}
+      <Field label="Cần备案 cho hiệp hội luật sư không?">
         <Select
           value={barFiling ?? ""}
           onValueChange={(v) => setValue("barFiling", v, { shouldDirty: true })}
         >
           <SelectTrigger className="h-10 bg-background">
-            <SelectValue placeholder="选择" />
+            <SelectValue placeholder="Chọn" />
           </SelectTrigger>
           <SelectContent>
             {/* TODO: BAR_FILING_OPTIONS */}
@@ -86,18 +86,18 @@ export function LawyerSection({
         </Select>
       </Field>
 
-      {/* 是否反诉 */}
-      <Field label="是否反诉">
+      {/* Có phản tố? */}
+      <Field label="Có phản tố không?">
         <Select
           value={counterclaim ? "yes" : "no"}
           onValueChange={(v) => setValue("counterclaim", v === "yes", { shouldDirty: true })}
         >
           <SelectTrigger className="h-10 bg-background">
-            <SelectValue placeholder="选择" />
+            <SelectValue placeholder="Chọn" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="no">否</SelectItem>
-            <SelectItem value="yes">是</SelectItem>
+            <SelectItem value="no">Không</SelectItem>
+            <SelectItem value="yes">Có</SelectItem>
           </SelectContent>
         </Select>
       </Field>

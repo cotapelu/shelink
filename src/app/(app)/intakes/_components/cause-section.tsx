@@ -21,7 +21,7 @@ interface CauseSectionProps {
 
 export function CauseSection({ category, causeId, setValue, errors }: CauseSectionProps) {
   return (
-    <Field label="案由" required error={errors.causeId?.message}>
+    <Field label="Nguyên nhân vụ án" required error={errors.causeId?.message}>
       <div className="flex gap-2">
         <div className="flex-1">
           <CauseCombobox
@@ -40,7 +40,7 @@ export function CauseSection({ category, causeId, setValue, errors }: CauseSecti
           className="gap-1.5"
         >
           <Sparkles className="h-4 w-4" />
-          AI推荐
+          Gợi ý AI
         </Button>
         <Button
           type="button"
@@ -50,7 +50,7 @@ export function CauseSection({ category, causeId, setValue, errors }: CauseSecti
           className="gap-1.5"
         >
           <ScanLine className="h-4 w-4" />
-          手动选择
+          Chọn thủ công
         </Button>
       </div>
     </Field>

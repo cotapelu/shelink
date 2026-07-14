@@ -4363,3 +4363,45 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - [ ] Refactor `updateProcedureInfo` (182 lines, complexity 15) - extract validation and transaction helpers
 - [ ] Continue function coverage push toward ≥75% then 80%
 
+
+### [CYCLE-P1-AA] - 2025-07-14 Complete updateProcedureInfo tests + createMatter refactor
+
+**Type**: Test Expansion (T) + Refactor (R)  
+**Priority**: HIGH  
+**Duration**: ~60 min  
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Typecheck: PASS  
+- ✅ Tests: **1864 → 1868 passed** (+4 tests)  
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+| Metric | Before | After | Δ |
+|---------|--------|-------|---|
+| Functions (overall) | 69.76% | 70.64% | +0.88% |
+| Statements | 74.25% | 74.69% | +0.44% |
+| Branches | 60.6% | 60.92% | +0.32% |
+| Lines | 75.61% | 76.06% | +0.45% |
+
+**Test Delta**:
+- Created `src/tests/server/matters/actions-update-procedure-info.test.ts` (6 tests)
+- Covered `updateProcedureInfo` error paths (permission, transaction, invalid party)
+- Fixed mock setup: guard.assertMatterWritable vs permissions separation
+
+**Refactor Actions**:
+- Extracted `buildMatterCreateData` helper in `createMatter` (already in prior commit)
+- `createMatter` lines reduced from ~112 → ~72, complexity ~14→~9
+
+**Violations Addressed**:
+- Partial: `createMatter` still >20 lines, complexity >10 (requires further extraction)
+- `updateProcedureInfo` still 182 lines, complexity 15 - needs refactor next
+
+**Next Priority**:
+Based on Proactive Analysis (Step 4.2), highest-impact item now: **[T] UI Components: Replace Chinese labels with Vietnamese** (market fit, user experience). Files:
+- `src/app/(app)/intakes/_components/claim-section.tsx`: "标的额" → "Giá trị yêu cầu"
+- `src/app/(app)/intakes/_components/cause-section.tsx`: "案由", "AI推荐", "手动选择" → Vietnamese
+- Similar across other intake components.
+
+Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract validation helpers, reduce complexity to ≤10).
+

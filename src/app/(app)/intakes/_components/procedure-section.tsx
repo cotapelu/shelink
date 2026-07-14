@@ -46,10 +46,10 @@ export function ProcedureSection({
 
   return (
     <>
-      {/* 案由 | 当前程序 | 管辖地 | 争议解决机构 */}
+      {/* Nguyên nhân vụ án | Thủ tục hiện tại | Có thẩm quyền | Cơ quan giải quyết tranh chấp */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
-        {/* 当前程序 */}
-        <Field label="当前程序" required error={errors.firstProcedureType?.message}>
+        {/* Thủ tục hiện tại */}
+        <Field label="Thủ tục hiện tại" required error={errors.firstProcedureType?.message}>
           <Select
             value={firstProcedureType ?? ""}
             onValueChange={(v) => {
@@ -59,7 +59,7 @@ export function ProcedureSection({
             }}
           >
             <SelectTrigger className="h-10 bg-background">
-              <SelectValue placeholder="选择当前程序" />
+              <SelectValue placeholder="Chọn thủ tục hiện tại" />
             </SelectTrigger>
             <SelectContent>
               {procedureOptions.map((p) => (
@@ -71,8 +71,8 @@ export function ProcedureSection({
           </Select>
         </Field>
 
-        {/* 管辖地 */}
-        <Field label="管辖地">
+        {/* Có thẩm quyền */}
+        <Field label="Có thẩm quyền">
           <Input
             value={jurisdiction}
             onChange={(e) => {
@@ -83,20 +83,20 @@ export function ProcedureSection({
                 setValue("firstAgency", "", { shouldDirty: true });
               }
             }}
-            placeholder="输入管辖地"
+            placeholder="Nhập địa điểm có thẩm quyền"
             className="h-10"
           />
         </Field>
 
-        {/* 争议解决机构 */}
-        <Field label="争议解决机构">
+        {/* Cơ quan giải quyết tranh chấp */}
+        <Field label="Cơ quan giải quyết tranh chấp">
           <Select
             value={firstAgency || ""}
             onValueChange={(v) => setValue("firstAgency", v, { shouldDirty: true })}
             disabled={agencyOpts.length === 0}
           >
             <SelectTrigger className="h-10 bg-background">
-              <SelectValue placeholder={jurisdiction ? "选择机构" : "请先选管辖地"} />
+              <SelectValue placeholder={jurisdiction ? "Chọn cơ quan" : "Vui lòng chọn khu vực có thẩm quyền trước"} />
             </SelectTrigger>
             <SelectContent>
               {agencyOpts.map((a) => (
@@ -108,14 +108,14 @@ export function ProcedureSection({
           </Select>
         </Field>
 
-        {/* Spacer for grid alignment (争议解决机构 occupies 1/4) */}
+        {/* Spacer for grid alignment (Cơ quan giải quyết tranh chấp occupies 1/4) */}
         <div></div>
       </div>
 
-      {/* 我方诉讼地位 (仅诉讼) */}
+      {/* Vị trí tố tụng của chúng tôi (chỉ cho tố tụng) */}
       {showStanding && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Field label="我方诉讼地位" required error={errors.ourStanding?.message}>
+          <Field label="Vị trí tố tụng của chúng tôi" required error={errors.ourStanding?.message}>
             <Select
               value={ourStanding ?? ""}
               onValueChange={(v) =>
@@ -126,7 +126,7 @@ export function ProcedureSection({
               }
             >
               <SelectTrigger className="h-10 bg-background">
-                <SelectValue placeholder="选择诉讼地位" />
+                <SelectValue placeholder="Chọn vị trí tố tụng" />
               </SelectTrigger>
               <SelectContent>
                 {(ourStandingOptions.length
@@ -141,14 +141,14 @@ export function ProcedureSection({
             </Select>
           </Field>
 
-          {/* 是否需向律协备案 */}
-          <Field label="是否需向律协备案">
+          {/* Cần với Hiệp hội Luật sư? */}
+          <Field label="Cần với Hiệp hội Luật sư không?">
             <Select
               value={barFiling ?? ""}
               onValueChange={(v) => setValue("barFiling", v as BarFilingType, { shouldDirty: true })}
             >
               <SelectTrigger className="h-10 bg-background">
-                <SelectValue placeholder="选择" />
+                <SelectValue placeholder="Chọn" />
               </SelectTrigger>
               <SelectContent>
                 {BAR_FILING_OPTIONS.map((opt) => (
@@ -160,18 +160,18 @@ export function ProcedureSection({
             </Select>
           </Field>
 
-          {/* 是否反诉 */}
-          <Field label="是否反诉">
+          {/* Có phản tố? */}
+          <Field label="Có phản tố không?">
             <Select
               value={counterclaim ? "yes" : "no"}
               onValueChange={(v) => setValue("counterclaim", v === "yes", { shouldDirty: true })}
             >
               <SelectTrigger className="h-10 bg-background">
-                <SelectValue placeholder="选择" />
+                <SelectValue placeholder="Chọn" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="no">否</SelectItem>
-                <SelectItem value="yes">是</SelectItem>
+                <SelectItem value="no">Không</SelectItem>
+                <SelectItem value="yes">Có</SelectItem>
               </SelectContent>
             </Select>
           </Field>
@@ -181,25 +181,25 @@ export function ProcedureSection({
         </div>
       )}
 
-      {/* Non-litigation: 业务类型, 项目金额, 时间范围, 顾问类型, etc. */}
+      {/* Non-litigation: Loại hình dịch vụ, Giá trị dự án, Phạm vi thời gian, Loại tư vấn, etc. */}
       {kind !== "litigation" && (
         <>
-          {/* 业务类型 */}
+          {/* Loại hình dịch vụ */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Field label="业务类型">
+            <Field label="Loại hình dịch vụ">
               <Select
                 value={""}
                 onValueChange={() => {}}
               >
                 <SelectTrigger className="h-10 bg-background">
-                  <SelectValue placeholder="选择业务类型" />
+                  <SelectValue placeholder="Chọn loại hình dịch vụ" />
                 </SelectTrigger>
                 <SelectContent>
                   {/* TODO: fill from PROJECT_BUSINESS_TYPES */}
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="项目金额（元）">
+            <Field label="Giá trị dự án (VNĐ)">
               <Input
                 type="number"
                 inputMode="decimal"
