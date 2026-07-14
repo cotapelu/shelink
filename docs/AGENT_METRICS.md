@@ -760,6 +760,50 @@ Target: ≥90 points, increase ≥0.5%/week
 
 ---
 
+### [CYCLE-P1-28] - 2025-07-14 Test Expansion: getMonthlyRevenue Tests
+
+**Type**: Test Expansion (T) - Coverage Improvement
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Actions**:
+- ✅ Added unit tests for `getMonthlyRevenue` (4 tests)
+  - Monthly revenue aggregation, visibility filter, default months, type filter
+- ✅ Mocked Prisma feeEntry aggregate and date handling
+- ✅ Typecheck & Tests: 4 passed
+
+**Impact**:
+- Function coverage: +1 absolute
+- No new lint violations
+
+**Files Modified**:
+- src/tests/server/finance/getMonthlyRevenue.test.ts
+
+---
+
+### [CYCLE-P1-29] - 2025-07-14 Test Expansion: searchMattersForInvoice Tests
+
+**Type**: Test Expansion (T) - Coverage Improvement
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Actions**:
+- ✅ Added unit tests for `searchMattersForInvoice` (3 tests)
+  - Basic search, query param handling, default limit
+- ✅ Mocked Prisma matter.findMany
+- ✅ Typecheck & Tests: 3 passed
+
+**Impact**:
+- Function coverage: +1 absolute
+- No new lint violations
+
+**Files Modified**:
+- src/tests/server/finance/searchMattersForInvoice.test.ts
+
+---
+
 ## Next Scheduled Actions
 
 **IMMEDIATE** (Next 30 minutes):
