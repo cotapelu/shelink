@@ -100,6 +100,33 @@ function parsePersonRecord(record: ParseRecord, idMap: Map<string, string>): Ged
 
   let currentTag = "";
 
+  const level1Handlers: Record<string, (val: string) => void> = {
+    NAME: (val) => { fullName = val.replace(/\//g, "").trim(); },
+    SEX: (val) => {
+      if (val === "M") gender = "male";
+      else if (val === "F") gender = "female";
+    },
+    DEAT: (val) => { is_deceased = val.trim().length === 0 || val === "Y"; },
+    NOTE: (val) => { note = val; },
+  };
+
+  const level2Handlers: Record<string, (val: string) => void> = {
+    "NOTE:CONT": (val) => { note += "\n" + val; },
+    "BIRT:DATE": (val) => {
+      const date = parseGedcomDate(val);
+      birth_day = date.day;
+      birth_month = date.month;
+      birth_year = date.year;
+    },
+    "DEAT:DATE": (val) => {
+      is_deceased = true;
+      const date = parseGedcomDate(val);
+      death_day = date.day;
+      death_month = date.month;
+      death_year = date.year;
+    },
+  };
+
   for (let i = 0; i < record.lines.length; i++) {
     const line = record.lines[i];
     const match = line.match(/^(\d+)\s+([A-Z0-9_]+)(?:\s+(.*))?$/);
@@ -111,31 +138,12 @@ function parsePersonRecord(record: ParseRecord, idMap: Map<string, string>): Ged
 
     if (level === 1) {
       currentTag = tag;
-      if (tag === "NAME") {
-        fullName = val.replace(/\//g, "").trim();
-      } else if (tag === "SEX") {
-        if (val === "M") gender = "male";
-        else if (val === "F") gender = "female";
-      } else if (tag === "DEAT") {
-        is_deceased = val.trim().length === 0 || val === "Y";
-      } else if (tag === "NOTE") {
-        note = val;
-      }
+      const h1 = level1Handlers[tag];
+      if (h1) h1(val);
     } else if (level === 2) {
-      if (currentTag === "NOTE" && tag === "CONT") {
-        note += "\n" + val;
-      } else if (currentTag === "BIRT" && tag === "DATE") {
-        const date = parseGedcomDate(val);
-        birth_day = date.day;
-        birth_month = date.month;
-        birth_year = date.year;
-      } else if (currentTag === "DEAT" && tag === "DATE") {
-        is_deceased = true;
-        const date = parseGedcomDate(val);
-        death_day = date.day;
-        death_month = date.month;
-        death_year = date.year;
-      }
+      const key = `${currentTag}:${tag}`;
+      const h2 = level2Handlers[key];
+      if (h2) h2(val);
     }
   }
 
