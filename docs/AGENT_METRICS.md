@@ -1011,6 +1011,34 @@ Target: ≥90 points, increase ≥0.5%/week
 - Continue extracting `SealsView` (186 lines) and `ApprovalDialog` (115 lines)
 - Simultaneously, increase test coverage for uncovered server modules (e.g., express/actions remaining functions)
 
+### [CYCLE-AUTO-3] - 2026-07-14 Test: getExpressSettingsPublic
+
+**Type**: Test Expansion (T)
+**Priority**: HIGH (coverage)
+**Duration**: ~20 min
+**Status**: ✅ Completed
+
+**Actions**:
+- Added unit tests for `getExpressSettingsPublic` (2 tests)
+  - Admin role requirement enforced
+  - Returns settings for admin
+- Covered both success and error paths
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Build: PASS
+- ✅ Tests: 1869 passed (+2)
+- ✅ Coverage: Functions +1 absolute
+
+**Files Modified**:
+- src/tests/server/express/actions-get-settings.test.ts (new)
+
+**Impact**:
+- Function coverage increased from 70.64% to ~70.74% (approx)
+- Improved test coverage for express module
+
+**Next**: Continue adding tests for remaining express functions to reach 80% function coverage.
+
 ---
 
 ## Next Scheduled Actions
