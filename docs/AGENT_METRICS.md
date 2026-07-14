@@ -1041,6 +1041,38 @@ Target: ≥90 points, increase ≥0.5%/week
 
 ---
 
+### [CYCLE-AUTO-4] - 2026-07-14 Test: saveExpressSettingsAction
+
+**Type**: Test Expansion (T)
+**Priority**: HIGH (coverage)
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Actions**:
+- Added unit tests for `saveExpressSettingsAction` (3 tests)
+  - Admin role requirement enforced (throw for non-ADMIN)
+  - Success path: calls `saveSettings` with correct payload and audits
+  - String trimming verified (ebusinessId, appKey, customer, key)
+- Fixed mock to use correct export name (`saveExpressSettings`)
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Build: PASS
+- ✅ Tests: 1871 passed (+3)
+- ✅ Coverage: Functions +1 absolute (approx 70.77%)
+
+**Files Modified**:
+- src/tests/server/express/actions-settings.test.ts (new)
+
+**Impact**:
+- Increased test coverage for express settings module
+- Validated admin-only access control
+
+**Next**:
+- Continue expanding coverage in `express/actions` (remaining functions: `refreshExpress`, `deleteExpress`) and address other low-coverage modules.
+
+---
+
 ## Next Scheduled Actions
 
 **IMMEDIATE** (Next 30 minutes):
