@@ -919,6 +919,28 @@ Target: ≥90 points, increase ≥0.5%/week
 
 ---
 
+### [CYCLE-P1-35] - 2025-07-14 Refactor Reduce Complexity: pickSeverity
+
+**Type**: Refactor (R) - Complexity Reduction
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Actions**:
+- ✅ Converted `pickSever` from if-else chain to map lookup
+- ✅ Reduced cyclomatic complexity from 11 to ~5
+- ✅ Lines reduced
+- ✅ Verified behavior via existing conflict algorithm tests (8 passed)
+
+**Impact**:
+- One less complexity violation in `conflicts/algorithm.ts`
+- Contributes to quality gate improvement
+
+**Files Modified**:
+- src/server/conflicts/algorithm.ts
+
+---
+
 ## Next Scheduled Actions
 
 **IMMEDIATE** (Next 30 minutes):
