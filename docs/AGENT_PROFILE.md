@@ -178,3 +178,20 @@ Areas where modifications consume excessive time/risk:
 **Last Updated**: 2025-07-07 (JWT upgrade completed)
 **Next Review**: 2025-07-10 (weekly)
 **Status**: ✅ P0 done (rate limit), P1 in progress (JWT code done, awaiting deployment; permission audit, coverage, transactions pending)
+
+### New Weakness (2025-07-14)
+
+**Module**: `src/server/matters/actions.ts`  
+**Reason**: Despite refactoring `createMatter`, the file still contains functions exceeding complexity threshold:  
+- `updateProcedureInfo` (182 lines, complexity ~15)  
+- `listMatters` (129 lines, complexity ~13)  
+- `ensureClientParty` and `normalizeNewProcedureParties` also high complexity  
+These require extraction and test coverage expansion.  
+**Failure Rate**: TBD (monitor after refactors)  
+**Remediation**:  
+- [ ] Extract helpers from `updateProcedureInfo` (build update payload, procedure validation, transaction wrapper)  
+- [ ] Add comprehensive tests for `updateProcedureInfo` error paths (currently only 2 basic tests)  
+- [ ] Refactor `listMatters` to separate query building, pagination, and permission filtering  
+- [ ] Verify all permission assertions are present (assertMatterWritable, assertCanAssociateMatter)  
+**Priority**: P1 (quality gate)
+
