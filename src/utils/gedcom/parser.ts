@@ -25,6 +25,27 @@ function parseMonthName(name: string): number | null {
   return index !== -1 ? index + 1 : null;
 }
 
+function parseGedcomDate(dateStr: string): {
+  day: number | null;
+  month: number | null;
+  year: number | null;
+} {
+  const cleanVal = dateStr.replace(/^(ABT|EST|AFT|BEF|CAL)\s+/i, "");
+  const parts = cleanVal.split(" ");
+  if (parts.length === 3) {
+    return {
+      day: parseInt(parts[0]) || null,
+      month: parseMonthName(parts[1]),
+      year: parseInt(parts[2]) || null,
+    };
+  } else if (parts.length === 1) {
+    return { day: null, month: null, year: parseInt(parts[0]) || null };
+  } else if (parts.length === 2) {
+    return { day: null, month: parseMonthName(parts[0]), year: parseInt(parts[1]) || null };
+  }
+  return { day: null, month: null, year: null };
+}
+
 function generateUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0,
@@ -104,32 +125,16 @@ function parsePersonRecord(record: ParseRecord, idMap: Map<string, string>): Ged
       if (currentTag === "NOTE" && tag === "CONT") {
         note += "\n" + val;
       } else if (currentTag === "BIRT" && tag === "DATE") {
-        const cleanVal = val.replace(/^(ABT|EST|AFT|BEF|CAL)\s+/i, "");
-        const parts = cleanVal.split(" ");
-        if (parts.length === 3) {
-          birth_day = parseInt(parts[0]) || null;
-          birth_month = parseMonthName(parts[1]);
-          birth_year = parseInt(parts[2]) || null;
-        } else if (parts.length === 1) {
-          birth_year = parseInt(parts[0]) || null;
-        } else if (parts.length === 2) {
-          birth_month = parseMonthName(parts[0]);
-          birth_year = parseInt(parts[1]) || null;
-        }
+        const date = parseGedcomDate(val);
+        birth_day = date.day;
+        birth_month = date.month;
+        birth_year = date.year;
       } else if (currentTag === "DEAT" && tag === "DATE") {
         is_deceased = true;
-        const cleanVal = val.replace(/^(ABT|EST|AFT|BEF|CAL)\s+/i, "");
-        const parts = cleanVal.split(" ");
-        if (parts.length === 3) {
-          death_day = parseInt(parts[0]) || null;
-          death_month = parseMonthName(parts[1]);
-          death_year = parseInt(parts[2]) || null;
-        } else if (parts.length === 1) {
-          death_year = parseInt(parts[0]) || null;
-        } else if (parts.length === 2) {
-          death_month = parseMonthName(parts[0]);
-          death_year = parseInt(parts[1]) || null;
-        }
+        const date = parseGedcomDate(val);
+        death_day = date.day;
+        death_month = date.month;
+        death_year = date.year;
       }
     }
   }
@@ -153,12 +158,12 @@ function parsePersonRecord(record: ParseRecord, idMap: Map<string, string>): Ged
   };
 }
 
-function parseFamilyRecord(record: ParseRecord, idMap: Map<string, string>): { marriage?: GedcomRelationship; children: GedcomRelationship[] } {
+function parseFamilyReferences(lines: string[], idMap: Map<string, string>): { husb: string | null; wife: string | null; children: string[] } {
   let husb: string | null = null;
   let wife: string | null = null;
   const children: string[] = [];
 
-  for (const line of record.lines) {
+  for (const line of lines) {
     const match = line.match(/^1\s+(HUSB|WIFE|CHIL)\s+@([^@]+)@/);
     if (match) {
       const tag = match[1];
@@ -171,16 +176,22 @@ function parseFamilyRecord(record: ParseRecord, idMap: Map<string, string>): { m
       else if (tag === "CHIL") children.push(uuid);
     }
   }
+  return { husb, wife, children };
+}
 
-  const marriage: GedcomRelationship | undefined = husb && wife ? { type: "marriage", person_a: husb, person_b: wife } : undefined;
-  const childRels: GedcomRelationship[] = [];
-  const parentA = husb || wife;
-  if (parentA) {
-    for (const childId of children) {
-      childRels.push({ type: "biological_child", person_a: parentA, person_b: childId });
-    }
-  }
-  return { marriage, children: childRels };
+function createMarriage(husb: string, wife: string): GedcomRelationship {
+  return { type: "marriage", person_a: husb, person_b: wife };
+}
+
+function createChildRelationships(parentA: string | null, children: string[]): GedcomRelationship[] {
+  if (!parentA) return [];
+  return children.map((childId) => ({ type: "biological_child", person_a: parentA, person_b: childId }));
+}
+
+function parseFamilyRecord(record: ParseRecord, idMap: Map<string, string>): { marriage?: GedcomRelationship; children: GedcomRelationship[] } {
+  const { husb, wife, children } = parseFamilyReferences(record.lines, idMap);
+  const marriage: GedcomRelationship | undefined = husb && wife ? createMarriage(husb, wife) : undefined;
+  return { marriage, children: createChildRelationships(husb || wife, children) };
 }
 
 export function parseGedcom(gedcom: string): {
