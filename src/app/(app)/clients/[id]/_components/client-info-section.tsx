@@ -49,13 +49,13 @@ function renderHeader({ client, TypeIcon }: { client: Client; TypeIcon: any }) {
 
 function renderInfoGrid({ client, dash }: { client: Client; dash: any }) {
   const info = [
-    { label: "性别", value: client.gender ? genderLabel[client.gender] : dash },
-    { label: "证件号", value: client.idNumber ?? dash },
-    { label: "联系电话", value: client.phone ?? dash },
-    { label: "邮箱", value: client.email ?? dash },
-    { label: "地址", value: client.address ?? dash, span: 2 },
-    { label: "来源", value: client.source ?? dash },
-    { label: "行业", value: client.industry ?? dash },
+    { label: "Giới tính", value: client.gender ? genderLabel[client.gender] : dash },
+    { label: "Số giấy tờ", value: client.idNumber ?? dash },
+    { label: "Điện thoại", value: client.phone ?? dash },
+    { label: "Email", value: client.email ?? dash },
+    { label: "Địa chỉ", value: client.address ?? dash, span: 2 },
+    { label: "Nguồn", value: client.source ?? dash },
+    { label: "Ngành nghề", value: client.industry ?? dash },
   ];
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -71,9 +71,9 @@ function renderInfoGrid({ client, dash }: { client: Client; dash: any }) {
 
 function renderFinanceStats({ finance }: { finance: { receivable: number; received: number; outstanding: number } }) {
   const stats = [
-    { label: "应收总额", value: finance.receivable, className: "text-blue-600 dark:text-blue-400" },
-    { label: "已收总额", value: finance.received, className: "text-green-600 dark:text-green-400" },
-    { label: "未收余额", value: finance.outstanding, className: "text-rose-600 dark:text-rose-400" },
+    { label: "Tổng phải thu", value: finance.receivable, className: "text-blue-600 dark:text-blue-400" },
+    { label: "Tổng đã thu", value: finance.received, className: "text-green-600 dark:text-green-400" },
+    { label: "Còn lại", value: finance.outstanding, className: "text-rose-600 dark:text-rose-400" },
   ];
   return (
     <div className="mt-4 grid grid-cols-3 gap-3 rounded-lg bg-muted/40 p-3">

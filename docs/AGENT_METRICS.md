@@ -4441,3 +4441,49 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - Other UI modules still contain Chinese: `client-sheet.tsx`, `clients-view.tsx`, `client-info-section.tsx`, archive and approvals components, matter components, etc.
 - Recommended next: Systematically translate remaining high-traffic modules using auto-detection script.
 
+
+### [CYCLE-P1-BB] - 2025-07-14 UI Internationalization Batch (Intake + Client)
+
+**Type**: (T) Documentation / UI Gap Fix  
+**Priority**: HIGH  
+**Duration**: ~4h total across multiple commits  
+**Status**: ✅ Completed
+
+**Scope**:
+- `src/app/(app)/intakes/_components/`: claim-section, cause-section, lawyer-section, procedure-section, intake-sheet, documents-section, fee-section (partial)
+- `src/app/(app)/clients/_components/`: clients-table, client-sheet (partial)
+
+**Translations Applied**:
+- Form sections: Basic info, Parties, Procedure, Fee, Documents
+- Field labels: case title, cause, claim amount, jurisdiction, agency, lawyers, fees, etc.
+- Buttons: submit, cancel, add attachment
+- Table headers and empty states
+- Error messages and placeholders where applicable
+
+**Quality Gates**:
+- ✅ Typecheck: PASS  
+- ✅ Tests: **1868 passed**, 1 skipped (no regressions)  
+- ✅ Build: SUCCESS
+
+**Coverage**:
+- Functions: 70.64% (unchanged, server tests unchanged)
+- Overall test count increased by +4 (from 1864 to 1868)
+
+**Test Updates**:
+- Updated expectations in 6 test files to match Vietnamese labels
+- Used regex for labels with required asterisk to match text nodes
+- Fixed mock implementations for permission guards
+
+**Remaining Work**:
+- Extensive Chinese labels remain in other high-traffic modules:
+  - Clients: client-sheet, client-info-section, clients-view
+  - Matters: matter detail components, procedure-content, timeline, etc.
+  - Archive, Approvals (seals), Finance, Settings, Tools
+  - Many `src/app/(app)/**/_components/*.tsx` still contain Chinese
+- Recommendation: Continue systematic i18n sweep with auto-detection script.
+
+**Key Learnings**:
+- Field component renders required star as separate element; tests should use regex or exact match ignoring star.
+- When multiple components inline labels (not using subcomponents), need to translate each occurrence.
+- Global find/replace with sed effective for common terms but must avoid false positives.
+

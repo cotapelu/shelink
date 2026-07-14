@@ -108,14 +108,14 @@ export function ClientsView({ initialData, initialFilters }: Props) {
       <header className="space-y-2">
         <div className="flex items-end justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-xl font-medium tracking-tight">客户管理</h1>
+            <h1 className="text-xl font-medium tracking-tight">Quản lý khách hàng</h1>
             <p className="text-[13px] text-muted-foreground">
-              共 <span className="font-mono tabular text-foreground">{initialData.total}</span> 位客户
+              Có <span className="font-mono tabular text-foreground">{initialData.total}</span> khách hàng
             </p>
           </div>
           <Button onClick={handleNew} className="h-9 gap-1.5 px-4 shadow-sm">
             <Plus className="h-4 w-4" strokeWidth={2} />
-            新建客户
+            Tạo khách hàng mới
           </Button>
         </div>
         <div className="ll-rule" />
@@ -131,7 +131,7 @@ export function ClientsView({ initialData, initialFilters }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onBlur={() => updateUrl({ search })}
-            placeholder="搜索客户名称 / 身份证号 / 电话 / 邮箱"
+            placeholder="Tìm kiếm theo tên / số CMND/CCCD / điện thoại / email"
             className="h-9 border-border bg-card pl-9"
           />
         </form>
@@ -147,20 +147,20 @@ export function ClientsView({ initialData, initialFilters }: Props) {
           <SelectTrigger
             className="h-9 w-36 border-border bg-card"
           >
-            <SelectValue placeholder="客户类型" />
+            <SelectValue placeholder="Loại khách hàng" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">全部类型</SelectItem>
-            <SelectItem value="INDIVIDUAL">自然人</SelectItem>
-            <SelectItem value="COMPANY">公司</SelectItem>
-            <SelectItem value="ORGANIZATION">其他组织</SelectItem>
+            <SelectItem value="ALL">Tất cả loại</SelectItem>
+            <SelectItem value="INDIVIDUAL">Cá nhân</SelectItem>
+            <SelectItem value="COMPANY">Công ty</SelectItem>
+            <SelectItem value="ORGANIZATION">Tổ chức khác</SelectItem>
           </SelectContent>
         </Select>
 
         {(search || type !== "ALL") && (
           <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1">
             <X className="h-3.5 w-3.5" />
-            清除筛选
+            Xóa bộ lọc
           </Button>
         )}
       </div>

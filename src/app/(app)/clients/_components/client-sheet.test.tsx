@@ -58,9 +58,9 @@ vi.mock("sonner", () => ({
 }));
 
 vi.mock("@/lib/enums", () => ({
-  cooperationStatusLabel: { SIGNED: "已签约" },
+  cooperationStatusLabel: { SIGNED: "Đã ký hợp đồng" },
   COOPERATION_STATUS_OPTIONS: ["SIGNED"],
-  genderLabel: { MALE: "男", FEMALE: "女" },
+  genderLabel: { MALE: "Nam", FEMALE: "Nữ" },
   GENDER_OPTIONS: ["MALE", "FEMALE"]
 }));
 
@@ -105,7 +105,7 @@ describe("ClientSheet", () => {
   it("renders sheet when open", () => {
     render(<ClientSheet {...defaultProps} />);
     expect(screen.getByTestId("sheet")).toBeInTheDocument();
-    expect(screen.getByText("新建客户")).toBeInTheDocument();
+    expect(screen.getByText("Tạo mới")).toBeInTheDocument();
   });
 
   it("does not render when closed", () => {
@@ -116,19 +116,19 @@ describe("ClientSheet", () => {
   it("displays edit title when editingClient provided", () => {
     const editingClient = { id: "1", name: "Test", type: "COMPANY" } as any;
     render(<ClientSheet {...defaultProps} editingClient={editingClient} />);
-    expect(screen.getByText("编辑客户")).toBeInTheDocument();
+    expect(screen.getByText("Chỉnh sửa")).toBeInTheDocument();
   });
 
   it("renders basic fields (name, type)", () => {
     render(<ClientSheet {...defaultProps} />);
-    expect(screen.getByText("客户名称")).toBeInTheDocument();
-    expect(screen.getByText("类型")).toBeInTheDocument();
+    expect(screen.getByText("Tên khách hàng")).toBeInTheDocument();
+    expect(screen.getByText("Loại")).toBeInTheDocument();
   });
 
   it("calls onOpenChange with false when cancel button clicked", () => {
     render(<ClientSheet {...defaultProps} />);
-    // Find cancel button by text "取消"
-    const cancelBtn = screen.getByText("取消");
+    // Find cancel button by text "Hủy"
+    const cancelBtn = screen.getByText("Hủy");
     fireEvent.click(cancelBtn);
     expect(mockOnOpenChange).toHaveBeenCalledWith(false);
   });
@@ -144,7 +144,7 @@ describe("ClientSheet", () => {
         return undefined;
       });
       render(<ClientSheet {...defaultProps} />);
-      expect(screen.getByText("身份证号")).toBeInTheDocument();
+      expect(screen.getByText("Số CMND/CCCD")).toBeInTheDocument();
     });
 
     it("shows unified social credit code field for COMPANY type", () => {
@@ -153,7 +153,7 @@ describe("ClientSheet", () => {
         return undefined;
       });
       render(<ClientSheet {...defaultProps} />);
-      expect(screen.getByText("统一社会信用代码")).toBeInTheDocument();
+      expect(screen.getByText("Mã số doanh nghiệp")).toBeInTheDocument();
     });
   });
 });

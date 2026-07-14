@@ -150,15 +150,15 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
       try {
         if (isEdit && editingClient) {
           await updateClient({ id: editingClient.id, ...values });
-          toast.success("客户已更新");
+          toast.success("Khách hàng đã cập nhật");
         } else {
           await createClient(values);
-          toast.success("客户已创建");
+          toast.success("Khách hàng đã tạo");
         }
         onOpenChange(false);
       } catch (err) {
-        toast.error("保存失败", {
-          description: err instanceof Error ? err.message : "请稍后重试"
+        toast.error("Lưu thất bại", {
+          description: err instanceof Error ? err.message : "Vui lòng thử lại sau"
         });
       }
     });
@@ -176,7 +176,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
     setValue("tags", (watchedTags || []).filter((t: string) => t !== tag), { shouldDirty: true });
   }
 
-  // v0.27: AI 自动填信用代码（公司 / 组织路径）
+  // v0.27: AI 自动填信用代码（Công ty / 组织路径）
   const [candidates, setCandidates] = useState<EnterpriseSearchItem[] | null>(null);
   const [aiSearching, startAiSearch] = useTransition();
   const [aiFilling, startAiFill] = useTransition();
@@ -184,25 +184,25 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
   function handleAILookup() {
     const name = watchedName.trim();
     if (!name) {
-      toast.warning("请先填写客户名称再点击 AI 查找");
+      toast.warning("Vui lòng nhập tên khách hàng trước khi tìm kiếm AI");
       return;
     }
     startAiSearch(async () => {
       try {
         const r = await searchEnterpriseCandidates(name);
         if (!r.configured) {
-          toast.error("元典 API 未配置", {
-            description: "请在 设置 → AI 与元典 中配置 API Key"
+          toast.error("Chưa cấu hình API Yuandian", {
+            description: "Vui lòng cấu hình API Key trong Cài đặt → AI 请在 设置 → AI 与元典 中配置 API Key Yuandian"
           });
           return;
         }
         if (r.items.length === 0) {
-          toast.info("未找到候选企业", { description: "试试更完整的名称或简称" });
+          toast.info("Không tìm thấy doanh nghiệp phù hợp", { description: "Thử tên đầy đủ hơn hoặc tên viết tắt" });
           return;
         }
         setCandidates(r.items);
       } catch (err) {
-        toast.error("查找失败", {
+        toast.error("Tìm kiếm thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -219,10 +219,10 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
         if (r.configured && r.info) {
           if (r.info.legalRep) setValue("legalRep", r.info.legalRep, { shouldDirty: true });
           if (r.info.address) setValue("address", r.info.address, { shouldDirty: true });
-          toast.success(`已回填：${item.name}`);
+          toast.success(`Đã điền: ${item.name}`);
         }
       } catch (err) {
-        toast.warning("法代 / 地址自动填充失败，可手动补充", {
+        toast.warning("Tự động điền pháp lý / địa chỉ thất bại, có thể bổ sung thủ công", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -237,10 +237,10 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
       >
         <SheetHeader className="border-b border-border bg-background px-6 py-4">
           <SheetTitle className="text-lg">
-            {isEdit ? "编辑客户" : "新建客户"}
+            {isEdit ? "Chỉnh sửa" : "Tạo mới"}
           </SheetTitle>
           <SheetDescription className="text-xs">
-            客户主体信息 + 联系人，联系方式细节走联系人单独维护
+            Thông tin chính khách hàng + Liên hệ, chi tiết liên hệ được quản lý riêng tại liên hệ
           </SheetDescription>
         </SheetHeader>
 
@@ -249,18 +249,18 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
           className="flex flex-1 flex-col overflow-hidden"
         >
           <div className="flex-1 overflow-y-auto px-6 py-5">
-            {/* 基本信息 */}
-            <Section title="基本信息">
-              <Field label="客户名称" required error={errors.name?.message}>
+            {/* Thông tin cơ bản */}
+            <Section title="Thông tin cơ bản">
+              <Field label="Tên khách hàng" required error={errors.name?.message}>
                 <Input
                   placeholder={
-                    watchedType === "INDIVIDUAL" ? "张三" : "上海某某有限公司"
+                    watchedType === "INDIVIDUAL" ? "张三" : "上海某某有限Công ty"
                   }
                   {...register("name")}
                 />
               </Field>
 
-              <Field label="类型" required>
+              <Field label="Loại" required>
                 <Select
                   value={watchedType}
                   onValueChange={(v) =>
@@ -271,20 +271,20 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="INDIVIDUAL">自然人</SelectItem>
-                    <SelectItem value="COMPANY">公司</SelectItem>
-                    <SelectItem value="ORGANIZATION">其他组织</SelectItem>
+                    <SelectItem value="INDIVIDUAL">Cá nhân</SelectItem>
+                    <SelectItem value="COMPANY">Công ty</SelectItem>
+                    <SelectItem value="ORGANIZATION">Tổ chức khác</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
 
               <Field
-                label={watchedType === "INDIVIDUAL" ? "身份证号" : "统一社会信用代码"}
+                label={watchedType === "INDIVIDUAL" ? "Số CMND/CCCD" : "Mã số doanh nghiệp"}
               >
                 {watchedType === "INDIVIDUAL" ? (
                   <Input
                     className="font-mono"
-                    placeholder="18 位身份证号"
+                    placeholder="18 位Số CMND/CCCD"
                     {...register("idNumber")}
                   />
                 ) : (
@@ -292,7 +292,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                     <div className="flex gap-1">
                       <Input
                         className="flex-1 font-mono"
-                        placeholder="18 位信用代码"
+                        placeholder="18 số mã doanh nghiệp"
                         {...register("idNumber")}
                       />
                       <Button
@@ -302,14 +302,14 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                         onClick={handleAILookup}
                         disabled={aiSearching || aiFilling}
                         className="h-9 shrink-0 gap-1"
-                        title="按客户名称在元典搜索，自动回填信用代码 / 法代 / 注册地址"
+                        title="Tìm kiếm theo tên khách hàng trên Yuandian, tự động điền mã số / đại diện pháp lý / địa chỉ đăng ký"
                       >
                         {aiSearching ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
                         ) : (
                           <Sparkles className="h-3 w-3" />
                         )}
-                        AI 查找
+                        Tìm kiếm AI
                       </Button>
                     </div>
                     {candidates && candidates.length > 0 && (
@@ -339,7 +339,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                           onClick={() => setCandidates(null)}
                           className="mt-1 w-full text-[10px] text-muted-foreground hover:text-foreground"
                         >
-                          关闭
+                          Đóng
                         </button>
                       </div>
                     )}
@@ -347,29 +347,29 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                 )}
               </Field>
 
-              <Field label="主要联系电话">
-                <Input className="font-mono" placeholder="11 位手机号" {...register("phone")} />
+              <Field label="Số điện thoại chính">
+                <Input className="font-mono" placeholder="11 số điện thoại" {...register("phone")} />
               </Field>
 
-              <Field label="邮箱" error={errors.email?.message}>
+              <Field label="Email" error={errors.email?.message}>
                 <Input type="email" placeholder="contact@example.com" {...register("email")} />
               </Field>
 
-              <Field label="地址">
-                <Input placeholder="详细地址" {...register("address")} />
+              <Field label="Địa chỉ">
+                <Input placeholder="详细Địa chỉ" {...register("address")} />
               </Field>
 
               {watchedType !== "INDIVIDUAL" && (
-                <Field label="法定代表人">
-                  <Input placeholder="法定代表人姓名" {...register("legalRep")} />
+                <Field label="Người đại diện pháp luật">
+                  <Input placeholder="Người đại diện pháp luật姓名" {...register("legalRep")} />
                 </Field>
               )}
 
-              <Field label="案源">
-                <Input placeholder="介绍人 / 公开来源 / 老客户复购" {...register("source")} />
+              <Field label="Nguồn vụ án">
+                <Input placeholder="Người giới thiệu / Nguồn công khai / Khách hàng cũ mua lại" {...register("source")} />
               </Field>
 
-              <Field label="合作状态">
+              <Field label="Trạng thái hợp tác">
                 <Select
                   value={useWatch({ name: "cooperationStatus" })}
                   onValueChange={(v) =>
@@ -391,13 +391,13 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                 </Select>
               </Field>
 
-              <Field label="所属行业">
-                <Input placeholder="如 制造业 / 互联网 / 房地产" {...register("industry")} />
+              <Field label="Ngành nghề">
+                <Input placeholder="Ví dụ: Sản xuất / Internet / Bất động sản" {...register("industry")} />
               </Field>
 
               {watchedType === "INDIVIDUAL" && (
                 <>
-                  <Field label="性别">
+                  <Field label="Giới tính">
                     <Select
                       value={watchedGender || "UNSET"}
                       onValueChange={(v) =>
@@ -409,10 +409,10 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="未填" />
+                        <SelectValue placeholder="Chưa điền" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="UNSET">未填</SelectItem>
+                        <SelectItem value="UNSET">Chưa điền</SelectItem>
                         {GENDER_OPTIONS.map((g) => (
                           <SelectItem key={g} value={g}>
                             {genderLabel[g]}
@@ -422,13 +422,13 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                     </Select>
                   </Field>
 
-                  <Field label="民族">
-                    <Input placeholder="如 汉族" {...register("ethnicity")} />
+                  <Field label="Dân tộc">
+                    <Input placeholder="Ví dụ: Kinh" {...register("ethnicity")} />
                   </Field>
                 </>
               )}
 
-              <Field label="标签">
+              <Field label="Nhãn">
                 <TagInput
                   tags={watchedTags || []}
                   onAdd={addTag}
@@ -436,7 +436,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                 />
               </Field>
 
-              <Field label="备注" full>
+              <Field label="Ghi chú" full>
                 <Textarea rows={3} placeholder="可选" {...register("notes")} />
               </Field>
             </Section>
@@ -463,7 +463,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                   className="h-7 gap-1"
                 >
                   <Plus className="h-3.5 w-3.5" />
-                  添加联系人
+                  Thêm联系人
                 </Button>
               }
             >
@@ -483,7 +483,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                             checked={watchedContacts?.[idx]?.isPrimary}
                             onCheckedChange={(c) => {
                               if (c) {
-                                // 单选：取消其他主联系人
+                                // 单选：Hủy其他主联系人
                                 fields.forEach((_, i) => {
                                   setValue(`contacts.${i}.isPrimary`, i === idx);
                                 });
@@ -521,7 +521,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                       </Field>
                       <Field label="职务">
                         <Input
-                          placeholder="法定代表人 / 总经理 / 法务"
+                          placeholder="Người đại diện pháp luật / 总经理 / 法务"
                           {...register(`contacts.${idx}.title`)}
                         />
                       </Field>
@@ -532,7 +532,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                         />
                       </Field>
                       <Field
-                        label="邮箱"
+                        label="Email"
                         error={errors.contacts?.[idx]?.email?.message}
                       >
                         <Input
@@ -543,7 +543,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
                       <Field label="微信">
                         <Input {...register(`contacts.${idx}.wechat`)} />
                       </Field>
-                      <Field label="备注">
+                      <Field label="Ghi chú">
                         <Input {...register(`contacts.${idx}.notes`)} />
                       </Field>
                     </div>
@@ -561,7 +561,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              取消
+              Hủy
             </Button>
             <Button
               type="submit"
@@ -569,7 +569,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
               className="gap-1.5 "
             >
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isEdit ? "保存" : "创建客户"}
+              {isEdit ? "Lưu" : "创建客户"}
             </Button>
           </SheetFooter>
         </form>
@@ -646,7 +646,7 @@ function TagInput({ tags, onAdd, onRemove }: { tags: string[]; onAdd: (t: string
       ))}
       <input
         type="text"
-        placeholder={tags.length === 0 ? "输入后回车添加标签" : ""}
+        placeholder={tags.length === 0 ? "输入后回车ThêmNhãn" : ""}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();

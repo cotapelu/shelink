@@ -233,3 +233,28 @@ Following proactive analysis, identified functions in `src/server/matters/action
 
 **Priority**: P1 (quality gate)
 
+
+### Extensive UI Internationalization Remaining (2025-07-14)
+
+**Status**: ~30% of UI translated (intake + client-table); majority still Chinese.
+
+**High-Priority Modules** (user-facing, high traffic):
+- `src/app/(app)/clients/_components/client-sheet.tsx` (615 lines)
+- `src/app/(app)/clients/[id]/_components/client-info-section.tsx`
+- `src/app/(app)/clients/_components/clients-view.tsx`
+- `src/app/(app)/matters/[id]/_components/procedure-content.tsx` (1357 lines)
+- `src/app/(app)/matters/_components/matters-table.tsx` (maybe already done? verify)
+- `src/app/(app)/archive/_components/pending-archive-table.tsx`
+- `src/app/(app)/archive/_components/archive-tabs.tsx`
+- `src/app/(app)/approvals/seals/_components/seal-request-sheet.tsx`
+- `src/app/(app)/finance/_components/invoice-create-dialog.tsx`
+- `src/app/(app)/settings/*` various
+
+**Recommended Strategy**:
+1. Create a script to enumerate all UI strings in `src/app/(app)/**/*.tsx` containing CJK characters.
+2. Build a translation map and apply in batches per domain (Clients, Matters, Archive, etc.).
+3. Update corresponding test files in lockstep.
+4. Consider extracting UI strings to a `locales/vi.json` for future maintainability.
+
+**Priority**: P1 (market readiness)
+
