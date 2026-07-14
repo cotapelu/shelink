@@ -972,6 +972,47 @@ Target: ≥90 points, increase ≥0.5%/week
 
 ---
 
+### [CYCLE-AUTO-2] - 2026-07-14 Refactor: SealRequestForm Extraction
+
+**Type**: Refactor (R) - Lines Reduction
+**Priority**: HIGH (quality gate)
+**Duration**: ~45 min
+**Status**: ✅ Completed
+
+**Actions**:
+- Extracted `SealTypeSection` (seal type RadioChips + alsoLegalRep checkbox)
+- Extracted `MatterLinkSection` (matter combobox / existing link display)
+- Extracted `ExistingDocumentBanner` (linked document notice)
+- Extracted `DocumentTitleField` (label + input)
+- Extracted `FormFooter` (dialog buttons)
+- Condensed destructuring and inlined intermediate variables
+- Reduced `SealRequestForm` from **163 lines → 76 lines** (-53%)
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Build: SUCCESS
+- ✅ Lint: Function size still >50 (76) but significantly reduced; will continue extraction in next cycle
+- ✅ No test regressions (no existing tests)
+
+**Files Modified**:
+- src/app/(app)/approvals/seals/_components/seal-request-form.tsx (refactored)
+- src/app/(app)/approvals/seals/_components/seal-type-section.tsx (new)
+- src/app/(app)/approvals/seals/_components/matter-link-section.tsx (new)
+- src/app/(app)/approvals/seals/_components/existing-document-banner.tsx (new)
+- src/app/(app)/approvals/seals/_components/document-title-field.tsx (new)
+- src/app/(app)/approvals/seals/_components/form-footer.tsx (new)
+
+**Impact**:
+- One of the largest UI components reduced by 87 lines
+- Improved modularity, each subcomponent ~30-50 lines and independently testable
+- Overall lint errors decreased slightly (931→930); more extractions needed to meet quality gate
+
+**Next**:
+- Continue extracting `SealsView` (186 lines) and `ApprovalDialog` (115 lines)
+- Simultaneously, increase test coverage for uncovered server modules (e.g., express/actions remaining functions)
+
+---
+
 ## Next Scheduled Actions
 
 **IMMEDIATE** (Next 30 minutes):

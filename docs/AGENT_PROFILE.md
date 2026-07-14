@@ -213,18 +213,18 @@ These require extraction and test coverage expansion.
 
 ### High-Complexity Server Functions (2025-07-14)
 
-Following proactive analysis, identified functions in `src/server/matters/actions.ts` exceeding quality gates and requiring refactor:
+Functions in `src/server/matters/actions.ts` exceeding quality gates (lines >20, complexity >10).
 
-| Function | Lines | Complexity | Target | Remediation |
-|----------|-------|------------|--------|-------------|
-| `updateProcedureInfo` | 182 | ~15 | ≤20 lines / ≤10 | Extract payload builders, validation logic, and transaction orchestration |
-| `listMatters` | 129 | ~13 | ≤20 lines / ≤10 | Separate query construction, permission filtering, pagination |
-| `ensureClientParty` / `normalizeNewProcedureParties` | ~50 each | ~8-10 | ≤20 lines / ≤10 | Extract normalization utilities |
+| Function | Lines | Complexity | Target | Status |
+|----------|-------|------------|--------|--------|
+| `updateProcedureInfo` | 182 | ~15 | ≤20 lines / ≤10 | **Tests added** (6 tests, error paths covered). Refactor **deferred** – will extract helpers in next cycle after deeper analysis |
+| `listMatters` | 129 | ~13 | ≤20 lines / ≤10 | Pending |
+| `ensureClientParty` / `normalizeNewProcedureParties` | ~50 each | ~8-10 | ≤20 lines / ≤10 | Pending |
 
 **Remediation Plan**:
-- [ ] Refactor `updateProcedureInfo` first (currently 0% branch coverage? Actually 2 tests added but still low coverage). Extract helpers: `buildProcedureUpdatePayload`, `validateProcedurePartyReferences`, `executeProcedureUpdateTransaction`.
-- [ ] Then refactor `listMatters` to improve readability and coverage.
-- [ ] Add comprehensive tests for error paths and edge cases before refactor (red-green).
+- [ ] Refactor `updateProcedureInfo` – split into smaller helpers (payload building, party validation, transaction)
+- [ ] Refactor `listMatters` – separate query building, permission filtering, pagination
+- [ ] Continue adding tests for uncovered branches
 
 **Priority**: P1 (quality gate)
 
