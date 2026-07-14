@@ -11,10 +11,10 @@
 | Metric | Current | Target | Trend |
 |--------|---------|--------|-------|
 | Health Score | ~84* | ≥90 | ↘️ |
-| Test Coverage (Statements) | **73.69%** | ≥80% | ↘️ |
+| Test Coverage (Statements) | **73.65%** | ≥80% | ↘️ |
 | Branches | **60.12%** | ≥80% | ↘️ |
-| Functions Covered | **69.06%** | ≥80% | ↘️ |
-| Lines | **75.02%** | ≥80% | ↗️ |
+| Functions Covered | **69.28%** | ≥80% | ↗️ |
+| Lines | **74.99%** | ≥80% | ↘️ |
 | Avg Cyclomatic Complexity | ~12 (est.) | ≤10 | ↘️ |
 | Complexity Violations (>10) | 1010** | 0 | ↘️ |
 | Functions >20 lines | TBD (rule updated 2025-07-09) | 0 | - |
@@ -894,6 +894,28 @@ Target: ≥90 points, increase ≥0.5%/week
 
 **Files Modified**:
 - src/server/conflicts/actions.ts
+
+---
+
+### [CYCLE-P1-34] - 2025-07-14 Test Expansion: audit-list module
+
+**Type**: Test Expansion (T) - Coverage Improvement
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Actions**:
+- ✅ Added unit tests for `listAuditLogs` (3 tests) and `getAuditFilterOptions` (2 tests)
+  - Admin role checks, pagination (nextCursor), distinct options
+- ✅ Mocks: `prisma.auditLog.findMany`, `prisma.user.findMany`
+- ✅ Typecheck & Tests: 5 passed
+
+**Impact**:
+- Function coverage: +2 absolute
+- Increased confidence in audit filtering APIs
+
+**Files Modified**:
+- src/tests/server/audit-list.test.ts
 
 ---
 
