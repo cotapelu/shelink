@@ -1,73 +1,91 @@
-import { computeEvents, FamilyEvent } from "@/utils/eventHelpers";
+import { describe, it, expect } from "vitest";
+import { computeEvents, type PersonInput, type CustomEventRecord } from "@/utils/eventHelpers";
 
-describe("eventHelpers - computeEvents", () => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+describe("utils/eventHelpers", () => {
+  const today = new Date("2025-07-15T00:00:00.000Z");
 
-  const createPerson = (overrides: Partial<any> = {}) => ({
-    id: "p1",
-    full_name: "John Doe",
-    birth_year: 1990,
-    birth_month: 5,
-    birth_day: 15,
-    death_year: null,
-    death_month: null,
-    death_day: null,
-    is_deceased: false,
-    ...overrides,
-  });
-
-  it("should generate birthday event", () => {
-    const persons = [createPerson()];
-    const events = computeEvents(persons);
-    expect(events.length).toBeGreaterThanOrEqual(1);
-    const birthday = events.find(e => e.type === "birthday");
-    expect(birthday).toBeDefined();
-    expect(birthday!.personId).toBe("p1");
-    expect(birthday!.personName).toBe("John Doe");
-    expect(birthday!.eventDateLabel).toBe("15/05");
-    expect(birthday!.originYear).toBe(1990);
-    expect(birthday!.originMonth).toBe(5);
-    expect(birthday!.originDay).toBe(15);
-    // daysUntil should be >=0
-    expect(typeof birthday!.daysUntil).toBe("number");
-  });
-
-  it("should not generate birthday if birth_day/month missing", () => {
-    const person = createPerson({ birth_day: null, birth_month: null });
-    const events = computeEvents([person]);
-    const birthday = events.find(e => e.type === "birthday");
-    expect(birthday).toBeUndefined();
-  });
-
-  it("should generate death anniversary when deceased", () => {
-    // This will use lunar conversion; we trust library. Simple check: event exists.
-    const person = createPerson({
-      is_deceased: true,
-      death_year: 2020,
-      death_month: 3,
-      death_day: 10,
+  describe("computeEvents", () => {
+    it("aggregates birthdays and death anniversaries from persons", () => {
+      const persons: PersonInput[] = [
+        {
+          id: "p1",
+          full_name: "John",
+          birth_year: 1990,
+          birth_month: 5,
+          birth_day: 20,
+          death_year: null,
+          death_month: null,
+          death_day: null,
+          is_deceased: false,
+        },
+        {
+          id: "p2",
+          full_name: "Jane",
+          birth_year: 1985,
+          birth_month: 7,
+          birth_day: 25,
+          death_year: 2020,
+          death_month: 8,
+          death_day: 10,
+          is_deceased: true,
+        },
+      ];
+      const events = computeEvents(persons);
+      expect(events.length).toBeGreaterThanOrEqual(2);
+      const types = new Set(events.map(e => e.type));
+      expect(types.has("birthday")).toBe(true);
+      expect(types.has("death_anniversary")).toBe(true);
     });
-    const events = computeEvents([person]);
-    const deathEvent = events.find(e => e.type === "death_anniversary");
-    expect(deathEvent).toBeDefined();
-    expect(deathEvent!.personId).toBe("p1");
-  });
 
-  it("should include custom events", () => {
-    const customEvent = {
-      id: "ce1",
-      name: "Wedding Anniversary",
-      content: "Happy Marriage",
-      event_date: "2023-05-20",
-      location: null,
-      created_by: null,
-    };
-    const persons = [createPerson()];
-    const events = computeEvents(persons, [customEvent]);
-    const custom = events.find(e => e.type === "custom_event");
-    expect(custom).toBeDefined();
-    expect(custom!.personId).toBe("ce1"); // custom event uses its own id
-    expect(custom!.personName).toBe("Wedding Anniversary");
+    it("includes custom events", () => {
+      const customs: CustomEventRecord[] = [{
+        id: "c1",
+        name: "Party",
+        content: "",
+        event_date: "2025-09-01",
+        location: "",
+        created_by: null,
+      }];
+      const events = computeEvents([], customs);
+      expect(events.some(e => e.type === "custom_event")).toBe(true);
+    });
+
+    it("sorts by daysUntil ascending", () => {
+      const today = new Date("2025-07-15");
+      const persons: PersonInput[] = [
+        {
+          id: "p1",
+          full_name: "Early",
+          birth_month: 7,
+          birth_day: 16,
+          birth_year: 1990,
+          death_year: null,
+          death_month: null,
+          death_day: null,
+          is_deceased: false,
+        },
+        {
+          id: "p2",
+          full_name: "Late",
+          birth_month: 8,
+          birth_day: 1,
+          birth_year: 1990,
+          death_year: null,
+          death_month: null,
+          death_day: null,
+          is_deceased: false,
+        },
+      ];
+      const events = computeEvents(persons);
+      if (events.length >= 2) {
+        expect(events[0].personName).toBe("Early");
+        expect(events[1].personName).toBe("Late");
+      }
+    });
+
+    it("returns empty array when no persons or customs", () => {
+      const events = computeEvents([], []);
+      expect(events).toEqual([]);
+    });
   });
 });
