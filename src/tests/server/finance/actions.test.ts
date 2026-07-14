@@ -5,6 +5,7 @@ import {
   deleteBilling,
   setCommissionPlan,
   createFeeEntry,
+  deleteFeeEntry,
   getMatterFinance,
   listMatterInvoiceRequests,
   getMatterInvoiceContext,
@@ -47,6 +48,9 @@ vi.mock("@/lib/prisma", () => ({
     feeEntry: {
       create: vi.fn(),
       findMany: vi.fn(),
+      findUnique: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
     },
     timelineEvent: {
       create: vi.fn(),
