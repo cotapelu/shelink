@@ -851,6 +851,30 @@ Target: ≥90 points, increase ≥0.5%/week
 
 ---
 
+### [CYCLE-P1-32] - 2025-07-14 Test Expansion: audit function
+
+**Type**: Test Expansion (T) - Coverage Improvement
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Actions**:
+- ✅ Added unit tests for `audit` (3 tests)
+  - Correct field mapping to `prisma.auditLog.create`
+  - Error handling (silent catch, console.error)
+  - userId undefined becomes null
+- ✅ Mocks: `prisma.auditLog.create`
+- ✅ Typecheck & Tests: 3 passed
+
+**Impact**:
+- Function coverage: +1 absolute (audit)
+- Improved confidence in audit logging
+
+**Files Modified**:
+- src/tests/server/audit.test.ts
+
+---
+
 ## Next Scheduled Actions
 
 **IMMEDIATE** (Next 30 minutes):
