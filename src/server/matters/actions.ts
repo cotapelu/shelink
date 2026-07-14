@@ -625,6 +625,71 @@ export async function getMatterById(id: string) {
   return matter;
 }
 
+function buildMatterCreateData(
+  data: MatterCreateInput,
+  userId: string,
+  primaryClientId: string,
+  internalCode: string,
+  firmCaseNo: string
+) {
+  return {
+    internalCode,
+    firmCaseNo,
+    title: data.title,
+    category: data.category,
+    ownerId: userId,
+    ...emptyToNull({
+      causeId: data.causeId,
+      causeFreeText: data.causeFreeText
+    }),
+    claimAmount: data.claimAmount ?? undefined,
+    ourStanding: data.ourStanding,
+    counterclaimAsPlaintiff: data.counterclaimAsPlaintiff,
+    counterclaimAsDefendant: data.counterclaimAsDefendant,
+    intakeDate: data.intakeDate ?? new Date(),
+    primaryClientId,
+    members: { create: { userId, role: "LEAD" } },
+    clientLinks: {
+      create: data.clientIds.map((cid, idx) => ({
+        clientId: cid,
+        isPrimary: idx === 0,
+        label: idx === 0 ? "Khách hàng chính" : `Bên ủy thác ${idx + 1}`
+      }))
+    },
+    parties: {
+      create: data.parties.map((p) =>
+        emptyToNull({
+          role: p.role,
+          ordinal: p.ordinal,
+          name: p.name,
+          partyType: p.partyType,
+          idNumber: p.idNumber,
+          phone: p.phone,
+          address: p.address,
+          legalRep: p.legalRep,
+          contactName: p.contactName,
+          enterpriseSocialCode: p.enterpriseSocialCode,
+          enterpriseName: p.enterpriseName,
+          notes: p.notes
+        })
+      )
+    },
+    procedures: {
+      create: {
+        type: data.firstProcedure.type,
+        customLabel: data.firstProcedure.customLabel || null,
+        engagement: "ENGAGED",
+        order: 1,
+        caseNumber: data.firstProcedure.caseNumber || null,
+        handlingAgency: data.firstProcedure.handlingAgency || null,
+        acceptedAt: data.firstProcedure.acceptedAt,
+        status: "IN_PROGRESS"
+      }
+    },
+    firstAcceptedAt: data.firstProcedure.acceptedAt
+  } as any;
+}
+
 export async function createMatter(input: MatterCreateInput) {
   const session = await requireSession();
   const data = matterCreateSchema.parse(input);
@@ -635,76 +700,7 @@ export async function createMatter(input: MatterCreateInput) {
 
   const created = await prisma.$transaction(async (tx) => {
     const matter = await tx.matter.create({
-      data: {
-        internalCode,
-        firmCaseNo,
-        title: data.title,
-        category: data.category,
-        ownerId: session.user.id,
-
-        ...emptyToNull({
-          causeId: data.causeId,
-          causeFreeText: data.causeFreeText
-        }),
-
-        claimAmount: data.claimAmount ?? undefined,
-        ourStanding: data.ourStanding,
-        counterclaimAsPlaintiff: data.counterclaimAsPlaintiff,
-        counterclaimAsDefendant: data.counterclaimAsDefendant,
-        intakeDate: data.intakeDate ?? new Date(),
-
-        primaryClientId,
-
-        // Luật sư phụ trách mặc định là người tạo
-        members: {
-          create: { userId: session.user.id, role: "LEAD" }
-        },
-
-        // Bảng liên kết nhiều khách hàng
-        clientLinks: {
-          create: data.clientIds.map((cid, idx) => ({
-            clientId: cid,
-            isPrimary: idx === 0,
-            label: idx === 0 ? "Khách hàng chính" : `Bên ủy thác ${idx + 1}`
-          }))
-        },
-
-        // Các bên liên quan
-        parties: {
-          create: data.parties.map((p) =>
-            emptyToNull({
-              role: p.role,
-              ordinal: p.ordinal,
-              name: p.name,
-              partyType: p.partyType,
-              idNumber: p.idNumber,
-              phone: p.phone,
-              address: p.address,
-              legalRep: p.legalRep,
-              contactName: p.contactName,
-              enterpriseSocialCode: p.enterpriseSocialCode,
-              enterpriseName: p.enterpriseName,
-              notes: p.notes
-            })
-          )
-        },
-
-        // Thủ tục đầu tiên
-        procedures: {
-          create: {
-            type: data.firstProcedure.type,
-            customLabel: data.firstProcedure.customLabel || null,
-            engagement: "ENGAGED",
-            order: 1,
-            caseNumber: data.firstProcedure.caseNumber || null,
-            handlingAgency: data.firstProcedure.handlingAgency || null,
-            acceptedAt: data.firstProcedure.acceptedAt,
-            status: "IN_PROGRESS"
-          }
-        },
-
-        firstAcceptedAt: data.firstProcedure.acceptedAt
-      }
+      data: buildMatterCreateData(data, session.user.id, primaryClientId, internalCode, firmCaseNo)
     });
 
     // TimelineEvent: Tạo vụ án
