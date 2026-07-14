@@ -48,9 +48,9 @@ export function ClientsTable({
   if (items.length === 0) {
     return (
       <div className="rounded-md border border-border bg-muted/30 flex flex-col items-center gap-2 py-20 text-center">
-        <div className="text-sm text-muted-foreground">还没有客户</div>
+        <div className="text-sm text-muted-foreground">Chưa có khách hàng</div>
         <div className="text-xs text-muted-foreground">
-          点击右上角 <span className="text-foreground/80">新建客户</span> 开始
+          Nhấn vào góc phải trên cùng <span className="text-foreground/80">Tạo khách hàng mới</span> để bắt đầu
         </div>
       </div>
     );
@@ -58,18 +58,18 @@ export function ClientsTable({
 
   return (
     <>
-      {/* 桌面端表格 */}
+      {/* Desktop Table */}
       <div className="ll-surface hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left text-[0.68rem] font-medium uppercase tracking-wider text-muted-foreground">
-              <th className="px-5 py-2.5">客户</th>
-              <th className="px-4 py-2.5">类型</th>
-              <th className="px-4 py-2.5">联系方式</th>
-              <th className="px-4 py-2.5">主要联系人</th>
-              <th className="px-4 py-2.5">案件</th>
-              <th className="px-4 py-2.5">标签</th>
-              <th className="w-20 px-5 py-2.5 text-right">操作</th>
+              <th className="px-5 py-2.5">Khách hàng</th>
+              <th className="px-4 py-2.5">Loại</th>
+              <th className="px-4 py-2.5">Liên hệ</th>
+              <th className="px-4 py-2.5">Liên hệ chính</th>
+              <th className="px-4 py-2.5">Vụ án</th>
+              <th className="px-4 py-2.5">Nhãn</th>
+              <th className="w-20 px-5 py-2.5 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -132,7 +132,7 @@ export function ClientsTable({
                     <span className="ll-stat text-base">{c._count.matters}</span>
                     {c._count.intakes > 0 && (
                       <span className="ml-2 font-mono text-[10.5px] text-muted-foreground tabular">
-                        +{c._count.intakes} 收案
+                        +{c._count.intakes} vụ đăng ký
                       </span>
                     )}
                   </td>
@@ -155,7 +155,7 @@ export function ClientsTable({
                       size="sm"
                       onClick={() => onEdit(c)}
                       className="h-7 w-7 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-                      aria-label="编辑"
+                      aria-label="Chỉnh sửa"
                     >
                       <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} />
                     </Button>
@@ -193,7 +193,7 @@ export function ClientsTable({
                   size="sm"
                   onClick={() => onEdit(c)}
                   className="h-7 w-7 shrink-0 p-0"
-                  aria-label="编辑"
+                  aria-label="Chỉnh sửa"
                 >
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} />
                 </Button>
@@ -206,7 +206,7 @@ export function ClientsTable({
                     {c.phone}
                   </span>
                 )}
-                <span className="ll-stat">{c._count.matters} 个案件</span>
+                <span className="ll-stat">{c._count.matters} vụ án</span>
               </div>
               {c.tags.length > 0 && (
                 <div className="mt-1.5 flex flex-wrap gap-1">
