@@ -5,7 +5,8 @@ import {
   getMatterById,
   updateMatterBasicInfo,
   softDeleteMatter,
-  listMatters
+  listMatters,
+  searchMattersForLink
 } from "@/server/matters/actions";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
@@ -23,6 +24,9 @@ vi.mock("@/lib/prisma", () => ({
       update: vi.fn(),
       findMany: vi.fn(),
       count: vi.fn()
+    },
+    matterLink: {
+      findMany: vi.fn()
     }
   }
 }));
@@ -35,7 +39,9 @@ vi.mock("@/lib/telemetry/server-metrics", () => ({
 vi.mock("@/lib/permissions", () => ({
   assertMatterWritable: vi.fn(),
   assertCanAccessMatter: vi.fn(),
+  assertCanAssociateMatter: vi.fn(),
   assertCanOwnMatter: vi.fn(),
+  matterAssociationFilter: vi.fn(() => ({})),
   matterVisibilityFilter: vi.fn(() => ({}))
 }));
 vi.mock("@/lib/archive/guard", () => ({
@@ -50,7 +56,9 @@ const mockWithMetrics = vi.mocked(withMetrics);
 const mockAssertMatterWritable = vi.mocked(permissions.assertMatterWritable);
 const mockAssertCanAccessMatter = vi.mocked(permissions.assertCanAccessMatter);
 const mockAssertCanOwnMatter = vi.mocked(permissions.assertCanOwnMatter);
+const mockAssertCanAssociateMatter = vi.mocked(permissions.assertCanAssociateMatter as any);
 const mockArchiveAssertMatterWritable = vi.mocked(archiveGuard.assertMatterWritable);
+const mockMatterLink = mockPrisma.matterLink as any;
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -214,5 +222,56 @@ describe("matters actions", () => {
       expect(result.page).toBe(1);
       expect(result.pageSize).toBe(20);
     });
+  });
+});
+describe("searchMattersForLink", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
+    mockAssertCanAssociateMatter.mockResolvedValue(undefined);
+  });
+
+  it("should return matching matters excluding self and linked ones", async () => {
+    const myMatterId = "m1";
+    const linkedMatterId = "m2";
+    const q = "contract";
+
+    // Existing linked matters (both directions)
+    mockPrisma.matterLink.findMany.mockResolvedValue([
+      { matterId: myMatterId, relatedMatterId: linkedMatterId }
+    ]);
+
+    mockPrisma.matter.findMany.mockResolvedValue([
+      { id: "m3", internalCode: "INT-001", title: "Contract A" },
+      { id: "m4", internalCode: "INT-002", title: "Contract B" }
+    ]);
+
+    const result = await searchMattersForLink(myMatterId, q);
+
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe("m3");
+    expect(mockPrisma.matter.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          id: { notIn: expect.arrayContaining([myMatterId, linkedMatterId]) },
+          OR: [
+            { title: { contains: q, mode: "insensitive" } },
+            { internalCode: { contains: q, mode: "insensitive" } }
+          ]
+        }),
+        orderBy: { createdAt: "desc" },
+        take: 8
+      })
+    );
+  });
+
+  it("returns empty array when no matches", async () => {
+    const myMatterId = "m1";
+    mockMatterLink.findMany.mockResolvedValue([]);
+    mockPrisma.matter.findMany.mockResolvedValue([]);
+
+    const result = await searchMattersForLink(myMatterId, "");
+
+    expect(result).toEqual([]);
   });
 });
