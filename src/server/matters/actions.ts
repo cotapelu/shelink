@@ -625,6 +625,52 @@ export async function getMatterById(id: string) {
   return matter;
 }
 
+function buildClientLinks(primaryClientId: string, clientIds: string[]) {
+  return {
+    create: clientIds.map((cid, idx) => ({
+      clientId: cid,
+      isPrimary: idx === 0,
+      label: idx === 0 ? "Khách hàng chính" : `Bên ủy thác ${idx + 1}`
+    }))
+  };
+}
+
+function buildParties(parties: MatterCreateInput["parties"]) {
+  return {
+    create: parties.map((p) =>
+      emptyToNull({
+        role: p.role,
+        ordinal: p.ordinal,
+        name: p.name,
+        partyType: p.partyType,
+        idNumber: p.idNumber,
+        phone: p.phone,
+        address: p.address,
+        legalRep: p.legalRep,
+        contactName: p.contactName,
+        enterpriseSocialCode: p.enterpriseSocialCode,
+        enterpriseName: p.enterpriseName,
+        notes: p.notes
+      })
+    )
+  };
+}
+
+function buildProcedure(firstProcedure: MatterCreateInput["firstProcedure"], acceptedAt?: Date) {
+  return {
+    create: {
+      type: firstProcedure.type,
+      customLabel: firstProcedure.customLabel || null,
+      engagement: "ENGAGED" as const,
+      order: 1,
+      caseNumber: firstProcedure.caseNumber || null,
+      handlingAgency: firstProcedure.handlingAgency || null,
+      acceptedAt: acceptedAt ?? firstProcedure.acceptedAt,
+      status: "IN_PROGRESS" as const
+    }
+  };
+}
+
 function buildMatterCreateData(
   data: MatterCreateInput,
   userId: string,
@@ -649,43 +695,9 @@ function buildMatterCreateData(
     intakeDate: data.intakeDate ?? new Date(),
     primaryClientId,
     members: { create: { userId, role: "LEAD" } },
-    clientLinks: {
-      create: data.clientIds.map((cid, idx) => ({
-        clientId: cid,
-        isPrimary: idx === 0,
-        label: idx === 0 ? "Khách hàng chính" : `Bên ủy thác ${idx + 1}`
-      }))
-    },
-    parties: {
-      create: data.parties.map((p) =>
-        emptyToNull({
-          role: p.role,
-          ordinal: p.ordinal,
-          name: p.name,
-          partyType: p.partyType,
-          idNumber: p.idNumber,
-          phone: p.phone,
-          address: p.address,
-          legalRep: p.legalRep,
-          contactName: p.contactName,
-          enterpriseSocialCode: p.enterpriseSocialCode,
-          enterpriseName: p.enterpriseName,
-          notes: p.notes
-        })
-      )
-    },
-    procedures: {
-      create: {
-        type: data.firstProcedure.type,
-        customLabel: data.firstProcedure.customLabel || null,
-        engagement: "ENGAGED",
-        order: 1,
-        caseNumber: data.firstProcedure.caseNumber || null,
-        handlingAgency: data.firstProcedure.handlingAgency || null,
-        acceptedAt: data.firstProcedure.acceptedAt,
-        status: "IN_PROGRESS"
-      }
-    },
+    clientLinks: buildClientLinks(primaryClientId, data.clientIds),
+    parties: buildParties(data.parties),
+    procedures: buildProcedure(data.firstProcedure, data.firstProcedure.acceptedAt),
     firstAcceptedAt: data.firstProcedure.acceptedAt
   } as any;
 }
