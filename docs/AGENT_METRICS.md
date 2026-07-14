@@ -716,6 +716,50 @@ Target: ≥90 points, increase ≥0.5%/week
 
 ---
 
+### [CYCLE-P1-26] - 2025-07-14 Test Expansion: deleteFeeEntry Tests
+
+**Type**: Test Expansion (T) - Coverage Improvement
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Actions**:
+- ✅ Added unit tests for `deleteFeeEntry` (3 tests)
+  - Success: cascade delete commission children, permission check, not found handling
+- ✅ Prisma mock extended: `feeEntry` (findUnique, delete, deleteMany), `$transaction`
+- ✅ Typecheck & Tests: 3 passed
+
+**Impact**:
+- Function coverage: +3 absolute
+- No new lint violations
+
+**Files Modified**:
+- src/tests/server/finance/deleteFeeEntry.test.ts
+
+---
+
+### [CYCLE-P1-27] - 2025-07-14 Test Expansion: getPersonalRevenue Tests
+
+**Type**: Test Expansion (T) - Coverage Improvement
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Actions**:
+- ✅ Added unit tests for `getPersonalRevenue` (4 tests)
+  - Self access, manager view other, permission rejection, zero commission handling
+- ✅ Mocked Prisma aggregate calls
+- ✅ Typecheck & Tests: 4 passed
+
+**Impact**:
+- Function coverage: +4 absolute
+- No new lint violations
+
+**Files Modified**:
+- src/tests/server/finance/getPersonalRevenue.test.ts
+
+---
+
 ## Next Scheduled Actions
 
 **IMMEDIATE** (Next 30 minutes):
