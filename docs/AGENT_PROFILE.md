@@ -204,8 +204,6 @@ These require extraction and test coverage expansion.
 
 **Remaining High-Priority Modules**:
 - `src/app/(app)/matters/[id]/_components/procedure-content.tsx` (1357 lines)
-- `src/app/(app)/matters/_components/matters-table.tsx`
-- `src/app/(app)/matters/_components/matters-view.tsx`
 - `src/app/(app)/archive/_components/*` (multiple)
 - `src/app/(app)/approvals/seals/_components/*`
 - `src/app/(app)/finance/_components/*`

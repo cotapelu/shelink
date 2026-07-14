@@ -4523,3 +4523,35 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - Matter modules (procedure-content, matters-table, matters-view, etc.) still Chinese
 - Archive, Approvals, Finance, Settings modules also need i18n
 
+
+### [CYCLE-P1-BB-3] - 2025-07-14 Matter Modules i18n
+
+**Type**: (T) Documentation / UI Gap Fix  
+**Priority**: HIGH  
+**Duration**: ~1h  
+**Status**: ✅ Completed
+
+**Scope**:
+- `src/app/(app)/matters/_components/matters-table.tsx`
+- `src/app/(app)/matters/_components/matters-view.tsx`
+
+**Translations**:
+- Table columns: Thời gian nhận vụ án, Tên vụ án, Giá trị yêu cầu, Mã số nội bộ, Thời gian xét xử, Trạng thái
+- Tabs: Tất cả vụ án, Chờ duyệt, Đang xử lý, Chờ bổ sung, Đã lưu trữ
+- Filters: Tất cả trạng thái, Đang xử lý, Đã kết thúc, Đã lưu trữ
+- Sort labels: Theo thời gian xét xử, Theo thời gian nhận vụ án, Theo giá trị yêu cầu, Giảm dần, Tăng dần
+- Empty state: Không có vụ án phù hợp → Tạo vụ án mới
+
+**Quality**:
+- ✅ Typecheck: PASS
+- ✅ Tests: **1868 passed**, 1 skipped
+- ✅ Build: SUCCESS
+
+**Coverage**: unchanged (server code unchanged)
+
+**Cumulative i18n Progress**:
+- ✅ Intake flow completed
+- ✅ Client management completed
+- ✅ Matter list/detail partially done (table + view)
+- Remaining: `procedure-content.tsx` (1357 lines), archive, approvals, finance, settings
+
