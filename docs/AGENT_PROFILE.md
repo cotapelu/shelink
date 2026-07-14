@@ -58,7 +58,11 @@ Modules với failure rate >5% hoặc repeated issues:
   - Complexity and max-lines violations eliminated for this module
 - **2025-07-14**: Fixed `conflicts/algorithm` test type errors and exported functions for testability
 - **2025-07-14**: Added ESLint override for test files (complexity & max-lines off), acknowledging mock-heavy test patterns
-- Result: Lint errors reduced from 2070 to 1301 (-37%)
+- **2025-07-14**: Refactored `gedcom/parser`:
+  - Added `parseGedcomDate` helper to eliminate duplication
+  - Refactored `parseFamilyRecord` into smaller helpers (`parseFamilyReferences`, `createMarriage`, `createChildRelationships`)
+  - Refactored `parsePersonRecord` using handler map, reducing complexity from 38 → 13 (still >10, need further reduction)
+  - Result: Lint errors reduced from 2070 to 1299 (-37%)
 
 ## Error-Prone Stacks
 

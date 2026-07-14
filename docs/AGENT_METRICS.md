@@ -600,9 +600,10 @@ Target: ≥90 points, increase ≥0.5%/week
   - Reduced code duplication, improved readability
 
 ** Impact **:
-- parsePersonRecord complexity improved (from 38 to 24)
-- parseFamilyRecord complexity ~12 (still slightly >10, but manageable)
-- splitIntoRecords remains borderline (21 lines) - consider further extraction if needed
+- parsePersonRecord complexity reduced from 38 → 13 (still >10, needs further reduction)
+- parseFamilyRecord complexity ~12 (still slightly >10)
+- splitIntoRecords remains at 21 lines (borderline)
+- Overall lint errors reduced from 1301 to 1299 after this refactor
 
 **Files Modified**:
 - src/utils/gedcom/parser.ts
