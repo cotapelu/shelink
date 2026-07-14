@@ -133,12 +133,16 @@ function pickSeverity(
   candidateRole: PartyRole,
   historyRole: PartyRole
 ): ConflictHitDraft["severity"] {
-  if (candidateRole === "THIRD_PARTY" || historyRole === "THIRD_PARTY") return "MEDIUM";
-  if (candidateRole === "OPPOSING_PARTY" && historyRole === "CLIENT_PARTY") return "BLOCKING";
-  if (candidateRole === "CLIENT_PARTY" && historyRole === "OPPOSING_PARTY") return "HIGH";
-  if (candidateRole === "OPPOSING_PARTY" && historyRole === "OPPOSING_PARTY") return "LOW";
-  if (candidateRole === "CLIENT_PARTY" && historyRole === "CLIENT_PARTY") return "LOW";
-  return "MEDIUM";
+  if (candidateRole === "THIRD_PARTY" || historyRole === "THIRD_PARTY") {
+    return "MEDIUM";
+  }
+  const comboMap: Record<string, ConflictHitDraft["severity"]> = {
+    "OPPOSING_PARTY|CLIENT_PARTY": "BLOCKING",
+    "CLIENT_PARTY|OPPOSING_PARTY": "HIGH",
+    "OPPOSING_PARTY|OPPOSING_PARTY": "LOW",
+    "CLIENT_PARTY|CLIENT_PARTY": "LOW",
+  };
+  return comboMap[`${candidateRole}|${historyRole}`] ?? "MEDIUM";
 }
 
 export async function runConflictCheck(queries: QueryItem[]): Promise<ConflictCheckResult> {
