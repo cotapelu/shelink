@@ -4555,3 +4555,34 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - ✅ Matter list/detail partially done (table + view)
 - Remaining: `procedure-content.tsx` (1357 lines), archive, approvals, finance, settings
 
+
+### [CYCLE-P1-BB-4] - 2025-07-14 procedure-content i18n
+
+**Type**: (T) Documentation / UI Gap Fix  
+**Priority**: HIGH  
+**Duration**: ~1.5h  
+**Status**: ✅ Completed
+
+**Scope**:
+- `src/app/(app)/matters/[id]/_components/procedure-content.tsx` (1357 lines)
+
+**Translated**:
+- Tabs: 开庭→Xét xử, 时限→Thời hạn, 快递→Chuyển phát, 备忘→Ghi chú
+- Buttons: 添加→Thêm, 删除→Xóa, 标记完成/未完成, etc.
+- Toasts: 操作失败, 已删除, 删除失败, etc.
+- Confirmations: 删除这条...？, 未填写法庭信息, etc.
+- Status labels: 逾期, 今天, 已完成, 未召开/已召开, 寄出/收件, 待识别, 待跟踪
+- Empty state: 暂无{label} → Chưa có {label}
+
+**Quality**:
+- ✅ Typecheck: PASS
+- ✅ Tests: **1868 passed**
+- ✅ Build: SUCCESS
+
+**Impact**:
+- Matter detail important events section fully Vietnamese
+- Consistent with overall i18n effort
+
+**Remaining**:
+- Other matter-related components (timeline, documents panel, etc.) may still contain Chinese; to be scanned in next cycle.
+
