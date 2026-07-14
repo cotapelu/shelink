@@ -4487,3 +4487,39 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - When multiple components inline labels (not using subcomponents), need to translate each occurrence.
 - Global find/replace with sed effective for common terms but must avoid false positives.
 
+
+### [CYCLE-P1-BB-2] - 2025-07-14 Client Module i18n + Test Updates
+
+**Type**: (T) Documentation / UI Gap Fix  
+**Priority**: HIGH  
+**Duration**: ~2h  
+**Status**: ✅ Completed
+
+**Scope**:
+- `src/app/(app)/clients/_components/client-sheet.tsx` (615 lines)
+- `src/app/(app)/clients/_components/clients-view.tsx`
+- `src/app/(app)/clients/[id]/_components/client-info-section.tsx`
+- Associated test files updated
+
+**Translated Labels**:
+- Form fields: Tên khách hàng, Loại, Số CMND/CCCD, Số điện thoại, Email, Địa chỉ, etc.
+- Toasts: Khách hàng đã cập nhật/tạo, Lưu thất bại, Tìm kiếm thất bại, etc.
+- Buttons: Tạo mới, Chỉnh sửa, Lưu, Hủy, Thêm, Xóa, Đóng
+- Page titles: Quản lý khách hàng, Tạo khách hàng mới
+- Search placeholder: Tìm kiếm theo tên / số CMND/CCCD / điện thoại / email
+- Finance labels: Tổng phải thu, Tổng đã thu, Còn lại
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: **1868 passed**, 1 skipped (no regressions)
+- ✅ Build: SUCCESS
+
+**Impact**:
+- Client management flow fully Vietnamese
+- Improved user experience for Vietnamese users
+- Consistency with intake i18n
+
+**Remaining Work**:
+- Matter modules (procedure-content, matters-table, matters-view, etc.) still Chinese
+- Archive, Approvals, Finance, Settings modules also need i18n
+

@@ -59,11 +59,11 @@ export function CaseListHeader({
         "hidden border-b border-border bg-muted/30 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground lg:grid"
       )}
     >
-      <div>收案时间</div>
-      <div>案件名称</div>
-      <div>标的</div>
-      <div>{metaColumn === "firmCaseNo" ? "所内案号" : "开庭时间"}</div>
-      <div>状态</div>
+      <div>Thời gian nhận vụ án</div>
+      <div>Tên vụ án</div>
+      <div>Giá trị yêu cầu</div>
+      <div>{metaColumn === "firmCaseNo" ? "Mã số nội bộ" : "Thời gian xét xử"}</div>
+      <div>Trạng thái</div>
     </div>
   );
 }
@@ -78,9 +78,9 @@ export function MattersTable({
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-card py-20 text-center">
-        <div className="text-base text-muted-foreground">没有匹配的案件</div>
+        <div className="text-base text-muted-foreground">Không có vụ án phù hợp</div>
         <div className="text-xs text-muted-foreground/70">
-          点击右上角 <span className="text-foreground/80">新建收案</span> 开始
+          点击右上角 <span className="text-foreground/80">Tạo vụ án mới</span> 开始
         </div>
       </div>
     );
@@ -99,7 +99,7 @@ export function MattersTable({
             status={{
               label:
                 (m.archiveRecords?.length ?? 0) > 0
-                  ? "归档中"
+                  ? "Đang lưu trữ"
                   : matterStatusLabel[m.status],
               dot:
                 (m.archiveRecords?.length ?? 0) > 0
@@ -164,7 +164,7 @@ export function CaseListCard({
         )}
       >
         <div className={MATTER_ROW_GRID}>
-          <DataCell label="收案时间">
+          <DataCell label="Thời gian nhận vụ án">
             <span className="font-mono tabular-nums text-foreground/70">
               {formatDate(intakeDate)}
             </span>
@@ -184,18 +184,18 @@ export function CaseListCard({
                 {categoryShort}
               </span>
               <span className="min-w-0 truncate text-[12px] font-normal leading-5 text-primary">
-                {title || "（未命名）"}
+                {title || "（Chưa có tên）"}
               </span>
             </div>
           </div>
 
-          <DataCell label="标的">
+          <DataCell label="Giá trị yêu cầu">
             <span className="font-mono tabular-nums text-foreground/75">
               {claimAmount != null ? formatCurrency(claimAmount) : "—"}
             </span>
           </DataCell>
 
-          <DataCell label={metaColumn === "firmCaseNo" ? "所内案号" : "开庭时间"}>
+          <DataCell label={metaColumn === "firmCaseNo" ? "Mã số nội bộ" : "Thời gian xét xử"}>
             {metaColumn === "firmCaseNo" ? (
               <span className="font-mono tabular-nums text-foreground/75">
                 {firmCaseNo || "—"}
@@ -212,7 +212,7 @@ export function CaseListCard({
             )}
           </DataCell>
 
-          <DataCell label="状态">
+          <DataCell label="Trạng thái">
             <StatusChip label={status.label} dot={status.dot} />
           </DataCell>
         </div>
@@ -246,7 +246,7 @@ function formatDate(value: Date | null) {
 }
 
 function formatDateTime(value: Date | null) {
-  if (!value) return "暂无开庭";
+  if (!value) return "Chưa có lịch xét xử";
   const date = new Date(value);
   const yyyy = date.getFullYear();
   const mm = pad2(date.getMonth() + 1);

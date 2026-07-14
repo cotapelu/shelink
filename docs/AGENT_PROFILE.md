@@ -196,24 +196,22 @@ These require extraction and test coverage expansion.
 **Priority**: P1 (quality gate)
 
 
-### UI Localization Incomplete (2025-07-14)
+### UI Localization Incomplete (2025-07-14) - UPDATED
 
-**Modules with remaining Chinese labels**:
-- `src/app/(app)/clients/_components/client-sheet.tsx` (large, many toasts and labels)
-- `src/app/(app)/clients/_components/clients-view.tsx`
-- `src/app/(app)/clients/[id]/_components/client-info-section.tsx`
-- `src/app/(app)/archive/_components/*` (multiple)
-- `src/app/(app)/approvals/seals/_components/*` (many)
+**Completed**: 
+- Intake flow (claim, cause, lawyer, procedure, documents, fee, intake-sheet)
+- Client management (client-sheet, clients-view, client-info-section, clients-table)
+
+**Remaining High-Priority Modules**:
 - `src/app/(app)/matters/[id]/_components/procedure-content.tsx` (1357 lines)
-- Other matters components
+- `src/app/(app)/matters/_components/matters-table.tsx`
+- `src/app/(app)/matters/_components/matters-view.tsx`
+- `src/app/(app)/archive/_components/*` (multiple)
+- `src/app/(app)/approvals/seals/_components/*`
+- `src/app/(app)/finance/_components/*`
+- `src/app/(app)/settings/*`
 
-**Remediation**:
-- [ ] Create translation map and systematically replace Chinese with Vietnamese across all UI components
-- [ ] Prioritize high-traffic pages: client management, matter detail, archive, approvals
-- [ ] Ensure i18n consistency: use same Vietnamese terms
-- [ ] Update related test snapshots if needed
-
-**Priority**: P1 (user experience, market readiness)
+**Next Step**: Continue with Matter modules i18n, then refactor high-complexity server functions.
 
 
 ### High-Complexity Server Functions (2025-07-14)

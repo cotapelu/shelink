@@ -77,29 +77,29 @@ const ALL_CATEGORIES: (MatterCategory | "ALL")[] = [
 ];
 
 const TABS: { key: Tab; label: string; icon: typeof Clock }[] = [
-  { key: "all", label: "全部案件", icon: FolderOpen },
-  { key: "intake", label: "待审批", icon: Clock },
-  { key: "active", label: "进行中", icon: CheckCircle2 },
-  { key: "revision", label: "待补正", icon: AlertCircle },
-  { key: "archived", label: "已归档", icon: Archive }
+  { key: "all", label: "Tất cả vụ án", icon: FolderOpen },
+  { key: "intake", label: "Chờ duyệt", icon: Clock },
+  { key: "active", label: "Đang xử lý", icon: CheckCircle2 },
+  { key: "revision", label: "Chờ bổ sung", icon: AlertCircle },
+  { key: "archived", label: "Đã lưu trữ", icon: Archive }
 ];
 
 const ALL_STATUS_FILTERS: { value: string; label: string }[] = [
-  { value: "ALL", label: "全部状态" },
-  { value: "active", label: "办理中" },
-  { value: "closed", label: "已结案" },
-  { value: "archived", label: "已归档" }
+  { value: "ALL", label: "Tất cả trạng thái" },
+  { value: "active", label: "Đang xử lý" },
+  { value: "closed", label: "Đã kết thúc" },
+  { value: "archived", label: "Đã lưu trữ" }
 ];
 
 const SORT_OPTIONS: { value: SortBy; label: string }[] = [
-  { value: "hearing", label: "按开庭时间" },
-  { value: "intakeDate", label: "按收案时间" },
-  { value: "claimAmount", label: "按标的金额" }
+  { value: "hearing", label: "Theo thời gian xét xử" },
+  { value: "intakeDate", label: "Theo thời gian nhận vụ án" },
+  { value: "claimAmount", label: "Theo giá trị yêu cầu" }
 ];
 
 const SORT_DIR_OPTIONS: { value: SortDir; label: string }[] = [
-  { value: "desc", label: "倒序" },
-  { value: "asc", label: "正序" }
+  { value: "desc", label: "Giảm dần" },
+  { value: "asc", label: "Tăng dần" }
 ];
 
 function defaultSortByForTab(tab: Tab): SortBy {
