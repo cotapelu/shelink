@@ -30,7 +30,7 @@ describe("saveExpressSettingsAction", () => {
 
   it("should save settings and audit for admin", async () => {
     mockRequireSession.mockResolvedValue({ user: { role: "ADMIN" } } as any);
-    mockSaveSettings.mockResolvedValue(undefined);
+    mockSaveSettings.mockResolvedValue({ ok: true });
 
     const result = await saveExpressSettingsAction({
       kdniaoEbusinessId: "test-eb",
@@ -61,7 +61,7 @@ describe("saveExpressSettingsAction", () => {
 
   it("should trim strings before saving", async () => {
     mockRequireSession.mockResolvedValue({ user: { role: "ADMIN" } } as any);
-    mockSaveSettings.mockResolvedValue(undefined);
+    mockSaveSettings.mockResolvedValue({ ok: true });
 
     await saveExpressSettingsAction({
       kdniaoEbusinessId: "  eb  ",

@@ -1073,6 +1073,47 @@ Target: ≥90 points, increase ≥0.5%/week
 
 ---
 
+### [CYCLE-AUTO-5] - 2026-07-14 Refactor: SealsView Extraction
+
+**Type**: Refactor (R) - Lines Reduction
+**Priority**: HIGH (quality gate)
+**Duration**: ~45 min
+**Status**: ✅ Completed
+
+**Actions**:
+- Extracted `SealsHeader` (title + new button)
+- Extracted `SealsKpi` (stats cards)
+- Extracted `SealsTabBar` (tabs navigation)
+- Extracted `SealsTable` (table rendering, empty state)
+- Refactored `SealsView` to use subcomponents and inline derived data
+- Moved props type to `SealsViewProps` interface
+- Reduced `SealsView` function size: **186 lines → 87 lines** (-51%)
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Build: PASS
+- ✅ Lint: Function size reduced from 186 to 87 (still >50 but significantly improved)
+- No test regressions (existing tests unaffected)
+
+**Files Modified**:
+- src/app/(app)/approvals/seals/_components/seals-view.tsx (refactored)
+- src/app/(app)/approvals/seals/_components/seals-header.tsx (new)
+- src/app/(app)/approvals/seals/_components/seals-kpi.tsx (new)
+- src/app/(app)/approvals/seals/_components/seals-tab-bar.tsx (new)
+- src/app/(app)/approvals/seals/_components/seals-table.tsx (new)
+
+**Impact**:
+- Large UI component modularized; each subcomponent <50 lines
+- Improved readability and maintainability
+- Lint violations decreased (from ~930 to ~?)
+- Demonstrated systematic extraction pattern applicable to other large components (e.g., `InvoiceBuilder`, `MemberDetailContent`)
+
+**Next**:
+- Continue with next large UI component (`ApprovalDialog` `seal-actions-dialogs` refactor) to reach <50 lines target
+- Add tests for `express/actions` remaining functions
+
+---
+
 ## Next Scheduled Actions
 
 **IMMEDIATE** (Next 30 minutes):
