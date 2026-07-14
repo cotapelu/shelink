@@ -804,6 +804,28 @@ Target: ≥90 points, increase ≥0.5%/week
 
 ---
 
+### [CYCLE-P1-30] - 2025-07-14 Test Strategy Refinement
+
+**Type**: Process Improvement
+**Priority**: MEDIUM
+**Duration**: ~30 min
+**Status**: ⚠️ Partial (exploratory)
+
+**Actions**:
+- Explored adding tests for `documents/actions` (listAllDocuments, hardDeleteDocument) but encountered module mock mismatches.
+- Explored `audit-list` tests; API more complex than expected (cursor pagination, filter object).
+- Explored `utils/eventHelpers` tests; initial signature misunderstanding; will revisit with precise signatures.
+
+**Impact**:
+- No net coverage gain this sub-cycle.
+- Documented pitfalls for future test development.
+- Will allocate dedicated time to refactor complex modules (e.g., `kinship/compute.ts`) with proper scaffolding.
+
+**Files Modified**:
+- (none merged)
+
+---
+
 ## Next Scheduled Actions
 
 **IMMEDIATE** (Next 30 minutes):
