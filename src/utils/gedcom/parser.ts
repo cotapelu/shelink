@@ -33,17 +33,35 @@ function parseGedcomDate(dateStr: string): {
   const cleanVal = dateStr.replace(/^(ABT|EST|AFT|BEF|CAL)\s+/i, "");
   const parts = cleanVal.split(" ");
   if (parts.length === 3) {
-    return {
-      day: parseInt(parts[0]) || null,
-      month: parseMonthName(parts[1]),
-      year: parseInt(parts[2]) || null,
-    };
+    return { day: parseInt(parts[0]) || null, month: parseMonthName(parts[1]), year: parseInt(parts[2]) || null };
   } else if (parts.length === 1) {
     return { day: null, month: null, year: parseInt(parts[0]) || null };
   } else if (parts.length === 2) {
     return { day: null, month: parseMonthName(parts[0]), year: parseInt(parts[1]) || null };
   }
   return { day: null, month: null, year: null };
+}
+
+function handleLevel1(tag: string, val: string, state: any): void {
+  switch (tag) {
+    case "NAME": state.fullName = val.replace(/\//g, "").trim(); break;
+    case "SEX": state.gender = val === "M" ? "male" : val === "F" ? "female" : "other"; break;
+    case "DEAT": state.is_deceased = val.trim().length === 0 || val === "Y"; break;
+    case "NOTE": state.note = val; break;
+  }
+}
+
+function handleLevel2(currentTag: string, tag: string, val: string, state: any): void {
+  const key = `${currentTag}:${tag}`;
+  if (key === "NOTE:CONT") state.note += "\n" + val;
+  else if (key === "BIRT:DATE") {
+    const d = parseGedcomDate(val);
+    state.birth_day = d.day; state.birth_month = d.month; state.birth_year = d.year;
+  } else if (key === "DEAT:DATE") {
+    state.is_deceased = true;
+    const d = parseGedcomDate(val);
+    state.death_day = d.day; state.death_month = d.month; state.death_year = d.year;
+  }
 }
 
 function generateUUID() {
@@ -78,50 +96,41 @@ function splitIntoRecords(gedcom: string): ParseRecord[] {
   return records;
 }
 
-// eslint-disable-next-line max-lines-per-function, max-statements
+
+
+function buildGedcomPersonFromState(state: any, uuid: string): GedcomPerson {
+  return {
+    id: uuid,
+    full_name: state.fullName,
+    gender: state.gender,
+    is_deceased: state.is_deceased,
+    birth_day: Number.isNaN(state.birth_day) ? null : state.birth_day,
+    birth_month: state.birth_month,
+    birth_year: Number.isNaN(state.birth_year) ? null : state.birth_year,
+    death_day: Number.isNaN(state.death_day) ? null : state.death_day,
+    death_month: state.death_month,
+    death_year: Number.isNaN(state.death_year) ? null : state.death_year,
+    is_in_law: false,
+    birth_order: null,
+    generation: null,
+    avatar_url: null,
+    note: state.note.length > 0 ? state.note : null,
+  };
+}
+
 function parsePersonRecord(record: ParseRecord, idMap: Map<string, string>): GedcomPerson {
   const uuid = generateUUID();
   idMap.set(record.id, uuid);
 
-  let fullName = "Unknown";
-  let gender: "male" | "female" | "other" = "other";
-  let is_deceased = false;
-  let birth_day: number | null = null;
-  let birth_month: number | null = null;
-  let birth_year: number | null = null;
-  let death_day: number | null = null;
-  let death_month: number | null = null;
-  let death_year: number | null = null;
-  let note = "";
-
+  const state: any = {
+    fullName: "Unknown",
+    gender: "other",
+    is_deceased: false,
+    birth_day: null, birth_month: null, birth_year: null,
+    death_day: null, death_month: null, death_year: null,
+    note: ""
+  };
   let currentTag = "";
-
-  const level1Handlers: Record<string, (val: string) => void> = {
-    NAME: (val) => { fullName = val.replace(/\//g, "").trim(); },
-    SEX: (val) => {
-      if (val === "M") gender = "male";
-      else if (val === "F") gender = "female";
-    },
-    DEAT: (val) => { is_deceased = val.trim().length === 0 || val === "Y"; },
-    NOTE: (val) => { note = val; },
-  };
-
-  const level2Handlers: Record<string, (val: string) => void> = {
-    "NOTE:CONT": (val) => { note += "\n" + val; },
-    "BIRT:DATE": (val) => {
-      const date = parseGedcomDate(val);
-      birth_day = date.day;
-      birth_month = date.month;
-      birth_year = date.year;
-    },
-    "DEAT:DATE": (val) => {
-      is_deceased = true;
-      const date = parseGedcomDate(val);
-      death_day = date.day;
-      death_month = date.month;
-      death_year = date.year;
-    },
-  };
 
   for (let i = 0; i < record.lines.length; i++) {
     const line = record.lines[i];
@@ -134,32 +143,13 @@ function parsePersonRecord(record: ParseRecord, idMap: Map<string, string>): Ged
 
     if (level === 1) {
       currentTag = tag;
-      const h1 = level1Handlers[tag];
-      if (h1) h1(val);
+      handleLevel1(tag, val, state);
     } else if (level === 2) {
-      const key = `${currentTag}:${tag}`;
-      const h2 = level2Handlers[key];
-      if (h2) h2(val);
+      handleLevel2(currentTag, tag, val, state);
     }
   }
 
-  return {
-    id: uuid,
-    full_name: fullName,
-    gender,
-    is_deceased,
-    birth_day: Number.isNaN(birth_day) ? null : birth_day,
-    birth_month,
-    birth_year: Number.isNaN(birth_year) ? null : birth_year,
-    death_day: Number.isNaN(death_day) ? null : death_day,
-    death_month,
-    death_year: Number.isNaN(death_year) ? null : death_year,
-    is_in_law: false,
-    birth_order: null,
-    generation: null,
-    avatar_url: null,
-    note: note.length > 0 ? note : null,
-  };
+  return buildGedcomPersonFromState(state, uuid);
 }
 
 function parseFamilyReferences(lines: string[], idMap: Map<string, string>): { husb: string | null; wife: string | null; children: string[] } {

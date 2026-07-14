@@ -665,6 +665,55 @@ Target: ≥90 points, increase ≥0.5%/week
 
 ---
 
+### [CYCLE-P1-24] - 2025-07-14 Coverage Push: updateMatterTeam Tests
+
+**Type**: Test Expansion (T) - Coverage Improvement
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Actions**:
+- ✅ Added unit tests for `updateMatterTeam` (3 tests)
+  - Success: owner/co-leads/assistants update, transaction, audit, timeline, revalidate
+  - Matter not found → throw
+  - Permission denied → throw
+- ✅ Extended Prisma mock: `matterMember`, `timelineEvent`, `$transaction`
+- ✅ Typecheck & Tests: 13 passed
+
+**Impact**:
+- Function coverage: +2 absolute
+- No new lint violations
+- Quality gate maintained
+
+**Files Modified**:
+- src/tests/server/matters/actions.test.ts
+
+---
+
+### [CYCLE-P1-25] - 2025-07-14 Complexity Reduction: parsePersonRecord Refactor
+
+**Type**: Refactor (R) - Complexity Reduction
+**Priority**: HIGH
+**Duration**: ~30 min
+**Status**: ✅ Completed
+
+**Actions**:
+- ✅ Extracted `handleLevel1` and `handleLevel2` helper functions
+- ✅ Introduced `buildGedcomPersonFromState` to separate mapping logic
+- ✅ Simplified `parsePersonRecord` to only state collection and loop dispatch
+
+**Impact**:
+- `parsePersonRecord`: lines 49→~20, complexity 11→~5
+- All gedcom tests pass (41 passed)
+- Typecheck: PASS
+- No new lint violations for parser.ts
+- Improved readability and testability
+
+**Files Modified**:
+- src/utils/gedcom/parser.ts
+
+---
+
 ## Next Scheduled Actions
 
 **IMMEDIATE** (Next 30 minutes):

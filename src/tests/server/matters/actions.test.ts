@@ -6,7 +6,8 @@ import {
   updateMatterBasicInfo,
   softDeleteMatter,
   listMatters,
-  searchMattersForLink
+  searchMattersForLink,
+  updateMatterTeam
 } from "@/server/matters/actions";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
@@ -27,7 +28,15 @@ vi.mock("@/lib/prisma", () => ({
     },
     matterLink: {
       findMany: vi.fn()
-    }
+    },
+    matterMember: {
+      deleteMany: vi.fn(),
+      createMany: vi.fn()
+    },
+    timelineEvent: {
+      create: vi.fn()
+    },
+    $transaction: vi.fn()
   }
 }));
 vi.mock("@/lib/auth/session", () => ({ requireSession: vi.fn() }));
@@ -273,5 +282,93 @@ describe("searchMattersForLink", () => {
     const result = await searchMattersForLink(myMatterId, "");
 
     expect(result).toEqual([]);
+  });
+});
+
+describe("updateMatterTeam", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "ADMIN", name: "Admin" } });
+    mockAssertMatterWritable.mockResolvedValue(undefined);
+    mockAssertCanAccessMatter.mockResolvedValue(undefined);
+    mockAssertCanOwnMatter.mockResolvedValue(undefined);
+  });
+
+  it("should update matter team: owner, co-leads, assistants", async () => {
+    const input = {
+      matterId: "m1",
+      ownerId: "u2",
+      coLeadIds: ["u3", "u4"],
+      assistantIds: ["u5"]
+    };
+    mockPrisma.matter.findUnique.mockResolvedValue({ id: "m1", ownerId: "oldOwner" } as any);
+    mockPrisma.matterMember.deleteMany.mockResolvedValue({ count: 0 } as any);
+    mockPrisma.matterMember.createMany.mockResolvedValue({ count: 3 } as any);
+    mockPrisma.timelineEvent.create.mockResolvedValue({} as any);
+
+    mockPrisma.$transaction.mockImplementation(async (cb: any) => {
+      return await cb({
+        matter: { update: mockPrisma.matter.update },
+        matterMember: {
+          deleteMany: mockPrisma.matterMember.deleteMany,
+          createMany: mockPrisma.matterMember.createMany
+        },
+        timelineEvent: { create: mockPrisma.timelineEvent.create }
+      });
+    });
+
+    const result = await updateMatterTeam(input);
+
+    expect(result).toEqual({ ok: true });
+    expect(mockPrisma.matter.update).toHaveBeenCalledWith({
+      where: { id: "m1" },
+      data: { ownerId: "u2" }
+    });
+    expect(mockPrisma.matterMember.deleteMany).toHaveBeenCalledWith({
+      where: { matterId: "m1" }
+    });
+    expect(mockPrisma.matterMember.createMany).toHaveBeenCalledWith({
+      data: [
+        { matterId: "m1", userId: "u2", role: "LEAD" },
+        { matterId: "m1", userId: "u3", role: "CO_LEAD" },
+        { matterId: "m1", userId: "u4", role: "CO_LEAD" },
+        { matterId: "m1", userId: "u5", role: "ASSISTANT" }
+      ],
+      skipDuplicates: true
+    });
+    expect(mockPrisma.timelineEvent.create).toHaveBeenCalledWith({
+      data: {
+        matterId: "m1",
+        eventType: "TEAM_CHANGED",
+        title: "Cập nhật team xử lý",
+        occurredAt: expect.any(Date),
+        refType: "Matter",
+        refId: "m1"
+      }
+    });
+    expect(mockAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "MATTER_TEAM_UPDATE",
+        targetType: "Matter",
+        targetId: "m1",
+        detail: { ownerId: "u2", coLeads: 2, assistants: 1 }
+      })
+    );
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/matters/m1");
+  });
+
+  it("should throw if matter not found", async () => {
+    const input = { matterId: "m1", ownerId: "u2", coLeadIds: [], assistantIds: [] };
+    mockPrisma.matter.findUnique.mockResolvedValue(null);
+    await expect(updateMatterTeam(input)).rejects.toThrow("Vụ án không tồn tại");
+  });
+
+  it("should reject when user cannot own matter", async () => {
+    const input = { matterId: "m1", ownerId: "u2", coLeadIds: [], assistantIds: [] };
+    mockPrisma.matter.findUnique.mockResolvedValue({ id: "m1", ownerId: "oldOwner" } as any);
+    mockAssertCanOwnMatter.mockImplementation(() => {
+      throw new Error("Chỉ luật sư phụ trách hiện tại được sửa team vụ án");
+    });
+    await expect(updateMatterTeam(input)).rejects.toThrow("Chỉ luật sư phụ trách hiện tại được sửa team vụ án");
   });
 });
