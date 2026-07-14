@@ -20,7 +20,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2, Paperclip, FileText, AlertOctagon } from "lucide-react";
+import { Loader2, Paperclip, FileText } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -37,8 +37,10 @@ import {
   stampSealRequest,
   cancelSealRequest
 } from "@/server/seals/actions";
-import { normalizeUploadedFilename } from "@/lib/filename";
+
 import { type SealRequestRow, SEAL_STATUS_CN, SEAL_TYPE_CN } from "./seal-types";
+import { ApprovalDialog } from "./approval-dialog";
+import { SealDetailFields } from "./seal-detail-fields";
 
 type Action = "detail" | "approve" | "reject" | "stamp" | "cancel";
 
@@ -68,163 +70,16 @@ export function SealActionsDialogs({
 }
 
 function SealDetailDialog({ row, onClose }: { row: SealRequestRow; onClose: () => void }) {
-  const draftDocName = row.draftDoc ? normalizeUploadedFilename(row.draftDoc.name) : "";
-  const stampedDocName = row.stampedDoc ? normalizeUploadedFilename(row.stampedDoc.name) : "";
-
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[88vh] w-[92vw] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>用章申请详情</DialogTitle>
         </DialogHeader>
-        <div className="min-w-0 space-y-2 rounded border border-border bg-muted/20 p-3 text-[12px]">
-          <Field k="流水号" v={row.code} mono />
-          <Field k="状态" v={SEAL_STATUS_CN[row.status] ?? row.status} />
-          <Field k="章种类" v={SEAL_TYPE_CN[row.sealType] ?? row.sealType} />
-          <Field k="申请人" v={row.requestedBy.name} />
-          {row.matter && (
-            <Field k="关联案件" v={`${row.matter.internalCode} ${row.matter.title}`} />
-          )}
-          <Field k="文件标题" v={row.documentTitle} />
-          <Field k="事由" v={row.purpose} />
-          <Field k="页数 / 份数" v={`${row.pageCount} 页 × ${row.copies} 份`} />
-          <Field k="骑缝章" v={row.requireCrossPageSeal ? "是" : "否"} />
-          <Field k="紧急程度" v={row.urgency === "URGENT" ? "紧急" : "普通"} />
-          <Field k="提交时间" v={new Date(row.requestedAt).toLocaleString("zh-CN")} />
-          {row.approvedBy && <Field k="审批人" v={row.approvedBy.name} />}
-          {row.approvedAt && <Field k="审批时间" v={new Date(row.approvedAt).toLocaleString("zh-CN")} />}
-          {row.stampedByUser && <Field k="盖章人" v={row.stampedByUser.name} />}
-          {row.stampedAt && <Field k="盖章时间" v={new Date(row.stampedAt).toLocaleString("zh-CN")} />}
-          {row.requestNote && <Field k="申请备注" v={row.requestNote} />}
-          {row.approveNote && (
-            <Field k={row.status === "REJECTED" ? "驳回原因" : "审批意见"} v={row.approveNote} />
-          )}
-          {row.draftDoc && (
-            <DocumentLink label="待盖章稿" docId={row.draftDoc.id} name={draftDocName} />
-          )}
-          {row.stampedDoc && (
-            <DocumentLink label="盖章后文件" docId={row.stampedDoc.id} name={stampedDocName} />
-          )}
-        </div>
+        <SealDetailFields row={row} />
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             关闭
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function ApprovalDialog({
-  row,
-  action,
-  onClose
-}: {
-  row: SealRequestRow;
-  action: "approve" | "reject";
-  onClose: () => void;
-}) {
-  const [note, setNote] = useState("");
-  const [mode, setMode] = useState<"approve" | "reject">(action);
-  const [pending, startTransition] = useTransition();
-  const draftDocName = row.draftDoc ? normalizeUploadedFilename(row.draftDoc.name) : "";
-
-  const submit = () => {
-    if (mode === "reject" && !note.trim()) {
-      toast.error("驳回需要写明原因");
-      return;
-    }
-    startTransition(async () => {
-      try {
-        if (mode === "approve") {
-          await approveSealRequest({ id: row.id, note: note.trim() });
-          toast.success("已批准");
-        } else {
-          await rejectSealRequest({ id: row.id, reason: note.trim() });
-          toast.success("已驳回");
-        }
-        onClose();
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "操作失败");
-      }
-    });
-  };
-
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[88vh] w-[92vw] max-w-2xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>审批用章申请</DialogTitle>
-        </DialogHeader>
-        <div className="min-w-0 space-y-2 rounded border border-border bg-muted/20 p-3 text-[12px]">
-          <Field k="流水号" v={row.code} mono />
-          <Field k="章种类" v={SEAL_TYPE_CN[row.sealType] ?? row.sealType} />
-          <Field k="申请人" v={row.requestedBy.name} />
-          {row.matter && (
-            <Field k="关联案件" v={`${row.matter.internalCode} ${row.matter.title}`} />
-          )}
-          <Field k="文件标题" v={row.documentTitle} />
-          <Field k="事由" v={row.purpose} />
-          <Field k="页数 / 份数" v={`${row.pageCount} 页 × ${row.copies} 份`} />
-          {row.requireCrossPageSeal && <Field k="骑缝章" v="是" />}
-          {row.urgency === "URGENT" && (
-            <p className="flex items-center gap-1 text-destructive">
-              <AlertOctagon className="h-3 w-3" />
-              紧急
-            </p>
-          )}
-          {row.draftDoc && (
-            <a
-              href={`/api/documents/${row.draftDoc.id}/download`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex min-w-0 items-start gap-1 text-primary hover:underline"
-              title={draftDocName}
-            >
-              <FileText className="mt-0.5 h-3 w-3 shrink-0" />
-              <span className="min-w-0">
-                <span>下载待盖章稿</span>
-                <span className="block truncate text-[11px]">({draftDocName})</span>
-              </span>
-            </a>
-          )}
-        </div>
-
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button
-            size="sm"
-            variant={mode === "approve" ? "default" : "outline"}
-            onClick={() => setMode("approve")}
-            className="flex-1"
-          >
-            通过
-          </Button>
-          <Button
-            size="sm"
-            variant={mode === "reject" ? "destructive" : "outline"}
-            onClick={() => setMode("reject")}
-            className="flex-1"
-          >
-            驳回
-          </Button>
-        </div>
-
-        <Textarea
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder={mode === "approve" ? "审批意见 (可选)" : "驳回原因 (必填)"}
-          rows={2}
-          className="mt-2 text-[12px]"
-        />
-
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            取消
-          </Button>
-          <Button onClick={submit} disabled={pending}>
-            {pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
-            提交
           </Button>
         </DialogFooter>
       </DialogContent>
