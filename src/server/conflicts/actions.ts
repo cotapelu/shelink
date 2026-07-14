@@ -173,6 +173,22 @@ const conclusionSchema = z.object({
   note: z.string().max(500).optional().or(z.literal(""))
 });
 
+async function handleConclusionAudit(
+  userId: string,
+  checkId: string,
+  conclusion: string,
+  intakeId?: string
+) {
+  await audit({
+    userId,
+    action: "CONFLICT_CONCLUSION_SET",
+    targetType: "ConflictCheck",
+    targetId: checkId,
+    detail: { conclusion },
+  });
+  if (intakeId) revalidatePath(`/intakes/${intakeId}`);
+}
+
 export async function setConflictConclusion(input: z.infer<typeof conclusionSchema>) {
   const session = await requireSession();
   const data = conclusionSchema.parse(input);
@@ -183,21 +199,17 @@ export async function setConflictConclusion(input: z.infer<typeof conclusionSche
       conclusion: data.conclusion,
       decidedById: session.user.id,
       decidedAt: new Date(),
-      note: data.note || null
+      note: data.note || null,
     },
-    include: { intake: { select: { id: true } } }
+    include: { intake: { select: { id: true } } },
   });
 
-  await audit({
-    userId: session.user.id,
-    action: "CONFLICT_CONCLUSION_SET",
-    targetType: "ConflictCheck",
-    targetId: updated.id,
-    detail: { conclusion: data.conclusion }
-  });
+  await handleConclusionAudit(
+    session.user.id,
+    updated.id,
+    data.conclusion,
+    updated.intake?.id
+  );
 
-  if (updated.intake) {
-    revalidatePath(`/intakes/${updated.intake.id}`);
-  }
   return { ok: true };
 }
