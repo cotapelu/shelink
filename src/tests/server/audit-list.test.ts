@@ -41,9 +41,20 @@ describe("audit-list", () => {
         user: { id: "admin", role: "ADMIN" },
       } as any);
       const items = [
-        { id: CUID(1), createdAt: new Date(), action: "LOGIN", user: { id: CUID(2), name: "John" } as any },
+        {
+          id: CUID(1),
+          createdAt: new Date(),
+          action: "LOGIN",
+          targetType: "User" as const,
+          targetId: CUID(2),
+          detail: {},
+          ip: "127.0.0.1",
+          userAgent: "test",
+          userId: CUID(2),
+          user: { id: CUID(2), name: "John" },
+        },
       ];
-      mockPrisma.auditLog.findMany.mockResolvedValue(items);
+      mockPrisma.auditLog.findMany.mockResolvedValue(items as any);
 
       const result = await listAuditLogs({});
 
@@ -59,9 +70,15 @@ describe("audit-list", () => {
         id: CUID(i + 1),
         createdAt: new Date(),
         action: "TEST",
+        targetType: null as any,
+        targetId: null as any,
+        detail: {},
+        ip: null as any,
+        userAgent: null as any,
+        userId: null as any,
         user: null as any,
       }));
-      mockPrisma.auditLog.findMany.mockResolvedValue(items);
+      mockPrisma.auditLog.findMany.mockResolvedValue(items as any);
 
       const result = await listAuditLogs({ limit: 50 });
 
@@ -83,12 +100,12 @@ describe("audit-list", () => {
         user: { id: "admin", role: "ADMIN" },
       } as any);
       mockPrisma.auditLog.findMany
-        .mockResolvedValueOnce([{ action: "LOGIN" }, { action: "LOGOUT" }])
-        .mockResolvedValueOnce([{ targetType: "User" }, { targetType: "Matter" }]);
+        .mockResolvedValueOnce([{ action: "LOGIN" }, { action: "LOGOUT" }] as any)
+        .mockResolvedValueOnce([{ targetType: "User" }, { targetType: "Matter" }] as any);
       mockPrisma.user.findMany.mockResolvedValue([
-        { id: CUID(1), name: "Alice" },
-        { id: CUID(2), name: "Bob" },
-      ]);
+        { id: CUID(1), name: "Alice", role: "LAWYER", createdAt: new Date(), updatedAt: new Date(), active: true, email: "a@b.com", passwordHash: "hash", phone: null, avatar: null, lastLoginAt: null },
+        { id: CUID(2), name: "Bob", role: "LAWYER", createdAt: new Date(), updatedAt: new Date(), active: true, email: "b@b.com", passwordHash: "hash", phone: null, avatar: null, lastLoginAt: null },
+      ] as any);
 
       const result = await getAuditFilterOptions();
 

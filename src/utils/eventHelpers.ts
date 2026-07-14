@@ -52,7 +52,7 @@ export interface CustomEventRecord {
   created_by: string | null;
 }
 
-type PersonInput = {
+export type PersonInput = {
   id: string;
   full_name: string;
   birth_year: number | null;

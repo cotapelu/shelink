@@ -4281,3 +4281,39 @@ Date        Health   Coverage   Complexity   Tests   Debt
 - [ ] Refactor `matter-combobox.tsx` (99 lines)
 - [ ] Continue function coverage push toward ≥80%
 
+### [CYCLE-P1-XX] - 2025-07-14 Matters Actions: createMatter Tests
+
+**Type**: Test Expansion (T)  
+**Priority**: HIGH  
+**Duration**: ~60 min  
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Typecheck: PASS  
+- ✅ Tests: **1856 → 1862 passed** (+6 tests)  
+- ✅ Build: SUCCESS
+
+**Coverage Impact**:
+| Metric | Before | After | Δ |
+|---------|--------|-------|---|
+| Functions (matters) | 18.54% | 36.53% | +17.99% |
+| Functions (overall) | 68.65% | 69.44% | +0.79% |
+| Statements | 73.25% | 73.86% | +0.61% |
+| Branches | 59.64% | 59.96% | +0.32% |
+| Lines | 74.50% | 75.19% | +0.69% |
+
+**Test Delta**:
+- Created `src/tests/server/matters/actions-create.test.ts`
+- 6 unit tests covering createMatter: success, validation error, transaction error, emptyToNull, default intakeDate, optional fields
+- Mocked prisma.$transaction, permissions, and code generation dependencies
+
+**Notes**:
+- First comprehensive tests for createMatter, bringing matter actions function coverage from 18.5% to 36.5%
+- Function still complex (112 lines, complexity ~14) — needs refactor to meet GOAL standards (≤20 lines, ≤10 complexity)
+- No new violations introduced; test file follows existing patterns
+
+**Next Steps**:
+- [ ] Refactor createMatter: extract helpers (buildMatterData, prepareIntakeData, createTimelineEvents)
+- [ ] Continue coverage push on other uncovered server actions: archive/actions, documents/actions
+- [ ] Aim for overall Functions ≥75% then 80%
+
