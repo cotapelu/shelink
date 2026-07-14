@@ -11,10 +11,10 @@
 | Metric | Current | Target | Trend |
 |--------|---------|--------|-------|
 | Health Score | ~84* | ≥90 | ↘️ |
-| Test Coverage (Statements) | **73.52%** | ≥80% | ↘️ |
-| Branches | **60.21%** | ≥80% | ↘️ |
-| Functions Covered | **69.15%** | ≥80% | ↘️ |
-| Lines | **74.85%** | ≥80% | ↘️ |
+| Test Coverage (Statements) | **73.52%** | ≥80% | ↗️ |
+| Branches | **60.21%** | ≥80% | ↗️ |
+| Functions Covered | **69.25%** | ≥80% | ↗️ |
+| Lines | **74.85%** | ≥80% | ↗️ |
 | Avg Cyclomatic Complexity | ~12 (est.) | ≤10 | ↘️ |
 | Complexity Violations (>10) | 1010** | 0 | ↘️ |
 | Functions >20 lines | TBD (rule updated 2025-07-09) | 0 | - |
