@@ -47,14 +47,14 @@ describe("CauseSection", () => {
 
   it("renders label and combobox", () => {
     render(<CauseSection {...defaultProps} />);
-    expect(screen.getByText("案由 *")).toBeInTheDocument();
+    expect(screen.getByText("Nguyên nhân vụ án *")).toBeInTheDocument();
     expect(screen.getByTestId("cause-combobox")).toBeInTheDocument();
   });
 
   it("renders AI recommendation and manual selection buttons", () => {
     render(<CauseSection {...defaultProps} />);
-    expect(screen.getByText("AI推荐")).toBeInTheDocument();
-    expect(screen.getByText("手动选择")).toBeInTheDocument();
+    expect(screen.getByText("Gợi ý AI")).toBeInTheDocument();
+    expect(screen.getByText("Chọn thủ công")).toBeInTheDocument();
   });
 
   it("calls setValue when combobox selection changes", () => {
@@ -79,14 +79,14 @@ describe("CauseSection", () => {
 
   it("AI recommendation button has correct attributes (type, className)", () => {
     render(<CauseSection {...defaultProps} />);
-    const aiBtn = screen.getByText("AI推荐").closest("button");
+    const aiBtn = screen.getByText("Gợi ý AI").closest("button");
     expect(aiBtn).toHaveAttribute("type", "button");
     expect(aiBtn.className).toContain("gap-1.5");
   });
 
   it("manual selection button has correct attributes", () => {
     render(<CauseSection {...defaultProps} />);
-    const manualBtn = screen.getByText("手动选择").closest("button");
+    const manualBtn = screen.getByText("Chọn thủ công").closest("button");
     expect(manualBtn).toHaveAttribute("type", "button");
     expect(manualBtn.className).toContain("gap-1.5");
   });
@@ -102,10 +102,10 @@ describe("CauseSection", () => {
     it("displays error message when errors.causeId provided", () => {
       const propsWithError = {
         ...defaultProps,
-        errors: { causeId: { message: "必须选择案由" } } as any
+        errors: { causeId: { message: "Phải chọn nguyên nhân vụ án" } } as any
       };
       render(<CauseSection {...propsWithError} />);
-      expect(screen.getByRole("alert")).toHaveTextContent("必须选择案由");
+      expect(screen.getByRole("alert")).toHaveTextContent("Phải chọn nguyên nhân vụ án");
     });
   });
 });

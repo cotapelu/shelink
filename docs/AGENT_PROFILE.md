@@ -195,3 +195,41 @@ These require extraction and test coverage expansion.
 - [ ] Verify all permission assertions are present (assertMatterWritable, assertCanAssociateMatter)  
 **Priority**: P1 (quality gate)
 
+
+### UI Localization Incomplete (2025-07-14)
+
+**Modules with remaining Chinese labels**:
+- `src/app/(app)/clients/_components/client-sheet.tsx` (large, many toasts and labels)
+- `src/app/(app)/clients/_components/clients-view.tsx`
+- `src/app/(app)/clients/[id]/_components/client-info-section.tsx`
+- `src/app/(app)/archive/_components/*` (multiple)
+- `src/app/(app)/approvals/seals/_components/*` (many)
+- `src/app/(app)/matters/[id]/_components/procedure-content.tsx` (1357 lines)
+- Other matters components
+
+**Remediation**:
+- [ ] Create translation map and systematically replace Chinese with Vietnamese across all UI components
+- [ ] Prioritize high-traffic pages: client management, matter detail, archive, approvals
+- [ ] Ensure i18n consistency: use same Vietnamese terms
+- [ ] Update related test snapshots if needed
+
+**Priority**: P1 (user experience, market readiness)
+
+
+### High-Complexity Server Functions (2025-07-14)
+
+Following proactive analysis, identified functions in `src/server/matters/actions.ts` exceeding quality gates and requiring refactor:
+
+| Function | Lines | Complexity | Target | Remediation |
+|----------|-------|------------|--------|-------------|
+| `updateProcedureInfo` | 182 | ~15 | ≤20 lines / ≤10 | Extract payload builders, validation logic, and transaction orchestration |
+| `listMatters` | 129 | ~13 | ≤20 lines / ≤10 | Separate query construction, permission filtering, pagination |
+| `ensureClientParty` / `normalizeNewProcedureParties` | ~50 each | ~8-10 | ≤20 lines / ≤10 | Extract normalization utilities |
+
+**Remediation Plan**:
+- [ ] Refactor `updateProcedureInfo` first (currently 0% branch coverage? Actually 2 tests added but still low coverage). Extract helpers: `buildProcedureUpdatePayload`, `validateProcedurePartyReferences`, `executeProcedureUpdateTransaction`.
+- [ ] Then refactor `listMatters` to improve readability and coverage.
+- [ ] Add comprehensive tests for error paths and edge cases before refactor (red-green).
+
+**Priority**: P1 (quality gate)
+

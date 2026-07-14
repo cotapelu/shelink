@@ -66,9 +66,9 @@ describe("ProcedureSection", () => {
 
   it("renders main fields (procedure, jurisdiction, agency)", () => {
     render(<ProcedureSection {...defaultProps} />);
-    expect(screen.getByText(/当前程序\s*\*/)).toBeInTheDocument();
-    expect(screen.getByText("管辖地")).toBeInTheDocument();
-    expect(screen.getByText("争议解决机构")).toBeInTheDocument();
+    expect(screen.getByText(/Thủ tục hiện tại\s*\*/)).toBeInTheDocument();
+    expect(screen.getByText("Có thẩm quyền")).toBeInTheDocument();
+    expect(screen.getByText("Cơ quan giải quyết tranh chấp")).toBeInTheDocument();
   });
 
   it("renders procedure options", () => {
@@ -79,7 +79,7 @@ describe("ProcedureSection", () => {
 
   it("renders barFiling select", () => {
     render(<ProcedureSection {...defaultProps} />);
-    expect(screen.getByText("是否需向律协备案")).toBeInTheDocument();
+    expect(screen.getByText("Cần với Hiệp hội Luật sư không?")).toBeInTheDocument();
   });
 
   it("renders agency options", () => {
@@ -98,14 +98,14 @@ describe("ProcedureSection", () => {
 
   it("renders with jurisdiction value", () => {
     render(<ProcedureSection {...defaultProps} jurisdiction="北京市" />);
-    const input = screen.getByPlaceholderText("输入管辖地");
+    const input = screen.getByPlaceholderText("Nhập địa điểm có thẩm quyền");
     expect(input).toHaveValue("北京市");
   });
 
   describe("Counterclaim", () => {
     it("renders counterclaim select with options", () => {
       render(<ProcedureSection {...defaultProps} />);
-      expect(screen.getByText("是否反诉")).toBeInTheDocument();
+      expect(screen.getByText("Có phản tố không?")).toBeInTheDocument();
       expect(screen.getByTestId("select-item-yes")).toBeInTheDocument();
       expect(screen.getByTestId("select-item-no")).toBeInTheDocument();
     });

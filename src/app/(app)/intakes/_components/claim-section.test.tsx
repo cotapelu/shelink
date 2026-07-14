@@ -33,8 +33,8 @@ describe("ClaimSection", () => {
 
   it("renders claim amount and description fields", () => {
     render(<ClaimSection register={mockRegister} />);
-    expect(screen.getByText("标的额（元）")).toBeInTheDocument();
-    expect(screen.getByText("标的描述（非金钱标的或其他诉求）")).toBeInTheDocument();
+    expect(screen.getByText("Giá trị yêu cầu (VNĐ)")).toBeInTheDocument();
+    expect(screen.getByText("Mô tả yêu cầu (các yêu cầu không phải tiền hoặc khiếu nại khác)")).toBeInTheDocument();
   });
 
   it("registers claimAmount with valueAsNumber", () => {
@@ -45,7 +45,7 @@ describe("ClaimSection", () => {
 
   it("registers claimDescription", () => {
     render(<ClaimSection register={mockRegister} />);
-    const descriptionInput = screen.getByPlaceholderText(/如：请求确认合同有效/);
+    const descriptionInput = screen.getByPlaceholderText(/Ví dụ: yêu cầu xác nhận hợp đồng có hiệu lực/);
     expect(mockRegister).toHaveBeenCalledWith("claimDescription");
   });
 
@@ -79,7 +79,7 @@ describe("ClaimSection", () => {
 
     it("claimDescription input has correct placeholder", () => {
       render(<ClaimSection register={mockRegister} />);
-      const descInput = screen.getByPlaceholderText(/如：请求确认合同有效/);
+      const descInput = screen.getByPlaceholderText(/Ví dụ: yêu cầu xác nhận hợp đồng có hiệu lực/);
       expect(descInput).toBeInTheDocument();
     });
   });

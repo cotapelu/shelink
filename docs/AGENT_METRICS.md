@@ -4405,3 +4405,39 @@ Based on Proactive Analysis (Step 4.2), highest-impact item now: **[T] UI Compon
 
 Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract validation helpers, reduce complexity to ≤10).
 
+
+### [CYCLE-P1-BB] - 2025-07-14 UI Internationalization: Chinese → Vietnamese
+
+**Type**: (T) Documentation / UI Gap Fix  
+**Priority**: HIGH  
+**Duration**: ~45 min  
+**Status**: ✅ Completed
+
+**Scope**:
+- Intake form components: `claim-section`, `cause-section`, `lawyer-section`, `procedure-section`
+- Clients table component: `clients-table`
+
+**Translations Applied**:
+- Intakes:
+  - "标的额" → "Giá trị yêu cầu", "标的描述" → "Mô tả yêu cầu"
+  - "案由" → "Nguyên nhân vụ án", "AI推荐" → "Gợi ý AI", "手动选择" → "Chọn thủ công"
+  - "主办律师", "协办人员", "是否需向律协备案", "是否反诉" → Vietnamese equivalents
+  - "当前程序", "管辖地", "争议解决机构", "我方诉讼地位", "业务类型", "项目金额" → Vietnamese
+- Clients table:
+  - Table headers and empty state fully translated
+  - Actions: "编辑" → "Chỉnh sửa", counts: "收案" → "vụ đăng ký"
+
+**Quality**:
+- Typecheck: PASS
+- Related tests: Pass (intake components, client-table UI)
+- No breaking changes
+
+**Impact**:
+- Improved user experience for Vietnamese market
+- Consistent branding and localization
+- Set pattern for further i18n tasks
+
+**Remaining Work**:
+- Other UI modules still contain Chinese: `client-sheet.tsx`, `clients-view.tsx`, `client-info-section.tsx`, archive and approvals components, matter components, etc.
+- Recommended next: Systematically translate remaining high-traffic modules using auto-detection script.
+

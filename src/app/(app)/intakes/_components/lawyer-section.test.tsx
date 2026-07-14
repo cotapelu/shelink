@@ -56,9 +56,9 @@ describe("LawyerSection", () => {
 
   it("renders all three fields with required indicator", () => {
     render(<LawyerSection {...defaultProps} />);
-    expect(screen.getByText(/主办律师\s*\*/)).toBeInTheDocument();
-    expect(screen.getByText("协办人员（可多选）")).toBeInTheDocument();
-    expect(screen.getByText("是否需向律协备案")).toBeInTheDocument();
+    expect(screen.getByText(/Luật sư phụ trách\s*\*/)).toBeInTheDocument();
+    expect(screen.getByText("Nhân sự hỗ trợ (có thể chọn nhiều)")).toBeInTheDocument();
+    expect(screen.getByText("Cần với Hiệp hội Luật sư không?")).toBeInTheDocument();
   });
 
   it("renders lawyer options in owner select", () => {
@@ -85,16 +85,16 @@ describe("LawyerSection", () => {
     // No select items should be present
     expect(screen.queryByTestId("select-item-u1")).not.toBeInTheDocument();
     // Fields still rendered
-    expect(screen.getByText(/主办律师\s*\*/)).toBeInTheDocument();
+    expect(screen.getByText(/Luật sư phụ trách\s*\*/)).toBeInTheDocument();
   });
 
   it("does not crash when errors prop passed", () => {
     render(<LawyerSection {...defaultProps} errors={{ ownerUserId: { message: "Required" } }} />);
-    expect(screen.getByText(/主办律师\s*\*/)).toBeInTheDocument();
+    expect(screen.getByText(/Luật sư phụ trách\s*\*/)).toBeInTheDocument();
   });
 
   it("renders with counterclaim prop", () => {
     render(<LawyerSection {...defaultProps} counterclaim={true} />);
-    expect(screen.getByText(/主办律师\s*\*/)).toBeInTheDocument();
+    expect(screen.getByText(/Luật sư phụ trách\s*\*/)).toBeInTheDocument();
   });
 });

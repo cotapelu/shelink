@@ -288,18 +288,18 @@ describe("IntakeSheet", () => {
 
     it("renders basic info section", () => {
       render(<IntakeSheet {...defaultProps} />);
-      expect(screen.getByText("基本信息")).toBeInTheDocument();
+      expect(screen.getByText("Thông tin cơ bản")).toBeInTheDocument();
     });
 
     it("renders parties section", () => {
       render(<IntakeSheet {...defaultProps} />);
-      // For litigation kind, the section title is "案件当事人"
-      expect(screen.getByText("案件当事人")).toBeInTheDocument();
+      // For litigation kind, the section title is "Bên liên quan vụ án"
+      expect(screen.getByText("Bên liên quan vụ án")).toBeInTheDocument();
     });
 
     it("renders fee section", () => {
       render(<IntakeSheet {...defaultProps} />);
-      expect(screen.getByText("律师费")).toBeInTheDocument();
+      expect(screen.getByText("Phí luật sư")).toBeInTheDocument();
     });
 
     it("debug: dump rendered html for inspection", () => {
@@ -312,8 +312,8 @@ describe("IntakeSheet", () => {
   describe("Form Validation", () => {
     it("renders required fields", () => {
       render(<IntakeSheet {...defaultProps} />);
-      // Check that required fields are present: case title input labeled "案件名称"
-      expect(screen.getByText(/案件名称/)).toBeInTheDocument();
+      // Check that required fields are present: case title input labeled "Tên vụ án"
+      expect(screen.getByText(/Tên vụ án/)).toBeInTheDocument();
     });
 
     // More validation tests to be added
@@ -322,8 +322,8 @@ describe("IntakeSheet", () => {
   describe("Party Management", () => {
     it("renders party fields", () => {
       render(<IntakeSheet {...defaultProps} />);
-      // Litigation kind shows "案件当事人" section
-      expect(screen.getByText("案件当事人")).toBeInTheDocument();
+      // Litigation kind shows "Bên liên quan vụ án" section
+      expect(screen.getByText("Bên liên quan vụ án")).toBeInTheDocument();
     });
   });
 
@@ -337,7 +337,7 @@ describe("IntakeSheet", () => {
   describe("Integration: Multi-Section Rendering", () => {
     it("renders all major section headers", () => {
       render(<IntakeSheet {...defaultProps} />);
-      const headers = ["基本信息", "案件当事人", "律师费", "委托合同 / 相关附件"];
+      const headers = ["Thông tin cơ bản", "Bên liên quan vụ án", "Phí luật sư", "Hợp đồng ủy quyền / Tài liệu liên quan"];
       headers.forEach((text) => {
         expect(screen.getByText(text)).toBeInTheDocument();
       });
@@ -345,10 +345,10 @@ describe("IntakeSheet", () => {
 
     it("renders key fields", () => {
       render(<IntakeSheet {...defaultProps} />);
-      expect(screen.getByText("案件名称")).toBeInTheDocument();
-      expect(screen.getByText("案由")).toBeInTheDocument();
-      expect(screen.getByText("标的额（元）")).toBeInTheDocument();
-      expect(screen.getByText("主办律师")).toBeInTheDocument();
+      expect(screen.getByText("Tên vụ án")).toBeInTheDocument();
+      expect(screen.getByText("Nguyên nhân vụ án")).toBeInTheDocument();
+      expect(screen.getByText("Giá trị yêu cầu (VNĐ)")).toBeInTheDocument();
+      expect(screen.getByText("Luật sư phụ trách")).toBeInTheDocument();
     });
 
     it("renders footer submit button with correct text", () => {

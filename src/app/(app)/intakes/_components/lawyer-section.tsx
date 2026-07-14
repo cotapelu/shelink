@@ -35,7 +35,7 @@ export function LawyerSection({
           onValueChange={(v) => setValue("ownerUserId", v, { shouldDirty: true })}
         >
           <SelectTrigger className="h-10 bg-background">
-            <SelectValue placeholder="Chọn luật sư phụ trách" />
+            <SelectValue placeholder="Chọn Luật sư phụ trách" />
           </SelectTrigger>
           <SelectContent>
             {colleagues
@@ -71,8 +71,8 @@ export function LawyerSection({
         </Select>
       </Field>
 
-      {/* Cần备案 cho hiệp hội luật sư? */}
-      <Field label="Cần备案 cho hiệp hội luật sư không?">
+      {/* Cần备案 cho hiệp hội Luật sư? */}
+      <Field label="Cần với Hiệp hội Luật sư không?">
         <Select
           value={barFiling ?? ""}
           onValueChange={(v) => setValue("barFiling", v, { shouldDirty: true })}
