@@ -5202,3 +5202,29 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - Continue complexity reduction after coverage approaches 80%.
 
 ---
+
+### [CYCLE-AUTO-18] - 2025-07-15 11:50
+**Type**: Testing Improvement (Compute kinship core)
+**Priority**: HIGH
+**Duration**: ~30 minutes
+**Status**: ✅ Success
+
+**Test Delta**: +8 tests (total ~1990)
+**Coverage Delta**:
+- Statements: +0.26% (77.14% → 77.4%)
+- Branches: +0.23% (63.57% → 63.8%)
+- Functions: ~0% (72.8% → 72.8%)
+- Lines: +0.29% (78.47% → 78.77%)
+
+**Files Modified**:
+- src/utils/kinship/compute.ts (exported compareSeniority, getDirectAncestorTerm, getDirectDescendantTerm)
+- src/tests/utils/kinship/computeKinship.test.ts (new)
+
+**Notes**: Added unit tests for computeKinship covering marriage, parent-child, grandparent, siblings, uncle, in-law, and unknown scenarios. compute.ts branch coverage now 32.35% (up from 28.75%). Overall branch coverage 63.8%. Still far from 80% target (+16.2% needed). computeKinship still has many unexecuted branches due to complex logic and missing data scenarios.
+
+**Next**:
+- Continue targeting src/utils/kinship/compute.ts: add tests for deeper kinship (cousins, multiple generations, adopted, etc.) to cover remaining branches.
+- Explore testing src/utils/gedcom/parser.ts (branch 55.81%) after kinship improvements.
+- Reassess need for refactoring large functions after coverage approaches target.
+
+---
