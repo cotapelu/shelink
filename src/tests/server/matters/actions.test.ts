@@ -108,6 +108,18 @@ describe("matters actions", () => {
       });
       await expect(getMatterById("m1")).rejects.toThrow("Access denied");
     });
+
+    it("does not call audit when matter is null", async () => {
+      mockPrisma.matter.findFirst.mockResolvedValue(null as any);
+      const result = await getMatterById("m1");
+      expect(result).toBeNull();
+      expect(mockAudit).not.toHaveBeenCalled();
+    });
+
+    it("propagates prisma errors", async () => {
+      mockPrisma.matter.findFirst.mockRejectedValue(new Error("DB error"));
+      await expect(getMatterById("m1")).rejects.toThrow("DB error");
+    });
   });
 
   describe("updateMatterBasicInfo", () => {

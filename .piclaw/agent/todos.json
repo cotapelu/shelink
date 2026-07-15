@@ -3,42 +3,32 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Coverage Push - getMatterById & listMatters Edge Cases",
+      "name": "Export Internal Helpers & Add Unit Tests",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Read getMatterById implementation for untested branches",
+          "content": "Export helpers: buildClientLinks, buildParties, buildProcedure, buildMatterCreateData, clientTypeToPartyType, normalize*",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Add tests for getMatterById: null matter, includes structure verification",
+          "content": "Create actions-helpers.test.ts with unit tests for each helper",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Read listMatters for untested branches (date range, complex filters)",
+          "content": "Run coverage to measure function coverage increase",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Add tests for listMatters: date range filter, empty includes",
-          "status": "pending"
-        },
-        {
-          "id": "task-5",
-          "content": "Run coverage and verify branch coverage increase",
-          "status": "pending"
-        },
-        {
-          "id": "task-6",
-          "content": "Commit and push metrics update",
+          "content": "Commit and push",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 7,
+  "nextTaskId": 5,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-15T03:12:42.485Z"
+  "updatedAt": "2026-07-15T03:28:42.872Z"
 }
