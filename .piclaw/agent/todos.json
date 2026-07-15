@@ -3,27 +3,42 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Finalize & Commit",
+      "name": "Refactor updateProcedureInfo - Complexity Reduction",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Verify all new tests pass",
-          "status": "completed"
-        },
-        {
-          "id": "task-2",
-          "content": "Update AGENT_METRICS.md with cycle summary",
+          "content": "Analyze updateProcedureInfo structure and complexity hotspots",
           "status": "in_progress"
         },
         {
+          "id": "task-2",
+          "content": "Extract helper functions (validation, transaction steps, audit)",
+          "status": "pending"
+        },
+        {
           "id": "task-3",
-          "content": "Commit and push",
+          "content": "Refactor main function to use extracted helpers",
+          "status": "pending"
+        },
+        {
+          "id": "task-4",
+          "content": "Update existing tests to match new structure",
+          "status": "pending"
+        },
+        {
+          "id": "task-5",
+          "content": "Run typecheck, lint, tests, build to verify",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
+          "content": "Commit and push with metrics update",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 4,
+  "nextTaskId": 7,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-15T02:27:12.050Z"
+  "updatedAt": "2026-07-15T02:39:43.253Z"
 }

@@ -121,4 +121,81 @@ describe("updateProcedureInfo", () => {
 
     await expect(updateProcedureInfo(input)).rejects.toThrow(/party không thuộc vụ án|không tồn tại/i);
   });
+
+  // Additional tests for newProcedureParties coverage
+
+  it("creates new parties from newProcedureParties", async () => {
+    const procedureId = cuid();
+    const matterId = cuid();
+
+    mockPrisma.matterProcedure.findUnique.mockResolvedValue({ id: procedureId, matterId } as any);
+
+    mockPrisma.$transaction.mockImplementation(async (fn) => {
+      const tx = {
+        matterProcedure: { update: vi.fn().mockResolvedValue({}) },
+        party: {
+          aggregate: vi.fn().mockResolvedValue({ _max: { ordinal: 2 } }),
+          create: vi.fn().mockResolvedValue({ id: "newParty" })
+        },
+        procedureParty: { deleteMany: vi.fn(), createMany: vi.fn() }
+      } as any;
+      return fn(tx);
+    });
+
+    const input = {
+      procedureId,
+      newProcedureParties: [
+        {
+          name: "New Company",
+          role: "CLIENT_PARTY" as const,
+          partyType: "COMPANY" as const,
+          idNumber: "",
+          enterpriseSocialCode: "123456",
+          standings: ["PLAINTIFF"]
+        }
+      ]
+    } as any;
+
+    await updateProcedureInfo(input);
+    // No validation errors -> should succeed
+    expect(mockRevalidatePath).toHaveBeenCalledWith(`/matters/${matterId}`);
+  });
+
+  it("updates existing party from newProcedureParties", async () => {
+    const procedureId = cuid();
+    const matterId = cuid();
+    const existingPartyId = cuid();
+
+    mockPrisma.matterProcedure.findUnique.mockResolvedValue({ id: procedureId, matterId } as any);
+
+    mockPrisma.$transaction.mockImplementation(async (fn) => {
+      const tx = {
+        matterProcedure: { update: vi.fn().mockResolvedValue({}) },
+        party: {
+          findFirst: vi.fn().mockResolvedValue({ id: existingPartyId }),
+          update: vi.fn().mockResolvedValue({}),
+          aggregate: vi.fn().mockResolvedValue({ _max: { ordinal: 1 } })
+        },
+        procedureParty: { deleteMany: vi.fn(), createMany: vi.fn() }
+      } as any;
+      return fn(tx);
+    });
+
+    const input = {
+      procedureId,
+      newProcedureParties: [
+        {
+          existingPartyId,
+          name: "Updated Party",
+          role: "OPPOSING_PARTY" as const,
+          partyType: "NATURAL_PERSON" as const,
+          idNumber: "123456",
+          standings: ["DEFENDANT"]
+        }
+      ]
+    } as any;
+
+    await updateProcedureInfo(input);
+    expect(mockRevalidatePath).toHaveBeenCalledWith(`/matters/${matterId}`);
+  });
 });

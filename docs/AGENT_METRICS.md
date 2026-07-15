@@ -4952,3 +4952,39 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 **Next**:
 - Continue UI i18n (remaining modules: archive, approvals, finance, settings) OR proceed with `updateProcedureInfo` refactor in next cycle based on priority.
 
+---
+
+### [CYCLE-AUTO-11] - 2025-07-15 Coverage Push: newProcedureParties Tests
+
+**Type**: Test Expansion (T)
+**Priority**: HIGH
+**Duration**: ~1h
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: **~1930 passed** (thêm 2 tests)
+- ✅ Build: SUCCESS
+
+**Target**: Increase function coverage; exercise `updateProcedureInfo` branches for `newProcedureParties`.
+
+**Actions**:
+- Added tests: "creates new parties from newProcedureParties" và "updates existing party from newProcedureParties"
+- Covered: normalizeNewProcedureParties, new party creation flow, existing party update flow, ordinal calculation
+- These tests call previously under-exercised branches inside `updateProcedureInfo` and its helpers
+
+**Coverage Impact**:
+- Functions: 72.12% (+0.59%)
+- Statements: 76.45% (+0.44%)
+- Branches: 62.58% (+0.67%)
+- Lines: 77.94% (+0.47%)
+
+**Files Modified**:
+- src/tests/server/matters/actions-update-procedure-info.test.ts
+
+**Next**:
+- Continue coverage push: target uncovered functions in `src/utils/kinship/compute.ts` or add test for `ensureClientParty` (client conversion) to further raise function coverage.
+- Or tackle complexity reduction for large functions (`updateProcedureInfo` still 182 lines) – may need multi-cycle refactor.
+
+---
+
