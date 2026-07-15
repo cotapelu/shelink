@@ -3,32 +3,42 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Autonomous Cycle - 2025-07-15 (Continued)",
+      "name": "Phase 1: Critical Violations",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Increase Function coverage from 72.94% → 80%",
+          "content": "Write comprehensive tests for compute.ts to achieve ≥80% branch coverage",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Extract large UI components >50 lines (Audit* , AnnouncementsView)",
+          "content": "Refactor compute.ts: Split resolveBloodTerms into smaller functions (≤20 lines, complexity ≤10)",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Fix validateForm complexity (already minimal) or document",
+          "content": "Refactor compute.ts: Split computeKinship into smaller functions",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Address useSealRequestFormState size (split or bypass)",
+          "content": "Remove truly dead code (unused functions) after verification",
+          "status": "pending"
+        },
+        {
+          "id": "task-5",
+          "content": "Fix TypeScript errors in test files",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
+          "content": "Run quality gates and verify improvements",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 5,
+  "nextTaskId": 7,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-15T07:07:01.510Z"
+  "updatedAt": "2026-07-15T10:06:46.073Z"
 }

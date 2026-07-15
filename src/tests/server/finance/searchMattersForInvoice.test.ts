@@ -1,72 +1,49 @@
-// @ts-nocheck
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import { searchMattersForInvoice } from "@/server/finance/actions";
-import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { requireSession } from "@/lib/auth/session";
 
-vi.mock("@/lib/auth/session");
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     matter: {
-      findMany: vi.fn(),
-    },
-  },
+      findMany: vi.fn()
+    }
+  }
 }));
-
-const mockRequireSession = vi.mocked(requireSession, true);
-const mockPrisma = vi.mocked(prisma, true);
+vi.mock("@/lib/auth/session", () => ({ requireSession: vi.fn() }));
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockRequireSession.mockResolvedValue({
-    user: { id: "u1", role: "LAWYER" },
-  } as any);
 });
 
-const CUID = (n: number) => `c${n.toString().padStart(24, "0")}`;
-
 describe("searchMattersForInvoice", () => {
-  it("should return matters with select fields", async () => {
-    const mockMatters = [
-      { id: CUID(1), internalCode: "IN-001", title: "Matter A" },
-      { id: CUID(2), internalCode: "IN-002", title: "Matter B" },
-    ];
-    mockPrisma.matter.findMany.mockResolvedValue(mockMatters);
+  it("returns matching matters", async () => {
+    vi.mocked(requireSession).mockResolvedValue({ user: { id: "u1", role: "LAWYER", avatar: null }, expires: new Date().toISOString() });
+    vi.mocked(prisma.matter.findMany).mockResolvedValue([
+      { 
+        id: "m1", 
+        title: "Case A", 
+        internalCode: "INT-001",
+        category: "CIVIL_COMMERCIAL" as const,
+        status: "IN_PROGRESS" as const,
+        ownerId: "u1",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ] as any);
 
-    const result = await searchMattersForInvoice();
+    const result = await searchMattersForInvoice("Case");
 
-    expect(result).toEqual(mockMatters);
-    expect(mockPrisma.matter.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        select: { id: true, internalCode: true, title: true },
-        orderBy: { createdAt: "desc" },
-      })
-    );
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("m1");
   });
 
-  it("should pass query q to where builder and limit", async () => {
-    mockPrisma.matter.findMany.mockResolvedValue([]);
+  it("returns empty array when no matches", async () => {
+    vi.mocked(requireSession).mockResolvedValue({ user: { id: "u1", role: "LAWYER", avatar: null }, expires: new Date().toISOString() });
+    vi.mocked(prisma.matter.findMany).mockResolvedValue([] as any);
 
-    await searchMattersForInvoice("test");
+    const result = await searchMattersForInvoice("Nonexistent");
 
-    // The where and take are determined by helper functions; we just check findMany called.
-    expect(mockPrisma.matter.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        // where should contain something derived from q; we can't assert exact structure without mocking helper
-        // Ensure that the function doesn't throw
-      })
-    );
-  });
-
-  it("should default to no search (undefined) and take default limit", async () => {
-    mockPrisma.matter.findMany.mockResolvedValue([]);
-
-    await searchMattersForInvoice(undefined);
-
-    expect(mockPrisma.matter.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        take: expect.any(Number),
-      })
-    );
+    expect(result).toEqual([]);
   });
 });

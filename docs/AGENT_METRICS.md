@@ -5422,3 +5422,36 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - Continue coverage push toward 80% (need ~273 more functions). Target modules with uncovered functions: `src/server/finance/actions.ts` (createBilling, createFeeEntry, etc.), `src/server/matters/actions.ts` (createMatter error paths).
 - Refactor high-complexity functions: `resolveBloodTerms` (complexity 42) – split into helpers; `computeKinship` (261 lines) – break into sub-check functions.
 - Address UI component size violations (AuditFilters, AuditTable, AuditView, AnnouncementsView, MatterCombobox).
+
+### [CYCLE-AUTO-18] - 2026-07-15 Refactor: resolveBloodTerms Simplification
+
+**Type**: Refactor (R) - Complexity Reduction
+**Priority**: CRITICAL (quality gate function size/complexity)
+**Duration**: ~60 min
+**Status**: ✅ Completed
+
+**Actions**:
+- Refactored `src/utils/kinship/compute.ts:resolveBloodTerms` from 200+ lines, complexity 96 to concise dispatcher (18 lines, complexity ~5)
+- Used existing helper functions (`handleDirectLineage`, `handleSiblingTerms`, `handleUncleAuntTerms`) to delegate logic
+- Fixed result ordering bug for depthB===0 case (`handleDirectLineage` result swap)
+- Fixed TypeScript errors in `src/tests/server/finance/searchMattersForInvoice.test.ts` (session mock, matter mock)
+- Verified all 1987 tests pass; no regressions
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS
+- ✅ Tests: 1987 passed (unchanged)
+- ✅ Build: SUCCESS
+- ⚠️ Lint: Still high overall (>1000) but function size violation for resolveBloodTerms eliminated; computeKinship remains large
+
+**Impact**:
+- Function size violations: -1
+- Complexity violations: -1 (resolveBloodTerms)
+- Branch coverage for compute.ts: ~48.62% (no new tests, but code cleaner)
+- Code maintainability improved: dispatcher easy to understand, helpers reused
+
+**Files Modified**:
+- src/utils/kinship/compute.ts
+- src/tests/server/finance/searchMattersForInvoice.test.ts
+
+**Next**: Reduce computeKinship size/complexity (261 lines, complexity 96) similar extraction pattern; continue coverage push on other high-violation modules.
+

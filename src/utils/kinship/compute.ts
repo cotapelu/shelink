@@ -232,174 +232,33 @@ function resolveBloodTerms(
   depthB: number,
   personA: PersonNode,
   personB: PersonNode,
-  pathA: PersonNode[], // Từ A lên tới LCA (không bao gồm LCA)
-  pathB: PersonNode[], // Từ B lên tới LCA (không bao gồm LCA)
+  pathA: PersonNode[],
+  pathB: PersonNode[]
 ): [string, string, string] {
-  const genderA = personA.gender;
-  const genderB = personB.gender;
-
-  // 1. QUAN HỆ TRỰC HỆ (A là con cháu B hoặc ngược lại)
-  if (depthA === 0) {
-    // A chính là LCA. B là con cháu của A.
-    // Xác định vế Nội/Ngoại của B đối với A: Dựa vào người con đầu tiên của A trên đường tới B
-    const firstChildOfA = pathB[pathB.length - 1];
-    if (!firstChildOfA) return ["Hậu duệ", "Tiền bối", "Quan hệ Trực hệ"];
-
-    const isPaternal = firstChildOfA.gender === "male";
-
-    const bCallsA = getDirectAncestorTerm(depthB, genderA, isPaternal);
-    const aCallsB = getDirectDescendantTerm(depthB);
-    return [aCallsB, bCallsA, "Quan hệ Trực hệ"];
-  }
-
+  // Direct lineage
+  if (depthA === 0) return handleDirectLineage(depthA, depthB, personA, personB, pathA, pathB);
   if (depthB === 0) {
-    // B chính là LCA. A là con cháu của B.
-    const firstChildOfB = pathA[pathA.length - 1];
-    if (!firstChildOfB) return ["Tiền bối", "Hậu duệ", "Quan hệ Trực hệ"];
-
-    const isPaternal = firstChildOfB.gender === "male";
-
-    const aCallsB = getDirectAncestorTerm(depthA, genderB, isPaternal);
-    const bCallsA = getDirectDescendantTerm(depthA);
-    return [aCallsB, bCallsA, "Quan hệ Trực hệ"];
+    const r = handleDirectLineage(depthB, depthA, personB, personA, pathB, pathA);
+    return [r[1], r[0], r[2]];
   }
 
-  // 2. QUAN HỆ NGANG HÀNG (Anh chị em ruột hoặc họ hàng)
-  const branchA = pathA[pathA.length - 1]; // Con của LCA phía A
-  const branchB = pathB[pathB.length - 1]; // Con của LCA phía B
-
+  const branchA = pathA[pathA.length - 1];
+  const branchB = pathB[pathB.length - 1];
   if (!branchA || !branchB) return ["Họ hàng", "Họ hàng", "Quan hệ họ hàng"];
 
-  const seniority = compareSeniority(branchA, branchB);
+  // Siblings
+  if (depthA === 1 && depthB === 1) return handleSiblingTerms(personA, personB, branchA, branchB);
 
-  // Xác định vế Nội/Ngoại: Dựa vào giới tính của người ở nhánh A (người đang gọi)
-  const isPaternalA = branchA.gender === "male";
-
-  // Anh chị em ruột (Cùng bố mẹ)
-  if (depthA === 1 && depthB === 1) {
-    const aSenior = compareSeniority(personA, personB);
-    if (aSenior === "senior") {
-      return [
-        genderB === "female" ? "Em gái" : "Em trai",
-        genderA === "female" ? "Chị gái" : "Anh trai",
-        "Anh chị em ruột",
-      ];
-    } else {
-      return [
-        genderB === "female" ? "Chị gái" : "Anh trai",
-        genderA === "female" ? "Em gái" : "Em trai",
-        "Anh chị em ruột",
-      ];
-    }
-  }
-
-  // Chú/Bác/Cô/Cậu/Dì (Vế trên - Vế dưới)
-  if (depthA > 1 && depthB === 1) {
-    // B là anh/chị/em của tổ tiên A
-    let termForB = "";
-    const isPaternalSide = branchA.gender === "male";
-
-    if (isPaternalSide) {
-      // Bên Nội (Anh em của bố)
-      if (genderB === "female") {
-        termForB = "Cô";
-      } else {
-        termForB = seniority === "junior" ? "Bác" : "Chú";
-      }
-    } else {
-      // Bên Ngoại (Anh em của mẹ)
-      if (genderB === "female") {
-        termForB = "Dì";
-      } else {
-        termForB = "Cậu";
-      }
-    }
-
-    // Nếu cách nhiều đời (ví dụ B là anh của ông nội)
-    let prefix = "";
-    if (depthA === 3) prefix = genderB === "female" ? "Bà " : "Ông ";
-    else if (depthA === 4) prefix = genderB === "female" ? "Cụ bà " : "Cụ ông ";
-    else if (depthA > 4) prefix = ANCESTORS[depthA - 1] + " ";
-
-    return [
-      (prefix + termForB).trim(),
-      getDirectDescendantTerm(depthA),
-      isPaternalSide ? "Bên Nội (Vế trên)" : "Bên Ngoại (Vế trên)",
-    ];
-  }
-
-  // Ngược lại của trường hợp trên
+  // Uncle/Aunt relationships
+  if (depthA > 1 && depthB === 1) return handleUncleAuntTerms(depthA, depthB, personA, personB, branchA, branchB, pathA, pathB);
   if (depthA === 1 && depthB > 1) {
-    const [bCallsA, aCallsB, desc] = resolveBloodTerms(
-      depthB,
-      depthA,
-      personB,
-      personA,
-      pathB,
-      pathA,
-    );
-    return [aCallsB, bCallsA, desc];
+    const r = handleUncleAuntTerms(depthB, depthA, personB, personA, branchB, branchA, pathB, pathA);
+    return [r[1], r[0], r[2]];
   }
 
-  // Anh em họ (Cùng thế hệ hoặc lệch thế hệ nhưng không trực hệ)
-  if (depthA > 1 && depthB > 1) {
-    const side = isPaternalA ? "Nội" : "Ngoại";
-
-    if (depthA === depthB) {
-      // Cùng thế hệ
-      if (seniority === "senior") {
-        return [
-          "Em họ",
-          genderA === "female" ? "Chị họ" : "Anh họ",
-          `Anh em họ ${side}`,
-        ];
-      } else {
-        return [
-          genderB === "female" ? "Chị họ" : "Anh họ",
-          "Em họ",
-          `Anh em họ ${side}`,
-        ];
-      }
-    } else {
-      // Lệch thế hệ
-      const genDiff = depthA - depthB;
-      if (genDiff > 0) {
-        // B ở vế trên
-        let termForB = "Họ hàng";
-        if (genDiff === 1) {
-          const isPaternalSide = branchA.gender === "male";
-          if (isPaternalSide) {
-            termForB =
-              genderB === "female"
-                ? "Cô họ"
-                : seniority === "junior"
-                  ? "Bác họ"
-                  : "Chú họ";
-          } else {
-            termForB = genderB === "female" ? "Dì họ" : "Cậu họ";
-          }
-        } else {
-          termForB = genderB === "female" ? "Bà họ" : "Ông họ";
-        }
-        return [termForB, "Cháu họ", `Họ hàng ${side}`];
-      } else {
-        const [bCallsA, aCallsB, desc] = resolveBloodTerms(
-          depthB,
-          depthA,
-          personB,
-          personA,
-          pathB,
-          pathA,
-        );
-        return [aCallsB, bCallsA, desc];
-      }
-    }
-  }
-
-  return ["Người trong họ", "Người trong họ", "Quan hệ họ hàng"];
+  // Cousins and distant relations
+  return handleCrossGenerationalTerms(depthA, depthB, personA, personB, branchA, branchB);
 }
-
-// ── Data Processing ──────────────────────────────────────────────────────────
 
 function enqueueParents(
   currentNode: PersonNode,
