@@ -194,4 +194,79 @@ describe("createMatter", () => {
     expect(data.claimAmount).toBe(50000);
     expect(data.ourStanding).toBe("PLAINTIFF");
   });
+
+  it("fails transaction when systemSetting upsert fails", async () => {
+    const clientId = cuid();
+    const input = {
+      title: "Test",
+      category: "CIVIL_COMMERCIAL",
+      clientIds: [clientId],
+      parties: [],
+      firstProcedure: { type: "FIRST_INSTANCE" as const, acceptedAt: new Date() }
+    };
+    const mockTx = {
+      matter: { create: vi.fn().mockResolvedValue({ id: cuid() }) },
+      timelineEvent: { create: vi.fn() },
+      systemSetting: {
+        findUnique: vi.fn(),
+        upsert: vi.fn().mockRejectedValue(new Error("Unique constraint"))
+      }
+    };
+    mockPrisma.$transaction.mockImplementation(async (fn) => fn(mockTx));
+
+    await expect(createMatter(input)).rejects.toThrow("Unique constraint");
+  });
+
+  it("throws when required clientIds missing", async () => {
+    const input = {
+      title: "Test",
+      category: "CIVIL_COMMERCIAL",
+      clientIds: [], // empty
+      parties: [],
+      firstProcedure: { type: "FIRST_INSTANCE" as const, acceptedAt: new Date() }
+    };
+    await expect(createMatter(input)).rejects.toThrow("clientIds");
+  });
+
+  it("throws when firstProcedure missing", async () => {
+    const clientId = cuid();
+    const input = {
+      title: "Test",
+      category: "CIVIL_COMMERCIAL",
+      clientIds: [clientId],
+      parties: []
+      // missing firstProcedure
+    };
+    await expect(createMatter(input)).rejects.toThrow("firstProcedure");
+  });
+
+  it("audit logs matter creation with correct details", async () => {
+    const clientId = cuid();
+    const matterId = cuid();
+    const internalCode = "LL-2025-CC-0001";
+    const input = {
+      title: "Test",
+      category: "CIVIL_COMMERCIAL",
+      clientIds: [clientId],
+      parties: [],
+      firstProcedure: { type: "FIRST_INSTANCE" as const, acceptedAt: new Date() }
+    };
+    const mockTx = {
+      matter: { create: vi.fn().mockResolvedValue({ id: matterId, internalCode }) },
+      timelineEvent: { create: vi.fn() },
+      systemSetting: { findUnique: vi.fn(), upsert: vi.fn() }
+    };
+    mockPrisma.$transaction.mockImplementation(async (fn) => fn(mockTx));
+
+    await createMatter(input);
+
+    expect(mockAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "MATTER_CREATE",
+        targetType: "Matter",
+        targetId: matterId,
+        detail: { internalCode }
+      })
+    );
+  });
 });

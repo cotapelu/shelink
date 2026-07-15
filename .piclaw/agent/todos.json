@@ -3,27 +3,32 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Final Verification & Commit",
+      "name": "Coverage Push - Matter Creation & Update",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Run quality gate: lint, typecheck, test, build",
+          "content": "Expand createMatter tests: validation, permission, duplicate, transaction failure",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Git add, commit with conventional message",
+          "content": "Expand updateProcedureInfo tests: invalid procedure, permission errors, party validation",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Push changes (if remote configured)",
+          "content": "Run coverage and measure branch coverage increase",
+          "status": "pending"
+        },
+        {
+          "id": "task-4",
+          "content": "Update metrics and commit",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 4,
+  "nextTaskId": 5,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-15T01:03:10.530Z"
+  "updatedAt": "2026-07-15T01:33:55.394Z"
 }

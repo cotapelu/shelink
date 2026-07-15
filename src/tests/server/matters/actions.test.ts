@@ -7,7 +7,9 @@ import {
   softDeleteMatter,
   listMatters,
   searchMattersForLink,
-  updateMatterTeam
+  updateMatterTeam,
+  addMatterLink,
+  removeMatterLink
 } from "@/server/matters/actions";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
@@ -27,7 +29,9 @@ vi.mock("@/lib/prisma", () => ({
       count: vi.fn()
     },
     matterLink: {
-      findMany: vi.fn()
+      findMany: vi.fn(),
+      upsert: vi.fn(),
+      deleteMany: vi.fn()
     },
     matterMember: {
       deleteMany: vi.fn(),
@@ -370,5 +374,92 @@ describe("updateMatterTeam", () => {
       throw new Error("Chỉ luật sư phụ trách hiện tại được sửa team vụ án");
     });
     await expect(updateMatterTeam(input)).rejects.toThrow("Chỉ luật sư phụ trách hiện tại được sửa team vụ án");
+  });
+});
+
+// ── Matter Link Tests ───────────────────────────────────────────────────────────
+
+describe("matter links", () => {
+  const matterId = "m1";
+  const relatedMatterId = "m2";
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    mockAssertCanAssociateMatter.mockResolvedValue(undefined);
+  });
+
+  describe("addMatterLink", () => {
+    it("should create link successfully", async () => {
+      await addMatterLink(matterId, relatedMatterId);
+
+      expect(mockAssertCanAssociateMatter).toHaveBeenCalledTimes(2);
+      expect(mockAssertCanAssociateMatter).toHaveBeenCalledWith("u1", matterId);
+      expect(mockAssertCanAssociateMatter).toHaveBeenCalledWith("u1", relatedMatterId);
+      expect(mockPrisma.matterLink.upsert).toHaveBeenCalledWith({
+        where: { matterId_relatedMatterId: { matterId, relatedMatterId } },
+        create: { matterId, relatedMatterId },
+        update: {}
+      });
+      expect(mockAudit).toHaveBeenCalledWith({
+        userId: "u1",
+        action: "MATTER_LINK_ADD",
+        targetType: "Matter",
+        targetId: matterId,
+        detail: { relatedMatterId }
+      });
+      expect(mockRevalidatePath).toHaveBeenCalledWith(`/matters/${matterId}`);
+    });
+
+    it("should throw when matterId equals relatedMatterId", async () => {
+      await expect(addMatterLink(matterId, matterId)).rejects.toThrow("Không thể liên kết đến chính vụ án này");
+    });
+
+    it("should throw when permission denied", async () => {
+      mockAssertCanAssociateMatter.mockRejectedValueOnce(new Error("Không có quyền")); // for matterId
+      await expect(addMatterLink(matterId, relatedMatterId)).rejects.toThrow("Không có quyền");
+    });
+
+    it("should be idempotent (upsert)", async () => {
+      await addMatterLink(matterId, relatedMatterId);
+      await addMatterLink(matterId, relatedMatterId); // second call should not error
+      expect(mockPrisma.matterLink.upsert).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("removeMatterLink", () => {
+    it("should delete link successfully (both directions)", async () => {
+      await removeMatterLink(matterId, relatedMatterId);
+
+      expect(mockAssertCanAssociateMatter).toHaveBeenCalledTimes(2);
+      expect(mockAssertCanAssociateMatter).toHaveBeenCalledWith("u1", matterId);
+      expect(mockAssertCanAssociateMatter).toHaveBeenCalledWith("u1", relatedMatterId);
+      expect(mockPrisma.matterLink.deleteMany).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            { matterId, relatedMatterId },
+            { matterId: relatedMatterId, relatedMatterId: matterId }
+          ]
+        }
+      });
+      expect(mockAudit).toHaveBeenCalledWith({
+        userId: "u1",
+        action: "MATTER_LINK_REMOVE",
+        targetType: "Matter",
+        targetId: matterId,
+        detail: { relatedMatterId }
+      });
+      expect(mockRevalidatePath).toHaveBeenCalledWith(`/matters/${matterId}`);
+    });
+
+    it("should not throw when link does not exist", async () => {
+      mockPrisma.matterLink.deleteMany.mockResolvedValue({} as any); // delete 0 rows is fine
+      await expect(removeMatterLink(matterId, relatedMatterId)).resolves.not.toThrow();
+    });
+
+    it("should throw when permission denied", async () => {
+      mockAssertCanAssociateMatter.mockRejectedValueOnce(new Error("Không có quyền"));
+      await expect(removeMatterLink(matterId, relatedMatterId)).rejects.toThrow("Không có quyền");
+    });
   });
 });
