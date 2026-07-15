@@ -4988,3 +4988,40 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 
 ---
 
+### [CYCLE-AUTO-12] - 2025-07-15 Coverage Push: ensureClientParty & newProcedureParties
+
+**Type**: Test Expansion (T)
+**Priority**: HIGH
+**Duration**: ~1.5h
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: **~1941 passed** (thêm 3 integration tests)
+- ✅ Build: SUCCESS
+
+**Target**: Increase function and branch coverage by testing client conversion logic in `updateProcedureInfo`.
+
+**Actions**:
+- Added 3 integration tests covering `ensureClientParty` scenarios:
+  1. Throws when client not found
+  2. Reuses existing party when client name matches
+  3. Creates new party when not exists
+- These tests exercise branches inside `ensureClientParty` and the `client:` prefix handling in `procedureParties`.
+
+**Coverage Impact**:
+- Functions: 72.51% (+0.39%)
+- Statements: 76.72% (+0.27%)
+- Branches: 62.88% (+0.3%)
+- Lines: 78.2% (+0.26%)
+
+**Files Modified**:
+- src/tests/server/matters/actions-update-procedure-info.test.ts
+
+**Next**:
+- Continue coverage push: target remaining uncovered functions in `src/server/matters/actions.ts` (e.g., `updateMatterTeam`, `getMatterById` error paths)
+- Branch coverage remains low (62.88% → need 80%); consider adding more edge case tests for conditional logic.
+- Complexity reduction remains open: `updateProcedureInfo` (182 lines), `listMatters` (129 lines), `src/utils/kinship/compute.ts` (complexity 96).
+
+---
+

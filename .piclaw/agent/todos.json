@@ -3,42 +3,37 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Refactor updateProcedureInfo - Complexity Reduction",
+      "name": "Coverage Push - ensureClientParty Tests",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Analyze updateProcedureInfo structure and complexity hotspots",
+          "content": "Read ensureClientParty implementation",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Extract helper functions (validation, transaction steps, audit)",
+          "content": "Add tests for ensureClientParty: client not found, existing party reuse, new party creation",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Refactor main function to use extracted helpers",
+          "content": "Add test for procedureParties with client: prefix conversion",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Update existing tests to match new structure",
+          "content": "Run coverage to verify increase",
           "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "Run typecheck, lint, tests, build to verify",
-          "status": "pending"
-        },
-        {
-          "id": "task-6",
-          "content": "Commit and push with metrics update",
+          "content": "Commit and push metrics update",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 7,
+  "nextTaskId": 6,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-15T02:39:43.253Z"
+  "updatedAt": "2026-07-15T02:59:52.476Z"
 }

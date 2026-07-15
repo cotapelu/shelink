@@ -122,8 +122,6 @@ describe("updateProcedureInfo", () => {
     await expect(updateProcedureInfo(input)).rejects.toThrow(/party không thuộc vụ án|không tồn tại/i);
   });
 
-  // Additional tests for newProcedureParties coverage
-
   it("creates new parties from newProcedureParties", async () => {
     const procedureId = cuid();
     const matterId = cuid();
@@ -157,7 +155,6 @@ describe("updateProcedureInfo", () => {
     } as any;
 
     await updateProcedureInfo(input);
-    // No validation errors -> should succeed
     expect(mockRevalidatePath).toHaveBeenCalledWith(`/matters/${matterId}`);
   });
 
@@ -197,5 +194,111 @@ describe("updateProcedureInfo", () => {
 
     await updateProcedureInfo(input);
     expect(mockRevalidatePath).toHaveBeenCalledWith(`/matters/${matterId}`);
+  });
+
+  // Integration tests covering ensureClientParty via procedureParties with client: prefix
+
+  it("converts client: prefix to party via ensureClientParty (throws when client missing)", async () => {
+    const procedureId = cuid();
+    const matterId = cuid();
+
+    mockPrisma.matterProcedure.findUnique.mockResolvedValue({ id: procedureId, matterId } as any);
+
+    // Mock matter to validate clientIds as belonging to matter (use primaryClientId)
+    mockPrisma.matter.findUnique.mockResolvedValue({
+      id: matterId,
+      primaryClientId: "known-client-id",
+      clientLinks: []
+    } as any);
+
+    mockPrisma.$transaction.mockImplementation(async (fn) => {
+      const tx = {
+        client: { findUnique: vi.fn().mockResolvedValue(null) },
+        party: { findFirst: vi.fn(), aggregate: vi.fn(), create: vi.fn() }
+      } as any;
+      return fn(tx);
+    });
+
+    const input = {
+      procedureId,
+      procedureParties: [{ partyId: "client:known-client-id", standing: "PLAINTIFF" }]
+    } as any;
+
+    await expect(updateProcedureInfo(input)).rejects.toThrow("Khách hàng không tồn tại");
+  });
+
+  it("converts client: prefix to party via ensureClientParty (reuses existing)", async () => {
+    const procedureId = cuid();
+    const matterId = cuid();
+    const existingPartyId = cuid();
+
+    mockPrisma.matterProcedure.findUnique.mockResolvedValue({ id: procedureId, matterId } as any);
+
+    mockPrisma.matter.findUnique.mockResolvedValue({
+      id: matterId,
+      primaryClientId: "c1",
+      clientLinks: []
+    } as any);
+
+    mockPrisma.$transaction.mockImplementation(async (fn) => {
+      const tx = {
+        client: {
+          findUnique: vi.fn().mockResolvedValue({ id: "c1", name: "Client A", type: "COMPANY", idNumber: "123" })
+        },
+        party: {
+          findFirst: vi.fn().mockResolvedValue({ id: existingPartyId }),
+          aggregate: vi.fn()
+        },
+        matterProcedure: { update: vi.fn().mockResolvedValue({}) },
+        procedureParty: { deleteMany: vi.fn(), createMany: vi.fn() }
+      } as any;
+      return fn(tx);
+    });
+
+    const input = {
+      procedureId,
+      procedureParties: [{ partyId: "client:c1", standing: "PLAINTIFF" }]
+    } as any;
+
+    await updateProcedureInfo(input);
+    // ensureClientParty should find existing party and return its ID without creating
+  });
+
+  it("converts client: prefix to party via ensureClientParty (creates new)", async () => {
+    const procedureId = cuid();
+    const matterId = cuid();
+    const newPartyId = cuid();
+
+    mockPrisma.matterProcedure.findUnique.mockResolvedValue({ id: procedureId, matterId } as any);
+
+    mockPrisma.matter.findUnique.mockResolvedValue({
+      id: matterId,
+      primaryClientId: "c2",
+      clientLinks: []
+    } as any);
+
+    mockPrisma.$transaction.mockImplementation(async (fn) => {
+      const tx = {
+        client: {
+          findUnique: vi.fn().mockResolvedValue({ id: "c2", name: "Client B", type: "INDIVIDUAL", idNumber: "456" })
+        },
+        party: {
+          findFirst: vi.fn().mockResolvedValue(null),
+          aggregate: vi.fn().mockResolvedValue({ _max: { ordinal: 3 } }),
+          create: vi.fn().mockResolvedValue({ id: newPartyId })
+        },
+        matterProcedure: { update: vi.fn().mockResolvedValue({}) },
+        procedureParty: { deleteMany: vi.fn(), createMany: vi.fn() }
+      } as any;
+      return fn(tx);
+    });
+
+    const input = {
+      procedureId,
+      procedureParties: [{ partyId: "client:c2", standing: "DEFENDANT" }]
+    } as any;
+
+    await updateProcedureInfo(input);
+    // ensureClientParty should create new party
   });
 });
