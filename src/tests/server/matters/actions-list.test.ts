@@ -94,4 +94,55 @@ describe("listMatters", () => {
     await listMatters({});
     expect(mockVisibilityFilter).toHaveBeenCalledWith("u1", "LAWYER");
   });
+
+  // Additional edge case tests
+
+  it("filters by intake date range", async () => {
+    mockPrisma.matter.findMany.mockResolvedValue([]);
+    mockPrisma.matter.count.mockResolvedValue(0);
+    const from = new Date("2025-01-01");
+    const to = new Date("2025-12-31");
+    await listMatters({ intakeDateFrom: from, intakeDateTo: to });
+    const callArgs = mockPrisma.matter.findMany.mock.calls[0][0];
+    const where = callArgs.where as any;
+    const dateCond = where.AND?.find((c: any) => c.intakeDate);
+    expect(dateCond).toBeDefined();
+    expect(dateCond.intakeDate.gte).toEqual(from);
+    expect(dateCond.intakeDate.lte).toEqual(to);
+  });
+
+  it("filters by statusIn array", async () => {
+    mockPrisma.matter.findMany.mockResolvedValue([]);
+    mockPrisma.matter.count.mockResolvedValue(0);
+    await listMatters({ statusIn: ["IN_PROGRESS", "CLOSED"] });
+    const callArgs = mockPrisma.matter.findMany.mock.calls[0][0];
+    const where = callArgs.where as any;
+    const statusCond = where.AND?.find((c: any) => c.status && c.status.in);
+    expect(statusCond).toBeDefined();
+    expect(statusCond.status.in).toEqual(["IN_PROGRESS", "CLOSED"]);
+  });
+
+  it("filters by statusNotIn array", async () => {
+    mockPrisma.matter.findMany.mockResolvedValue([]);
+    mockPrisma.matter.count.mockResolvedValue(0);
+    await listMatters({ statusNotIn: ["ARCHIVED", "ON_HOLD"] });
+    const callArgs = mockPrisma.matter.findMany.mock.calls[0][0];
+    const where = callArgs.where as any;
+    const statusCond = where.AND?.find((c: any) => c.status && c.status.notIn);
+    expect(statusCond).toBeDefined();
+    expect(statusCond.status.notIn).toEqual(["ARCHIVED", "ON_HOLD"]);
+  });
+
+  it("combines category, statusIn, and search filters", async () => {
+    mockPrisma.matter.findMany.mockResolvedValue([]);
+    mockPrisma.matter.count.mockResolvedValue(0);
+    await listMatters({ category: "CIVIL_COMMERCIAL", statusIn: ["IN_PROGRESS"], search: "contract" });
+    const callArgs = mockPrisma.matter.findMany.mock.calls[0][0];
+    const where = callArgs.where as any;
+    const and = where.AND as any[];
+    expect(and.some((c: any) => c.category === "CIVIL_COMMERCIAL")).toBe(true);
+    expect(and.some((c: any) => c.status?.in?.includes("IN_PROGRESS") && c.status?.notIn === undefined)).toBe(true);
+    expect(and.some((c: any) => c.OR)).toBe(true);
+  });
+
 });

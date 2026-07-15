@@ -5025,3 +5025,40 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 
 ---
 
+### [CYCLE-AUTO-13] - 2025-07-15 Coverage Push: listMatters Edge Cases
+
+**Type**: Test Expansion (T)
+**Priority**: HIGH
+**Duration**: ~1h
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Tests: **~1951 passed** (thêm 4 tests)
+- ✅ Build: SUCCESS
+
+**Target**: Increase branch coverage for `listMatters` by covering filter branches.
+
+**Actions**:
+- Extended `src/tests/server/matters/actions-list.test.ts` with:
+  1. intakeDate range filter
+  2. statusIn array filter
+  3. statusNotIn array filter
+  4. Combined category + statusIn + search
+- Fixed enum values to match Prisma schema (MatterStatus)
+
+**Coverage Impact**:
+- Functions: 72.51% (unchanged)
+- Branches: 62.98% (+0.1%)
+- Statements: 76.78% (+0.06%)
+- Lines: 78.22% (+0.03%)
+
+**Files Modified**:
+- src/tests/server/matters/actions-list.test.ts
+
+**Next**:
+- Branch coverage still far from 80% target (+17% needed). Consider deeper integration tests for include structures and error paths in getMatterById, createMatter.
+- Complexity reduction needed for large functions: `updateProcedureInfo` (182 lines) - may require breaking into smaller helpers.
+
+---
+

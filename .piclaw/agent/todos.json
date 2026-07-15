@@ -3,37 +3,42 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Coverage Push - ensureClientParty Tests",
+      "name": "Coverage Push - getMatterById & listMatters Edge Cases",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Read ensureClientParty implementation",
+          "content": "Read getMatterById implementation for untested branches",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Add tests for ensureClientParty: client not found, existing party reuse, new party creation",
+          "content": "Add tests for getMatterById: null matter, includes structure verification",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Add test for procedureParties with client: prefix conversion",
+          "content": "Read listMatters for untested branches (date range, complex filters)",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Run coverage to verify increase",
+          "content": "Add tests for listMatters: date range filter, empty includes",
           "status": "pending"
         },
         {
           "id": "task-5",
+          "content": "Run coverage and verify branch coverage increase",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
           "content": "Commit and push metrics update",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 6,
+  "nextTaskId": 7,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-15T02:59:52.476Z"
+  "updatedAt": "2026-07-15T03:12:42.485Z"
 }
