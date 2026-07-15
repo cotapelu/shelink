@@ -102,6 +102,130 @@ export function getDirectDescendantTerm(depth: number): string {
 /**
  * Giải quyết danh xưng huyết thống giữa A và B
  */
+
+// Helpers for resolveBloodTerms (split to reduce complexity)
+function handleDirectLineage(
+  depthA: number,
+  depthB: number,
+  personA: PersonNode,
+  personB: PersonNode,
+  pathA: PersonNode[],
+  pathB: PersonNode[]
+): [string, string, string] {
+  const genderA = personA.gender;
+  const genderB = personB.gender;
+  if (depthA === 0) {
+    const firstChild = pathB[pathB.length - 1];
+    if (!firstChild) return ["Hậu duệ", "Tiền bối", "Quan hệ Trực hệ"];
+    const isPaternal = firstChild.gender === "male";
+    const bCallsA = getDirectAncestorTerm(depthB, genderA, isPaternal);
+    const aCallsB = getDirectDescendantTerm(depthB);
+    return [aCallsB, bCallsA, "Quan hệ Trực hệ"];
+  }
+  const firstChild = pathA[pathA.length - 1];
+  if (!firstChild) return ["Tiền bối", "Hậu duệ", "Quan hệ Trực hệ"];
+  const isPaternal = firstChild.gender === "male";
+  const aCallsB = getDirectAncestorTerm(depthA, genderB, isPaternal);
+  const bCallsA = getDirectDescendantTerm(depthA);
+  return [aCallsB, bCallsA, "Quan hệ Trực hệ"];
+}
+
+function handleSiblingTerms(
+  personA: PersonNode,
+  personB: PersonNode,
+  branchA: PersonNode,
+  branchB: PersonNode
+): [string, string, string] {
+  const genderA = personA.gender;
+  const genderB = personB.gender;
+  const seniority = compareSeniority(branchA, branchB);
+  if (seniority === "senior") {
+    return [
+      genderB === "female" ? "Em gái" : "Em trai",
+      genderA === "female" ? "Chị gái" : "Anh trai",
+      "Anh chị em ruột",
+    ];
+  } else {
+    return [
+      genderB === "female" ? "Chị gái" : "Anh trai",
+      genderA === "female" ? "Em gái" : "Em trai",
+      "Anh chị em ruột",
+    ];
+  }
+}
+
+function handleUncleAuntTerms(
+  depthA: number,
+  depthB: number,
+  personA: PersonNode,
+  personB: PersonNode,
+  branchA: PersonNode,
+  branchB: PersonNode,
+  pathA: PersonNode[],
+  pathB: PersonNode[]
+): [string, string, string] {
+  const genderA = personA.gender;
+  const genderB = personB.gender;
+  const seniority = compareSeniority(branchA, branchB);
+  const isALineHigher = depthA > depthB;
+  const higherDepth = isALineHigher ? depthA : depthB;
+  const higherBranch = isALineHigher ? branchA : branchB;
+  const lowerPerson = isALineHigher ? personB : personA;
+  const lowerGender = lowerPerson.gender;
+  const isPaternalSide = higherBranch.gender === "male";
+  const genDiff = higherDepth - 1;
+  let lowerCallsHigher = "";
+  if (isPaternalSide) {
+    if (genDiff === 1) {
+      lowerCallsHigher = lowerGender === "female" ? "Cô" : "Bác";
+    } else if (genDiff === 2) {
+      lowerCallsHigher = lowerGender === "female" ? "Bà cô" : "Cụ ông";
+    } else {
+      const prefix = lowerGender === "female" ? `Bà ${ANCESTORS[genDiff - 1]}` : `Ông ${ANCESTORS[genDiff - 1]}`;
+      lowerCallsHigher = prefix;
+    }
+  } else {
+    if (genDiff === 1) {
+      lowerCallsHigher = lowerGender === "female" ? "Dì" : "Chú";
+    } else if (genDiff === 2) {
+      lowerCallsHigher = lowerGender === "female" ? "Bà dì" : "Ông dượng";
+    } else {
+      const prefix = lowerGender === "female" ? `Bà ${ANCESTORS[genDiff - 1]}` : `Ông ${ANCESTORS[genDiff - 1]}`;
+      lowerCallsHigher = prefix;
+    }
+  }
+  const higherCallsLower = getDirectDescendantTerm(higherDepth);
+  const description = isPaternalSide ? "Bên Nội (Vế trên)" : "Bên Ngoại (Vế trên)";
+  return [lowerCallsHigher, higherCallsLower, description];
+}
+
+function handleCrossGenerationalTerms(
+  depthA: number,
+  depthB: number,
+  personA: PersonNode,
+  personB: PersonNode,
+  branchA: PersonNode,
+  branchB: PersonNode
+): [string, string, string] {
+  const genderA = personA.gender;
+  const genderB = personB.gender;
+  const seniority = compareSeniority(branchA, branchB);
+  const isPaternalA = branchA.gender === "male";
+  const genDiffA = depthA - 1;
+  const genDiffB = depthB - 1;
+  if (genDiffA === 0 || genDiffB === 0) return ["Họ hàng", "Họ hàng", "Quan hệ họ hàng"];
+  const depthDiff = Math.abs(genDiffA - genDiffB);
+  const maxGen = Math.max(genDiffA, genDiffB);
+  if (maxGen > 1 && depthDiff <= 1) {
+    if (seniority === "senior") {
+      return ["Em họ", genderA === "female" ? "Chị họ" : "Anh họ", `Anh em họ ${isPaternalA ? "Nội" : "Ngoại"}`];
+    } else {
+      return [genderB === "female" ? "Chị họ" : "Anh họ", "Em họ", `Anh em họ ${isPaternalA ? "Nội" : "Ngoại"}`];
+    }
+  }
+  return ["Họ hàng", "Họ hàng", "Quan hệ họ hàng"];
+}
+
 // eslint-disable-next-line max-lines-per-function, max-statements
 function resolveBloodTerms(
   depthA: number,
