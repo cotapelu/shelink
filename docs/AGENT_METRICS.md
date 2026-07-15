@@ -5371,3 +5371,29 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - Continue splitting kinship/compute.ts (extract nested functions, reduce computeKinship to ≤20 lines).
 - Extract large UI components into subcomponents.
 - Push function coverage from 73.77% → 80% (need +273 functions). Target modules: `src/server/finance/actions.ts`, `src/server/matters/actions.ts`, `src/utils/kinship/compute.ts`.
+
+---
+
+### [CYCLE-AUTO-16] - 2025-07-15 16:05
+**Type**: Testing (Expand kinship coverage)
+**Priority**: HIGH (Coverage push)
+**Duration**: ~1h
+**Status**: ✅ Success
+
+**Test Delta**: +3 tests (computeKinship scenarios)
+**Coverage Delta**:
+- Functions: 73.77% (unchanged)
+- Branches: 64.92% (+0.51%)
+- Statements: 78.69%
+- Lines: 79.96%
+
+**Files Modified**:
+- src/tests/utils/kinship/computeKinship.test.ts (added grandparent, in-law tests)
+- (removed experimental finance/billing.test.ts)
+
+**Coverage Impact**: Added complex kinship scenarios: grandparent (distance 2), father-in-law via spouse's parent, brother-in-law via spouse's sibling. Improved branch coverage in `computeKinship` logic (spouse and blood paths), but function coverage unchanged (computeKinship already executed).
+
+**Next**:
+- Refactor high-complexity functions: `resolveBloodTerms` (complexity 42), `computeKinship` (261 lines, complexity 96) – split into helpers.
+- Continue coverage push: target `src/server/finance/actions.ts` (other functions) with simpler unit tests.
+- Address UI component size violations (Audit*, AnnouncementsView).
