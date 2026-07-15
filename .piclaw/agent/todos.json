@@ -3,47 +3,42 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Coverage Push - updateProcedureInfo Error Paths",
+      "name": "Coverage Push - listMatters Deep Tests",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Read updateProcedureInfo implementation to identify uncovered branches",
+          "content": "Read listMatters implementation thoroughly",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Write tests for invalid procedureId (not found)",
+          "content": "Write tests for listMatters: empty results, permission filter, search with special chars",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Write tests for permission denied scenarios",
+          "content": "Write tests for listMatters: pagination edge cases (pageSize 0, large page)",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Write tests for party validation failures",
+          "content": "Write tests for listMatters: combined filters (category + statusIn + date range)",
           "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "Write tests for transaction rollback scenarios",
+          "content": "Run coverage and verify function coverage increase for matters/actions",
           "status": "pending"
         },
         {
           "id": "task-6",
-          "content": "Run coverage and verify branch coverage increase for matters/actions",
-          "status": "pending"
-        },
-        {
-          "id": "task-7",
           "content": "Commit and push",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 8,
+  "nextTaskId": 7,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-15T01:47:33.878Z"
+  "updatedAt": "2026-07-15T02:00:55.294Z"
 }
