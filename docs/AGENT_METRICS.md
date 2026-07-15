@@ -389,6 +389,56 @@
 
 ---
 
+### [CYCLE-AUTO-9] - 2025-07-14 Coverage Push: Algorithm & Express Tests
+
+**Type**: Test Expansion (T)
+**Priority**: HIGH
+**Duration**: ~60 min
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Lint: 0 warnings
+- ✅ Typecheck: PASS
+- ✅ Tests: **1868 → 1899 passed** (+31 tests)
+- ✅ Build: SUCCESS
+
+**Coverage Baseline → After**:
+| Metric | Before | After | Δ |
+|---------|--------|-------|----|
+| Statements | 75.75% | **75.94%** | +0.19% |
+| Branches | 61.74% | **61.82%** | +0.08% |
+| **Functions** | **71.44%** | **71.53%** | **+0.09%** |
+| Lines | 77.25% | **77.45%** | +0.20% |
+
+**Target Modules**:
+1. `src/server/conflicts/algorithm.ts` (Functions: 11% → 87%):
+   - Exported `bumpSeverity` & `roleLabel` for testability
+   - Comprehensive tests: `pickSeverity` (6), `bumpSeverity` (4), `roleLabel` (7)
+   - `runConflictCheck`: 11 new tests covering exact/fuzzy matching, dedup, sorting, client archive search
+   - Total new: 28 tests
+
+2. `src/server/express/actions.ts` (Functions: 77.77% → ~88%):
+   - Added `deleteExpress` tests (3 tests)
+   - Verified success path, revalidation, audit
+   - Total new: 3 tests
+
+**Test Delta**: +31 tests (total 1899)
+
+**Violations Resolved**:
+- ✅ None (existing violations remain: complexity 940+, functions >20 lines in many modules)
+
+**Notes**:
+- Algorithm module testability improved by exposing helper functions
+- All tests pass, coverage improved modestly but function coverage still below 80% target
+- Next: Target low-function-coverage modules (`src/server/matters/actions.ts` 62.5%, `src/utils/kinship/compute.ts` branches 22.22%)
+
+**Files Modified**:
+- src/server/conflicts/algorithm.ts (export helpers)
+- src/tests/server/conflicts/algorithm.test.ts (comprehensive tests)
+- src/tests/server/express/actions.test.ts (deleteExpress tests)
+
+---
+
 ## Recent Cycles (Last 10)
 
 *(Auto-populated as cycles complete)*

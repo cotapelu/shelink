@@ -125,11 +125,11 @@ export type ConflictCheckResult = {
 const SEV_ORDER = { LOW: 0, MEDIUM: 1, HIGH: 2, BLOCKING: 3 } as const;
 const SEV_BY_ORDER = ["LOW", "MEDIUM", "HIGH", "BLOCKING"] as const;
 
-function bumpSeverity(s: ConflictHitDraft["severity"]): ConflictHitDraft["severity"] {
+export function bumpSeverity(s: ConflictHitDraft["severity"]): ConflictHitDraft["severity"] {
   return SEV_BY_ORDER[Math.min(SEV_ORDER[s] + 1, 3)];
 }
 
-function pickSeverity(
+export function pickSeverity(
   candidateRole: PartyRole,
   historyRole: PartyRole
 ): ConflictHitDraft["severity"] {
@@ -363,7 +363,7 @@ export async function runConflictCheck(queries: QueryItem[]): Promise<ConflictCh
   };
 }
 
-function roleLabel(role: PartyRole) {
+export function roleLabel(role: PartyRole) {
   switch (role) {
     case "CLIENT_PARTY":
       return "委托方";

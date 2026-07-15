@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { listExpress, createExpress, getExpress } from "@/server/express/actions";
+import cuid from "cuid";
+import { listExpress, createExpress, getExpress, deleteExpress } from "@/server/express/actions";
 import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { assertMatterWritable } from "@/lib/archive/guard";
@@ -15,6 +16,7 @@ vi.mock("@/lib/prisma", () => ({
       findMany: vi.fn(),
       findUnique: vi.fn(),
       create: vi.fn(),
+      delete: vi.fn(),
     },
     matter: {
       findUnique: vi.fn(),
@@ -250,6 +252,36 @@ describe("express/actions", () => {
       const id = CUID(1);
       mockPrisma.expressTracking.findUnique.mockResolvedValue(null as any);
       await expect(getExpress(id)).rejects.toThrow("快递记录不存在");
+    });
+  });
+
+  describe("deleteExpress", () => {
+    it("should delete successfully", async () => {
+      const id = CUID(1);
+      const input = { id };
+
+      const mockRecord = { id, matterId: null as string | null, createdById: "u1" };
+      mockPrisma.expressTracking.findUnique.mockResolvedValue(mockRecord as any);
+      mockPrisma.expressTracking.delete.mockResolvedValue({ id } as any);
+
+      await deleteExpress(input);
+
+      expect(mockPrisma.expressTracking.delete).toHaveBeenCalledWith({ where: { id } });
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/express");
+    });
+
+    it("should revalidate matter path if matterId exists", async () => {
+      const id = CUID(1);
+      const matterId = CUID(2);
+      const input = { id };
+
+      const mockRecord = { id, matterId, createdById: "u1" };
+      mockPrisma.expressTracking.findUnique.mockResolvedValue(mockRecord as any);
+      mockPrisma.expressTracking.delete.mockResolvedValue({ id } as any);
+
+      await deleteExpress(input);
+
+      expect(mockRevalidatePath).toHaveBeenCalledWith(`/matters/${matterId}`);
     });
   });
 });

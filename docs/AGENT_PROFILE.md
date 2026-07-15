@@ -253,3 +253,22 @@ Functions in `src/server/matters/actions.ts` exceeding quality gates (lines >20,
 
 **Priority**: P1 (market readiness)
 
+### Seals Component Refactor (2026-07-14)
+
+Progress:
+- Extracted `ApprovalDialog` (115→74 lines) with `ApprovalDialogFields`; still >50, pending further extraction
+- Extracted `SealDetailFields` from `SealDetailDialog`; complexity reduced from 17→<10
+- Created shared `field.tsx` and `document-link.tsx` utilities
+- Eliminated 2 function size violations in seals components
+
+Remaining UI violations (seals):
+- `StampDialog`: 75 lines (>50)
+- `MatterCombobox`: 99 lines (>50)
+- `SealRequestForm`: 76 lines (>50)
+- `SealsTable`: 51 lines (>50)
+- `SealsView`: 87 lines (>50)
+
+Next:
+- Extract `StampDialog` actions into subcomponent
+- Continue with next largest UI components to achieve ≤50 lines per function
+

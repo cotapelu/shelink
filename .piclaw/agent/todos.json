@@ -3,37 +3,27 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Complex Hook Refactoring",
+      "name": "Final Verification & Commit",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Split useBulkAdd hook: extract handleBulkAdd logic into smaller sub-functions to get main hook ≤30 lines",
+          "content": "Run quality gate: lint, typecheck, test, build",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Split useQuickAddSpouse hook similarly",
+          "content": "Git add, commit with conventional message",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Split useRelationshipSearch hook if still >30 lines",
-          "status": "pending"
-        },
-        {
-          "id": "task-4",
-          "content": "Refactor AddRelationshipForm: ensure FormFields and other subcomponents ≤30 lines",
-          "status": "pending"
-        },
-        {
-          "id": "task-5",
-          "content": "Refactor BulkAddChildrenForm: compress or split to get main function ≤30 lines",
+          "content": "Push changes (if remote configured)",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 6,
+  "nextTaskId": 4,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-09T07:40:29.097Z"
+  "updatedAt": "2026-07-15T01:03:10.530Z"
 }
