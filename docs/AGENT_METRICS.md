@@ -5455,3 +5455,17 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 
 **Next**: Reduce computeKinship size/complexity (261 lines, complexity 96) similar extraction pattern; continue coverage push on other high-violation modules.
 
+## 2026-07-15 17:57 Cycle CYCLE-AUTO-19 - Task: Fix computeKinship transformation after refactor
+- **Type**: Violation Fix (Critical: Breaking tests)
+- **Priority**: CRITICAL
+- **Duration**: 20 minutes (estimated)
+- **Status**: ✅ Success
+- **Test Delta**: 0 (total 1987)
+- **Coverage Delta**: 
+  - Statements: 0% (no change)
+  - Branches: 0%
+  - Functions: 0%
+  - Lines: 0%
+- **Performance**: N/A
+- **Security**: N/A
+- **Notes**: Restored original transformation logic for Via A and Via B spouse-based relationships using helper functions. All 8 kinship tests now pass. 2 failures resolved: father-in-law and brother-in-law. Complexity of helpers not yet optimized; subsequent cycles needed.

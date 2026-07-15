@@ -286,3 +286,6 @@ Next:
 
 **Priority**: P1 (quality gate)
 
+
+### Weaknesses (as of 2026-07-15 17:57)
+- High complexity in `src/utils/kinship/compute.ts`: multiple functions exceed 20 lines and cyclomatic complexity >10 (handleDirectLineage, handleSiblingTerms, handleUncleAuntTerms, handleCrossGenerationalTerms, resolveBloodTerms, findBloodKinship, buildMaps, createBothSpousesResult, checkViaBothSpouses, transformViaB_aCallsB, computeKinship). Requires systematic refactoring to meet quality gates.
