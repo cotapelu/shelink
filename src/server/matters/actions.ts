@@ -43,7 +43,7 @@ import {
   type MatterUpdateBasicInput
 } from "./schemas";
 
-function emptyToNull<T extends Record<string, unknown>>(obj: T): T {
+export function emptyToNull<T extends Record<string, unknown>>(obj: T): T {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(obj)) {
     out[k] = v === "" ? null : v;
@@ -383,7 +383,7 @@ type NewProcedurePartyInput = {
   standings: LitigationStanding[];
 };
 
-function clientTypeToPartyType(type: "INDIVIDUAL" | "COMPANY" | "ORGANIZATION"): PartyType {
+export function clientTypeToPartyType(type: "INDIVIDUAL" | "COMPANY" | "ORGANIZATION"): PartyType {
   if (type === "INDIVIDUAL") return "NATURAL_PERSON";
   if (type === "COMPANY") return "COMPANY";
   return "OTHER_ORG";
@@ -434,7 +434,7 @@ async function ensureClientParty(
   return created.id;
 }
 
-function normalizeProcedureParties(
+export function normalizeProcedureParties(
   rows: { partyId: string; standing: LitigationStanding }[]
 ) {
   const standingValues = new Set(Object.values(LitigationStanding));
@@ -450,13 +450,13 @@ function normalizeProcedureParties(
     });
 }
 
-function normalizeLitigationStanding(standing: LitigationStanding): LitigationStanding {
+export function normalizeLitigationStanding(standing: LitigationStanding): LitigationStanding {
   if (standing === "JOINT_PLAINTIFF") return "PLAINTIFF";
   if (standing === "JOINT_DEFENDANT") return "DEFENDANT";
   return standing;
 }
 
-function normalizeNewProcedureParties(rows: NewProcedurePartyInput[]) {
+export function normalizeNewProcedureParties(rows: NewProcedurePartyInput[]) {
   const standingValues = new Set(Object.values(LitigationStanding));
   const roleValues = new Set(Object.values(PartyRole));
   const partyTypeValues = new Set(Object.values(PartyType));
@@ -625,7 +625,7 @@ export async function getMatterById(id: string) {
   return matter;
 }
 
-function buildClientLinks(primaryClientId: string, clientIds: string[]) {
+export function buildClientLinks(primaryClientId: string, clientIds: string[]) {
   return {
     create: clientIds.map((cid, idx) => ({
       clientId: cid,
@@ -635,7 +635,7 @@ function buildClientLinks(primaryClientId: string, clientIds: string[]) {
   };
 }
 
-function buildParties(parties: MatterCreateInput["parties"]) {
+export function buildParties(parties: MatterCreateInput["parties"]) {
   return {
     create: parties.map((p) =>
       emptyToNull({
@@ -656,7 +656,7 @@ function buildParties(parties: MatterCreateInput["parties"]) {
   };
 }
 
-function buildProcedure(firstProcedure: MatterCreateInput["firstProcedure"], acceptedAt?: Date) {
+export function buildProcedure(firstProcedure: MatterCreateInput["firstProcedure"], acceptedAt?: Date) {
   return {
     create: {
       type: firstProcedure.type,
@@ -671,7 +671,7 @@ function buildProcedure(firstProcedure: MatterCreateInput["firstProcedure"], acc
   };
 }
 
-function buildMatterCreateData(
+export function buildMatterCreateData(
   data: MatterCreateInput,
   userId: string,
   primaryClientId: string,

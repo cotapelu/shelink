@@ -3,32 +3,37 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Export Internal Helpers & Add Unit Tests",
+      "name": "Coverage Push - createMatter & getMatterById Error Paths",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Export helpers: buildClientLinks, buildParties, buildProcedure, buildMatterCreateData, clientTypeToPartyType, normalize*",
+          "content": "Read createMatter implementation to identify untested error branches",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Create actions-helpers.test.ts with unit tests for each helper",
+          "content": "Add tests for createMatter: client not found, validation failures",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Run coverage to measure function coverage increase",
+          "content": "Add tests for getMatterById: null matter, audit verification, prisma errors",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Commit and push",
+          "content": "Run coverage to verify branch coverage increase",
+          "status": "pending"
+        },
+        {
+          "id": "task-5",
+          "content": "Commit and push metrics update",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 5,
+  "nextTaskId": 6,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-15T03:28:42.872Z"
+  "updatedAt": "2026-07-15T03:35:40.934Z"
 }
