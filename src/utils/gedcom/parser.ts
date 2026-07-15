@@ -30,8 +30,8 @@ export function parseGedcomDate(dateStr: string): {
   month: number | null;
   year: number | null;
 } {
-  const cleanVal = dateStr.replace(/^(ABT|EST|AFT|BEF|CAL)\s+/i, "");
-  const parts = cleanVal.split(" ");
+  const cleanVal = dateStr.replace(/^(ABT|EST|AFT|BEF|CAL)\s+/i, "").trim();
+  const parts = cleanVal.split(/\s+/);
   if (parts.length === 3) {
     return { day: parseInt(parts[0]) || null, month: parseMonthName(parts[1]), year: parseInt(parts[2]) || null };
   } else if (parts.length === 1) {

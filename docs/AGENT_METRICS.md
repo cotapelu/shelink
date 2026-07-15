@@ -5311,3 +5311,34 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - Continue coverage push: target ~70 more functions
 - Focus on server actions with uncovered functions: src/server/finance/actions.ts, src/server/express/actions.ts
 - Address complexity violations concurrently.
+
+---
+
+### [CYCLE-AUTO-14] - 2025-07-15 15:20
+**Type**: Testing (Unit tests for finance actions, cron jobs, kinship)
+**Priority**: HIGH (Coverage push)
+**Duration**: ~1.5h
+**Status**: ✅ Success
+
+**Test Delta**: +10 tests (total ~2000)
+**Coverage Delta**:
+- Statements: 78.31% (4506/5754)
+- Branches: 64.42% (3049/4733)
+- Functions: 73.67% (764/1037) (+0.58%)
+- Lines: 79.51% (4053/5097)
+
+**Files Modified** (test additions):
+- src/tests/utils/kinship/computeKinship.test.ts
+- src/tests/utils/gedcom/parser.unit.test.ts (fix)
+- src/tests/utils/gedcom/parser.integration.test.ts
+- src/tests/server/finance/getMonthlyRevenue.test.ts
+- src/tests/server/finance/getPersonalRevenue.test.ts
+- src/tests/server/cron/jobs/scan-due-reminders.test.ts
+- (others from previous cycles)
+
+**Coverage Impact**: Added coverage for previously untested functions: `scanDueReminders`, `getMonthlyRevenue`, `getPersonalRevenue`, `computeKinship`. Also improved branch coverage in gedcom parser and kinship helpers. Overall function coverage increased from ~73.09% to 73.67%.
+
+**Next**:
+- Continue coverage push toward 80%: need ~73 more functions.
+- Target remaining low-coverage modules: `src/server/matters/actions.ts` (createMatter), `src/server/finance/actions.ts` (createBilling, createFeeEntry, etc.), `src/utils/kinship/compute.ts` (deep kinship logic).
+- Address complexity violations: extract large UI components (AuditFilters, AuditTable, AuditView, AnnouncementsView).

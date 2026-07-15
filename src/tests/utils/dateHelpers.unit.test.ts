@@ -25,6 +25,7 @@ describe("formatDisplayDate", () => {
 describe("calculateAge", () => {
   it("returns age and isDeceased false for birthYear only", () => {
     const result = calculateAge(2000);
+    if (!result) throw new Error('Expected result for birthYear 2000');
     expect(result).toHaveProperty("age");
     expect(result).toHaveProperty("isDeceased", false);
     const currentYear = new Date().getFullYear();
@@ -60,8 +61,8 @@ describe("getZodiacAnimal", () => {
   });
   it("returns string when month/day provided", () => {
     const result = getZodiacAnimal(2024, 1, 1);
-    expect(result).toBeTruthy();
-    expect(typeof result).toBe("string");
+    if (!result) throw new Error('Expected non-null zodiac');
+    expect(typeof result).toBe('string');
   });
 });
 

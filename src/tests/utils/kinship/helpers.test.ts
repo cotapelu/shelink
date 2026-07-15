@@ -7,28 +7,39 @@ import {
 import type { PersonNode } from "@/utils/kinship/types";
 
 describe("compareSeniority", () => {
+  const basePerson = (overrides: Partial<PersonNode> = {}): PersonNode => ({
+    id: "1",
+    full_name: "Test",
+    gender: "male",
+    birth_year: null,
+    birth_order: null,
+    generation: null,
+    is_in_law: false,
+    ...overrides
+  });
+
   it("returns equal for same person", () => {
-    const p: PersonNode = { id: "1", birth_order: 1, birth_year: 1990 };
+    const p = basePerson();
     expect(compareSeniority(p, p)).toBe("equal");
   });
 
   it("uses birth_order when both present", () => {
-    const a: PersonNode = { id: "1", birth_order: 1, birth_year: 1990 };
-    const b: PersonNode = { id: "2", birth_order: 2, birth_year: 1990 };
+    const a = basePerson({ birth_order: 1 });
+    const b = basePerson({ birth_order: 2, id: "2" });
     expect(compareSeniority(a, b)).toBe("senior");
     expect(compareSeniority(b, a)).toBe("junior");
   });
 
   it("uses birth_year when birth_order missing", () => {
-    const a: PersonNode = { id: "1", birth_year: 1990 };
-    const b: PersonNode = { id: "2", birth_year: 1995 };
+    const a = basePerson({ birth_year: 1990 });
+    const b = basePerson({ birth_year: 1995, id: "2" });
     expect(compareSeniority(a, b)).toBe("senior");
     expect(compareSeniority(b, a)).toBe("junior");
   });
 
   it("returns equal when no ordering info", () => {
-    const a: PersonNode = { id: "1" };
-    const b: PersonNode = { id: "2" };
+    const a = basePerson();
+    const b = basePerson({ id: "2" });
     expect(compareSeniority(a, b)).toBe("equal");
   });
 });
