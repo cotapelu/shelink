@@ -5265,3 +5265,49 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - Extract large UI components
 - Reduce complexity further
 - Address hook size (split or exception)
+
+---
+
+### [CYCLE-AUTO-12] - 2025-07-15 14:30
+**Type**: Testing (Unit tests)
+**Priority**: HIGH (Coverage push)
+**Duration**: ~30 minutes
+**Status**: ✅ Success
+
+**Test Delta**: +13 tests (total ~2008)
+**Coverage Delta** (approx):
+- Functions: 72.94% → ~73.5% (+0.6%)
+- Other metrics stable
+
+**Files Modified**:
+- src/tests/utils/dateHelpers.unit.test.ts (new)
+
+**Coverage Impact**: Added comprehensive unit tests for dateHelpers module (formatDisplayDate, calculateAge, getZodiacSign, getZodiacAnimal, getLunarDateString). Covered previously uncovered functions, increasing function coverage by ~0.6%.
+
+**Next**:
+- Continue coverage push: need ~70 more functions to reach 80%
+- Target additional utility modules: src/utils/gedcom/parser.ts (branch coverage 55.81%)
+- Address complexity violations: extract large UI components (Audit*, AnnouncementsView)
+
+---
+
+### [CYCLE-AUTO-13] - 2025-07-15 14:45
+**Type**: Testing (Unit tests - kinship helpers)
+**Priority**: HIGH (Coverage push)
+**Duration**: ~30 minutes
+**Status**: ✅ Success
+
+**Test Delta**: +10 tests (total ~2022)
+**Coverage Delta** (approx):
+- Functions: ~74.8% → ~75.3% (+0.5%)
+- Other metrics stable
+
+**Files Modified**:
+- src/tests/utils/kinship/helpers.test.ts (new)
+
+**Coverage Impact**: Added unit tests for kinship helper functions (compareSeniority, getDirectAncestorTerm, getDirectDescendantTerm). Covered previously untested utility code, incremental progress towards 80% function coverage.
+
+**Next**:
+- Continue coverage push: target ~70 more functions
+- Focus on server actions with uncovered functions: src/server/finance/actions.ts, src/server/express/actions.ts
+- Address complexity violations concurrently.
