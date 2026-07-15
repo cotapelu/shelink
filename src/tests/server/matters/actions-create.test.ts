@@ -113,6 +113,17 @@ describe("createMatter", () => {
     await expect(createMatter(input)).rejects.toThrow();
   });
 
+  it("rejects on invalid category enum", async () => {
+    const input = {
+      title: "Test",
+      category: "INVALID" as any,
+      clientIds: [cuid()],
+      parties: [],
+      firstProcedure: { type: "FIRST_INSTANCE" as const, acceptedAt: new Date() }
+    };
+    await expect(createMatter(input)).rejects.toThrow();
+  });
+
   it("handles transaction failure", async () => {
     mockPrisma.$transaction.mockRejectedValue(new Error("DB error"));
     const input = {

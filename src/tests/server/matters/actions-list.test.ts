@@ -145,4 +145,34 @@ describe("listMatters", () => {
     expect(and.some((c: any) => c.OR)).toBe(true);
   });
 
+  it("sorts by hearing date", async () => {
+    mockPrisma.matter.findMany.mockResolvedValue([]);
+    mockPrisma.matter.count.mockResolvedValue(0);
+    await listMatters({ sortBy: "hearing" });
+    const callArgs = mockPrisma.matter.findMany.mock.calls[0][0];
+    expect(callArgs.orderBy).toBeDefined();
+  });
+
+  it("sorts by claimAmount", async () => {
+    mockPrisma.matter.findMany.mockResolvedValue([]);
+    mockPrisma.matter.count.mockResolvedValue(0);
+    await listMatters({ sortBy: "claimAmount" });
+    const callArgs = mockPrisma.matter.findMany.mock.calls[0][0];
+    expect(callArgs.orderBy).toBeDefined();
+  });
+
+  it("sorts by hearing date with multiple procedures", async () => {
+    const date1 = new Date("2025-01-01");
+    const date2 = new Date("2025-02-01");
+    mockPrisma.matter.findMany.mockResolvedValue([{
+      id: "m1",
+      procedures: [{ hearings: [{ startsAt: date1 }] }, { hearings: [{ startsAt: date2 }] }],
+      updatedAt: new Date()
+    }]);
+    mockPrisma.matter.count.mockResolvedValue(1);
+
+    const result = await listMatters({ sortBy: "hearing", sortDir: "asc" });
+    expect(result.items).toHaveLength(1);
+  });
+
 });

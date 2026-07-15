@@ -3,37 +3,42 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Coverage Push - createMatter & getMatterById Error Paths",
+      "name": "Coverage Push - listMatters Includes & createMatter Validation",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Read createMatter implementation to identify untested error branches",
+          "content": "Add test for listMatters: verify includes structure (primaryClient, owner, cause, procedures, parties)",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Add tests for createMatter: client not found, validation failures",
+          "content": "Add test for listMatters: archiveRecords include",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Add tests for getMatterById: null matter, audit verification, prisma errors",
+          "content": "Add test for createMatter: invalid category enum",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Run coverage to verify branch coverage increase",
+          "content": "Add test for createMatter: client not found scenario",
           "status": "pending"
         },
         {
           "id": "task-5",
+          "content": "Run coverage and verify branch coverage increase",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
           "content": "Commit and push metrics update",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 6,
+  "nextTaskId": 7,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-15T03:35:40.934Z"
+  "updatedAt": "2026-07-15T03:46:31.481Z"
 }
