@@ -24,7 +24,9 @@ vi.mock("@/lib/matters/firm-caseno", () => ({
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     $transaction: vi.fn(),
-    systemSetting: { findUnique: vi.fn(), upsert: vi.fn() }
+    systemSetting: { findUnique: vi.fn(), upsert: vi.fn() },
+    client: { findUnique: vi.fn() },
+    party: { findMany: vi.fn() }
   }
 }));
 vi.mock("@/lib/auth/session", () => ({ requireSession: vi.fn() }));
