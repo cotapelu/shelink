@@ -118,10 +118,22 @@ function buildGedcomPersonFromState(state: any, uuid: string): GedcomPerson {
   };
 }
 
-function parsePersonRecord(record: ParseRecord, idMap: Map<string, string>): GedcomPerson {
-  const uuid = generateUUID();
-  idMap.set(record.id, uuid);
+function processPersonLine(line: string, currentTag: string, state: any): string {
+  const match = line.match(/^(\d+)\s+([A-Z0-9_]+)(?:\s+(.*))?$/);
+  if (!match) return currentTag;
+  const level = parseInt(match[1]);
+  const tag = match[2];
+  const val = match[3] || "";
+  if (level === 1) {
+    handleLevel1(tag, val, state);
+    return tag;
+  } else if (level === 2) {
+    handleLevel2(currentTag, tag, val, state);
+  }
+  return currentTag;
+}
 
+function parsePersonState(lines: string[]): any {
   const state: any = {
     fullName: "Unknown",
     gender: "other",
@@ -131,24 +143,16 @@ function parsePersonRecord(record: ParseRecord, idMap: Map<string, string>): Ged
     note: ""
   };
   let currentTag = "";
-
-  for (let i = 0; i < record.lines.length; i++) {
-    const line = record.lines[i];
-    const match = line.match(/^(\d+)\s+([A-Z0-9_]+)(?:\s+(.*))?$/);
-    if (!match) continue;
-
-    const level = parseInt(match[1]);
-    const tag = match[2];
-    const val = match[3] || "";
-
-    if (level === 1) {
-      currentTag = tag;
-      handleLevel1(tag, val, state);
-    } else if (level === 2) {
-      handleLevel2(currentTag, tag, val, state);
-    }
+  for (const line of lines) {
+    currentTag = processPersonLine(line, currentTag, state);
   }
+  return state;
+}
 
+function parsePersonRecord(record: ParseRecord, idMap: Map<string, string>): GedcomPerson {
+  const uuid = generateUUID();
+  idMap.set(record.id, uuid);
+  const state = parsePersonState(record.lines);
   return buildGedcomPersonFromState(state, uuid);
 }
 

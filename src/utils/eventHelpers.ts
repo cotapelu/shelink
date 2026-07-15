@@ -126,30 +126,37 @@ function createBirthdayEvent(p: PersonInput, today: Date): FamilyEvent | null {
   };
 }
 
-function createDeathAnniversaryEvent(p: PersonInput, today: Date): FamilyEvent | null {
-  if (!p.death_month || !p.death_day) return null;
+function computeDeathAnniversaryData(p: PersonInput, today: Date): { next: Date; daysUntil: number; label: string } | null {
   try {
     const deathYear = p.death_year ?? new Date().getFullYear();
-    const solar = Solar.fromYmd(deathYear, p.death_month, p.death_day);
+    const solar = Solar.fromYmd(deathYear, p.death_month!, p.death_day!);
     const lunar = solar.getLunar();
     const lMonth = Math.abs(lunar.getMonth());
     const lDay = lunar.getDay();
     const next = nextSolarForLunar(lMonth, lDay, today);
     if (!next) return null;
     const daysUntil = computeDaysUntil(next, today);
-    return {
-      personId: p.id,
-      personName: p.full_name,
-      type: "death_anniversary",
-      nextOccurrence: next,
-      daysUntil,
-      eventDateLabel: `${lDay.toString().padStart(2, "0")}/${lMonth.toString().padStart(2, "0")} ÂL`,
-      originYear: p.death_year,
-      isDeceased: p.is_deceased,
-    };
+    const label = `${lDay.toString().padStart(2, "0")}/${lMonth.toString().padStart(2, "0")} ÂL`;
+    return { next, daysUntil, label };
   } catch {
     return null;
   }
+}
+
+function createDeathAnniversaryEvent(p: PersonInput, today: Date): FamilyEvent | null {
+  if (!p.death_month || !p.death_day) return null;
+  const data = computeDeathAnniversaryData(p, today);
+  if (!data) return null;
+  return {
+    personId: p.id,
+    personName: p.full_name,
+    type: "death_anniversary",
+    nextOccurrence: data.next,
+    daysUntil: data.daysUntil,
+    eventDateLabel: data.label,
+    originYear: p.death_year,
+    isDeceased: p.is_deceased,
+  };
 }
 
 function createCustomEvent(ce: CustomEventRecord, today: Date): FamilyEvent | null {
@@ -177,27 +184,28 @@ function createCustomEvent(ce: CustomEventRecord, today: Date): FamilyEvent | nu
  * - Birthdays use the solar birth_month / birth_day.
  * - Death anniversaries (ngày giỗ) are observed on the *lunar* date of death.
  */
-export function computeEvents(
-  persons: PersonInput[],
-  customEvents: CustomEventRecord[] = []
-): FamilyEvent[] {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+function gatherFamilyEvents(persons: PersonInput[], customEvents: CustomEventRecord[], today: Date): FamilyEvent[] {
   const events: FamilyEvent[] = [];
-
   for (const p of persons) {
     const bday = createBirthdayEvent(p, today);
     if (bday) events.push(bday);
     const death = createDeathAnniversaryEvent(p, today);
     if (death) events.push(death);
   }
-
   for (const ce of customEvents) {
     const custom = createCustomEvent(ce, today);
     if (custom) events.push(custom);
   }
+  return events;
+}
 
-  // Sort: soonest first
+export function computeEvents(
+  persons: PersonInput[],
+  customEvents: CustomEventRecord[] = []
+): FamilyEvent[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const events = gatherFamilyEvents(persons, customEvents, today);
   events.sort((a, b) => a.daysUntil - b.daysUntil);
   return events;
 }
