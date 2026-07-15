@@ -66,7 +66,7 @@ describe("computeKinship", () => {
     ];
     const result = computeKinship(gp, child, [gp, parent, child], edges);
     expect(result).not.toBeNull();
-    expect(result?.aCallsB).toBe("Cháu"); // gp calls child "Cháu"
+    expect(result?.aCallsB).toBe("Cháu");
     expect(result?.distance).toBe(2);
   });
 
@@ -87,7 +87,7 @@ describe("computeKinship", () => {
   it("detects brother-in-law (spouse's sibling)", () => {
     const husband = makePerson("h", "male");
     const wife = makePerson("w", "female", 1990);
-    const brotherInLaw = makePerson("b", "male", 1988); // older brother
+    const brotherInLaw = makePerson("b", "male", 1988);
     const parent = makePerson("p", "female", 1960);
     const edges: RelEdge[] = [
       { person_a: husband.id, person_b: wife.id, type: "marriage" },
@@ -97,7 +97,6 @@ describe("computeKinship", () => {
     const allPersons = [husband, wife, brotherInLaw, parent];
     const result = computeKinship(husband, brotherInLaw, allPersons, edges);
     expect(result).not.toBeNull();
-    // husband calls wife's older brother: "Anh vợ" (Anh + suffix)
     expect(result?.aCallsB).toBe("Anh vợ");
     expect(result?.distance).toBe(2);
   });
