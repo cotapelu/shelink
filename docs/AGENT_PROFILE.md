@@ -272,3 +272,17 @@ Next:
 - Extract `StampDialog` actions into subcomponent
 - Continue with next largest UI components to achieve ≤50 lines per function
 
+
+### Ongoing Refactor: computeKinship (2026-07-15)
+
+**Module**: `src/utils/kinship/compute.ts`  
+**Issue**: `computeKinship` function 261 lines, complexity 96 remains unresolved  
+**Current Status**: `resolveBloodTerms` simplified (18 lines), but main dispatcher still large  
+**Next Steps**:
+- [ ] Extract `buildMaps` (parentMap, spouseMap construction)
+- [ ] Extract `checkDirectMarriage`, `checkBloodRelation`, `checkRelationViaSpouse` (A's spouse), `checkRelationViaBothSpouses`
+- [ ] Extract transformation helpers for spouse calls (split if-else chains)
+- Target: Dispatcher under 20 lines, each helper ≤20 lines, complexity ≤10
+
+**Priority**: P1 (quality gate)
+
