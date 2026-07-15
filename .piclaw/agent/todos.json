@@ -3,32 +3,47 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Coverage Push - Matter Creation & Update",
+      "name": "Coverage Push - updateProcedureInfo Error Paths",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Expand createMatter tests: validation, permission, duplicate, transaction failure",
+          "content": "Read updateProcedureInfo implementation to identify uncovered branches",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Expand updateProcedureInfo tests: invalid procedure, permission errors, party validation",
+          "content": "Write tests for invalid procedureId (not found)",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Run coverage and measure branch coverage increase",
+          "content": "Write tests for permission denied scenarios",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Update metrics and commit",
+          "content": "Write tests for party validation failures",
+          "status": "pending"
+        },
+        {
+          "id": "task-5",
+          "content": "Write tests for transaction rollback scenarios",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
+          "content": "Run coverage and verify branch coverage increase for matters/actions",
+          "status": "pending"
+        },
+        {
+          "id": "task-7",
+          "content": "Commit and push",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 5,
+  "nextTaskId": 8,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-15T01:33:55.394Z"
+  "updatedAt": "2026-07-15T01:47:33.878Z"
 }

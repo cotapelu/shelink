@@ -111,7 +111,6 @@ describe("updateProcedureInfo", () => {
     const matterId = cuid();
 
     mockPrisma.matterProcedure.findUnique.mockResolvedValue({ id: procedureId, matterId } as any);
-    // party not found in matter
     mockPrisma.party.findMany.mockResolvedValue([]);
     mockPrisma.matter.findUnique.mockResolvedValue({ id: matterId, primaryClientId: null, clientLinks: [] } as any);
 
