@@ -4,36 +4,51 @@ import {
   getDirectAncestorTerm,
   getDirectDescendantTerm
 } from "@/utils/kinship/compute";
+import type { PersonNode } from "@/utils/kinship/types";
+
+function mkPerson(id: string, overrides: Partial<PersonNode> = {}): PersonNode {
+  return {
+    id,
+    full_name: id,
+    gender: "other",
+    birth_year: null,
+    birth_order: null,
+    generation: null,
+    is_in_law: false,
+    ...overrides
+  };
+}
 
 describe("compareSeniority", () => {
   it("returns equal for same person", () => {
-    expect(compareSeniority({ id: "1" }, { id: "1" })).toBe("equal");
+    const p = mkPerson("1");
+    expect(compareSeniority(p, p)).toBe("equal");
   });
 
   it("compares by birth_order when available", () => {
-    const a = { id: "a", birth_order: 1 };
-    const b = { id: "b", birth_order: 2 };
+    const a = mkPerson("a", { birth_order: 1 });
+    const b = mkPerson("b", { birth_order: 2 });
     expect(compareSeniority(a, b)).toBe("senior");
     expect(compareSeniority(b, a)).toBe("junior");
   });
 
   it("uses birth_year when birth_order equal or missing", () => {
-    const a = { id: "a", birth_year: 1980 };
-    const b = { id: "b", birth_year: 1990 };
+    const a = mkPerson("a", { birth_year: 1980 });
+    const b = mkPerson("b", { birth_year: 1990 });
     expect(compareSeniority(a, b)).toBe("senior");
     expect(compareSeniority(b, a)).toBe("junior");
   });
 
   it("returns equal when no ordering info", () => {
-    const a = { id: "a" };
-    const b = { id: "b" };
+    const a = mkPerson("a");
+    const b = mkPerson("b");
     expect(compareSeniority(a, b)).toBe("equal");
   });
 
   it("prefers birth_order over birth_year", () => {
-    const a = { id: "a", birth_order: 1, birth_year: 1990 };
-    const b = { id: "b", birth_order: 2, birth_year: 1980 };
-    expect(compareSeniority(a, b)).toBe("senior"); // based on birth_order
+    const a = mkPerson("a", { birth_order: 1, birth_year: 1990 });
+    const b = mkPerson("b", { birth_order: 2, birth_year: 1980 });
+    expect(compareSeniority(a, b)).toBe("senior");
   });
 });
 

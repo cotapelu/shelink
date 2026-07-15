@@ -19,13 +19,13 @@
  */
 import type { GedcomPerson, GedcomRelationship } from "./types";
 
-function parseMonthName(name: string): number | null {
+export function parseMonthName(name: string): number | null {
   const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
   const index = months.findIndex((m) => m === name.toUpperCase());
   return index !== -1 ? index + 1 : null;
 }
 
-function parseGedcomDate(dateStr: string): {
+export function parseGedcomDate(dateStr: string): {
   day: number | null;
   month: number | null;
   year: number | null;

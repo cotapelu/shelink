@@ -128,4 +128,35 @@ describe("computeKinship", () => {
     expect(result!.bCallsA).toBe("Chưa xác định");
     expect(result!.distance).toBe(-1);
   });
+
+  it("detects first cousins", () => {
+    const gp = mkPerson("gp", "GP", "male");
+    const p1 = mkPerson("p1", "P1", "male");
+    const p2 = mkPerson("p2", "P2", "female");
+    const a = mkPerson("a", "A", "male");
+    const b = mkPerson("b", "B", "female");
+    const rels: RelEdge[] = [
+      mkEdge("biological_child", "gp", "p1"),
+      mkEdge("biological_child", "gp", "p2"),
+      mkEdge("biological_child", "p1", "a"),
+      mkEdge("biological_child", "p2", "b")
+    ];
+    const result = computeKinship(a, b, [gp, p1, p2, a, b], rels);
+    expect(result).not.toBeNull();
+    expect(result!.aCallsB).toContain("họ"); // "Bạn họ" or "họ"
+    expect(result!.distance).toBeGreaterThanOrEqual(3);
+  });
+
+  it("treats adopted children as siblings", () => {
+    const parent = mkPerson("p", "P", "male");
+    const bio = mkPerson("b", "B", "male");
+    const adopted = mkPerson("a", "A", "female");
+    const rels: RelEdge[] = [
+      mkEdge("biological_child", "p", "b"),
+      mkEdge("adopted_child", "p", "a")
+    ];
+    const result = computeKinship(bio, adopted, [parent, bio, adopted], rels);
+    expect(result).not.toBeNull();
+    expect(result!.distance).toBe(2);
+  });
 });
