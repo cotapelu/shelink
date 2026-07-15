@@ -23,7 +23,7 @@ import type { PersonNode, KinshipResult, RelEdge } from "./types";
  * So sánh thứ bậc giữa hai người (cùng bố mẹ hoặc cùng thế hệ)
  * Ưu tiên: Thứ tự sinh (birth_order) -> Năm sinh (birth_year)
  */
-function compareSeniority(
+export function compareSeniority(
   a: PersonNode,
   b: PersonNode,
 ): "senior" | "junior" | "equal" {
@@ -71,7 +71,7 @@ const DESCENDANTS = [
 /**
  * Lấy danh xưng trực hệ vế trên
  */
-function getDirectAncestorTerm(
+export function getDirectAncestorTerm(
   depth: number,
   gender: "male" | "female" | "other",
   isPaternal: boolean,
@@ -92,7 +92,7 @@ function getDirectAncestorTerm(
 /**
  * Lấy danh xưng trực hệ vế dưới
  */
-function getDirectDescendantTerm(depth: number): string {
+export function getDirectDescendantTerm(depth: number): string {
   const base = DESCENDANTS[depth] || `Cháu đời ${depth}`;
   return base;
 }

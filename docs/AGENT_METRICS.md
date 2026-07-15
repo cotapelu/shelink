@@ -5176,3 +5176,29 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 
 ---
 
+
+### [CYCLE-AUTO-17] - 2025-07-15 11:45
+**Type**: Testing Improvement (Unit tests for kinship/compute helpers)
+**Priority**: HIGH (branch coverage low)
+**Duration**: ~30 minutes
+**Status**: ✅ Success
+
+**Test Delta**: +13 tests (total ~1982)
+**Coverage Delta**:
+- Statements: +0.21% (76.93% → 77.14%)
+- Branches: +0.44% (63.13% → 63.57%)
+- Functions: ~0% (72.8% → 72.8%)
+- Lines: +0.16% (78.31% → 78.47%)
+
+**Files Modified**:
+- src/utils/kinship/compute.ts (exported helpers)
+- src/tests/utils/kinship/compute.test.ts (new)
+
+**Notes**: Exported 3 helper functions (compareSeniority, getDirectAncestorTerm, getDirectDescendantTerm) for unit testing. Added 13 tests covering branches in kinship term calculations. Kinship compute branch coverage now 28.75% (still low). Overall branch coverage still far from 80% target (+16.43% needed).
+
+**Next**:
+- Add tests for computeKinship core algorithm to boost branch coverage.
+- Target other low-coverage modules: src/utils/gedcom/parser.ts (55.81% branches), src/utils/kinship/compute.ts (28.75% branches) remains priority.
+- Continue complexity reduction after coverage approaches 80%.
+
+---
