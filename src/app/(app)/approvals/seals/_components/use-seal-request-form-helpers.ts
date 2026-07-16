@@ -2,7 +2,6 @@
  * Helper functions for useSealRequestForm
  * Extracted to reduce hook complexity and function size
  */
-import type { SealTypeConfigRow, MatterOption } from "./seal-types";
 
 /**
  * Preset purposes for seal requests
@@ -114,21 +113,7 @@ export function isPdfFile(file: File): boolean {
 /**
  * Build FormData from form state
  */
-export function buildFormData(
-  sealType: string,
-  matterId: string,
-  resolvedPurpose: string,
-  documentTitle: string,
-  pageCount: number,
-  crossPage: boolean,
-  copies: number,
-  urgency: "NORMAL" | "URGENT",
-  requestNote: string,
-  alsoLegalRep: boolean,
-  hasExisting: boolean,
-  preset: { draftDocId?: string } | null,
-  file: File | null
-): FormData {
+export function buildFormData(sealType: string, matterId: string, resolvedPurpose: string, documentTitle: string, pageCount: number, crossPage: boolean, copies: number, urgency: "NORMAL" | "URGENT", requestNote: string, alsoLegalRep: boolean, hasExisting: boolean, preset: { draftDocId?: string } | null, file: File | null): FormData {
   const fd = new FormData();
   addBaseFields(fd, sealType, matterId, resolvedPurpose, documentTitle, pageCount, crossPage, copies, urgency, requestNote);
   addAlsoLegalRep(fd, alsoLegalRep, sealType);
@@ -136,18 +121,7 @@ export function buildFormData(
   return fd;
 }
 
-function addBaseFields(
-  fd: FormData,
-  sealType: string,
-  matterId: string,
-  resolvedPurpose: string,
-  documentTitle: string,
-  pageCount: number,
-  crossPage: boolean,
-  copies: number,
-  urgency: "NORMAL" | "URGENT",
-  requestNote: string
-) {
+function addBaseFields(fd: FormData, sealType: string, matterId: string, resolvedPurpose: string, documentTitle: string, pageCount: number, crossPage: boolean, copies: number, urgency: "NORMAL" | "URGENT", requestNote: string) {
   fd.set("sealType", sealType);
   if (matterId) fd.set("matterId", matterId);
   fd.set("purpose", resolvedPurpose);

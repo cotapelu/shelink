@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import type { PurposePreset } from "./use-seal-request-form-helpers";
 import { UseSealRequestFormReturn } from "./use-seal-request-form-helpers";
 import { useSealRequestFormState } from "./use-seal-request-form-state";
@@ -19,12 +20,13 @@ export function useSealRequestForm({
   onOpenChange: (o: boolean) => void;
 }): UseSealRequestFormReturn {
   const state = useSealRequestFormState({ preset });
+  const router = useRouter();
   const actions = useMemo(
     () =>
       createSealRequestFormActions(state, {
         draftDocId: preset?.draftDocId,
-      }, onOpenChange),
-    [state, preset, onOpenChange]
+      }, onOpenChange, router),
+    [state, preset, onOpenChange, router]
   );
 
   // Return full interface

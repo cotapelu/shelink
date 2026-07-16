@@ -244,7 +244,13 @@ function tryViaA(personA: PersonNode, personB: PersonNode, personsMap: Map<strin
     if (res) {
       const aCallsB = transformViaA_aCallsB(res.aCallsB, personA);
       const bCallsA = transformViaA_bCallsA(res.bCallsA, personA);
-      return { ...res, aCallsB, bCallsA, description: `Thông qua hôn nhân của ${spouseA.full_name}`, pathLabels: [`${personA.full_name} là vợ/chồng của ${spouseA.full_name}`, ...res.pathLabels] };
+      return {
+        ...res,
+        aCallsB,
+        bCallsA,
+        description: `Thông qua hôn nhân của ${spouseA.full_name}`,
+        pathLabels: [`${personA.full_name} là vợ/chồng của ${spouseA.full_name}`, ...res.pathLabels]
+      };
     }
   }
   return null;

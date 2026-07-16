@@ -42,7 +42,7 @@ export function MatterCombobox({
   placeholder?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const selected = value ? matters.find((m) => m.id === value) : null;
+  const selected = value ? (matters.find((m) => m.id === value) ?? null) : null;
   const handleClear = (e: React.MouseEvent<HTMLButtonElement>) => { e.preventDefault(); e.stopPropagation(); onChange(""); };
   const handleKeyClear = (e: React.KeyboardEvent<HTMLButtonElement>) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onChange(""); } };
   const handleSelect = (id: string) => { onChange(id); setOpen(false); };

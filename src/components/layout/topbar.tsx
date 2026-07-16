@@ -75,6 +75,141 @@ const APP_ITEMS = [
   { label: "通讯录", href: "/contacts", icon: Contact, kind: "link" }
 ] as const;
 
+function AppMenu({ onToolsOpen }: { onToolsOpen: (open: boolean) => void }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-[13px]",
+            "text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          )}
+          title="应用"
+        >
+          <LayoutGrid className="h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={1.8} />
+          <span className="hidden sm:inline">应用</span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        {APP_ITEMS.map((it) => {
+          if (it.kind === "tools") {
+            return (
+              <DropdownMenuItem
+                key={it.label}
+                onSelect={(e) => {
+                  e.preventDefault();
+                  onToolsOpen(true);
+                }}
+                className="cursor-pointer"
+              >
+                <it.icon className="mr-2 h-4 w-4 text-muted-foreground" strokeWidth={1.8} />
+                {it.label}
+              </DropdownMenuItem>
+            );
+          }
+          return (
+            <DropdownMenuItem key={it.label} asChild>
+              {it.kind === "external" ? (
+                <a href={it.href} target="_blank" rel="noreferrer" className="cursor-pointer">
+                  <it.icon className="mr-2 h-4 w-4 text-muted-foreground" strokeWidth={1.8} />
+                  {it.label}
+                </a>
+              ) : (
+                <Link href={it.href} className="cursor-pointer">
+                  <it.icon className="mr-2 h-4 w-4 text-muted-foreground" strokeWidth={1.8} />
+                  {it.label}
+                </Link>
+              )}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+
+function UserMenu({ userAvatar, displayName, roleLabel }: { userAvatar?: string | null; displayName: string; roleLabel: string }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={cn(
+            "flex h-8 items-center gap-2 rounded-md border border-border pl-1 pr-2.5",
+            "transition-colors hover:bg-muted"
+          )}
+        >
+          <Avatar className="h-6 w-6">
+            {userAvatar ? <AvatarImage src={userAvatar} alt={displayName} /> : null}
+            <AvatarFallback className="bg-primary/10 text-[11px] font-semibold text-primary">
+              {displayName ? displayName.charAt(0) : "?"}
+            </AvatarFallback>
+          </Avatar>
+          <span className="hidden text-[13px] font-medium sm:inline">{displayName || "..."}</span>
+          <ChevronDown className="h-3 w-3 text-muted-foreground" strokeWidth={2} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+          {displayName ? `${displayName} · ${roleLabel}` : "加载中..."}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/settings/profile" className="cursor-pointer">
+            <User className="mr-2 h-4 w-4" />
+            个人信息
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/settings" className="cursor-pointer">
+            <SettingsIcon className="mr-2 h-4 w-4" />
+            偏好设置
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault();
+            signOut({ callbackUrl: "/login" });
+          }}
+          className="cursor-pointer text-destructive focus:text-destructive"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          退出登录
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function TopbarRight({ setToolsOpen, router, userAvatar, displayName, roleLabel }: {
+  setToolsOpen: (open: boolean) => void;
+  router: any;
+  userAvatar?: string | null;
+  displayName: string;
+  roleLabel: string;
+}) {
+  return (
+    <>
+      <div className="flex items-center gap-1.5">
+        <AppMenu onToolsOpen={setToolsOpen} />
+        <Button
+          size="sm"
+          onClick={() => router.push("/matters?tab=intake&new=1")}
+          className="h-8 gap-1.5 px-3 text-[13px]"
+        >
+          <Plus className="h-3.5 w-3.5" strokeWidth={2} />
+          <span className="hidden sm:inline">新建收案</span>
+        </Button>
+        <div className="mx-0.5 hidden h-4 w-px bg-border sm:block" />
+        <NotificationPopover />
+      </div>
+      <UserMenu userAvatar={userAvatar} displayName={displayName} roleLabel={roleLabel} />
+    </>
+  );
+}
+
 export function Topbar({ onMobileMenuToggle, userAvatar }: { onMobileMenuToggle?: () => void; userAvatar?: string | null }) {
   const { data: session } = useSession();
   const router = useRouter();
@@ -116,122 +251,7 @@ export function Topbar({ onMobileMenuToggle, userAvatar }: { onMobileMenuToggle?
       <div className="flex-1 hidden sm:block" />
 
       {/* 工具按钮组 */}
-      <div className="flex items-center gap-1.5">
-        {/* 应用菜单（案件云式聚合入口）*/}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className={cn(
-                "inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-[13px]",
-                "text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              )}
-              title="应用"
-            >
-              <LayoutGrid className="h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={1.8} />
-              <span className="hidden sm:inline">应用</span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
-            {APP_ITEMS.map((it) => {
-              // 实务工具：打开全局工具箱弹窗，不跳转、不改路由
-              if (it.kind === "tools") {
-                return (
-                  <DropdownMenuItem
-                    key={it.label}
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      setToolsOpen(true);
-                    }}
-                    className="cursor-pointer"
-                  >
-                    <it.icon className="mr-2 h-4 w-4 text-muted-foreground" strokeWidth={1.8} />
-                    {it.label}
-                  </DropdownMenuItem>
-                );
-              }
-              return (
-                <DropdownMenuItem key={it.label} asChild>
-                  {it.kind === "external" ? (
-                    <a href={it.href} target="_blank" rel="noreferrer" className="cursor-pointer">
-                      <it.icon className="mr-2 h-4 w-4 text-muted-foreground" strokeWidth={1.8} />
-                      {it.label}
-                    </a>
-                  ) : (
-                    <Link href={it.href} className="cursor-pointer">
-                      <it.icon className="mr-2 h-4 w-4 text-muted-foreground" strokeWidth={1.8} />
-                      {it.label}
-                    </Link>
-                  )}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Button
-          size="sm"
-          onClick={() => router.push("/matters?tab=intake&new=1")}
-          className="h-8 gap-1.5 px-3 text-[13px]"
-        >
-          <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-          <span className="hidden sm:inline">新建收案</span>
-        </Button>
-
-        <div className="mx-0.5 hidden h-4 w-px bg-border sm:block" />
-
-        <NotificationPopover />
-      </div>
-
-      {/* 用户 */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            className={cn(
-              "flex h-8 items-center gap-2 rounded-md border border-border pl-1 pr-2.5",
-              "transition-colors hover:bg-muted"
-            )}
-          >
-            <Avatar className="h-6 w-6">
-              {userAvatar ? <AvatarImage src={userAvatar} alt={displayName} /> : null}
-              <AvatarFallback className="bg-primary/10 text-[11px] font-semibold text-primary">
-                {initial}
-              </AvatarFallback>
-            </Avatar>
-            <span className="hidden text-[13px] font-medium sm:inline">{displayName || "..."}</span>
-            <ChevronDown className="h-3 w-3 text-muted-foreground" strokeWidth={2} />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-52">
-          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-            {displayName ? `${displayName} · ${roleLabel}` : "加载中..."}
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link href="/settings/profile" className="cursor-pointer">
-              <User className="mr-2 h-4 w-4" />
-              个人信息
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/settings" className="cursor-pointer">
-              <SettingsIcon className="mr-2 h-4 w-4" />
-              偏好设置
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onSelect={(e) => {
-              e.preventDefault();
-              signOut({ callbackUrl: "/login" });
-            }}
-            className="cursor-pointer text-destructive focus:text-destructive"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            退出登录
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <TopbarRight setToolsOpen={setToolsOpen} router={router} userAvatar={userAvatar} displayName={displayName} roleLabel={roleLabel} />
 
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       <ToolsDialog open={toolsOpen} onOpenChange={setToolsOpen} />

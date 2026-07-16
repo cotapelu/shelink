@@ -47,7 +47,7 @@ export function SealRowActions({
   }
 
   if (status === "STAMPED" && stampedDoc) {
-    return <StampedDownload stampedDoc={stampedDoc} onAction={onAction} />;
+    return <StampedDownload stampedDoc={stampedDoc} />;
   }
 
   if (status === "REJECTED" && isAdmin) {

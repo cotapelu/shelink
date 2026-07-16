@@ -4,10 +4,9 @@ import type { SealRequestRow } from "./seal-types";
 
 interface StampedDownloadProps {
   stampedDoc: { id: string };
-  onAction: (action: "download") => void;
 }
 
-export function StampedDownload({ stampedDoc, onAction }: StampedDownloadProps) {
+export function StampedDownload({ stampedDoc }: StampedDownloadProps) {
   return (
     <a
       href={`/api/documents/${stampedDoc.id}/download`}
