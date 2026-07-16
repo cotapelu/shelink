@@ -5740,3 +5740,21 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - src/server/genealogy/actions.ts
 
 **Next**: Address remaining functions in this file: getRelationships (23), createRelationship (25), createEvent (21), updateEvent (22). Also continue with other HIGH violations across codebase (IntakeSheet, DocumentReviewDialog, PartyCard, etc.).
+
+### [CYCLE-AUTO-20] - 2026-07-16 Refactor: getFirmProfile Complexity Reduction
+
+**Type**: Refactor (R)  
+**Priority**: HIGH  
+**Duration**: ~20 min  
+**Status**: ✅ Completed
+
+**Actions**:
+- Extracted 7 helper functions (`pickFirmName`, `pickFirmSubtitle`, `pickLogoDataUrl`, `pickMatterCodePrefix`, `pickFirmShortName`, `pickCaseNoTemplate`, `pickCategoryWords`).
+- Simplified `getFirmProfile` to a thin orchestrator calling helpers.
+- Complexity reduced from 12 → 3.
+- All functions comply with quality gates.
+
+**Files Modified**:
+- src/server/settings/firm-profile.ts
+
+**Next**: Continue remaining HIGH violations: `DocumentReviewDialog` (28), `PartyCard` (28), `IntakeSheet` (31), `InvoiceBuilder` (18), `ReportBuilder` (12), `Topbar` (12), `ChartWidget` (14), `AiSettingsForm` (14), etc. Also need to address `max-statements` and `max-lines-per-function` violations in UI components.
