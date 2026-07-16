@@ -82,148 +82,105 @@ function hearingWhenText(offset: Offset, startsAt: Date) {
   return `${day} ${hh}:${mm} 开庭`;
 }
 
-export async function scanDueReminders(): Promise<DueReminderScanResult> {
-  const now = new Date();
-  const todayStart = startOfLocalDay(now);
-
-  let deadlineScanned = 0;
-  let deadlineNotified = 0;
-  let hearingScanned = 0;
-  let hearingNotified = 0;
-  let suppressed = 0;
-
-  for (const offset of OFFSETS) {
-    const target = new Date(now);
-    target.setDate(target.getDate() + offset);
-    const dayStart = startOfLocalDay(target);
-    const dayEnd = endOfLocalDay(target);
-
-    // Deadline 扫描（程序内法定期限：答辩期、举证期等）
-    const deadlines = await prisma.deadline.findMany({
-      where: {
-        completed: false,
-        dueAt: { gte: dayStart, lte: dayEnd }
-      },
-      select: {
-        id: true,
-        title: true,
-        dueAt: true,
-        procedure: {
-          select: {
-            id: true,
-            matter: {
-              select: { id: true, title: true, internalCode: true, ownerId: true }
-            }
-          }
-        }
-      }
-    });
-    deadlineScanned += deadlines.length;
-
-    const refTypeDL = `${offsetKey(offset)}:Deadline`;
-    for (const d of deadlines) {
-      const userId = d.procedure.matter.ownerId;
-      if (!userId) continue;
-
-      const dup = await prisma.notification.findFirst({
-        where: { refType: refTypeDL, refId: d.id, createdAt: { gte: todayStart } },
-        select: { id: true }
-      });
-      if (dup) {
-        suppressed++;
-        continue;
-      }
-
-      await createNotification({
-        userId,
-        type: "DEADLINE_REMINDER",
-        priority: priorityFor(offset),
-        title: `${stateText(offset)}：${d.title}`,
-        content: `案件 ${d.procedure.matter.internalCode}·${d.procedure.matter.title}`,
-        href: `/matters/${d.procedure.matter.id}`,
-        refType: refTypeDL,
-        refId: d.id
-      });
-      deadlineNotified++;
-    }
-
-    // Hearing 扫描（开庭提醒）—— 开庭过去不再提醒，跳过 T+1 这档
-    if (offset <= 0) {
-      const hearings = await prisma.hearing.findMany({
-        where: {
-          startsAt: { gte: dayStart, lte: dayEnd }
-        },
+async function fetchDeadlines(offset: Offset, dayStart: Date, dayEnd: Date) {
+  return prisma.deadline.findMany({
+    where: { completed: false, dueAt: { gte: dayStart, lte: dayEnd } },
+    select: {
+      id: true,
+      title: true,
+      dueAt: true,
+      procedure: {
         select: {
           id: true,
-          title: true,
-          startsAt: true,
-          room: true,
-          judge: true,
-          procedure: {
-            select: {
-              matter: {
-                select: { id: true, title: true, internalCode: true, ownerId: true }
-              }
-            }
-          }
+          matter: { select: { id: true, title: true, internalCode: true, ownerId: true } }
         }
-      });
-      hearingScanned += hearings.length;
-
-      const refTypeHearing = `${offsetKey(offset)}:Hearing`;
-      for (const h of hearings) {
-        const userId = h.procedure.matter.ownerId;
-        if (!userId) continue;
-
-        const dup = await prisma.notification.findFirst({
-          where: { refType: refTypeHearing, refId: h.id, createdAt: { gte: todayStart } },
-          select: { id: true }
-        });
-        if (dup) {
-          suppressed++;
-          continue;
-        }
-
-        const place = [h.room && `${h.room}`, h.judge && `审判员 ${h.judge}`]
-          .filter(Boolean)
-          .join(" · ");
-        await createNotification({
-          userId,
-          type: "HEARING_REMINDER",
-          priority: priorityFor(offset),
-          title: `${hearingWhenText(offset, h.startsAt)}：${h.title}`,
-          content: `案件 ${h.procedure.matter.internalCode}·${h.procedure.matter.title}${place ? ` · ${place}` : ""}`,
-          href: `/matters/${h.procedure.matter.id}`,
-          refType: refTypeHearing,
-          refId: h.id
-        });
-        hearingNotified++;
       }
     }
-  }
-
-  await audit({
-    userId: null,
-    action: "DUE_REMINDER_SCAN_CRON",
-    targetType: "Report",
-    targetId: "due-reminder",
-    detail: {
-      deadlineScanned,
-      deadlineNotified,
-      hearingScanned,
-      hearingNotified,
-      suppressed,
-      offsets: OFFSETS
-    }
   });
-
-  return {
-    deadlineScanned,
-    deadlineNotified,
-    hearingScanned,
-    hearingNotified,
-    suppressed
-  };
 }
 
-// 手动触发入口已移至 @/server/reminders/actions（顶层 "use server"，可被客户端组件 import）
+async function notifySingleDeadline(d: any, offset: Offset, todayStart: Date): Promise<{ notified: boolean; suppressed: boolean }> {
+  const userId = d.procedure.matter.ownerId;
+  if (!userId) return { notified: false, suppressed: false };
+  const refTypeDL = `${offsetKey(offset)}:Deadline`;
+  const dup = await prisma.notification.findFirst({ where: { refType: refTypeDL, refId: d.id, createdAt: { gte: todayStart } }, select: { id: true } });
+  if (dup) return { notified: false, suppressed: true };
+  await createNotification({ userId, type: "DEADLINE_REMINDER", priority: priorityFor(offset), title: `${stateText(offset)}：${d.title}`, content: `案件 ${d.procedure.matter.internalCode}·${d.procedure.matter.title}`, href: `/matters/${d.procedure.matter.id}`, refType: refTypeDL, refId: d.id });
+  return { notified: true, suppressed: false };
+}
+
+async function processDeadlines(deadlines: any[], offset: Offset, todayStart: Date): Promise<{ notified: number; suppressed: number }> {
+  let notified = 0, suppressed = 0;
+  for (const d of deadlines) {
+    const res = await notifySingleDeadline(d, offset, todayStart);
+    notified += res.notified ? 1 : 0;
+    suppressed += res.suppressed ? 1 : 0;
+  }
+  return { notified, suppressed };
+}
+
+async function scanDeadlinesForOffset(offset: Offset, dayStart: Date, dayEnd: Date, todayStart: Date): Promise<{ scanned: number; notified: number; suppressed: number }> {
+  const deadlines = await fetchDeadlines(offset, dayStart, dayEnd);
+  const { notified, suppressed } = await processDeadlines(deadlines, offset, todayStart);
+  return { scanned: deadlines.length, notified, suppressed };
+}
+
+async function fetchHearings(offset: Offset, dayStart: Date, dayEnd: Date) {
+  return prisma.hearing.findMany({
+    where: { startsAt: { gte: dayStart, lte: dayEnd } },
+    select: {
+      id: true,
+      title: true,
+      startsAt: true,
+      room: true,
+      judge: true,
+      procedure: { select: { matter: { select: { id: true, title: true, internalCode: true, ownerId: true } } } }
+    }
+  });
+}
+
+async function notifySingleHearing(h: any, offset: Offset, todayStart: Date): Promise<{ notified: boolean; suppressed: boolean }> {
+  const userId = h.procedure.matter.ownerId;
+  if (!userId) return { notified: false, suppressed: false };
+  const refTypeHearing = `${offsetKey(offset)}:Hearing`;
+  const dup = await prisma.notification.findFirst({ where: { refType: refTypeHearing, refId: h.id, createdAt: { gte: todayStart } }, select: { id: true } });
+  if (dup) return { notified: false, suppressed: true };
+  const place = [h.room && `${h.room}`, h.judge && `审判员 ${h.judge}`].filter(Boolean).join(" · ");
+  await createNotification({ userId, type: "HEARING_REMINDER", priority: priorityFor(offset), title: `${hearingWhenText(offset, h.startsAt)}：${h.title}`, content: `案件 ${h.procedure.matter.internalCode}·${h.procedure.matter.title}${place ? ` · ${place}` : ""}`, href: `/matters/${h.procedure.matter.id}`, refType: refTypeHearing, refId: h.id });
+  return { notified: true, suppressed: false };
+}
+
+async function processHearings(hearings: any[], offset: Offset, todayStart: Date): Promise<{ notified: number; suppressed: number }> {
+  let notified = 0, suppressed = 0;
+  for (const h of hearings) {
+    const res = await notifySingleHearing(h, offset, todayStart);
+    notified += res.notified ? 1 : 0;
+    suppressed += res.suppressed ? 1 : 0;
+  }
+  return { notified, suppressed };
+}
+
+async function scanHearingsForOffset(offset: Offset, dayStart: Date, dayEnd: Date, todayStart: Date): Promise<{ scanned: number; notified: number; suppressed: number }> {
+  const hearings = await fetchHearings(offset, dayStart, dayEnd);
+  const { notified, suppressed } = await processHearings(hearings, offset, todayStart);
+  return { scanned: hearings.length, notified, suppressed };
+}
+
+async function processOneOffset(offset: Offset, todayStart: Date, now: Date): Promise<Partial<DueReminderScanResult>> {
+  const target = new Date(now); target.setDate(target.getDate() + offset);
+  const dayStart = startOfLocalDay(target); const dayEnd = endOfLocalDay(target);
+  const deadlineStats = await scanDeadlinesForOffset(offset, dayStart, dayEnd, todayStart);
+  const hearingStats = offset <= 0 ? await scanHearingsForOffset(offset, dayStart, dayEnd, todayStart) : null;
+  return { deadlineScanned: deadlineStats.scanned, deadlineNotified: deadlineStats.notified, hearingScanned: hearingStats?.scanned ?? 0, hearingNotified: hearingStats?.notified ?? 0, suppressed: deadlineStats.suppressed + (hearingStats?.suppressed ?? 0) };
+}
+
+export async function scanDueReminders(): Promise<DueReminderScanResult> {
+  const now = new Date(); const todayStart = startOfLocalDay(now);
+  const result = { deadlineScanned: 0, deadlineNotified: 0, hearingScanned: 0, hearingNotified: 0, suppressed: 0 };
+  for (const offset of OFFSETS) {
+    const stats = await processOneOffset(offset, todayStart, now);
+    result.deadlineScanned += stats.deadlineScanned!; result.deadlineNotified += stats.deadlineNotified!; result.hearingScanned += stats.hearingScanned!; result.hearingNotified += stats.hearingNotified!; result.suppressed += stats.suppressed!;
+  }
+  await audit({ userId: null, action: "DUE_REMINDER_SCAN_CRON", targetType: "Report", targetId: "due-reminder", detail: { deadlineScanned: result.deadlineScanned, deadlineNotified: result.deadlineNotified, hearingScanned: result.hearingScanned, hearingNotified: result.hearingNotified, suppressed: result.suppressed, offsets: OFFSETS } });
+  return result;
+}
