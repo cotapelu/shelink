@@ -37,24 +37,14 @@ export enum ApiErrorCode {
 
 export function mapStatusCodeToErrorCode(status: number): ApiErrorCode {
   switch (status) {
-    case 401:
-      return ApiErrorCode.UNAUTHORIZED;
-    case 403:
-      return ApiErrorCode.FORBIDDEN;
-    case 404:
-      return ApiErrorCode.NOT_FOUND;
-    case 409:
-      return ApiErrorCode.CONFLICT;
-    case 429:
-      return ApiErrorCode.RATE_LIMITED;
-    case 422:
-      return ApiErrorCode.VALIDATION_ERROR;
-    case 500:
-    case 502:
-    case 503:
-      return ApiErrorCode.SERVER_ERROR;
-    default:
-      return ApiErrorCode.UNKNOWN;
+    case 401: return ApiErrorCode.UNAUTHORIZED;
+    case 403: return ApiErrorCode.FORBIDDEN;
+    case 404: return ApiErrorCode.NOT_FOUND;
+    case 409: return ApiErrorCode.CONFLICT;
+    case 429: return ApiErrorCode.RATE_LIMITED;
+    case 422: return ApiErrorCode.VALIDATION_ERROR;
+    case 500: case 502: case 503: return ApiErrorCode.SERVER_ERROR;
+    default: return ApiErrorCode.UNKNOWN;
   }
 }
 

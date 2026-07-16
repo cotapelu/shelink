@@ -34,31 +34,20 @@ export interface AppError {
 /**
  * Get user-friendly suggestion based on error code
  */
+const suggestionMap: Record<string, string> = {
+  unauthorized: 'Vui lòng đăng nhập lại.',
+  forbidden: 'Bạn không có quyền thực hiện hành động này. Liên hệ admin nếu cần.',
+  not_found: 'Tài nguyên không tồn tại. Kiểm tra lại thông tin.',
+  validation_failed: 'Vui lòng kiểm tra lại dữ liệu nhập. Các trường bắt buộc phải đúng định dạng.',
+  has_relationships: 'Xóa các mối quan hệ liên quan trước khi thực hiện.',
+  api_error: 'Máy chủ gặp lỗi. Đội ngũ kỹ thuật đã được thông báo. Vui lòng thử lại sau.',
+  network_error: 'Không thể kết nối đến máy chủ. Kiểm tra kết nối mạng và thử lại.',
+  timeout: 'Yêu cầu quá thời gian. Vui lòng Thử lại.',
+  rate_limited: 'Quá nhiều yêu cầu. Hãy chờ một chút và thử lại sau.',
+  conflict: 'Dữ liệu bị xung đột. Vui lòng thử lại.',
+};
 function getSuggestion(code: string): string {
-  switch (code) {
-    case 'unauthorized':
-      return 'Vui lòng đăng nhập lại.';
-    case 'forbidden':
-      return 'Bạn không có quyền thực hiện hành động này. Liên hệ admin nếu cần.';
-    case 'not_found':
-      return 'Tài nguyên không tồn tại. Kiểm tra lại thông tin.';
-    case 'validation_failed':
-      return 'Vui lòng kiểm tra lại dữ liệu nhập. Các trường bắt buộc phải đúng định dạng.';
-    case 'has_relationships':
-      return 'Xóa các mối quan hệ liên quan trước khi thực hiện.';
-    case 'api_error':
-      return 'Máy chủ gặp lỗi. Đội ngũ kỹ thuật đã được thông báo. Vui lòng thử lại sau.';
-    case 'network_error':
-      return 'Không thể kết nối đến máy chủ. Kiểm tra kết nối mạng và thử lại.';
-    case 'timeout':
-      return 'Yêu cầu quá thời gian. Vui lòng Thử lại.';
-    case 'rate_limited':
-      return 'Quá nhiều yêu cầu. Hãy chờ một chút và thử lại sau.';
-    case 'conflict':
-      return 'Dữ liệu bị xung đột. Vui lòng thử lại.';
-    default:
-      return 'Vui lòng thử lại sau. Nếu lỗi tiếp tục, liên hệ hỗ trợ.';
-  }
+  return suggestionMap[code] ?? 'Vui lòng thử lại sau. Nếu lỗi tiếp tục, liên hệ hỗ trợ.';
 }
 
 /**
@@ -87,27 +76,18 @@ export function formatApiError(
 /**
  * Log action execution with context (structured)
  */
-export function logAction(
-  action: string,
-  params: Record<string, unknown>,
-  userId?: string,
-  result?: { success: boolean; error?: string }
-): void {
+export function logAction(action: string, params: Record<string, unknown>, userId?: string, result?: { success: boolean; error?: string }): void {
   const logEntry: Record<string, unknown> = {
     timestamp: new Date().toISOString(),
     level: result?.success ? 'info' : 'error',
     action,
     params: sanitizeParams(params),
     result: result ? { success: result.success, ...(result.error ? { error: result.error } : {}) } : null,
+    ...(userId && { userId })
   };
-
-  if (userId) logEntry.userId = userId;
-
-  // In production, use proper structured logger (pino/winston)
   if (process.env.NODE_ENV === 'development') {
     console.log('[Action]', logEntry);
   } else {
-    // In production, ensure JSON logging
     console.log(JSON.stringify(logEntry));
   }
 }

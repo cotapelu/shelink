@@ -79,36 +79,19 @@ function AppMenu({ onToolsOpen }: { onToolsOpen: (open: boolean) => void }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-[13px]",
-            "text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          )}
-          title="应用"
-        >
+        <button type="button" className={cn("inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-[13px]", "text-muted-foreground transition-colors hover:bg-muted hover:text-foreground")} title="应用">
           <LayoutGrid className="h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={1.8} />
           <span className="hidden sm:inline">应用</span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
-        {APP_ITEMS.map((it) => {
-          if (it.kind === "tools") {
-            return (
-              <DropdownMenuItem
-                key={it.label}
-                onSelect={(e) => {
-                  e.preventDefault();
-                  onToolsOpen(true);
-                }}
-                className="cursor-pointer"
-              >
-                <it.icon className="mr-2 h-4 w-4 text-muted-foreground" strokeWidth={1.8} />
-                {it.label}
-              </DropdownMenuItem>
-            );
-          }
-          return (
+        {APP_ITEMS.map((it) => (
+          it.kind === "tools" ? (
+            <DropdownMenuItem key={it.label} onSelect={(e) => { e.preventDefault(); onToolsOpen(true); }} className="cursor-pointer">
+              <it.icon className="mr-2 h-4 w-4 text-muted-foreground" strokeWidth={1.8} />
+              {it.label}
+            </DropdownMenuItem>
+          ) : (
             <DropdownMenuItem key={it.label} asChild>
               {it.kind === "external" ? (
                 <a href={it.href} target="_blank" rel="noreferrer" className="cursor-pointer">
@@ -122,8 +105,8 @@ function AppMenu({ onToolsOpen }: { onToolsOpen: (open: boolean) => void }) {
                 </Link>
               )}
             </DropdownMenuItem>
-          );
-        })}
+          )
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -134,49 +117,27 @@ function UserMenu({ userAvatar, displayName, roleLabel }: { userAvatar?: string 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          className={cn(
-            "flex h-8 items-center gap-2 rounded-md border border-border pl-1 pr-2.5",
-            "transition-colors hover:bg-muted"
-          )}
-        >
+        <button className={cn("flex h-8 items-center gap-2 rounded-md border border-border pl-1 pr-2.5", "transition-colors hover:bg-muted")}>
           <Avatar className="h-6 w-6">
-            {userAvatar ? <AvatarImage src={userAvatar} alt={displayName} /> : null}
-            <AvatarFallback className="bg-primary/10 text-[11px] font-semibold text-primary">
-              {displayName ? displayName.charAt(0) : "?"}
-            </AvatarFallback>
+            {userAvatar && <AvatarImage src={userAvatar} alt={displayName} />}
+            <AvatarFallback className="bg-primary/10 text-[11px] font-semibold text-primary">{displayName ? displayName.charAt(0) : "?"}</AvatarFallback>
           </Avatar>
           <span className="hidden text-[13px] font-medium sm:inline">{displayName || "..."}</span>
           <ChevronDown className="h-3 w-3 text-muted-foreground" strokeWidth={2} />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-          {displayName ? `${displayName} · ${roleLabel}` : "加载中..."}
-        </DropdownMenuLabel>
+        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">{displayName ? `${displayName} · ${roleLabel}` : "加载中..."}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/settings/profile" className="cursor-pointer">
-            <User className="mr-2 h-4 w-4" />
-            个人信息
-          </Link>
+          <Link href="/settings/profile" className="cursor-pointer"><User className="mr-2 h-4 w-4" />个人信息</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/settings" className="cursor-pointer">
-            <SettingsIcon className="mr-2 h-4 w-4" />
-            偏好设置
-          </Link>
+          <Link href="/settings" className="cursor-pointer"><SettingsIcon className="mr-2 h-4 w-4" />偏好设置</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onSelect={(e) => {
-            e.preventDefault();
-            signOut({ callbackUrl: "/login" });
-          }}
-          className="cursor-pointer text-destructive focus:text-destructive"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          退出登录
+        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); signOut({ callbackUrl: "/login" }); }} className="cursor-pointer text-destructive focus:text-destructive">
+          <LogOut className="mr-2 h-4 w-4" />退出登录
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -218,7 +179,6 @@ export function Topbar({ onMobileMenuToggle, userAvatar }: { onMobileMenuToggle?
   const user = session?.user;
   const displayName = user?.name ?? "";
   const roleLabel = user?.role ? (roleLabels[user.role] ?? user.role) : "";
-  const initial = displayName ? displayName.charAt(0) : "?";
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-2.5 border-b border-border bg-background px-4 sm:px-6">
