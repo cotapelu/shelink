@@ -5706,3 +5706,20 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - src/server/genealogy/actions.ts
 
 **Next**: Continue with remaining HIGH violations (getPerson, createPerson, updatePerson, getRelationships, createRelationship, createEvent, updateEvent). Star
+
+### [CYCLE-AUTO-18] - 2026-07-16 Refactor: getPerson Complexity Reduction
+
+**Type**: Refactor (R)  
+**Priority**: HIGH  
+**Duration**: ~20 min  
+**Status**: ✅ Completed
+
+**Actions**:
+- Introduced `PERSON_SELECT` constant to centralize Prisma select fields.
+- Refactored `getPerson` to use constant, reducing function to 10 lines, complexity 2.
+- Maintained test stability.
+
+**Files Modified**:
+- src/server/genealogy/actions.ts
+
+**Next**: Continue with other genealogy functions (createPerson, updatePerson, getRelationships, createRelationship, createEvent, updateEvent) to bring under quality gates.
