@@ -6249,3 +6249,34 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 
 **Next**: Continue remaining HIGH violations: scan-due-reminders done; target `InvoiceBuilder`, `ReportBuilder`, `Topbar`, `ChartWidget`, `AiSettingsForm`, `DocumentReviewDialog`, `PartyCard`, `IntakeSheet`, etc. Also push Function coverage ≥80% by adding tests for uncovered server modules.
 
+
+### [CYCLE-AUTO-25] - 2026-07-16 Refactor: AuditView Component Extraction
+
+**Type**: Refactor (R) - Component Decomposition
+**Priority**: HIGH (Quality Gate: UI functions ≤50 lines)
+**Duration**: ~60 min
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS
+- ✅ Build: PASS
+- ✅ Lint: **0 errors** on audit-view components
+- ✅ Tests: 1987 passed (unchanged)
+
+**Refactor Actions**:
+- Extracted `AuditHeader` (title + cleanup button)
+- Extracted `AuditPagination` (page info + next button)
+- Simplified `AuditView` from 100 lines → ~40 lines
+
+**Impact**:
+- `AuditView` now satisfies quality gate (≤50 lines)
+- All audit module components within limits
+
+**Files Modified**:
+- src/app/(app)/audit/_components/audit-view.tsx (refactored)
+- src/app/(app)/audit/_components/audit-header.tsx (new)
+- src/app/(app)/audit/_components/audit-pagination.tsx (new)
+
+**Next**: Remaining HIGH violations: `InvoiceBuilder`, `ReportBuilder`, `Topbar`, `ChartWidget`, `AiSettingsForm`, `DocumentReviewDialog`, `PartyCard`, `IntakeSheet`. Coverage push remains top priority.
+
+---
