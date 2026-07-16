@@ -6109,7 +6109,97 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 **Files Modified**:
 - src/server/cron/jobs/scan-due-reminders.ts
 
-**Next**: Continue with remaining HIGH violations: `InvoiceBuilder` (18), `ReportBuilder` (12), `Topbar` (12), `ChartWidget` (14), `AiSettingsForm` (14), `DocumentReviewDialog` (28), `PartyCard` (28), `IntakeSheet` (31), etc. Strategy: similar extraction of helpers/subcomponents.
+**Next**: Continue remaining HIGH violations: `InvoiceBuilder` (18), `ReportBuilder` (12), `Topbar` (12), `ChartWidget` (14), `AiSettingsForm` (14), `DocumentReviewDialog` (28), `PartyCard` (28), `IntakeSheet` (31), etc. Strategy: similar extraction of helpers/subcomponents.
+
+### [CYCLE-AUTO-23] - 2026-07-16 Refactor: ClientSheet Component Extraction
+
+**Type**: Refactor (R) - Component & Hook Extraction
+**Priority**: HIGH (Quality Gate: UI functions ≤50 lines)
+**Duration**: ~60 min
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS
+- ✅ Build: PASS
+- ✅ Lint: **0 errors** on client-sheet components
+- ✅ Tests: 1987 passed (unchanged)
+
+**Refactor Actions**:
+- Extracted `ClientSheetFooter` component (button actions)
+- Extracted `useClientSheetForm` custom hook (form logic, submit, reset)
+- Simplified `ClientSheet` to ~35 lines from 116 lines
+- Removed unused imports
+
+**Impact**:
+- `ClientSheet` now satisfies quality gate (≤50 lines)
+- All lint violations resolved for this module
+- Improved testability via hook separation
+
+**Files Modified**:
+- src/app/(app)/clients/_components/client-sheet.tsx (refactored)
+- src/app/(app)/clients/_components/client-sheet-footer.tsx (new)
+- src/app/(app)/clients/_components/use-client-sheet-form.ts (new)
+
+**Next**: Continue remaining HIGH violations: `InvoiceBuilder`, `ReportBuilder`, `Topbar`, `ChartWidget`, `AiSettingsForm`, `DocumentReviewDialog`, `PartyCard`, `IntakeSheet`. Also push Function coverage ≥80% by adding tests for uncovered server modules.
+
+### [CYCLE-AUTO-24] - 2026-07-16 Refactor: AuditFilters & AuditTable Component Extraction
+
+**Type**: Refactor (R) - Component Decomposition
+**Priority**: HIGH (Quality Gate: UI functions ≤50 lines, complexity ≤10)
+**Duration**: ~120 min
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS
+- ✅ Build: PASS
+- ✅ Lint: **0 errors** on audit components (previously multiple size/complexity violations)
+- ✅ Tests: 1987 passed (unchanged)
+
+**Refactor Actions**:
+- **AuditFilters** (117 lines, complexity 11) → extracted:
+  - `SelectFilter` (reusable component)
+  - `DateRangeFilter`
+  - `FilterRow`
+  - `ClearFiltersButton`
+  - Main `AuditFilters` reduced to ~20 lines
+- **AuditTable** (105 lines, arrow 55, complexity 13) → extracted:
+  - `AuditTableRow` (wrapper)
+  - `AuditTableMainRow`
+  - `AuditTableDetailRow`
+  - Main `AuditTable` simplified to orchestration
+
+**Impact**:
+- All audit UI components now satisfy quality gates (≤50 lines, complexity ≤10)
+- Maintainability improved: each piece independently testable
+- Lint violations in audit module reduced to 0
+
+**Files Modified** (12 new/refactored):
+- src/app/(app)/audit/_components/audit-filters.tsx (refactored)
+- src/app/(app)/audit/_components/audit-table.tsx (refactored)
+- src/app/(app)/audit/_components/select-filter.tsx (new)
+- src/app/(app)/audit/_components/date-range-filter.tsx (new)
+- src/app/(app)/audit/_components/filter-row.tsx (new)
+- src/app/(app)/audit/_components/filter-fields.tsx (new)
+- src/app/(app)/audit/_components/clear-filters-button.tsx (new)
+- src/app/(app)/audit/_components/audit-table-row.tsx (new)
+- src/app/(app)/audit/_components/audit-table-main-row.tsx (new)
+- src/app/(app)/audit/_components/audit-table-detail-row.tsx (new)
+
+**Next**: Continue with remaining HIGH violations: `InvoiceBuilder`, `ReportBuilder`, `Topbar`, `ChartWidget`, `AiSettingsForm`, `DocumentReviewDialog`, `PartyCard`, `IntakeSheet`. Also push Function coverage ≥80% by adding tests for uncovered server modules.
+
+---
+
+## AGENT PROFILE WEAKNESSES UPDATE (Optional)
+
+*Will be updated in next cycle.*
+
+---
+
+## EVOLUTION ROADMAP UPDATE (Optional)
+
+*Will be updated in next cycle.*
+
+---
 
 ### [CYCLE-AUTO-22] - 2026-07-16 Refactor: Conflicts Module Component Extraction
 
