@@ -5688,3 +5688,21 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - src/server/ai/review-document.ts
 
 **Next**: Continue with remaining HIGH violations (`IntakeSheet` 31, `DocumentReviewDialog` 28, `PartyCard` 28, `IntakeDetailPage` 28, `FirmFilesView` 17, etc.).
+
+### [CYCLE-AUTO-17] - 2026-07-16 Refactor: getPersons Complexity Reduction
+
+**Type**: Refactor (R)  
+**Priority**: HIGH  
+**Duration**: ~25 min  
+**Status**: ✅ Completed
+
+**Actions**:
+- Extracted `buildPersonWhere` helper for query filter construction.
+- Simplified `getPersons` with compact `select` and `skip` variables.
+- Main function now 14 lines, complexity 3.
+- Lint and typecheck pass; all tests passing.
+
+**Files Modified**:
+- src/server/genealogy/actions.ts
+
+**Next**: Continue with remaining HIGH violations (getPerson, createPerson, updatePerson, getRelationships, createRelationship, createEvent, updateEvent). Star
