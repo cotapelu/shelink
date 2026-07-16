@@ -1,22 +1,3 @@
-/*
- * Copyright 2026 叶森 (Sen Ye) - Original work
- * Copyright 2026 COTAPELU - Modifications and additions
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * This file is part of a derivative work based on the original MIT-licensed project.
- * Original author: 叶森 (Sen Ye) - Copyright 2026
- */
 "use client";
 
 import Link from "next/link";
@@ -38,6 +19,92 @@ const TypeIcon = ({ type }: { type: ClientType }) => {
   return <Briefcase className={cls} />;
 };
 
+function EmptyState() {
+  return (
+    <div className="rounded-md border border-border bg-muted/30 flex flex-col items-center gap-2 py-20 text-center">
+      <div className="text-sm text-muted-foreground">Chưa có khách hàng</div>
+      <div className="text-xs text-muted-foreground">
+        Nhấn vào góc phải trên cùng <span className="text-foreground/80">Tạo khách hàng mới</span> để bắt đầu
+      </div>
+    </div>
+  );
+}
+
+function DesktopTableRow({ c, onEdit }: { c: ClientRow; onEdit: (c: ClientRow) => void }) {
+  const primary = c.contacts[0];
+  return (
+    <tr key={c.id} className="group border-t border-border transition-colors hover:bg-muted/30">
+      <td className="px-5 py-2.5">
+        <Link href={`/clients/${c.id}`} className="block">
+          <div className="text-[0.92rem] font-medium leading-snug text-foreground transition-colors group-hover:text-primary">{c.name}</div>
+          {c.idNumber && <div className="mt-1 font-mono text-[10.5px] tracking-wide text-muted-foreground tabular">{c.idNumber}</div>}
+        </Link>
+      </td>
+      <td className="px-4 py-2.5">
+        <span className="inline-flex items-center gap-1.5 rounded-sm border border-border px-2 py-0.5 text-[11px]">
+          <TypeIcon type={c.type} />{clientTypeLabel[c.type]}
+        </span>
+      </td>
+      <td className="px-4 py-2.5 text-muted-foreground">
+        <div className="flex flex-col gap-0.5">
+          {c.phone && <span className="flex items-center gap-1.5 text-xs"><Phone className="h-3 w-3" strokeWidth={1.8} /><span className="font-mono tabular">{c.phone}</span></span>}
+          {c.email && <span className="flex items-center gap-1.5 text-xs"><Mail className="h-3 w-3" strokeWidth={1.8} />{c.email}</span>}
+        </div>
+      </td>
+      <td className="px-4 py-2.5">
+        {primary ? (
+          <div>
+            <div className="text-[0.875rem] text-foreground/90">{primary.name}</div>
+            {primary.phone && <div className="font-mono text-[10.5px] text-muted-foreground">{primary.phone}</div>}
+          </div>
+        ) : <span className="text-xs text-muted-foreground">—</span>}
+      </td>
+      <td className="px-4 py-2.5">
+        <span className="ll-stat text-base">{c._count.matters}</span>
+        {c._count.intakes > 0 && <span className="ml-2 font-mono text-[10.5px] text-muted-foreground tabular">+{c._count.intakes} vụ đăng ký</span>}
+      </td>
+      <td className="px-4 py-2.5">
+        <div className="flex flex-wrap gap-1">
+          {c.tags.slice(0, 3).map(t => <Badge key={t} variant="secondary" className="text-[10px] font-normal">{t}</Badge>)}
+        </div>
+      </td>
+      <td className="px-5 py-2.5 text-right">
+        <Button variant="ghost" size="sm" onClick={() => onEdit(c)} className="h-7 w-7 p-0 opacity-0 transition-opacity group-hover:opacity-100" aria-label="Chỉnh sửa">
+          <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} />
+        </Button>
+      </td>
+    </tr>
+  );
+}
+
+function MobileClientCard({ c, onEdit }: { c: ClientRow; onEdit: (c: ClientRow) => void }) {
+  const primary = c.contacts[0];
+  return (
+    <div key={c.id} className="ll-surface rounded-lg border border-border p-3">
+      <div className="flex items-start justify-between gap-2">
+        <Link href={`/clients/${c.id}`} className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-foreground">{c.name}</span>
+            <span className="inline-flex items-center gap-1 rounded-sm border border-border px-1.5 py-0.5 text-[10px]"><TypeIcon type={c.type} />{clientTypeLabel[c.type]}</span>
+          </div>
+          {c.idNumber && <div className="mt-0.5 truncate font-mono text-[10.5px] text-muted-foreground">{c.idNumber}</div>}
+        </Link>
+        <Button variant="ghost" size="sm" onClick={() => onEdit(c)} className="h-7 w-7 shrink-0 p-0" aria-label="Chỉnh sửa"><Pencil className="h-3.5 w-3.5" strokeWidth={1.8} /></Button>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        {primary && <span>{primary.name}</span>}
+        {c.phone && <span className="flex items-center gap-1 font-mono"><Phone className="h-3 w-3" strokeWidth={1.8} />{c.phone}</span>}
+        <span className="ll-stat">{c._count.matters} vụ án</span>
+      </div>
+      {c.tags.length > 0 && (
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {c.tags.slice(0, 3).map(t => <Badge key={t} variant="secondary" className="text-[10px] font-normal">{t}</Badge>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ClientsTable({
   items,
   onEdit
@@ -45,20 +112,9 @@ export function ClientsTable({
   items: ClientRow[];
   onEdit: (c: ClientRow) => void;
 }) {
-  if (items.length === 0) {
-    return (
-      <div className="rounded-md border border-border bg-muted/30 flex flex-col items-center gap-2 py-20 text-center">
-        <div className="text-sm text-muted-foreground">Chưa có khách hàng</div>
-        <div className="text-xs text-muted-foreground">
-          Nhấn vào góc phải trên cùng <span className="text-foreground/80">Tạo khách hàng mới</span> để bắt đầu
-        </div>
-      </div>
-    );
-  }
-
+  if (items.length === 0) return <EmptyState />;
   return (
     <>
-      {/* Desktop Table */}
       <div className="ll-surface hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <thead>
@@ -72,155 +128,10 @@ export function ClientsTable({
               <th className="w-20 px-5 py-2.5 text-right">Thao tác</th>
             </tr>
           </thead>
-          <tbody>
-            {items.map((c) => {
-              const primary = c.contacts[0];
-              return (
-                <tr
-                  key={c.id}
-                  className="group border-t border-border transition-colors hover:bg-muted/30"
-                >
-                  <td className="px-5 py-2.5">
-                    <Link href={`/clients/${c.id}`} className="block">
-                      <div className="text-[0.92rem] font-medium leading-snug text-foreground transition-colors group-hover:text-primary">
-                        {c.name}
-                      </div>
-                      {c.idNumber && (
-                        <div className="mt-1 font-mono text-[10.5px] tracking-wide text-muted-foreground tabular">
-                          {c.idNumber}
-                        </div>
-                      )}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className="inline-flex items-center gap-1.5 rounded-sm border border-border px-2 py-0.5 text-[11px]">
-                      <TypeIcon type={c.type} />
-                      {clientTypeLabel[c.type]}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2.5 text-muted-foreground">
-                    <div className="flex flex-col gap-0.5">
-                      {c.phone && (
-                        <span className="flex items-center gap-1.5 text-xs">
-                          <Phone className="h-3 w-3" strokeWidth={1.8} />
-                          <span className="font-mono tabular">{c.phone}</span>
-                        </span>
-                      )}
-                      {c.email && (
-                        <span className="flex items-center gap-1.5 text-xs">
-                          <Mail className="h-3 w-3" strokeWidth={1.8} />
-                          {c.email}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    {primary ? (
-                      <div>
-                        <div className="text-[0.875rem] text-foreground/90">{primary.name}</div>
-                        {primary.phone && (
-                          <div className="font-mono text-[10.5px] text-muted-foreground">
-                            {primary.phone}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className="ll-stat text-base">{c._count.matters}</span>
-                    {c._count.intakes > 0 && (
-                      <span className="ml-2 font-mono text-[10.5px] text-muted-foreground tabular">
-                        +{c._count.intakes} vụ đăng ký
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <div className="flex flex-wrap gap-1">
-                      {c.tags.slice(0, 3).map((t) => (
-                        <Badge
-                          key={t}
-                          variant="secondary"
-                          className="text-[10px] font-normal"
-                        >
-                          {t}
-                        </Badge>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-5 py-2.5 text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEdit(c)}
-                      className="h-7 w-7 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-                      aria-label="Chỉnh sửa"
-                    >
-                      <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} />
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
+          <tbody>{items.map(c => <DesktopTableRow key={c.id} c={c} onEdit={onEdit} />)}</tbody>
         </table>
       </div>
-
-      {/* 移动端卡片列表 */}
-      <div className="space-y-2 md:hidden">
-        {items.map((c) => {
-          const primary = c.contacts[0];
-          return (
-            <div key={c.id} className="ll-surface rounded-lg border border-border p-3">
-              <div className="flex items-start justify-between gap-2">
-                <Link href={`/clients/${c.id}`} className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-foreground">{c.name}</span>
-                    <span className="inline-flex items-center gap-1 rounded-sm border border-border px-1.5 py-0.5 text-[10px]">
-                      <TypeIcon type={c.type} />
-                      {clientTypeLabel[c.type]}
-                    </span>
-                  </div>
-                  {c.idNumber && (
-                    <div className="mt-0.5 truncate font-mono text-[10.5px] text-muted-foreground">
-                      {c.idNumber}
-                    </div>
-                  )}
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit(c)}
-                  className="h-7 w-7 shrink-0 p-0"
-                  aria-label="Chỉnh sửa"
-                >
-                  <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} />
-                </Button>
-              </div>
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                {primary && <span>{primary.name}</span>}
-                {c.phone && (
-                  <span className="flex items-center gap-1 font-mono">
-                    <Phone className="h-3 w-3" strokeWidth={1.8} />
-                    {c.phone}
-                  </span>
-                )}
-                <span className="ll-stat">{c._count.matters} vụ án</span>
-              </div>
-              {c.tags.length > 0 && (
-                <div className="mt-1.5 flex flex-wrap gap-1">
-                  {c.tags.slice(0, 3).map((t) => (
-                    <Badge key={t} variant="secondary" className="text-[10px] font-normal">
-                      {t}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <div className="space-y-2 md:hidden">{items.map(c => <MobileClientCard key={c.id} c={c} onEdit={onEdit} />)}</div>
     </>
   );
 }
