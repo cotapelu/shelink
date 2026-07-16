@@ -26,6 +26,7 @@ import { requireSession } from "@/lib/auth/session";
 import { audit } from "@/server/audit";
 import { createNotification } from "@/server/notifications/create";
 import { checklistForCategory, evaluateChecklist } from "@/lib/archive/checklists";
+import type { MatterCategory } from "@prisma/client";
 import { nextArchiveNo } from "@/lib/archive/archive-no";
 import { assertMatterWritable } from "@/lib/archive/guard";
 import { assertCanLeadMatter } from "@/lib/permissions";
@@ -43,118 +44,124 @@ import { archiveSubmitSchema, type ArchiveSubmitInput, CLOSED_REASON_CN } from "
  *   7. Matter status=ARCHIVED + archivedAt + closedAt
  *   8. TimelineEvent + audit
  */
-export async function archiveMatter(input: ArchiveSubmitInput) {
+async function getArchiveSessionAndValidate(input: ArchiveSubmitInput) {
   const session = await requireSession();
   const data = archiveSubmitSchema.parse(input);
-
   await assertMatterWritable(data.matterId);
   await assertCanLeadMatter(session.user.id, data.matterId, "仅案件主办/协办可以提交归档申请");
+  return { session, data };
+}
 
+async function getMatterForArchive(matterId: string) {
   const matter = await prisma.matter.findUnique({
-    where: { id: data.matterId },
+    where: { id: matterId },
     select: { id: true, status: true, category: true, internalCode: true, title: true }
-  });
+  }) as { id: string; status: string; category: MatterCategory; internalCode: string; title: string } | null;
   if (!matter) throw new Error("案件不存在");
   if (matter.status === "ARCHIVED") throw new Error("案件已归档");
+  return matter;
+}
 
-  // checklist 缺项校验
-  const checklist = checklistForCategory(matter.category);
-  const { missingRequired } = evaluateChecklist(checklist, data.checklist);
-  if (missingRequired.length > 0 && !data.forceWithMissing) {
+function computeMissingItems(matterCategory: MatterCategory, checklistData: Record<string, boolean>, forceWithMissing: boolean) {
+  const checklist = checklistForCategory(matterCategory);
+  const { missingRequired } = evaluateChecklist(checklist, checklistData);
+  if (missingRequired.length > 0 && !forceWithMissing) {
     throw new Error(
       `归档清单缺必填项 ${missingRequired.length} 项：${missingRequired.map((x) => x.label).join("、")}。如确认强制归档，请勾选"强制归档"。`
     );
   }
-  const missingItems = missingRequired.map((x) => x.id);
+  return missingRequired.map((x) => x.id);
+}
 
-  // 渲染必须在事务外（涉及文件系统 + 加密）。先渲染再事务里建记录。
-  const now = new Date();
-  const archiveNo = await nextArchiveNo(prisma, matter.category, now);
+interface ArchiveExtras {
+  archiveNo: string;
+  summary: string;
+  judgmentSummary: string | undefined;
+  closedReason: ArchiveSubmitInput["closedReason"];
+  completedAt: Date;
+  archivedAt: Date;
+  checklist: Record<string, boolean>;
+  coverDocId?: string;
+  catalogDocId?: string;
+}
 
-  const extras = {
-    archiveNo,
-    closedReason: data.closedReason,
-    completedAt: data.completedAt,
-    archivedAt: now,
-    judgmentSummary: data.judgmentSummary || undefined
-  };
-
-  let coverDocId: string;
-  try {
-    coverDocId = await renderArchiveCover(prisma, {
-      matterId: matter.id,
-      userId: session.user.id,
-      extras
-    });
-  } catch (err) {
-    throw new Error(`渲染卷宗封皮失败：${err instanceof Error ? err.message : String(err)}`);
-  }
-
+async function renderArchiveDocuments(matterId: string, userId: string, extras: ArchiveExtras) {
+  const coverDocId = await renderArchiveCover(prisma, { matterId, userId, extras });
   let catalogDocId: string;
   try {
     catalogDocId = await renderArchiveCatalog(prisma, {
-      matterId: matter.id,
-      userId: session.user.id,
+      matterId,
+      userId,
       extras,
       excludeDocIds: [coverDocId]
     });
   } catch (err) {
-    // 封皮已落库；目录失败时回滚封皮文档（标记软删）。律师重试可重新生成。
-    await prisma.document.update({
-      where: { id: coverDocId },
-      data: { deletedAt: new Date() }
-    }).catch(() => null);
+    await prisma.document.update({ where: { id: coverDocId }, data: { deletedAt: new Date() } }).catch(() => null);
     throw new Error(`渲染卷宗目录失败：${err instanceof Error ? err.message : String(err)}`);
   }
+  return { coverDocId, catalogDocId };
+}
 
-  await prisma.$transaction(async (tx) => {
-    await tx.archiveRecord.create({
-      data: {
-        matterId: matter.id,
-        archiveNo,
-        summary: data.summary,
-        judgmentSummary: data.judgmentSummary || null,
-        closedReason: data.closedReason,
-        completedAt: data.completedAt,
-        checklistJson: data.checklist as Prisma.InputJsonValue,
-        missingItems,
-        coverDocId,
-        catalogDocId,
-        archivedBy: session.user.name ?? session.user.id,
-        archivedById: session.user.id,
-        status: "PENDING_REVIEW",
-        reviewedById: null,
-        reviewedAt: null
-      }
-    });
+function buildArchiveRecordData(matter: any, extras: ArchiveExtras, session: any, missingItems: string[]) {
+  return {
+    matterId: matter.id,
+    archiveNo: extras.archiveNo,
+    summary: extras.summary,
+    judgmentSummary: extras.judgmentSummary || null,
+    closedReason: extras.closedReason,
+    completedAt: extras.completedAt,
+    checklistJson: extras.checklist as Prisma.InputJsonValue,
+    missingItems,
+    coverDocId: extras.coverDocId!,
+    catalogDocId: extras.catalogDocId!,
+    archivedBy: session.user.name ?? session.user.id,
+    archivedById: session.user.id,
+    status: "PENDING_REVIEW" as const,
+    reviewedById: null,
+    reviewedAt: null
+  };
+}
 
-    await tx.timelineEvent.create({
-      data: {
-        matterId: matter.id,
-        eventType: "MATTER_ARCHIVE_REQUESTED",
-        title: `归档申请已提交（${archiveNo}，待审批）`,
-        content: `结案方式：${CLOSED_REASON_CN[data.closedReason]}。${data.summary}`,
-        occurredAt: now
-      }
-    });
-  });
+function buildTimelineEventData(matterId: string, extras: ArchiveExtras) {
+  return {
+    matterId,
+    eventType: "MATTER_ARCHIVE_REQUESTED" as const,
+    title: `归档申请已提交（${extras.archiveNo}，待审批）`,
+    content: `结案方式：${CLOSED_REASON_CN[extras.closedReason]}。${extras.summary}`,
+    occurredAt: extras.archivedAt
+  };
+}
 
+async function createArchiveInTx(tx: any, matter: any, session: any, extras: ArchiveExtras, missingItems: string[]) {
+  await tx.archiveRecord.create({ data: buildArchiveRecordData(matter, extras, session, missingItems) });
+  await tx.timelineEvent.create({ data: buildTimelineEventData(matter.id, extras) });
+  return extras.archiveNo;
+}
+
+async function finalizeArchive(matterId: string, userId: string, archiveNo: string, closedReason: ArchiveSubmitInput["closedReason"], missingItems: string[], forceWithMissing: boolean) {
   await audit({
-    userId: session.user.id,
+    userId,
     action: "MATTER_ARCHIVE",
     targetType: "Matter",
-    targetId: matter.id,
-    detail: {
-      archiveNo,
-      closedReason: data.closedReason,
-      missingCount: missingItems.length,
-      forced: data.forceWithMissing && missingItems.length > 0
-    }
+    targetId: matterId,
+    detail: { archiveNo, closedReason, missingCount: missingItems.length, forced: forceWithMissing && missingItems.length > 0 }
   });
-
-  revalidatePath(`/matters/${matter.id}`);
+  revalidatePath(`/matters/${matterId}`);
   revalidatePath("/matters");
-  revalidatePath("/archive");
+  revalidatePath("//archive");
+}
+
+export async function archiveMatter(input: ArchiveSubmitInput) {
+  const { session, data } = await getArchiveSessionAndValidate(input);
+  const matter = await getMatterForArchive(data.matterId);
+  const now = new Date();
+  const archiveNo = await nextArchiveNo(prisma, matter.category, now);
+  const missingItems = computeMissingItems(matter.category, data.checklist, data.forceWithMissing);
+  const extras: ArchiveExtras = { archiveNo, summary: data.summary, judgmentSummary: data.judgmentSummary || undefined, closedReason: data.closedReason, completedAt: data.completedAt, archivedAt: now, checklist: data.checklist };
+  const { coverDocId, catalogDocId } = await renderArchiveDocuments(matter.id, session.user.id, extras);
+  extras.coverDocId = coverDocId; extras.catalogDocId = catalogDocId;
+  await prisma.$transaction(async (tx) => { await createArchiveInTx(tx, matter, session, extras, missingItems); });
+  await finalizeArchive(matter.id, session.user.id, archiveNo, data.closedReason, missingItems, data.forceWithMissing);
   return { ok: true, archiveNo, status: "PENDING_REVIEW" };
 }
 
