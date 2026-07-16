@@ -76,54 +76,60 @@ function fold(line: string): string {
   return out.join("\r\n");
 }
 
-export function buildIcs(opts: {
-  prodId?: string;
-  calendarName?: string;
-  events: IcsEvent[];
-}): string {
-  const prodId = opts.prodId ?? "-//LawLink//ZH-CN";
-  const lines: string[] = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    `PRODID:${prodId}`,
-    "CALSCALE:GREGORIAN",
-    "METHOD:PUBLISH"
+function buildDateTimeLines(ev: IcsEvent): string[] {
+  if (ev.allDay) {
+    const end = ev.end ?? new Date(ev.start.getTime() + 86400000);
+    return [
+      `DTSTART;VALUE=DATE:${fmtDate(ev.start)}`,
+      `DTEND;VALUE=DATE:${fmtDate(end)}`
+    ];
+  } else {
+    const end = ev.end ?? new Date(ev.start.getTime() + 3600000);
+    return [
+      `DTSTART:${fmtUtc(ev.start)}`,
+      `DTEND:${fmtUtc(end)}`
+    ];
+  }
+}
+
+function buildAlarmLines(ev: IcsEvent): string[] {
+  const out: string[] = [];
+  for (const m of ev.reminderMinutes ?? []) {
+    out.push("BEGIN:VALARM");
+    out.push("ACTION:DISPLAY");
+    out.push(`DESCRIPTION:${esc(ev.title)}`);
+    out.push(`TRIGGER:-PT${m}M`);
+    out.push("END:VALARM");
+  }
+  return out;
+}
+
+function buildIcsEvent(ev: IcsEvent, now: Date): string[] {
+  const summaryLine = fold(`SUMMARY:${esc(ev.title)}`);
+  const descriptionLines = ev.description ? [fold(`DESCRIPTION:${esc(ev.description)}`)] : [];
+  const locationLines = ev.location ? [fold(`LOCATION:${esc(ev.location)}`)] : [];
+  return [
+    "BEGIN:VEVENT",
+    `UID:${ev.uid}@lawlink.local`,
+    `DTSTAMP:${fmtUtc(now)}`,
+    ...buildDateTimeLines(ev),
+    summaryLine,
+    ...descriptionLines,
+    ...locationLines,
+    ...buildAlarmLines(ev),
+    "END:VEVENT"
   ];
-  if (opts.calendarName) {
-    lines.push(fold(`X-WR-CALNAME:${esc(opts.calendarName)}`));
-  }
+}
 
+export function buildIcs(opts: { prodId?: string; calendarName?: string; events: IcsEvent[] }): string {
+  const prodId = opts.prodId ?? "-//LawLink//ZH-CN";
+  const lines: string[] = ["BEGIN:VCALENDAR","VERSION:2.0",`PRODID:${prodId}`,"CALSCALE:GREGORIAN","METHOD:PUBLISH"];
+  if (opts.calendarName) lines.push(fold(`X-WR-CALNAME:${esc(opts.calendarName)}`));
   const now = new Date();
-  for (const ev of opts.events) {
-    lines.push("BEGIN:VEVENT");
-    lines.push(`UID:${ev.uid}@lawlink.local`);
-    lines.push(`DTSTAMP:${fmtUtc(now)}`);
-    if (ev.allDay) {
-      lines.push(`DTSTART;VALUE=DATE:${fmtDate(ev.start)}`);
-      const end = ev.end ?? new Date(ev.start.getTime() + 86400000);
-      lines.push(`DTEND;VALUE=DATE:${fmtDate(end)}`);
-    } else {
-      lines.push(`DTSTART:${fmtUtc(ev.start)}`);
-      const end = ev.end ?? new Date(ev.start.getTime() + 3600000);
-      lines.push(`DTEND:${fmtUtc(end)}`);
-    }
-    lines.push(fold(`SUMMARY:${esc(ev.title)}`));
-    if (ev.description) lines.push(fold(`DESCRIPTION:${esc(ev.description)}`));
-    if (ev.location) lines.push(fold(`LOCATION:${esc(ev.location)}`));
-    for (const m of ev.reminderMinutes ?? []) {
-      lines.push("BEGIN:VALARM");
-      lines.push("ACTION:DISPLAY");
-      lines.push(`DESCRIPTION:${esc(ev.title)}`);
-      lines.push(`TRIGGER:-PT${m}M`);
-      lines.push("END:VALARM");
-    }
-    lines.push("END:VEVENT");
-  }
-
+  for (const ev of opts.events) lines.push(...buildIcsEvent(ev, now));
   lines.push("END:VCALENDAR");
   return lines.join("\r\n") + "\r\n";
 }
-
 /** 浏览器端：下载 .ics 文件 */
 export function downloadIcs(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/calendar;charset=utf-8" });
