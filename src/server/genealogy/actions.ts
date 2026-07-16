@@ -159,21 +159,9 @@ export async function getPerson(id: string) {
 export async function createPerson(input: z.infer<typeof CreatePersonSchema>) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');
-
   const data = CreatePersonSchema.parse(input);
-
-  const created = await prisma.person.create({
-    data,
-  });
-
-  await audit({
-    userId: session.user.id,
-    action: 'PERSON_CREATE',
-    targetType: 'Person',
-    targetId: created.id,
-    detail: { fullName: created.fullName },
-  });
-
+  const created = await prisma.person.create({ data });
+  await audit({ userId: session.user.id, action: 'PERSON_CREATE', targetType: 'Person', targetId: created.id, detail: { fullName: created.fullName } });
   revalidatePath('/genealogy/persons');
   return { ok: true, id: created.id };
 }
@@ -181,25 +169,12 @@ export async function createPerson(input: z.infer<typeof CreatePersonSchema>) {
 export async function updatePerson(input: z.infer<typeof UpdatePersonInputSchema>) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');
-
   const data = UpdatePersonInputSchema.parse(input);
   const { id } = data;
   const rest = { ...data };
   delete (rest as any).id;
-
-  const updated = await prisma.person.update({
-    where: { id },
-    data: rest,
-  });
-
-  await audit({
-    userId: session.user.id,
-    action: 'PERSON_UPDATE',
-    targetType: 'Person',
-    targetId: updated.id,
-    detail: { changes: rest },
-  });
-
+  const updated = await prisma.person.update({ where: { id }, data: rest });
+  await audit({ userId: session.user.id, action: 'PERSON_UPDATE', targetType: 'Person', targetId: updated.id, detail: { changes: rest } });
   revalidatePath(`/genealogy/persons/${id}`);
   return { ok: true };
 }
