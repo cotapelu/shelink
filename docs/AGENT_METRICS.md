@@ -5638,3 +5638,53 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - src/lib/yuandian/client.ts
 
 **Next**: Address remaining HIGH violations: `IntakeSheet` (31), `IntakeDetailPage` (28), `reviewDocument` (13), `DocumentReviewDialog` (28), `PartyCard` (28), etc. Continue complexity reduction push toward <500 total errors.
+
+### [CYCLE-AUTO-15] - 2026-07-16 Refactor: buildIcs Complexity Reduction
+
+**Type**: Refactor (R)  
+**Priority**: HIGH  
+**Duration**: ~30 min  
+**Status**: ✅ Completed
+
+**Actions**:
+- Extracted `buildDateTimeLines`, `buildAlarmLines`, `buildIcsEvent` helpers.
+- Simplified `buildIcs` to concise orchestrator (≤20 lines, complexity ≤2).
+- All functions within quality gates.
+
+**Quality Gates**:
+- ✅ Lint: PASS on `src/lib/ics.ts`.
+- ✅ Typecheck: PASS.
+- ✅ Tests: 1987 passed.
+- ✅ Build: PASS.
+
+**Coverage Impact**: None.
+
+**Files Modified**:
+- src/lib/ics.ts
+
+**Next**: Continue addressing remaining HIGH violations (`IntakeSheet` complexity 31, `DocumentReviewDialog` 28, `PartyCard` 28, etc.).
+
+### [CYCLE-AUTO-16] - 2026-07-16 Refactor: reviewDocument Complexity Reduction
+
+**Type**: Refactor (R)  
+**Priority**: HIGH  
+**Duration**: ~45 min  
+**Status**: ✅ Completed
+
+**Actions**:
+- Split `reviewDocument` into orchestrator + helpers: `loadDocumentForReview`, `prepareDocumentBuffer`, `prepareReviewText` (async), `buildReviewPrompt`, `executeReviewAI`, `persistReviewIfNeeded`.
+- Refactored `extractDocumentText` to delegate to helpers (`extractPdfText`, `extractDocxText`, `extractDocText`, `extractPlainText`), reducing its line count to under 20.
+- All functions now ≤20 lines, ≤10 complexity.
+
+**Quality Gates**:
+- ✅ Lint: PASS on `src/server/ai/review-document.ts`.
+- ✅ Typecheck: PASS.
+- ✅ Tests: 1987 passed.
+- ✅ Build: PASS.
+
+**Coverage Impact**: None (no test changes).
+
+**Files Modified**:
+- src/server/ai/review-document.ts
+
+**Next**: Continue with remaining HIGH violations (`IntakeSheet` 31, `DocumentReviewDialog` 28, `PartyCard` 28, `IntakeDetailPage` 28, `FirmFilesView` 17, etc.).
