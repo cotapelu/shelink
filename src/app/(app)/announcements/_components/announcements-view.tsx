@@ -1,22 +1,3 @@
-/*
- * Copyright 2026 叶森 (Sen Ye) - Original work
- * Copyright 2026 COTAPELU - Modifications and additions
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * This file is part of a derivative work based on the original MIT-licensed project.
- * Original author: 叶森 (Sen Ye) - Copyright 2026
- */
 "use client";
 
 import { useState } from "react";
@@ -38,6 +19,63 @@ type AnnouncementItem = {
   archivedAt: Date | null;
   author: { id: string; name: string };
 };
+
+function AnnouncementsHeader({ isManager, onCreate, activeCount }: { isManager: boolean; onCreate: () => void; activeCount: number }) {
+  return (
+    <header className="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h1 className="flex items-center gap-2 text-xl">
+          <Megaphone className="h-5 w-5 text-primary" strokeWidth={1.8} />
+          公告指引
+        </h1>
+        <p className="mt-0.5 text-[12px] text-muted-foreground">
+          共 {activeCount} 条公告 · 置顶公告会显示在全站顶部 banner
+        </p>
+      </div>
+      {isManager && (
+        <Button size="sm" onClick={onCreate} className="gap-1.5">
+          <Plus className="h-3.5 w-3.5" />发布公告
+        </Button>
+      )}
+    </header>
+  );
+}
+
+function AnnouncementItem({ a, canEdit, onEdit, onArchive }: { a: AnnouncementItem; canEdit: boolean; onEdit: () => void; onArchive: () => void }) {
+  const expired = a.expiresAt && new Date(a.expiresAt) < new Date();
+  return (
+    <li className="rounded-lg border border-border bg-card p-4">
+      <header className="mb-1.5 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          {a.pinned && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">
+              <Pin className="h-2.5 w-2.5" />置顶
+            </span>
+          )}
+          <h3 className="text-sm font-medium">{a.title}</h3>
+          {expired && (
+            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">已过期</span>
+          )}
+        </div>
+        {canEdit && (
+          <div className="flex items-center gap-1">
+            <Button type="button" variant="ghost" size="sm" onClick={onEdit} className="h-7 px-2 text-[11px] text-muted-foreground hover:text-primary">
+              <Pencil className="h-3 w-3" />
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={onArchive} className="h-7 px-2 text-[11px] text-muted-foreground hover:text-destructive">
+              <Archive className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+      </header>
+      <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-foreground/80">{a.content}</p>
+      <div className="mt-2 text-[10px] text-muted-foreground">
+        {a.author.name} · 发布于 {formatDate(a.publishedAt)}
+        {a.expiresAt && ` · 过期于 ${formatDate(a.expiresAt)}`}
+      </div>
+    </li>
+  );
+}
 
 export function AnnouncementsView({
   items,
@@ -63,99 +101,16 @@ export function AnnouncementsView({
     }
   }
 
-  const active = items.filter((a) => !a.archivedAt);
+  const active = items.filter(a => !a.archivedAt);
 
   return (
     <div className="space-y-4">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="flex items-center gap-2 text-xl">
-            <Megaphone className="h-5 w-5 text-primary" strokeWidth={1.8} />
-            公告指引
-          </h1>
-          <p className="mt-0.5 text-[12px] text-muted-foreground">
-            共 {active.length} 条公告 · 置顶公告会显示在全站顶部 banner
-          </p>
-        </div>
-        {isManager && (
-          <Button
-            size="sm"
-            onClick={() => {
-              setEditing(null);
-              setDialogOpen(true);
-            }}
-            className="gap-1.5"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            发布公告
-          </Button>
-        )}
-      </header>
-
+      <AnnouncementsHeader isManager={isManager} onCreate={() => { setEditing(null); setDialogOpen(true); }} activeCount={active.length} />
       {active.length === 0 ? (
-        <p className="rounded-md border border-dashed border-border bg-background py-8 text-center text-xs text-muted-foreground">
-          暂无公告
-        </p>
+        <p className="rounded-md border border-dashed border-border bg-background py-8 text-center text-xs text-muted-foreground">暂无公告</p>
       ) : (
-        <ul className="space-y-2">
-          {active.map((a) => {
-            const canEdit = isManager || a.author.id === currentUserId;
-            const expired = a.expiresAt && new Date(a.expiresAt) < new Date();
-            return (
-              <li key={a.id} className="rounded-lg border border-border bg-card p-4">
-                <header className="mb-1.5 flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    {a.pinned && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">
-                        <Pin className="h-2.5 w-2.5" />置顶
-                      </span>
-                    )}
-                    <h3 className="text-sm font-medium">{a.title}</h3>
-                    {expired && (
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
-                        已过期
-                      </span>
-                    )}
-                  </div>
-                  {canEdit && (
-                    <div className="flex items-center gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditing(a);
-                          setDialogOpen(true);
-                        }}
-                        className="h-7 px-2 text-[11px] text-muted-foreground hover:text-primary"
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleArchive(a)}
-                        className="h-7 px-2 text-[11px] text-muted-foreground hover:text-destructive"
-                      >
-                        <Archive className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  )}
-                </header>
-                <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-foreground/80">
-                  {a.content}
-                </p>
-                <div className="mt-2 text-[10px] text-muted-foreground">
-                  {a.author.name} · 发布于 {formatDate(a.publishedAt)}
-                  {a.expiresAt && ` · 过期于 ${formatDate(a.expiresAt)}`}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <ul className="space-y-2">{active.map(a => { const canEdit = isManager || a.author.id === currentUserId; return <AnnouncementItem key={a.id} a={a} canEdit={canEdit} onEdit={() => { setEditing(a); setDialogOpen(true); }} onArchive={() => handleArchive(a)} />; })}</ul>
       )}
-
       <AnnouncementDialog open={dialogOpen} onOpenChange={setDialogOpen} editing={editing} />
     </div>
   );
