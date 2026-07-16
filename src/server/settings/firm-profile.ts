@@ -78,17 +78,25 @@ export const FIRM_PROFILE_DEFAULTS: FirmProfile = {
   categoryWords: CATEGORY_WORD_DEFAULTS
 };
 
+function pickFirmName(s: Partial<FirmProfile>) { return s.firmName || FIRM_PROFILE_DEFAULTS.firmName; }
+function pickFirmSubtitle(s: Partial<FirmProfile>) { return s.firmSubtitle ?? FIRM_PROFILE_DEFAULTS.firmSubtitle; }
+function pickLogoDataUrl(s: Partial<FirmProfile>) { return s.logoDataUrl ?? null; }
+function pickMatterCodePrefix(s: Partial<FirmProfile>) { return (s.matterCodePrefix?.trim() || FIRM_PROFILE_DEFAULTS.matterCodePrefix); }
+function pickFirmShortName(s: Partial<FirmProfile>) { return s.firmShortName ?? FIRM_PROFILE_DEFAULTS.firmShortName; }
+function pickCaseNoTemplate(s: Partial<FirmProfile>) { return (s.caseNoTemplate?.trim() || FIRM_PROFILE_DEFAULTS.caseNoTemplate); }
+function pickCategoryWords(s: Partial<FirmProfile>) { return { ...CATEGORY_WORD_DEFAULTS, ...(s.categoryWords ?? {}) }; }
+
 export async function getFirmProfile(): Promise<FirmProfile> {
   const row = await prisma.systemSetting.findUnique({ where: { key: FIRM_PROFILE_KEY } });
   const s = (row?.value as Partial<FirmProfile> | null) ?? {};
   return {
-    firmName: s.firmName || FIRM_PROFILE_DEFAULTS.firmName,
-    firmSubtitle: s.firmSubtitle ?? FIRM_PROFILE_DEFAULTS.firmSubtitle,
-    logoDataUrl: s.logoDataUrl ?? null,
-    matterCodePrefix: s.matterCodePrefix?.trim() || FIRM_PROFILE_DEFAULTS.matterCodePrefix,
-    firmShortName: s.firmShortName ?? FIRM_PROFILE_DEFAULTS.firmShortName,
-    caseNoTemplate: s.caseNoTemplate?.trim() || FIRM_PROFILE_DEFAULTS.caseNoTemplate,
-    categoryWords: { ...CATEGORY_WORD_DEFAULTS, ...(s.categoryWords ?? {}) }
+    firmName: pickFirmName(s),
+    firmSubtitle: pickFirmSubtitle(s),
+    logoDataUrl: pickLogoDataUrl(s),
+    matterCodePrefix: pickMatterCodePrefix(s),
+    firmShortName: pickFirmShortName(s),
+    caseNoTemplate: pickCaseNoTemplate(s),
+    categoryWords: pickCategoryWords(s)
   };
 }
 
