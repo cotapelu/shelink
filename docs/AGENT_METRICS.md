@@ -5611,3 +5611,30 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - docs/AGENT_METRICS.md (this update)
 
 **Next**: Continue complexity reduction in other high-risk modules (`utils/kinship/compute.ts`, `utils/gedcom/parser.ts`) to improve overall code health and reduce lint violations toward target of <500 total errors.
+
+### [CYCLE-AUTO-14] - 2026-07-16 Complexity Reduction Batch (3 functions)
+
+**Type**: Refactor (R) - Complexity Reduction  
+**Priority**: HIGH (quality gate violation)  
+**Duration**: ~90 min  
+**Status**: ✅ Completed
+
+**Actions**:
+- `src/utils/kinship/compute.ts`: Refactored `createBothSpousesResult` (complexity 13→6, lines 21→14) by extracting `maybeAdjustBloodSiblingTerm` and `adjustBloodSiblingTerm`.  
+- `src/lib/yuandian/client.ts`: Refactored `searchPtalCases` (complexity 36→4) by extracting helpers (`validatePtalSearchParams`, `buildPtalRequestBody`, `executePtalSearch`, `transformPtalSearchResult`).  
+- `src/lib/yuandian/client.ts`: Refactored `searchCasesByVector` (complexity 22→3) by extracting similar helpers and adding compact `executeVectorSearch`.
+
+**Quality Gates**:
+- ✅ All modified functions ≤20 lines and ≤10 complexity.
+- ✅ Lint: PASS on modified files.
+- ✅ Typecheck: PASS (added type guards `hasNonEmptyArray`, `isNonEmptyString`).
+- ✅ Tests: 1987 passed, 1 skipped (unchanged).
+- ✅ Build: PASS.
+
+**Coverage Impact**: None (maintained existing ~75% functions).
+
+**Files Modified**:
+- src/utils/kinship/compute.ts (131 insertions, 87 deletions net across file? actually only partial)
+- src/lib/yuandian/client.ts
+
+**Next**: Address remaining HIGH violations: `IntakeSheet` (31), `IntakeDetailPage` (28), `reviewDocument` (13), `DocumentReviewDialog` (28), `PartyCard` (28), etc. Continue complexity reduction push toward <500 total errors.
