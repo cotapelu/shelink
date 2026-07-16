@@ -86,15 +86,9 @@ const GetPersonsQuerySchema = z.object({
 });
 
 // Actions
-export async function getPersons(query?: z.infer<typeof GetPersonsQuerySchema>) {
-  const validated = GetPersonsQuerySchema.parse(query);
-  const session = await getServerSession(authOptions);
-  if (!session?.user) throw new Error('Unauthorized');
-
+function buildPersonWhere(validated: z.infer<typeof GetPersonsQuerySchema>): any {
   const where: any = {};
-  if (validated.search) {
-    where.fullName = { contains: validated.search };
-  }
+  if (validated.search) where.fullName = { contains: validated.search };
   if (validated.gender) where.gender = validated.gender;
   if (validated.generation) where.generation = validated.generation;
   if (validated.minBirthYear || validated.maxBirthYear) {
@@ -103,34 +97,26 @@ export async function getPersons(query?: z.infer<typeof GetPersonsQuerySchema>) 
     if (validated.maxBirthYear) where.birthYear.lte = validated.maxBirthYear;
   }
   if (validated.isDeceased !== undefined) where.isDeceased = validated.isDeceased;
+  return where;
+}
 
+export async function getPersons(query?: z.infer<typeof GetPersonsQuerySchema>) {
+  const validated = GetPersonsQuerySchema.parse(query);
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error('Unauthorized');
+
+  const where = buildPersonWhere(validated);
+  const select = {
+    id: true, fullName: true, gender: true, birthYear: true,
+    birthMonth: true, birthDay: true, deathYear: true, deathMonth: true,
+    deathDay: true, isDeceased: true, isInLaw: true, birthOrder: true,
+    generation: true, avatarUrl: true, note: true
+  };
+  const skip = (validated.page - 1) * validated.limit;
   const [items, total] = await Promise.all([
-    prisma.person.findMany({
-      where,
-      select: {
-        id: true,
-        fullName: true,
-        gender: true,
-        birthYear: true,
-        birthMonth: true,
-        birthDay: true,
-        deathYear: true,
-        deathMonth: true,
-        deathDay: true,
-        isDeceased: true,
-        isInLaw: true,
-        birthOrder: true,
-        generation: true,
-        avatarUrl: true,
-        note: true,
-      },
-      orderBy: { fullName: 'asc' },
-      skip: (validated.page - 1) * validated.limit,
-      take: validated.limit,
-    }),
-    prisma.person.count({ where }),
+    prisma.person.findMany({ where, select, orderBy: { fullName: 'asc' }, skip, take: validated.limit }),
+    prisma.person.count({ where })
   ]);
-
   return { persons: items, total, page: validated.page, totalPages: Math.ceil(total / validated.limit) };
 }
 
