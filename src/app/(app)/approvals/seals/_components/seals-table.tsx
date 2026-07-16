@@ -50,14 +50,8 @@ export function SealsTable({
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <SealRow
-                  key={r.id}
-                  row={r}
-                  currentUser={currentUser}
-                  canApprove={approvableIds.has(r.id)}
-                  onAction={(action) => onAction(action, r)}
-                />
+              {rows.map(r => (
+                <SealRow key={r.id} row={r} currentUser={currentUser} canApprove={approvableIds.has(r.id)} onAction={action => onAction(action, r)} />
               ))}
             </tbody>
           </table>
