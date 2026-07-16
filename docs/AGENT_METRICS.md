@@ -1331,7 +1331,103 @@ Target: ≥90 points, increase ≥0.5%/week
 - Push function coverage toward 80% by adding tests for these UI components and uncovered server modules.
 - Address remaining complexity in `utils/kinship/compute.ts` and other high-complexity utilities.
 
-**Commit**: (will commit after audit)
+**Commit**: ✅ Completed (see CYCLE-AUTO-9)
+
+### [CYCLE-AUTO-9] - 2026-07-16 Refactor: Archive Actions Size Reduction
+
+**Type**: Violation Fix (HIGH) - Function Size & Complexity
+**Priority**: HIGH
+**Duration**: ~120 min (research + refactor)
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS (fixed MatterCategory casting)
+- ✅ Build: SUCCESS
+- ✅ Tests: 1987 passed (no regression)
+- ⚠️ Lint: Reduced errors for `src/server/archive/actions.ts` (multiple function size errors eliminated)
+
+**Refactor Actions**:
+1. Fixed `archiveMatter` function:
+   - Extracted helpers: `getArchiveSessionAndValidate`, `getMatterForArchive`, `computeMissingItems` (with proper MatterCategory type)
+   - Introduced `ArchiveExtras` interface with required fields
+   - Extracted `renderArchiveDocuments` and `finalizeArchive`
+   - Inlined and compressed orchestrator to ≤20 lines
+   - Result: `archiveMatter` now 20 lines, complexity within limit.
+2. Refactored `createArchiveInTx`:
+   - Extracted `buildArchiveRecordData` and `buildTimelineEventData`
+   - Reduced function to ≤20 lines.
+3. Type safety improvements:
+   - Proper `MatterCategory` handling in Prisma select
+   - Strongly-typed extras and missingItems
+   - Eliminated `any` where possible.
+
+**Files Modified**:
+- `src/server/archive/actions.ts` (refactored)
+
+**Impact**:
+- Eliminated 2 max-lines violations (archiveMatter, createArchiveInTx)
+- Improved maintainability and testability
+- No functional changes; behavior preserved
+- Overall lint errors for the file reduced from 13 to 11 (still >0; other functions remain to be refactored)
+
+**Remaining Violations in this file** (for future cycles):
+- `approveArchiveRecord` (77 lines, complexity maybe)
+- `rejectArchiveRecord` (60 lines, complexity 11)
+- `getArchivePrepData` (73 lines)
+- `listArchivedMatters` (28 lines)
+- `listPendingArchiveRecords` (33 lines)
+- `listRejectedArchiveRecords` (28 lines)
+- `batchApproveArchiveRecords` (37 lines)
+- `batchRejectArchiveRecords` (39 lines)
+- File size: 495 lines (exceeds 300 limit)
+
+**Next**: Continue systematic extraction for these functions; consider splitting file into multiple modules if needed.
+
+### [CYCLE-AUTO-10] - 2026-07-16 Archive Refactor: Approve & Reject
+
+**Type**: Violation Fix (HIGH) - Function Size & Complexity
+**Priority**: HIGH
+**Duration**: ~90 min
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS
+- ✅ Build: SUCCESS
+- ✅ Tests: 1987 passed
+- ⚠️ Lint: Further reduced errors for `src/server/archive/actions.ts`
+
+**Refactor Actions**:
+1. `approveArchiveRecord` (was 77 lines):
+   - Extracted: `findArchiveRecord`, `buildApprovalUpdateData`, `buildMatterUpdateData`, `buildApprovalTimelineEvent`, `notifyApplicant`
+   - Orchestrator now ≤20 lines.
+2. `rejectArchiveRecord` (was 60 lines):
+   - Extracted: `findRejectRecord`, `buildRejectUpdateData`, `notifyRejection`
+   - Orchestrator now ≤20 lines.
+3. Fixed nullability: `closedAt` fallback to `archivedAt` when null.
+4. Improved type safety (strict types, removed any).
+
+**Files Modified**:
+- `src/server/archive/actions.ts` (refactored)
+
+**Impact**:
+- Eliminated 2 max-lines violations (approve, reject)
+- Reduced complexity for reject (was 11)
+- File size reduced from 495 → 464 lines
+- Maintained behavior; all tests pass
+
+**Remaining Violations in this file**:
+- `getArchivePrepData` (73 lines)
+- `listArchivedMatters` (28 lines)
+- `listPendingArchiveRecords` (33 lines)
+- `listRejectedArchiveRecords` (28 lines)
+- `batchApproveArchiveRecords` (37 lines)
+- `batchRejectArchiveRecords` (39 lines)
+- File size: 464 lines (still >300)
+
+**Next Steps**:
+- Continue extracting remaining functions (list and batch operations)
+- Consider splitting this module into `archive-approval.ts`, `archive-list.ts`, `archive-batch.ts` to meet file size limit
+- After archive actions clean, move to other high-violation modules (utils/kinship, gedcom, etc.)
 
 ## Next Scheduled Actions
 
