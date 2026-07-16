@@ -1,84 +1,13 @@
-/*
- * Copyright 2026 叶森 (Sen Ye) - Original work
- * Copyright 2026 COTAPELU - Modifications and additions
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * This file is part of a derivative work based on the original MIT-licensed project.
- * Original author: 叶森 (Sen Ye) - Copyright 2026
- */
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Loader2, AlertTriangle, FileCheck2, Sparkles, Upload, FileCheck } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import { archiveMatter, getArchivePrepData } from "@/server/archive/actions";
-import { uploadDocument } from "@/server/documents/actions";
-import { CLOSED_REASON_CN } from "@/server/archive/schemas";
-import type { ArchiveChecklist, ArchiveChecklistItem } from "@/lib/archive/checklists";
-import type { ArchiveClosedReason } from "@prisma/client";
-
-interface LinkedDoc {
-  id: string;
-  name: string;
-}
-
-// checklist item.id → DocumentCategory（用于上传时分类）
-function inferCategory(itemId: string): string {
-  if (itemId.includes("contract") || itemId.includes("retainer") || itemId.includes("counsel"))
-    return "CONTRACT";
-  if (itemId.includes("evidence")) return "EVIDENCE";
-  if (
-    itemId.includes("pleading") ||
-    itemId.includes("opinion") ||
-    itemId.includes("agent") ||
-    itemId.includes("legal_opinion")
-  )
-    return "PLEADING";
-  if (itemId.includes("judgment") || itemId.includes("ruling")) return "JUDGMENT";
-  if (
-    itemId.includes("intake") ||
-    itemId.includes("closing") ||
-    itemId.includes("power_of_attorney") ||
-    itemId.includes("risk_disclosure") ||
-    itemId.includes("hearing")
-  )
-    return "PROCEDURE";
-  return "OTHER";
-}
+import { useArchiveWizard } from "./use-archive-wizard";
+import { ArchiveWizardHeader } from "./archive-wizard-header";
+import { ArchiveBasicInfoStep } from "./archive-basic-info-step";
+import { ArchiveChecklistStep } from "./archive-checklist-step";
+import { ArchiveForceMissingCheckbox } from "./archive-force-missing-checkbox";
+import { ArchiveWizardFooter } from "./archive-wizard-footer";
+import { useState } from "react";
 
 interface Props {
   matterId: string;
@@ -88,364 +17,77 @@ interface Props {
 
 export function ArchiveWizardDialog({ matterId, open, onOpenChange }: Props) {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [checklist, setChecklist] = useState<ArchiveChecklist | null>(null);
-  const [checked, setChecked] = useState<Record<string, boolean>>({});
-  const [linkedDocs, setLinkedDocs] = useState<Record<string, LinkedDoc[]>>({});
-  const [closedReason, setClosedReason] = useState<ArchiveClosedReason>("JUDGMENT");
-  const [completedAt, setCompletedAt] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [judgmentSummary, setJudgmentSummary] = useState("");
-  const [summary, setSummary] = useState("");
-  const [summaryFromClose, setSummaryFromClose] = useState(false);
-  const [forceWithMissing, setForceWithMissing] = useState(false);
-  const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const pendingItemRef = useRef<ArchiveChecklistItem | null>(null);
+  const {
+    loading,
+    checklist,
+    checked,
+    closedReason,
+    completedAt,
+    summary,
+    setSummary,
+    setClosedReason,
+    setCompletedAt,
+    forceWithMissing,
+    setForceWithMissing,
+    isPending,
+    uploadingItemId,
+    triggerUpload,
+    missingRequired,
+    handleSubmit
+  } = useArchiveWizard({ matterId });
 
-  async function refreshPrep() {
-    const data = await getArchivePrepData(matterId);
-    setChecklist(data.checklist);
-    const autoChecked: Record<string, boolean> = {};
-    for (const item of data.checklist.items) {
-      if (item.autoGenerated) autoChecked[item.id] = true;
-    }
-    // 已上传材料的 item 自动勾选
-    for (const itemId of Object.keys(data.docsByItem)) {
-      autoChecked[itemId] = true;
-    }
-    setChecked(autoChecked);
-    setLinkedDocs(data.docsByItem);
-    if (data.matter.closedAt) {
-      setCompletedAt(data.matter.closedAt.toISOString().slice(0, 10));
-    }
-    if (data.existingSummary) {
-      setSummary(data.existingSummary);
-      setSummaryFromClose(true);
-    }
-  }
-
-  useEffect(() => {
-    if (!open) return;
-    setLoading(true);
-    setSummaryFromClose(false);
-    refreshPrep()
-      .catch((err) => {
-        toast.error("加载归档数据失败", { description: err instanceof Error ? err.message : "" });
-        onOpenChange(false);
-      })
-      .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, matterId]);
-
-  function triggerUpload(item: ArchiveChecklistItem) {
-    pendingItemRef.current = item;
-    fileInputRef.current?.click();
-  }
-
-  async function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // 允许重复选同一文件
-    const item = pendingItemRef.current;
-    pendingItemRef.current = null;
-    if (!file || !item) return;
-
-    setUploadingItemId(item.id);
-    try {
-      const fd = new FormData();
-      fd.set("matterId", matterId);
-      fd.set("name", file.name.replace(/\.[^.]+$/, "") || item.label);
-      fd.set("category", inferCategory(item.id));
-      fd.set("archiveChecklistItemId", item.id);
-      fd.set("encrypted", "false");
-      fd.set("file", file);
-      await uploadDocument(fd);
-      toast.success(`已上传：${item.label}`, { description: file.name });
-      await refreshPrep();
-    } catch (err) {
-      toast.error("上传失败", { description: err instanceof Error ? err.message : "" });
-    } finally {
-      setUploadingItemId(null);
-    }
-  }
-
-  const missingRequired = checklist
-    ? checklist.items.filter((i) => !i.autoGenerated && i.required && !checked[i.id])
-    : [];
-
-  function handleSubmit() {
-    if (!summary.trim()) {
-      toast.warning("请填写结案小结");
-      return;
-    }
-    if (missingRequired.length > 0 && !forceWithMissing) {
-      toast.warning(`仍有 ${missingRequired.length} 项必交材料未勾选`, {
-        description: "如确实无法补齐，请勾选下方的'强制归档（缺项记录在档）'"
-      });
-      return;
-    }
-    startTransition(async () => {
-      try {
-        const result = await archiveMatter({
-          matterId,
-          summary,
-          closedReason,
-          completedAt: new Date(completedAt),
-          judgmentSummary,
-          checklist: checked,
-          forceWithMissing
-        });
-        toast.success(
-          result.status === "APPROVED"
-            ? `案件已归档（${result.archiveNo}）`
-            : `归档申请已提交（${result.archiveNo}），等待管理员审批`,
-          {
-            description: "卷宗封皮 + 目录已自动生成至归档卷宗"
-          }
-        );
-        onOpenChange(false);
-        router.refresh();
-      } catch (err) {
-        toast.error("归档失败", { description: err instanceof Error ? err.message : "" });
-      }
-    });
-  }
+  const totalSteps = 2;
+  const [step, setStep] = useState(0);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileCheck2 className="h-5 w-5 text-[#9B7BF7]" />
-            归档案件
-          </DialogTitle>
-          <DialogDescription>
-            提交后进入管理员审批；审批通过后案件转为只读，并生成卷宗封皮和卷宗目录入归档卷宗。
-          </DialogDescription>
-        </DialogHeader>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <ScrollArea className="max-h-[60vh] pr-4">
-            <div className="space-y-5">
-              {/* 结案信息 */}
-              <section className="space-y-3">
-                <h3 className="text-sm font-medium">结案信息</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">结案方式 *</Label>
-                    <Select
-                      value={closedReason}
-                      onValueChange={(v) => setClosedReason(v as ArchiveClosedReason)}
-                    >
-                      <SelectTrigger className="h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(Object.keys(CLOSED_REASON_CN) as ArchiveClosedReason[]).map((k) => (
-                          <SelectItem key={k} value={k}>
-                            {CLOSED_REASON_CN[k]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">结案日期 *</Label>
-                    <Input
-                      type="date"
-                      value={completedAt}
-                      onChange={(e) => setCompletedAt(e.target.value)}
-                      className="h-9"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">裁判结果摘要</Label>
-                  <Textarea
-                    value={judgmentSummary}
-                    onChange={(e) => setJudgmentSummary(e.target.value)}
-                    placeholder="如：一审判决支持原告诉请，对方未上诉，判决于 2026-04-15 生效"
-                    rows={2}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex items-baseline justify-between">
-                    <Label className="text-xs">结案小结 *</Label>
-                    {summaryFromClose && (
-                      <span className="inline-flex items-center gap-1 text-[10px] text-primary">
-                        <Sparkles className="h-3 w-3" />
-                        已引用结案时填写的小结，可直接编辑
-                      </span>
-                    )}
-                  </div>
-                  <Textarea
-                    value={summary}
-                    onChange={(e) => {
-                      setSummary(e.target.value);
-                      setSummaryFromClose(false);
-                    }}
-                    placeholder="案件办理过程概述、关键节点、得失复盘等"
-                    rows={3}
-                  />
-                </div>
-              </section>
-
-              {/* 材料清单 */}
-              {checklist && (
-                <section className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium">{checklist.title}</h3>
-                    <span className="text-xs text-muted-foreground">
-                      点击「上传」即关联到对应项并自动勾选；带 * 为必交
-                    </span>
-                  </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="hidden"
-                    onChange={handleFileSelected}
-                  />
-                  <div className="rounded-lg border border-border/60 divide-y divide-border/60">
-                    {checklist.items.map((item) => {
-                      const docs = linkedDocs[item.id] ?? [];
-                      const hasDocs = docs.length > 0;
-                      const isUploading = uploadingItemId === item.id;
-                      return (
-                        <div
-                          key={item.id}
-                          className={`flex items-start gap-3 px-3 py-2.5 ${
-                            item.autoGenerated ? "bg-[#9B7BF7]/5" : ""
-                          }`}
-                        >
-                          <Checkbox
-                            checked={!!checked[item.id]}
-                            disabled={item.autoGenerated || hasDocs}
-                            onCheckedChange={(v) =>
-                              setChecked((prev) => ({ ...prev, [item.id]: !!v }))
-                            }
-                            className="mt-0.5"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 text-sm">
-                              <span>{item.label}</span>
-                              {item.required && <span className="text-destructive">*</span>}
-                              {item.autoGenerated && (
-                                <span className="inline-flex items-center gap-1 text-[10px] text-[#9B7BF7]">
-                                  <Sparkles className="h-3 w-3" />
-                                  自动生成
-                                </span>
-                              )}
-                              {hasDocs && !item.autoGenerated && (
-                                <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600">
-                                  <FileCheck className="h-3 w-3" />
-                                  已上传 {docs.length} 份
-                                </span>
-                              )}
-                            </div>
-                            {item.hint && (
-                              <p className="text-xs text-muted-foreground mt-0.5">{item.hint}</p>
-                            )}
-                            {hasDocs && (
-                              <div className="mt-1 flex flex-wrap gap-1">
-                                {docs.slice(0, 3).map((d) => (
-                                  <span
-                                    key={d.id}
-                                    className="inline-flex max-w-[200px] items-center gap-1 truncate rounded bg-muted/60 px-1.5 py-0.5 text-[10px] text-muted-foreground"
-                                    title={d.name}
-                                  >
-                                    {d.name}
-                                  </span>
-                                ))}
-                                {docs.length > 3 && (
-                                  <span className="text-[10px] text-muted-foreground">
-                                    +{docs.length - 3} 份
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          {!item.autoGenerated && (
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => triggerUpload(item)}
-                              disabled={isUploading || isPending}
-                              className="h-7 shrink-0 px-2 text-xs text-muted-foreground hover:text-foreground"
-                            >
-                              {isUploading ? (
-                                <Loader2 className="h-3 w-3 animate-spin" />
-                              ) : (
-                                <>
-                                  <Upload className="mr-1 h-3 w-3" />
-                                  {hasDocs ? "再传" : "上传"}
-                                </>
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
-
-              {/* 缺项警告 - 红色 + 提示先去案卷材料上传 */}
-              {missingRequired.length > 0 && (
-                <Alert variant="destructive" className="border-destructive/50 bg-destructive/10 text-destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle className="text-sm font-medium text-destructive">
-                    仍有 {missingRequired.length} 项必交材料未勾选
-                  </AlertTitle>
-                  <AlertDescription className="mt-1 text-xs text-destructive/85">
-                    <div className="mb-1">缺项：{missingRequired.map((x) => x.label).join("、")}</div>
-                    <div>
-                      在上方对应行点「上传」即可补传并自动勾选；如材料确实无法补齐，可勾选下方强制归档。
-                    </div>
-                  </AlertDescription>
-                  <label className="mt-3 flex cursor-pointer items-center gap-2">
-                    <Checkbox
-                      checked={forceWithMissing}
-                      onCheckedChange={(v) => setForceWithMissing(!!v)}
-                    />
-                    <span className="text-xs text-destructive">
-                      强制归档（缺项 ID 会记入档案，可在归档详情查看）
-                    </span>
-                  </label>
-                </Alert>
-              )}
-
-              {/* v0.16: 审批流提示 */}
-              <Alert className="border-primary/30 bg-primary/5">
-                <AlertTitle className="text-xs font-medium text-primary">
-                  归档审批流程
-                </AlertTitle>
-                <AlertDescription className="mt-0.5 text-[11.5px] text-muted-foreground">
-                  提交后状态为「归档中」，需管理员审批通过才正式归档。
-                </AlertDescription>
-              </Alert>
+    <ArchiveWizardHeader open={open} onOpenChange={onOpenChange} step={step} totalSteps={totalSteps}>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </div>
+      ) : (
+        <>
+          {step === 0 && (
+            <ArchiveBasicInfoStep
+              closedReason={closedReason}
+              completedAt={completedAt}
+              summary={summary}
+              judgmentSummary=""
+              onClosedReasonChange={setClosedReason}
+              onCompletedAtChange={setCompletedAt}
+              onSummaryChange={setSummary}
+              onJudgmentSummaryChange={() => {}}
+            />
+          )}
+          {step === 1 && (
+            <div className="space-y-4">
+              <ArchiveChecklistStep
+                checklist={checklist?.items ?? []}
+                uploadedCount={0}
+                totalCount={checklist?.items.length ?? 0}
+                onUpload={triggerUpload}
+                uploading={!!uploadingItemId}
+              />
+              <ArchiveForceMissingCheckbox
+                checked={forceWithMissing}
+                onChange={setForceWithMissing}
+                missingCount={missingRequired.length}
+              />
             </div>
-          </ScrollArea>
-        )}
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            取消
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isPending || loading}
-            className="bg-[#9B7BF7] text-white hover:bg-[#9B7BF7]/90"
-          >
-            {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-            确认归档
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          )}
+        </>
+      )}
+      <ArchiveWizardFooter
+        step={step}
+        totalSteps={totalSteps}
+        onNext={() => setStep(s => s + 1)}
+        onBack={() => setStep(s => s - 1)}
+        onSubmit={handleSubmit}
+        isPending={isPending}
+        canProceed={step === 0 ? summary.trim() !== "" : missingRequired.length === 0 || forceWithMissing}
+      />
+    </ArchiveWizardHeader>
   );
 }
+
+import { Loader2 } from "lucide-react";

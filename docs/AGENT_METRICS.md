@@ -6280,3 +6280,38 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 **Next**: Remaining HIGH violations: `InvoiceBuilder`, `ReportBuilder`, `Topbar`, `ChartWidget`, `AiSettingsForm`, `DocumentReviewDialog`, `PartyCard`, `IntakeSheet`. Coverage push remains top priority.
 
 ---
+
+### [CYCLE-AUTO-26] - 2026-07-16 Refactor: PendingArchiveTable Component Extraction
+
+**Type**: Refactor (R) - Component Decomposition
+**Priority**: HIGH (Quality Gate: UI functions ≤50 lines, complexity ≤10)
+**Duration**: ~90 min
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS
+- ✅ Build: PASS
+- ✅ Lint: **0 errors** on archive components
+- ✅ Tests: 1987 passed (unchanged)
+
+**Refactor Actions**:
+- Split monolithic `PendingArchiveTable` (complexity 11, large JSX) into:
+  - `ArchiveToolbar` (selection actions)
+  - `ArchiveTable` (table rendering)
+  - `ArchiveRow` (individual row)
+  - `ArchiveDialogs` (action dialogs)
+- Simplified main component to state orchestration only (~35 lines)
+
+**Impact**:
+- All archive UI components now satisfy quality gates
+- Complexity reduced for `PendingArchiveTable`
+
+**Files Modified**:
+- src/app/(app)/archive/_components/pending-archive-table.tsx (refactored)
+- src/app/(app)/archive/_components/archive-toolbar.tsx (new)
+- src/app/(app)/archive/_components/archive-table.tsx (new)
+- src/app/(app)/archive/_components/archive-dialogs.tsx (new)
+
+**Next**: Continue remaining HIGH violations: `InvoiceBuilder`, `ReportBuilder`, `Topbar`, `ChartWidget`, `AiSettingsForm`, `DocumentReviewDialog`, `PartyCard`, `IntakeSheet`. Coverage push remains critical.
+
+---
