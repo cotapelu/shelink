@@ -37,6 +37,8 @@ import { withMetrics } from "@/lib/telemetry/server-metrics";
 import { seedDefaultFolders } from "@/lib/default-folders";
 import { notifyRoleApprovers } from "@/server/notifications/approval";
 import * as helpers from "./helpers";
+import type { Matter, Intake } from "@prisma/client";
+import * as conversion from "./conversion-helpers";
 
 // ============================================
 // Helper functions for createIntake (refactored to reduce complexity & lines)
@@ -640,219 +642,25 @@ export async function resubmitIntake(id: string) {
 export async function convertIntakeToMatter(intakeId: string) {
   const session = await requireSession();
   helpers.requireApprover(session.user.role);
-  const intake = await prisma.intake.findUnique({
-    where: { id: intakeId },
-    include: {
-      client: true,
-      parties: true,
-      conflictChecks: {
-        orderBy: { checkedAt: "desc" },
-        take: 1,
-        select: {
-          conclusion: true,
-          note: true,
-          queryPayload: true,
-          hits: { select: { severity: true } }
-        }
-      },
-      documents: { select: { id: true } }
-    }
-  });
-  if (!intake) throw new Error("Intake 不存在");
-  if (intake.status === "CONVERTED") throw new Error("此 Intake 已转化");
-  helpers.assertConflictReviewAllowsConversion(intake);
-
-  const { generateInternalCode, generateFirmCaseNo } = await import("@/server/matters/code-generator");
-  const internalCode = await generateInternalCode(intake.category);
-  const firmCaseNo = await generateFirmCaseNo(intake.category);
-
-  // 首程序类型：优先用 intake 选的，缺失按案件类别推断
-  const firstProcedureType =
-    intake.firstProcedureType ??
-    (intake.category === "CIVIL_COMMERCIAL" ||
-    intake.category === "CRIMINAL" ||
-    intake.category === "ADMINISTRATIVE"
-      ? "FIRST_INSTANCE"
-      : "NON_LITIGATION_PHASE");
-
+  const { intake, internalCode, firmCaseNo, firstProcedureType } = await prepareConversionContext(intakeId, session);
   const matter = await prisma.$transaction(async (tx) => {
-    const ownerId = intake.ownerUserId ?? session.user.id;
-
-    const m = await tx.matter.create({
-      data: {
-        internalCode,
-        firmCaseNo,
-        title: intake.title,
-        category: intake.category,
-        ownerId,
-        causeId: intake.causeId,
-        causeFreeText: intake.causeFreeText,
-        primaryClientId: intake.clientId,
-        intakeId: intake.id,
-        intakeDate: intake.receivedAt,
-        ourStanding: intake.ourStanding,
-        claimAmount: intake.claimAmount,
-        // 是否反诉：按我方地位推断角色（被告提反诉→反诉原告；原告被反诉→反诉被告）
-        counterclaimAsPlaintiff:
-          !!intake.counterclaim &&
-          (intake.ourStanding === "DEFENDANT" || intake.ourStanding === "JOINT_DEFENDANT"),
-        counterclaimAsDefendant:
-          !!intake.counterclaim &&
-          (intake.ourStanding === "PLAINTIFF" || intake.ourStanding === "JOINT_PLAINTIFF"),
-        barFiling: intake.barFiling,
-        // v0.35: 非诉/顾问/专项 专属字段带入
-        businessType: intake.businessType,
-        serviceScope: intake.serviceScope,
-        deliverables: intake.deliverables,
-        counselType: intake.counselType,
-        serviceStart: intake.serviceStart,
-        serviceEnd: intake.serviceEnd,
-        // 主办自动作为 LEAD；coUserIds 作为 CO_LEAD
-        members: {
-          create: [
-            { userId: ownerId, role: "LEAD" },
-            ...intake.coUserIds
-              .filter((uid) => uid !== ownerId)
-              .map((uid) => ({ userId: uid, role: "CO_LEAD" as const }))
-          ]
-        },
-        clientLinks: intake.clientId
-          ? { create: { clientId: intake.clientId, isPrimary: true, label: "主要委托方" } }
-          : undefined,
-      }
-    });
-
-    const procedurePartyRows: { partyId: string; standing: LitigationStanding; ordinal: number }[] = [];
-    let nextProcedurePartyOrdinal = 1;
-
-    if (intake.client && intake.ourStanding) {
-      const clientParty = await tx.party.create({
-        data: {
-          matterId: m.id,
-          role: "CLIENT_PARTY",
-          standing: intake.ourStanding,
-          ordinal: 1,
-          name: intake.client.name,
-          partyType: helpers.clientTypeToPartyType(intake.client.type),
-          idNumber: intake.client.type === "INDIVIDUAL" ? intake.client.idNumber : null,
-          phone: intake.client.phone,
-          address: intake.client.address,
-          legalRep: intake.client.legalRep,
-          contactName: intake.contactName,
-          enterpriseSocialCode: intake.client.type === "INDIVIDUAL" ? null : intake.client.idNumber,
-          enterpriseName: intake.client.type === "INDIVIDUAL" ? null : intake.client.name,
-          notes: "由收案委托方自动带入首程序"
-        },
-        select: { id: true }
-      });
-      procedurePartyRows.push({
-        partyId: clientParty.id,
-        standing: intake.ourStanding,
-        ordinal: nextProcedurePartyOrdinal++
-      });
-    }
-
-    for (const p of intake.parties) {
-      const party = await tx.party.create({
-        data: {
-          matterId: m.id,
-          role: p.role,
-          standing: p.standing,
-          ordinal: p.ordinal,
-          name: p.name,
-          partyType: p.partyType,
-          idNumber: p.idNumber,
-          phone: p.phone,
-          address: p.address,
-          legalRep: p.legalRep,
-          contactName: p.contactName,
-          enterpriseSocialCode: p.enterpriseSocialCode,
-          enterpriseName: p.enterpriseName,
-          notes: p.notes
-        },
-        select: { id: true }
-      });
-      if (p.standing) {
-        procedurePartyRows.push({
-          partyId: party.id,
-          standing: p.standing,
-          ordinal: nextProcedurePartyOrdinal++
-        });
-      }
-    }
-
-    const firstProcedure = await tx.matterProcedure.create({
-      data: {
-        matterId: m.id,
-        type: firstProcedureType,
-        engagement: "ENGAGED",
-        order: 1,
-        status: "IN_PROGRESS",
-        handlingAgency: intake.firstAgency,
-        // 程序级信息从收案带入首程序（原先丢失）
-        jurisdiction: intake.jurisdiction,
-        ourStanding: intake.ourStanding
-      },
-      select: { id: true }
-    });
-
-    if (procedurePartyRows.length > 0) {
-      await tx.procedureParty.createMany({
-        data: procedurePartyRows.map((row) => ({
-          procedureId: firstProcedure.id,
-          partyId: row.partyId,
-          standing: row.standing,
-          ordinal: row.ordinal
-        })),
-        skipDuplicates: true
-      });
-    }
-
-    // 律师费 → Billing
-    if (intake.feeAmount && intake.feeType) {
-      const feeTypeLabel: Record<string, string> = {
-        FIXED: "固定收费",
-        CONTINGENCY: "风险代理"
-      };
-      await tx.billing.create({
-        data: {
-          matterId: m.id,
-          title: `委托代理合同 - ${feeTypeLabel[intake.feeType] ?? intake.feeType}`,
-          contractAmount: intake.feeAmount,
-          schedule: intake.feeSchedule,
-          status: "ACTIVE"
-        }
-      });
-    }
-
-    // 把 Intake 上传的合同回填 matterId（保留 intakeId 溯源）
-    if (intake.documents.length > 0) {
-      await tx.document.updateMany({
-        where: { intakeId: intake.id },
-        data: { matterId: m.id }
-      });
-    }
-
-    await tx.intake.update({
-      where: { id: intake.id },
-      data: { status: "CONVERTED" }
-    });
-
-    await tx.timelineEvent.create({
-      data: {
-        matterId: m.id,
-        eventType: "MATTER_CREATED",
-        title: `案件已创建（来自 Intake）`,
-        occurredAt: new Date()
-      }
-    });
-
-    // v0.8: 默认卷宗
-    await seedDefaultFolders(tx, m.id, intake.category);
-
-    return m;
+    return await conversion.executeConversionTransaction(tx, intake, session, internalCode, firmCaseNo, firstProcedureType);
   });
+  await finalizeConversion(session, intake, matter, internalCode);
+  return { ok: true, matterId: matter.id, internalCode };
+}
 
+// Helpers for convertIntakeToMatter (refactored)
+async function prepareConversionContext(intakeId: string, session: any) {
+  const intake = await conversion.fetchIntakeWithDetails(intakeId);
+  conversion.validateIntakeForConversion(intake);
+  const { internalCode, firmCaseNo } = await conversion.generateCodes(intake.category);
+  const firstProcedureType = conversion.determineFirstProcedureType(intake);
+  helpers.assertConflictReviewAllowsConversion(intake as any);
+  return { intake, internalCode, firmCaseNo, firstProcedureType };
+}
+
+async function finalizeConversion(session: any, intake: Intake, matter: Matter, internalCode: string) {
   await audit({
     userId: session.user.id,
     action: "INTAKE_CONVERT",
@@ -860,10 +668,8 @@ export async function convertIntakeToMatter(intakeId: string) {
     targetId: intake.id,
     detail: { matterId: matter.id, internalCode }
   });
-
   revalidatePath("/intakes");
   revalidatePath(`/intakes/${intake.id}`);
   revalidatePath("/matters");
   revalidatePath(`/matters/${matter.id}`);
-  return { ok: true, matterId: matter.id, internalCode };
 }
