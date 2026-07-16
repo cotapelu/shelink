@@ -200,24 +200,15 @@ export async function deletePerson(id: string) {
 export async function getRelationships(personId?: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');
-
-  const where: any = {};
-  if (personId) {
-    where.OR = [
-      { fromPersonId: personId },
-      { toPersonId: personId },
-    ];
-  }
-
+  const where: any = personId ? { OR: [{ fromPersonId: personId }, { toPersonId: personId }] } : {};
   const relationships = await prisma.relationship.findMany({
     where,
     include: {
       fromPerson: { select: { id: true, fullName: true } },
-      toPerson: { select: { id: true, fullName: true } },
+      toPerson: { select: { id: true, fullName: true } }
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: 'desc' }
   });
-
   return relationships;
 }
 
@@ -230,19 +221,8 @@ export async function createRelationship(input: {
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');
-
-  const rel = await prisma.relationship.create({
-    data: input,
-  });
-
-  await audit({
-    userId: session.user.id,
-    action: 'RELATIONSHIP_CREATE',
-    targetType: 'Relationship',
-    targetId: rel.id,
-    detail: input,
-  });
-
+  const rel = await prisma.relationship.create({ data: input });
+  await audit({ userId: session.user.id, action: 'RELATIONSHIP_CREATE', targetType: 'Relationship', targetId: rel.id, detail: input });
   revalidatePath('/genealogy/relationships');
   return { ok: true, id: rel.id };
 }
@@ -250,17 +230,8 @@ export async function createRelationship(input: {
 export async function deleteRelationship(id: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');
-
   await prisma.relationship.delete({ where: { id } });
-
-  await audit({
-    userId: session.user.id,
-    action: 'RELATIONSHIP_DELETE',
-    targetType: 'Relationship',
-    targetId: id,
-    detail: {},
-  });
-
+  await audit({ userId: session.user.id, action: 'RELATIONSHIP_DELETE', targetType: 'Relationship', targetId: id, detail: {} });
   revalidatePath('/genealogy/relationships');
   return { ok: true };
 }
@@ -268,18 +239,12 @@ export async function deleteRelationship(id: string) {
 export async function getEvents(personId?: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');
-
-  const where: any = {};
-  if (personId) where.personId = personId;
-
+  const where: any = personId ? { personId } : {};
   const events = await prisma.event.findMany({
     where,
-    include: {
-      person: { select: { id: true, fullName: true } },
-    },
-    orderBy: { eventDate: 'desc' },
+    include: { person: { select: { id: true, fullName: true } } },
+    orderBy: { eventDate: 'desc' }
   });
-
   return events;
 }
 
@@ -295,21 +260,9 @@ const CreateEventSchema = z.object({
 export async function createEvent(input: any) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');
-
   const data = CreateEventSchema.parse(input);
-
-  const event = await prisma.event.create({
-    data,
-  });
-
-  await audit({
-    userId: session.user.id,
-    action: 'EVENT_CREATE',
-    targetType: 'Event',
-    targetId: event.id,
-    detail: data,
-  });
-
+  const event = await prisma.event.create({ data });
+  await audit({ userId: session.user.id, action: 'EVENT_CREATE', targetType: 'Event', targetId: event.id, detail: data });
   revalidatePath('/genealogy/events');
   return { ok: true, id: event.id };
 }
@@ -317,22 +270,10 @@ export async function createEvent(input: any) {
 export async function updateEvent(input: { id: string } & Partial<z.infer<typeof CreateEventSchema>>) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');
-
   const { id, ...rest } = input;
-
-  const updated = await prisma.event.update({
-    where: { id },
-    data: rest,
-  });
-
-  await audit({
-    userId: session.user.id,
-    action: 'EVENT_UPDATE',
-    targetType: 'Event',
-    targetId: updated.id,
-    detail: { changes: rest },
-  });
-
+  const data = CreateEventSchema.partial().parse(rest);
+  const updated = await prisma.event.update({ where: { id }, data });
+  await audit({ userId: session.user.id, action: 'EVENT_UPDATE', targetType: 'Event', targetId: updated.id, detail: { changes: rest } });
   revalidatePath('/genealogy/events');
   return { ok: true };
 }
