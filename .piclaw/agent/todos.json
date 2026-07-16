@@ -3,42 +3,37 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Phase 1: Critical Violations",
+      "name": "Autonomous Execution - Refactor Phase",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Write comprehensive tests for compute.ts to achieve ≥80% branch coverage",
+          "content": "✅ Task 1 COMPLETED: createIntake complexity reduced from 79→~5, lines 179→12",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Refactor compute.ts: Split resolveBloodTerms into smaller functions (≤20 lines, complexity ≤10)",
+          "content": "🔲 Task 2: Refactor runConflictCheck in conflicts/algorithm.ts (complexity 38, lines 217)",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Refactor compute.ts: Split computeKinship into smaller functions",
+          "content": "🔲 Task 3: Refactor buildMatterRow in matters/export-xlsx.ts (complexity 58, lines 85)",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Remove truly dead code (unused functions) after verification",
+          "content": "🔲 Task 4: Increase test coverage to ≥80% (currently statements 78.47%, branches 64.69%)",
           "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "Fix TypeScript errors in test files",
-          "status": "pending"
-        },
-        {
-          "id": "task-6",
-          "content": "Run quality gates and verify improvements",
+          "content": "🔲 Task 5: Security & performance audit",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 7,
+  "nextTaskId": 6,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-15T10:06:46.073Z"
+  "updatedAt": "2026-07-16T00:49:48.174Z"
 }

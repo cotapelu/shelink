@@ -25,27 +25,24 @@ import type { PersonNode, KinshipResult, RelEdge } from "./types";
  */
 import { findBloodKinship } from './bloodGraph';
 export { compareSeniority, getDirectAncestorTerm, getDirectDescendantTerm } from './bloodTerms';
-function buildMaps(
-  persons: PersonNode[],
-  relationships: RelEdge[]
-): { personsMap: Map<string, PersonNode>; parentMap: Map<string, string[]>; spouseMap: Map<string, string[]> } {
-  const personsMap = new Map(persons.map(p => [p.id, p]));
-  const parentMap = new Map<string, string[]>();
-  const spouseMap = new Map<string, string[]>();
+function createPersonsMap(persons: PersonNode[]): Map<string, PersonNode> {
+  return new Map(persons.map(p => [p.id, p]));
+}
+function populateMaps(relationships: RelEdge[], parentMap: Map<string, string[]>, spouseMap: Map<string, string[]>): void {
   for (const r of relationships) {
     if (r.type === "biological_child" || r.type === "adopted_child") {
-      const p = parentMap.get(r.person_b) ?? [];
-      p.push(r.person_a);
-      parentMap.set(r.person_b, p);
+      const p = parentMap.get(r.person_b) ?? []; p.push(r.person_a); parentMap.set(r.person_b, p);
     } else if (r.type === "marriage") {
-      const sA = spouseMap.get(r.person_a) ?? [];
-      sA.push(r.person_b);
-      spouseMap.set(r.person_a, sA);
-      const sB = spouseMap.get(r.person_b) ?? [];
-      sB.push(r.person_a);
-      spouseMap.set(r.person_b, sB);
+      const sA = spouseMap.get(r.person_a) ?? []; sA.push(r.person_b); spouseMap.set(r.person_a, sA);
+      const sB = spouseMap.get(r.person_b) ?? []; sB.push(r.person_a); spouseMap.set(r.person_b, sB);
     }
   }
+}
+function buildMaps(persons: PersonNode[], relationships: RelEdge[]): { personsMap: Map<string, PersonNode>; parentMap: Map<string, string[]>; spouseMap: Map<string, string[]> } {
+  const personsMap = createPersonsMap(persons);
+  const parentMap = new Map<string, string[]>();
+  const spouseMap = new Map<string, string[]>();
+  populateMaps(relationships, parentMap, spouseMap);
   return { personsMap, parentMap, spouseMap };
 }
 
@@ -65,51 +62,30 @@ function checkDirectMarriage(
 }
 
 
-function createBothSpousesResult(
-  res: KinshipResult,
-  spouseA: PersonNode,
-  spouseB: PersonNode,
-  personA: PersonNode,
-  personB: PersonNode
-): KinshipResult {
+function createBothSpousesResult(res: KinshipResult, spouseA: PersonNode, spouseB: PersonNode, personA: PersonNode, personB: PersonNode): KinshipResult {
   const prefixA = personA.gender === "male" ? "Chồng" : "Vợ";
   const prefixB = personB.gender === "male" ? "Chồng" : "Vợ";
-
   let aCallsB = `${prefixA} của ${res.aCallsB}`;
   let bCallsA = `${prefixB} của ${res.bCallsA}`;
-
-  // Special cases: anh em cot cheo / chi em dau
   if (res.description.includes("Anh chị em ruột")) {
-    if (personA.gender === "male" && personB.gender === "male" && spouseA.gender === "female" && spouseB.gender === "female") {
-      aCallsB = "Anh em cột chèo";
-      bCallsA = "Anh em cột chèo";
-    } else if (personA.gender === "female" && personB.gender === "female" && spouseA.gender === "male" && spouseB.gender === "male") {
-      aCallsB = "Chị em dâu";
-      bCallsA = "Chị em dâu";
+    const bothMale = personA.gender === "male" && personB.gender === "male" && spouseA.gender === "female" && spouseB.gender === "female";
+    const bothFemale = personA.gender === "female" && personB.gender === "female" && spouseA.gender === "male" && spouseB.gender === "male";
+    if (bothMale || bothFemale) {
+      const term = bothMale ? "Anh em cột chèo" : "Chị em dâu";
+      aCallsB = bCallsA = term;
     }
   }
-
   return {
     ...res,
     aCallsB,
     bCallsA,
     description: `Thông qua hôn nhân của cả ${spouseA.full_name} và ${spouseB.full_name}`,
-    pathLabels: [
-      `${personA.full_name} là ${prefixA} của ${spouseA.full_name}`,
-      ...res.pathLabels,
-      `${personB.full_name} là ${prefixB} của ${spouseB.full_name}`,
-    ],
+    pathLabels: [`${personA.full_name} là ${prefixA} của ${spouseA.full_name}`, ...res.pathLabels, `${personB.full_name} là ${prefixB} của ${spouseB.full_name}`],
   };
 }
 
-function checkViaBothSpouses(
-  spousesA: string[],
-  spousesB: string[],
-  personsMap: Map<string, PersonNode>,
-  parentMap: Map<string, string[]>,
-  personA: PersonNode,
-  personB: PersonNode
-): KinshipResult | null {
+
+function checkViaBothSpouses(spousesA: string[], spousesB: string[], personsMap: Map<string, PersonNode>, parentMap: Map<string, string[]>, personA: PersonNode, personB: PersonNode): KinshipResult | null {
   for (const sIdA of spousesA) {
     const spouseA = personsMap.get(sIdA);
     if (!spouseA) continue;
@@ -123,6 +99,7 @@ function checkViaBothSpouses(
   }
   return null;
 }
+
 // ============ Spouse transformation helpers (preserve original logic) ============
 
 const ANCESTOR_PREFIXES = ["Bố", "Mẹ", "Ông", "Bà", "Cụ"] as const;
@@ -166,27 +143,28 @@ function transformViaA_bCallsA(term: string, personA: PersonNode): string {
   return term;
 }
 
+const transformViaB_aCallsB_rules: Array<(t: string, g: string) => string | null> = [
+  (t, g) => t === "Con" ? (g === "male" ? "Con rể" : "Con dâu") : null,
+  (t, g) => t === "Cháu" ? (g === "male" ? "Cháu rể" : "Cháu dâu") : null,
+  (t, g) => (t.includes("Anh trai") || t.includes("Chị gái")) ? (g === "male" ? "Anh rể" : "Chị dâu") : null,
+  (t, g) => t.includes("Em") ? (g === "male" ? "Em rể" : "Em dâu") : null,
+  (t, g) => t === "Chị họ" ? "Anh (Chồng của Chị họ)" : null,
+  (t, g) => t === "Anh họ" ? "Chị (Vợ của Anh họ)" : null,
+  (t, g) => t === "Chú" ? "Cô" : null,
+  (t, g) => t === "Cô" ? "Chú" : null,
+  (t, g) => t === "Cậu" ? "Dì" : null,
+  (t, g) => t === "Dì" ? "Cậu" : null,
+  (t, g) => t === "Bà Cô" ? "Ông Dượng" : null,
+];
+
 function transformViaB_aCallsB(term: string, personB: PersonNode): string {
-  // symmetric to transformViaA_bCallsA but using personB.gender
-  const rules: Array<(t: string, g: string) => string | null> = [
-    (t, g) => t === "Con" ? (g === "male" ? "Con rể" : "Con dâu") : null,
-    (t, g) => t === "Cháu" ? (g === "male" ? "Cháu rể" : "Cháu dâu") : null,
-    (t, g) => (t.includes("Anh trai") || t.includes("Chị gái")) ? (g === "male" ? "Anh rể" : "Chị dâu") : null,
-    (t, g) => t.includes("Em") ? (g === "male" ? "Em rể" : "Em dâu") : null,
-    (t, g) => t === "Chị họ" ? "Anh (Chồng của Chị họ)" : null,
-    (t, g) => t === "Anh họ" ? "Chị (Vợ của Anh họ)" : null,
-    (t, g) => t === "Chú" ? "Cô" : null,
-    (t, g) => t === "Cô" ? "Chú" : null,
-    (t, g) => t === "Cậu" ? "Dì" : null,
-    (t, g) => t === "Dì" ? "Cậu" : null,
-    (t, g) => t === "Bà Cô" ? "Ông Dượng" : null,
-  ];
-  for (const rule of rules) {
+  for (const rule of transformViaB_aCallsB_rules) {
     const res = rule(term, personB.gender);
     if (res !== null) return res;
   }
   return term;
 }
+
 
 function transformViaB_bCallsA(term: string, personB: PersonNode): string {
   const suffix = personB.gender === "male" ? " vợ" : " chồng";
@@ -218,13 +196,7 @@ function transformViaB_bCallsA(term: string, personB: PersonNode): string {
 
 
 
-function tryViaA(
-  personA: PersonNode,
-  personB: PersonNode,
-  personsMap: Map<string, PersonNode>,
-  parentMap: Map<string, string[]>,
-  spousesA: string[]
-): KinshipResult | null {
+function tryViaA(personA: PersonNode, personB: PersonNode, personsMap: Map<string, PersonNode>, parentMap: Map<string, string[]>, spousesA: string[]): KinshipResult | null {
   for (const sId of spousesA) {
     if (sId === personB.id) continue;
     const spouseA = personsMap.get(sId);
@@ -233,25 +205,14 @@ function tryViaA(
     if (res) {
       const aCallsB = transformViaA_aCallsB(res.aCallsB, personA, personB);
       const bCallsA = transformViaA_bCallsA(res.bCallsA, personA);
-      return {
-        ...res,
-        aCallsB,
-        bCallsA,
-        description: `Thông qua hôn nhân của ${spouseA.full_name}`,
-        pathLabels: [`${personA.full_name} là vợ/chồng của ${spouseA.full_name}`, ...res.pathLabels],
-      };
+      return { ...res, aCallsB, bCallsA, description: `Thông qua hôn nhân của ${spouseA.full_name}`, pathLabels: [`${personA.full_name} là vợ/chồng của ${spouseA.full_name}`, ...res.pathLabels] };
     }
   }
   return null;
 }
 
-function tryViaB(
-  personA: PersonNode,
-  personB: PersonNode,
-  personsMap: Map<string, PersonNode>,
-  parentMap: Map<string, string[]>,
-  spousesB: string[]
-): KinshipResult | null {
+
+function tryViaB(personA: PersonNode, personB: PersonNode, personsMap: Map<string, PersonNode>, parentMap: Map<string, string[]>, spousesB: string[]): KinshipResult | null {
   for (const sId of spousesB) {
     if (sId === personA.id) continue;
     const spouseB = personsMap.get(sId);
@@ -260,58 +221,30 @@ function tryViaB(
     if (res) {
       const aCallsB = transformViaB_aCallsB(res.aCallsB, personB);
       const bCallsA = transformViaB_bCallsA(res.bCallsA, personB);
-      return {
-        ...res,
-        aCallsB,
-        bCallsA,
-        description: `Thông qua hôn nhân của ${spouseB.full_name}`,
-        pathLabels: [...res.pathLabels, `${personB.full_name} là vợ/chồng của ${spouseB.full_name}`],
-      };
+      return { ...res, aCallsB, bCallsA, description: `Thông qua hôn nhân của ${spouseB.full_name}`, pathLabels: [...res.pathLabels, `${personB.full_name} là vợ/chồng của ${spouseB.full_name}`] };
     }
   }
   return null;
 }
 
-export function computeKinship(
-  personA: PersonNode,
-  personB: PersonNode,
-  persons: PersonNode[],
-  relationships: RelEdge[],
-): KinshipResult | null {
+
+export function computeKinship(personA: PersonNode, personB: PersonNode, persons: PersonNode[], relationships: RelEdge[]): KinshipResult | null {
   if (personA.id === personB.id) return null;
-
   const { personsMap, parentMap, spouseMap } = buildMaps(persons, relationships);
-  const spousesA = spouseMap.get(personA.id) ?? [];
-  const spousesB = spouseMap.get(personB.id) ?? [];
-
-  // 0. Direct marriage
+  const spousesA = spouseMap.get(personA.id) ?? [], spousesB = spouseMap.get(personB.id) ?? [];
   const direct = checkDirectMarriage(personA, personB, spousesA);
   if (direct) return direct;
-
-  // 1. Blood relation
   const blood = findBloodKinship(personA, personB, personsMap, parentMap);
   if (blood) return blood;
-
-  // 2. Via A's spouse
   const viaA = tryViaA(personA, personB, personsMap, parentMap, spousesA);
   if (viaA) return viaA;
-
-  // 3. Via B's spouse
   const viaB = tryViaB(personA, personB, personsMap, parentMap, spousesB);
   if (viaB) return viaB;
-
-  // 4. Via both spouses
   const viaBoth = checkViaBothSpouses(spousesA, spousesB, personsMap, parentMap, personA, personB);
   if (viaBoth) return viaBoth;
-
-  return {
-    aCallsB: "Chưa xác định",
-    bCallsA: "Chưa xác định",
-    description: "Không tìm thấy quan hệ trong phạm vi dữ liệu",
-    distance: -1,
-    pathLabels: [],
-  };
+  return { aCallsB: "Chưa xác định", bCallsA: "Chưa xác định", description: "Không tìm thấy quan hệ trong phạm vi dữ liệu", distance: -1, pathLabels: [] };
 }
+
 
 
 

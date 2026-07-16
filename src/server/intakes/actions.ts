@@ -38,6 +38,326 @@ import { seedDefaultFolders } from "@/lib/default-folders";
 import { notifyRoleApprovers } from "@/server/notifications/approval";
 import * as helpers from "./helpers";
 
+// ============================================
+// Helper functions for createIntake (refactored to reduce complexity & lines)
+// ============================================
+
+// --- Client creation builders ---
+function buildClientCreateInput(name: string, data: IntakeCreateInput): Prisma.ClientCreateInput {
+  return {
+    name,
+    type: data.clientType ?? "INDIVIDUAL",
+    idNumber: data.clientIdNumber || null,
+    address: data.clientAddress || null,
+    legalRep: data.clientLegalRep || null,
+    phone: data.contactPhone || null,
+    contacts:
+      data.contactName?.trim() || data.contactPhone?.trim()
+        ? {
+            create: {
+              name: (data.contactName || name).trim(),
+              phone: data.contactPhone?.trim() || null,
+              isPrimary: true
+            }
+          }
+        : undefined
+  };
+}
+
+function buildContactCreateInput(clientId: string, data: IntakeCreateInput, clientName: string): Prisma.ContactCreateInput {
+  return {
+    clientId,
+    name: (data.contactName || clientName || "联系人").trim(),
+    phone: data.contactPhone?.trim() || null,
+    isPrimary: false
+  };
+}
+
+async function createClientWithContact(data: IntakeCreateInput, session: any): Promise<{ id: string; name: string }> {
+  const name = data.clientName!.trim();
+  const clientData = buildClientCreateInput(name, data);
+  const newClient = await prisma.client.create({ data: clientData });
+  return { id: newClient.id, name };
+}
+
+async function ensureClientContact(clientId: string, data: IntakeCreateInput, clientName: string): Promise<void> {
+  if (!data.contactName?.trim() && !data.contactPhone?.trim()) return;
+  const existing = await prisma.contact.findFirst({
+    where: {
+      clientId,
+      name: (data.contactName || clientName || "").trim() || undefined
+    }
+  });
+  if (!existing) {
+    const contactData = buildContactCreateInput(clientId, data, clientName);
+    await prisma.contact.create({ data: contactData });
+  }
+}
+
+async function auditClientAutoCreate(session: any, created: { id: string; name: string }, data: IntakeCreateInput): Promise<void> {
+  await audit({
+    userId: session.user.id,
+    action: "CLIENT_AUTO_CREATE",
+    targetType: "Client",
+    targetId: created.id,
+    detail: { name: created.name, type: data.clientType ?? "INDIVIDUAL", source: "intake" }
+  });
+}
+
+async function resolveClientAndContact(data: IntakeCreateInput, session: any): Promise<{ clientId: string | null; clientName: string | null }> {
+  let clientId: string | null = data.clientId || null;
+  let clientName: string | null = null;
+  if (!clientId && data.clientName && data.clientName.trim()) {
+    const created = await createClientWithContact(data, session);
+    clientId = created.id;
+    clientName = created.name;
+    await auditClientAutoCreate(session, created, data);
+  } else if (clientId) {
+    const client = await prisma.client.findUnique({ where: { id: clientId }, select: { name: true } });
+    clientName = client?.name ?? null;
+    await ensureClientContact(clientId, data, clientName);
+  }
+  return { clientId, clientName };
+}
+
+// --- Cause & title ---
+async function resolveCauseName(data: IntakeCreateInput): Promise<string | null> {
+  let causeName: string | null = data.causeFreeText || null;
+  if (data.causeId) {
+    const cause = await prisma.causeOfAction.findUnique({ where: { id: data.causeId }, select: { name: true } });
+    if (cause?.name) causeName = cause.name;
+  }
+  return causeName;
+}
+
+function buildFinalTitle(
+  data: IntakeCreateInput,
+  clientName: string | null,
+  opposingNames: string[],
+  causeName: string | null
+): string {
+  if (data.title && data.title.trim()) return data.title.trim();
+  return helpers.generateTitle(clientName, opposingNames, causeName);
+}
+
+function prepareTitleData(data: IntakeCreateInput, clientName: string | null, causeName: string | null): string {
+  const opposingNames = data.parties
+    .filter((p) => p.role === "OPPOSING_PARTY")
+    .map((p) => p.name)
+    .filter(Boolean);
+  return buildFinalTitle(data, clientName, opposingNames, causeName);
+}
+
+// --- Intake payload builders ---
+function buildCommonIntakeFields(data: IntakeCreateInput, finalTitle: string): Partial<Prisma.IntakeCreateInput> {
+  return {
+    title: finalTitle,
+    category: data.category,
+    causeId: data.causeId || null,
+    causeFreeText: data.causeFreeText || null,
+    description: data.description || null,
+    status: "PENDING_CONFIRMATION" as const,
+    receivedAt: data.receivedAt ?? new Date()
+  };
+}
+
+function buildClientRefFields(data: IntakeCreateInput, clientId: string | null): Partial<Prisma.IntakeCreateInput> {
+  return {
+    clientId,
+    clientType: data.clientType ?? null,
+    contactName: data.contactName?.trim() || null,
+    contactPhone: data.contactPhone?.trim() || null
+  };
+}
+
+function buildOwnershipFields(data: IntakeCreateInput, session: any): Partial<Prisma.IntakeCreateInput> {
+  return {
+    ownerUserId: data.ownerUserId || session.user.id,
+    coUserIds: data.coUserIds,
+    createdById: session.user.id
+  };
+}
+
+function buildProcedureInfo(data: IntakeCreateInput): Partial<Prisma.IntakeCreateInput> {
+  return {
+    firstProcedureType: data.firstProcedureType ?? null,
+    firstAgency: data.firstAgency?.trim() || null,
+    jurisdiction: data.jurisdiction?.trim() || null,
+    ourStanding: data.ourStanding ?? null
+  };
+}
+
+function buildClaimInfo(data: IntakeCreateInput): Partial<Prisma.IntakeCreateInput> {
+  return {
+    claimAmount: data.claimAmount ?? null,
+    claimDescription: data.claimDescription?.trim() || null,
+    barFiling: data.barFiling ?? null,
+    counterclaim: data.counterclaim ?? false
+  };
+}
+
+function buildServiceScopeFields(data: IntakeCreateInput): Partial<Prisma.IntakeCreateInput> {
+  return {
+    businessType: data.businessType?.trim() || null,
+    serviceScope: data.serviceScope?.trim() || null,
+    deliverables: data.deliverables?.trim() || null
+  };
+}
+
+function buildCounselFields(data: IntakeCreateInput): Partial<Prisma.IntakeCreateInput> {
+  return {
+    counselType: data.counselType?.trim() || null,
+    serviceStart: data.serviceStart ?? null,
+    serviceEnd: data.serviceEnd ?? null
+  };
+}
+
+function buildFeeBase(data: IntakeCreateInput): Partial<Prisma.IntakeCreateInput> {
+  return {
+    feeType: data.feeType ?? null,
+    feeAmount: data.feeAmount ?? null
+  };
+}
+
+function buildFeeDetail(data: IntakeCreateInput): Partial<Prisma.IntakeCreateInput> {
+  return {
+    contingencyTerms: data.contingencyTerms?.trim() || null,
+    feeSchedule: data.feeSchedule?.trim() || null,
+    feeNote: data.feeNote?.trim() || null
+  };
+}
+
+function buildPartyCreateInput(p: any): any {
+  return helpers.emptyToNull({
+    role: p.role,
+    standing: p.standing ?? null,
+    ordinal: p.ordinal,
+    name: p.name,
+    partyType: p.partyType,
+    idNumber: p.idNumber,
+    phone: p.phone,
+    address: p.address,
+    legalRep: p.legalRep,
+    contactName: p.contactName,
+    enterpriseSocialCode: p.enterpriseSocialCode,
+    enterpriseName: p.enterpriseName,
+    notes: p.notes
+  });
+}
+
+function buildPartiesField(data: IntakeCreateInput): { create: any[] } {
+  return { create: data.parties.map(buildPartyCreateInput) };
+}
+
+function mergePartial<T extends object>(...objects: Partial<T>[]): T {
+  return Object.assign({}, ...objects) as T;
+}
+
+function buildBaseIntakeData(
+  data: IntakeCreateInput,
+  session: any,
+  clientId: string | null,
+  finalTitle: string
+): Prisma.IntakeCreateInput {
+  const common = buildCommonIntakeFields(data, finalTitle);
+  const clientRef = buildClientRefFields(data, clientId);
+  const ownership = buildOwnershipFields(data, session);
+  return mergePartial(common, clientRef, ownership);
+}
+
+function buildProcedureFields(data: IntakeCreateInput): any {
+  const procInfo = buildProcedureInfo(data);
+  const claimInfo = buildClaimInfo(data);
+  return mergePartial(procInfo, claimInfo);
+}
+
+function buildNonLitigationFields(data: IntakeCreateInput): any {
+  const serviceScope = buildServiceScopeFields(data);
+  const counsel = buildCounselFields(data);
+  return mergePartial(serviceScope, counsel);
+}
+
+function buildFeeFields(data: IntakeCreateInput): any {
+  const base = buildFeeBase(data);
+  const detail = buildFeeDetail(data);
+  return mergePartial(base, detail);
+}
+
+function mergeIntakePayload(
+  base: Prisma.IntakeCreateInput,
+  procedure: any,
+  nonLitigation: any,
+  fee: any,
+  parties: { create: any[] }
+): Prisma.IntakeCreateInput {
+  return mergePartial(base, procedure, nonLitigation, fee, parties);
+}
+
+function assembleIntakePayload(
+  data: IntakeCreateInput,
+  session: any,
+  clientId: string | null,
+  finalTitle: string
+): Prisma.IntakeCreateInput {
+  const base = buildBaseIntakeData(data, session, clientId, finalTitle);
+  const procedure = buildProcedureFields(data);
+  const nonLitigation = buildNonLitigationFields(data);
+  const fee = buildFeeFields(data);
+  const parties = buildPartiesField(data);
+  return mergeIntakePayload(base, procedure, nonLitigation, fee, parties);
+}
+
+// --- Post-create processes ---
+async function auditIntakeCreate(session: any, created: any, data: IntakeCreateInput, clientName: string | null): Promise<void> {
+  await audit({
+    userId: session.user.id,
+    action: "INTAKE_CREATE",
+    targetType: "Intake",
+    targetId: created.id,
+    detail: {
+      title: created.title,
+      category: created.category,
+      autoTitle: !data.title,
+      autoClient: !!clientName && !data.clientId
+    }
+  });
+}
+
+async function notifyIntakeApproversWrapper(created: any, session: any, content: string): Promise<void> {
+  await notifyRoleApprovers({
+    roles: ["ADMIN", "PRINCIPAL_LAWYER"],
+    excludeUserId: session.user.id,
+    title: "新的案件审批待处理",
+    content: `${session.user.name ?? "有用户"} 提交了案件审批：${content}`,
+    href: `/intakes/${created.id}`,
+    refType: "Intake",
+    refId: created.id,
+    priority: "HIGH"
+  });
+}
+
+function revalidateIntakePaths(): void {
+  revalidatePath("/intakes");
+  revalidatePath("/matters");
+}
+
+async function postIntakeProcesses(
+  created: any,
+  session: any,
+  data: IntakeCreateInput,
+  clientName: string | null
+): Promise<void> {
+  await auditIntakeCreate(session, created, data, clientName);
+  await notifyIntakeApproversWrapper(created, session, created.title);
+  revalidateIntakePaths();
+}
+
+/**
+ * Create intake application - refactored
+ * Complexity: reduced from 79 to ~10
+ * Lines per function: reduced from 179 to ~15 average
+ */
+
 /**
  * List intake applications with filtering, pagination, and ordering.
  * @param input - Query parameters (page, pageSize, status, category, date range, search, sort)
@@ -176,180 +496,16 @@ export const createIntake = withMetrics('createIntake', async function createInt
   const session = await requireSession();
   const data = intakeCreateSchema.parse(input);
 
-  // ----- 解析客户：已选 / 自由输入新建 -----
-  let resolvedClientId: string | null = data.clientId || null;
-  let resolvedClientName: string | null = null;
+  const { clientId, clientName } = await resolveClientAndContact(data, session);
+  const causeName = await resolveCauseName(data);
+  const finalTitle = prepareTitleData(data, clientName, causeName);
+  const intakePayload = assembleIntakePayload(data, session, clientId, finalTitle);
 
-  if (!resolvedClientId && data.clientName && data.clientName.trim()) {
-    const name = data.clientName.trim();
-    const newClient = await prisma.client.create({
-      data: {
-        name,
-        type: data.clientType ?? "INDIVIDUAL",
-        idNumber: data.clientIdNumber || null,
-        address: data.clientAddress || null,
-        legalRep: data.clientLegalRep || null,
-        phone: data.contactPhone || null,
-        // 同步建一个主联系人
-        contacts:
-          data.contactName?.trim() || data.contactPhone?.trim()
-            ? {
-                create: {
-                  name: (data.contactName || name).trim(),
-                  phone: data.contactPhone?.trim() || null,
-                  isPrimary: true
-                }
-              }
-            : undefined
-      }
-    });
-    resolvedClientId = newClient.id;
-    resolvedClientName = name;
-    await audit({
-      userId: session.user.id,
-      action: "CLIENT_AUTO_CREATE",
-      targetType: "Client",
-      targetId: newClient.id,
-      detail: { name, type: newClient.type, source: "intake" }
-    });
-  } else if (resolvedClientId) {
-    const c = await prisma.client.findUnique({
-      where: { id: resolvedClientId },
-      select: { name: true }
-    });
-    resolvedClientName = c?.name ?? null;
+  const created = await prisma.intake.create({ data: intakePayload });
 
-    // 已有客户也补一条联系人（如果填了且现有不存在同名联系人）
-    if (data.contactName?.trim() || data.contactPhone?.trim()) {
-      const existing = await prisma.contact.findFirst({
-        where: {
-          clientId: resolvedClientId,
-          name: (data.contactName || resolvedClientName || "").trim() || undefined
-        }
-      });
-      if (!existing) {
-        await prisma.contact.create({
-          data: {
-            clientId: resolvedClientId,
-            name: (data.contactName || resolvedClientName || "联系人").trim(),
-            phone: data.contactPhone?.trim() || null,
-            isPrimary: false
-          }
-        });
-      }
-    }
-  }
+  await postIntakeProcesses(created, session, data, clientName);
 
-  // ----- 案由名（用于自动 title）-----
-  let causeName: string | null = data.causeFreeText || null;
-  if (data.causeId) {
-    const cause = await prisma.causeOfAction.findUnique({
-      where: { id: data.causeId },
-      select: { name: true }
-    });
-    causeName = cause?.name ?? causeName;
-  }
-
-  const opposingNames = data.parties
-    .filter((p) => p.role === "OPPOSING_PARTY")
-    .map((p) => p.name)
-    .filter(Boolean);
-
-  const finalTitle =
-    data.title && data.title.trim()
-      ? data.title.trim()
-      : helpers.generateTitle(resolvedClientName, opposingNames, causeName);
-
-  const created = await prisma.intake.create({
-    data: {
-      title: finalTitle,
-      category: data.category,
-      causeId: data.causeId || null,
-      causeFreeText: data.causeFreeText || null,
-      description: data.description || null,
-      status: "PENDING_CONFIRMATION",
-      receivedAt: data.receivedAt ?? new Date(),
-
-      clientId: resolvedClientId,
-      clientType: data.clientType ?? null,
-      contactName: data.contactName?.trim() || null,
-      contactPhone: data.contactPhone?.trim() || null,
-
-      firstProcedureType: data.firstProcedureType ?? null,
-      firstAgency: data.firstAgency?.trim() || null,
-      jurisdiction: data.jurisdiction?.trim() || null,
-      ourStanding: data.ourStanding ?? null,
-      claimAmount: data.claimAmount ?? null,
-      claimDescription: data.claimDescription?.trim() || null,
-      barFiling: data.barFiling ?? null,
-      counterclaim: data.counterclaim ?? false,
-
-      businessType: data.businessType?.trim() || null,
-      serviceScope: data.serviceScope?.trim() || null,
-      deliverables: data.deliverables?.trim() || null,
-      counselType: data.counselType?.trim() || null,
-      serviceStart: data.serviceStart ?? null,
-      serviceEnd: data.serviceEnd ?? null,
-
-      feeType: data.feeType ?? null,
-      feeAmount: data.feeAmount ?? null,
-      contingencyTerms: data.contingencyTerms?.trim() || null,
-      feeSchedule: data.feeSchedule?.trim() || null,
-      feeNote: data.feeNote?.trim() || null,
-
-      ownerUserId: data.ownerUserId || session.user.id,
-      coUserIds: data.coUserIds,
-
-      createdById: session.user.id,
-      parties: {
-        create: data.parties.map((p) =>
-          helpers.emptyToNull({
-            role: p.role,
-            standing: p.standing ?? null,
-            ordinal: p.ordinal,
-            name: p.name,
-            partyType: p.partyType,
-            idNumber: p.idNumber,
-            phone: p.phone,
-            address: p.address,
-            legalRep: p.legalRep,
-            contactName: p.contactName,
-            enterpriseSocialCode: p.enterpriseSocialCode,
-            enterpriseName: p.enterpriseName,
-            notes: p.notes
-          })
-        )
-      }
-    }
-  });
-
-  await audit({
-    userId: session.user.id,
-    action: "INTAKE_CREATE",
-    targetType: "Intake",
-    targetId: created.id,
-    detail: {
-      title: created.title,
-      category: created.category,
-      autoTitle: !data.title,
-      autoClient: !!resolvedClientName && !data.clientId
-    }
-  });
-
-  await notifyRoleApprovers({
-    roles: ["ADMIN", "PRINCIPAL_LAWYER"],
-    excludeUserId: session.user.id,
-    title: "新的案件审批待处理",
-    content: `${session.user.name ?? "有用户"} 提交了案件审批：${created.title}`,
-    href: `/intakes/${created.id}`,
-    refType: "Intake",
-    refId: created.id,
-    priority: "HIGH"
-  });
-
-  revalidatePath("/intakes");
-  revalidatePath("/matters");
-  return { ok: true, id: created.id, clientId: resolvedClientId };
+  return { ok: true, id: created.id, clientId };
 });
 
 /**

@@ -1,0 +1,25 @@
+
+> shelink@0.0.1 build
+> NEXT_DIST_DIR=.next-build next build
+
+▲ Next.js 16.2.7 (Turbopack)
+- Environments: .env.local, .env
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 16.9s
+  Running TypeScript ...
+Failed to type check.
+
+./src/utils/kinship/compute.ts:49:30
+Type error: Cannot find name 'persons'.
+
+  [90m47 |[0m }
+  [90m48 |[0m  {
+[31m[1m>[0m [90m49 |[0m   [36mconst[0m personsMap = [36mnew[0m [33mMap[0m(persons.map(p => [p.id, p]));
+  [90m   |[0m                              [31m[1m^[0m
+  [90m50 |[0m   [36mconst[0m parentMap = [36mnew[0m [33mMap[0m<string, string[]>();
+  [90m51 |[0m   [36mconst[0m spouseMap = [36mnew[0m [33mMap[0m<string, string[]>();
+  [90m52 |[0m   [36mfor[0m ([36mconst[0m r [36mof[0m relationships) {
+Next.js build worker exited with code: 1 and signal: null

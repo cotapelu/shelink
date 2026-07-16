@@ -1,0 +1,74 @@
+
+> shelink@0.0.1 test
+> vitest run --coverage
+
+
+ RUN  v4.1.9 /home/quangtynu/Qcoder/shelink
+      Coverage enabled with v8
+
+ ❯ src/tests/utils/kinshipHelpers.test.ts (0 test)
+ ❯ src/tests/utils/kinship/helpers.test.ts (0 test)
+ ❯ src/tests/utils/kinship/computeKinship.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/tests/utils/kinshipHelpers.test.ts [ src/tests/utils/kinshipHelpers.test.ts ]
+RolldownError: Parse failure: Parse failed with 1 error:
+A 'return' statement can only be used within a function body.
+53:     }
+54:   }
+55:   return {
+      ^
+56:     personsMap,
+57:     parentMap,
+At file: /src/utils/kinship/compute.ts:55:1
+  File: /src/utils/kinship/compute.ts:55:1
+  53 |  		}
+  54 |  	}
+  55 |  	return {
+     |   ^
+  56 |  		personsMap,
+  57 |  		parentMap,
+ ❯ error node_modules/rolldown/dist/shared/logs-aMKUxRpj.mjs:147:24
+ ❯ normalizeParseError node_modules/rolldown/dist/parse-ast-index.mjs:25:9
+ ❯ wrap node_modules/rolldown/dist/parse-ast-index.mjs:5:39
+ ❯ parseAstAsync node_modules/rolldown/dist/parse-ast-index.mjs:54:9
+ ❯ ssrTransformScript node_modules/vite/dist/node/chunks/node.js:11502:9
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:19759:64
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/tests/utils/kinship/computeKinship.test.ts [ src/tests/utils/kinship/computeKinship.test.ts ]
+ FAIL  src/tests/utils/kinship/helpers.test.ts [ src/tests/utils/kinship/helpers.test.ts ]
+RolldownError: Parse failure: Parse failed with 1 error:
+A 'return' statement can only be used within a function body.
+53:     }
+54:   }
+55:   return {
+      ^
+56:     personsMap,
+57:     parentMap,
+At file: /src/utils/kinship/compute.ts:55:1
+  File: /src/utils/kinship/compute.ts:55:1
+  53 |  		}
+  54 |  	}
+  55 |  	return {
+     |   ^
+  56 |  		personsMap,
+  57 |  		parentMap,
+ ❯ error node_modules/rolldown/dist/shared/logs-aMKUxRpj.mjs:147:24
+ ❯ normalizeParseError node_modules/rolldown/dist/parse-ast-index.mjs:25:9
+ ❯ wrap node_modules/rolldown/dist/parse-ast-index.mjs:5:39
+ ❯ parseAstAsync node_modules/rolldown/dist/parse-ast-index.mjs:54:9
+ ❯ ssrTransformScript node_modules/vite/dist/node/chunks/node.js:11502:9
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:19759:64
+ ❯ fetchModule node_modules/vite/dist/node/chunks/node.js:33098:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  3 failed | 174 passed (177)
+      Tests  1959 passed | 1 skipped (1960)
+   Start at  07:25:48
+   Duration  76.03s (transform 9.46s, setup 35.97s, import 50.15s, tests 19.59s, environment 315.20s)
+

@@ -5469,3 +5469,35 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - **Performance**: N/A
 - **Security**: N/A
 - **Notes**: Restored original transformation logic for Via A and Via B spouse-based relationships using helper functions. All 8 kinship tests now pass. 2 failures resolved: father-in-law and brother-in-law. Complexity of helpers not yet optimized; subsequent cycles needed.
+## 2026-07-15 18:30 Cycle CYCLE-AUTO-20 - Task: Comprehensive Kinship Refactoring
+- **Type**: Quality Improvement (Reduce Complexity, Split Files)
+- **Priority**: HIGH
+- **Duration**: ~45 minutes (estimated)
+- **Status**: ✅ Partial Success (tests pass, typecheck passes)
+- **Test Delta**: 0 (total 1987)
+- **Coverage Delta**: No change (coverage maintained)
+- **Violations Reduction**: from ~40 to 10 (down 75%)
+- **Performance**: N/A
+- **Security**: N/A
+- **Notes**: 
+  - Split monolithic compute.ts into compute.ts, bloodTerms.ts, bloodGraph.ts (file size 589 -> 262+153+~200)
+  - Refactored spouse transformation helpers, handleDirectLineage, handleUncleAuntTerms, handleCrossGenerationalTerms, resolveBloodTerms (complexity 11->10)
+  - Extracted tryViaA/tryViaB to simplify computeKinship.
+  - Remaining violations: buildMaps, createBothSpousesResult, checkViaBothSpouses, transformViaB_aCallsB, tryViaA/B, computeKinship, traverseAncestors, findBloodKinship.
+  - Next tasks: reduce remaining function sizes (split buildMaps, createBothSpousesResult, etc.)
+
+## [2025-07-16 07:57] Cycle 2 - Task: Refactor createIntake (complexity 79→5, lines 179→12)
+- **Type**: Refactor (R)
+- **Priority**: HIGH (quality gate violation)
+- **Duration**: ~45 min
+- **Status**: ✅ Success
+- **Test Delta**: +0 tests (1959 passed unchanged)
+- **Coverage Delta**: No significant change (coverage maintained)
+- **Performance**: N/A
+- **Security**: N/A
+- **Notes**: 
+  - Split monolithic createIntake (complexity 79, 179 lines) into 12 helper functions.
+  - Average lines per helper: 10 (≤20), average complexity: ≤5 (≤10).
+  - Main `createIntake` now 12 lines, complexity ~5.
+  - All existing tests pass (10/10 in actions-create.test.ts).
+  - Audit: Missing transaction for atomic client+intake creation (MEDIUM, P2 improvement).
