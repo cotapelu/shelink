@@ -88,75 +88,86 @@ export type PtalSearchResult = {
  *
  * Request body cannot be completely empty; caller must provide at least one filter (ay/qw/jbdw/etc).
  */
-export async function searchPtalCases(
-  params: PtalSearchParams,
-  resolved?: ResolvedYuandianSettings
-): Promise<PtalSearchResult> {
-  const s = resolved ?? (await getYuandianSettings());
-  if (!s.configured) throw new YuandianNotConfiguredError();
+function hasNonEmptyArray<T>(arr: T[] | null | undefined): arr is T[] {
+  return (arr?.length ?? 0) > 0;
+}
 
-  // YuanDian requires non-empty body; caller must provide at least one filter
-  const hasAny =
-    (params.ay?.length ?? 0) > 0 ||
-    !!params.qw?.trim() ||
-    (params.xzqh_p?.length ?? 0) > 0 ||
-    !!params.ajlb ||
-    (params.wszl?.length ?? 0) > 0 ||
-    !!params.ja_start ||
-    !!params.ja_end;
-  if (!hasAny) throw new Error("至少填写一个检索条件（案由 / 关键词 / 法院 / 地区 / 日期）");
+function isNonEmptyString(str: string | null | undefined): str is string {
+  return !!str?.trim();
+}
 
+function validatePtalSearchParams(params: PtalSearchParams): void {
+  const hasAy = hasNonEmptyArray(params.ay);
+  const hasQw = isNonEmptyString(params.qw);
+  const hasXzqh = hasNonEmptyArray(params.xzqh_p);
+  const hasAjlb = !!params.ajlb;
+  const hasWszl = hasNonEmptyArray(params.wszl);
+  const hasJaStart = !!params.ja_start;
+  const hasJaEnd = !!params.ja_end;
+  if (!(hasAy || hasQw || hasXzqh || hasAjlb || hasWszl || hasJaStart || hasJaEnd)) {
+    throw new Error("至少填写一个检索条件（案由 / 关键词 / 法院 / 地区 / 日期）");
+  }
+}
+
+function buildPtalRequestBody(params: PtalSearchParams): Record<string, unknown> {
   const body: Record<string, unknown> = {};
-  if (params.ay?.length) body.ay = params.ay;
+  if (hasNonEmptyArray(params.ay)) body.ay = params.ay;
   if (params.ajlb) body.ajlb = params.ajlb;
-  if (params.xzqh_p?.length) body.xzqh_p = params.xzqh_p;
-  if (params.wszl?.length) body.wszl = params.wszl;
-  if (params.qw?.trim()) {
+  if (hasNonEmptyArray(params.xzqh_p)) body.xzqh_p = params.xzqh_p;
+  if (hasNonEmptyArray(params.wszl)) body.wszl = params.wszl;
+  if (isNonEmptyString(params.qw)) {
     body.qw = params.qw.trim();
     body.search_mode = "and";
   }
   if (params.ja_start) body.ja_start = params.ja_start;
   if (params.ja_end) body.ja_end = params.ja_end;
   body.top_k = Math.min(Math.max(params.top_k ?? 10, 1), 50);
+  return body;
+}
 
-  const url = `${s.baseUrl.replace(/\/$/, "")}/rh_ptal_search`;
+async function executePtalSearch(url: string, body: Record<string, unknown>, s: ResolvedYuandianSettings): Promise<{status?: string; code?: number; message?: string; data?: { total?: number; lst?: PtalCase[] } | null; }> {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 30_000);
-  let json: {
+  const timer = setTimeout(() => ctrl.abort(), 30000);
+  try {
+    const res = await fetch(url, { method: "POST", headers: { "X-API-Key": s.apiKey, "Content-Type": "application/json; charset=utf-8", Accept: "application/json" }, body: JSON.stringify(body), signal: ctrl.signal });
+    if (!res.ok) throw new YuandianApiError(`HTTP ${res.status}`, res.status);
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function transformPtalSearchResult(
+  json: {
     status?: string;
     code?: number;
     message?: string;
     data?: { total?: number; lst?: PtalCase[] } | null;
-  };
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "X-API-Key": s.apiKey,
-        "Content-Type": "application/json; charset=utf-8",
-        Accept: "application/json"
-      },
-      body: JSON.stringify(body),
-      signal: ctrl.signal
-    });
-    if (!res.ok) {
-      throw new YuandianApiError(`HTTP ${res.status}`, res.status);
-    }
-    json = await res.json();
-  } finally {
-    clearTimeout(timer);
   }
-
+): PtalSearchResult {
   if (json.status !== "success") {
     throw new YuandianApiError(json.message ?? "元典返回失败", json.code ?? 500);
   }
-  // 未命中：data === null
   if (!json.data) return { total: 0, items: [] };
   return {
     total: json.data.total ?? 0,
     items: json.data.lst ?? []
   };
 }
+
+export async function searchPtalCases(
+  params: PtalSearchParams,
+  resolved?: ResolvedYuandianSettings
+): Promise<PtalSearchResult> {
+  const s = resolved ?? (await getYuandianSettings());
+  if (!s.configured) throw new YuandianNotConfiguredError();
+  validatePtalSearchParams(params);
+  const body = buildPtalRequestBody(params);
+  const url = `${s.baseUrl.replace(/\/$/, "")}/rh_ptal_search`;
+  const json = await executePtalSearch(url, body, s);
+  return transformPtalSearchResult(json);
+}
+
 
 /**
  * Build full URL for YuanDian frontend case detail (for "view full text" external link).
@@ -212,15 +223,12 @@ export type VectorSearchResult = {
   items: VectorCase[];
 };
 
-export async function searchCasesByVector(
-  params: VectorSearchParams,
-  resolved?: ResolvedYuandianSettings
-): Promise<VectorSearchResult> {
-  const s = resolved ?? (await getYuandianSettings());
-  if (!s.configured) throw new YuandianNotConfiguredError();
+function validateVectorSearchParams(params: VectorSearchParams): void {
   const query = params.query.trim();
   if (!query) throw new Error("语义检索 query 不能为空");
+}
 
+function buildVectorFilter(params: VectorSearchParams): Record<string, unknown> {
   const filter: Record<string, unknown> = {};
   if (params.ay?.length) filter.ay = params.ay;
   if (params.ajlb) filter.wenshu_type = params.ajlb;
@@ -233,44 +241,57 @@ export async function searchCasesByVector(
   }
   if (params.ja_start) filter.ja_start = params.ja_start;
   if (params.ja_end) filter.ja_end = params.ja_end;
+  return filter;
+}
 
-  const body: Record<string, unknown> = { query };
+function buildVectorBody(params: VectorSearchParams, filter: Record<string, unknown>): Record<string, unknown> {
+  const body: Record<string, unknown> = { query: params.query.trim() };
   if (Object.keys(filter).length) body.wenshu_filter = filter;
   body.return_num = Math.min(Math.max(params.return_num ?? 10, 1), 50);
-  body.rewrite_flag = false; // use original query; rewriting often gives weird results
+  body.rewrite_flag = false;
+  return body;
+}
 
-  const url = `${s.baseUrl.replace(/\/$/, "")}/case_vector_search`;
+async function executeVectorSearch(url: string, body: Record<string, unknown>, s: ResolvedYuandianSettings): Promise<{ code?: number; msg?: string; extra?: { wenshu?: VectorCase[] }; }> {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 60_000);
-  let json: {
-    code?: number;
-    msg?: string;
-    extra?: { wenshu?: VectorCase[] };
-  };
+  const timer = setTimeout(() => ctrl.abort(), 60000);
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "X-API-Key": s.apiKey,
-        "Content-Type": "application/json; charset=utf-8",
-        Accept: "application/json"
-      },
-      body: JSON.stringify(body),
-      signal: ctrl.signal
-    });
+    const res = await fetch(url, { method: "POST", headers: { "X-API-Key": s.apiKey, "Content-Type": "application/json; charset=utf-8", Accept: "application/json" }, body: JSON.stringify(body), signal: ctrl.signal });
     if (!res.ok) throw new YuandianApiError(`HTTP ${res.status}`, res.status);
-    json = await res.json();
+    return await res.json();
   } finally {
     clearTimeout(timer);
   }
+}
 
-  // Semantic interface success code is 201 (per docs); conservatively accept 200-299
+function transformVectorSearchResult(
+  json: {
+    code?: number;
+    msg?: string;
+    extra?: { wenshu?: VectorCase[] };
+  }
+): VectorSearchResult {
   const code = json.code ?? 0;
   if (code < 200 || code >= 300) {
     throw new YuandianApiError(json.msg ?? "元典语义检索失败", code);
   }
   return { items: json.extra?.wenshu ?? [] };
 }
+
+export async function searchCasesByVector(
+  params: VectorSearchParams,
+  resolved?: ResolvedYuandianSettings
+): Promise<VectorSearchResult> {
+  const s = resolved ?? (await getYuandianSettings());
+  if (!s.configured) throw new YuandianNotConfiguredError();
+  validateVectorSearchParams(params);
+  const filter = buildVectorFilter(params);
+  const body = buildVectorBody(params, filter);
+  const url = `${s.baseUrl.replace(/\/$/, "")}/case_vector_search`;
+  const json = await executeVectorSearch(url, body, s);
+  return transformVectorSearchResult(json);
+}
+
 
 /** Semantic search detail URL: scid → /ydzk/caseDetail/case/<scid> */
 export function buildVectorCaseDetailUrl(host: string, scid: string): string {

@@ -62,29 +62,52 @@ function checkDirectMarriage(
 }
 
 
+function adjustBloodSiblingTerm(
+  personA: PersonNode,
+  personB: PersonNode,
+  spouseA: PersonNode,
+  spouseB: PersonNode,
+  aCallsB: string,
+  bCallsA: string
+): { aCallsB: string; bCallsA: string } {
+  const bothMale = personA.gender === "male" && personB.gender === "male" && spouseA.gender === "female" && spouseB.gender === "female";
+  const bothFemale = personA.gender === "female" && personB.gender === "female" && spouseA.gender === "male" && spouseB.gender === "male";
+  if (bothMale || bothFemale) {
+    const term = bothMale ? "Anh em cột chèo" : "Chị em dâu";
+    return { aCallsB: term, bCallsA: term };
+  }
+  return { aCallsB, bCallsA };
+}
+
+function maybeAdjustBloodSiblingTerm(
+  res: KinshipResult,
+  personA: PersonNode,
+  personB: PersonNode,
+  spouseA: PersonNode,
+  spouseB: PersonNode,
+  aCallsB: string,
+  bCallsA: string
+): { aCallsB: string; bCallsA: string } {
+  if (!res.description.includes("Anh chị em ruột")) return { aCallsB, bCallsA };
+  return adjustBloodSiblingTerm(personA, personB, spouseA, spouseB, aCallsB, bCallsA);
+}
+
 function createBothSpousesResult(res: KinshipResult, spouseA: PersonNode, spouseB: PersonNode, personA: PersonNode, personB: PersonNode): KinshipResult {
   const prefixA = personA.gender === "male" ? "Chồng" : "Vợ";
   const prefixB = personB.gender === "male" ? "Chồng" : "Vợ";
   let aCallsB = `${prefixA} của ${res.aCallsB}`;
   let bCallsA = `${prefixB} của ${res.bCallsA}`;
-  if (res.description.includes("Anh chị em ruột")) {
-    const bothMale = personA.gender === "male" && personB.gender === "male" && spouseA.gender === "female" && spouseB.gender === "female";
-    const bothFemale = personA.gender === "female" && personB.gender === "female" && spouseA.gender === "male" && spouseB.gender === "male";
-    if (bothMale || bothFemale) {
-      const term = bothMale ? "Anh em cột chèo" : "Chị em dâu";
-      aCallsB = bCallsA = term;
-    }
-  }
-  return {
-    ...res,
-    aCallsB,
-    bCallsA,
-    description: `Thông qua hôn nhân của cả ${spouseA.full_name} và ${spouseB.full_name}`,
-    pathLabels: [`${personA.full_name} là ${prefixA} của ${spouseA.full_name}`, ...res.pathLabels, `${personB.full_name} là ${prefixB} của ${spouseB.full_name}`],
-  };
+  const adjusted = maybeAdjustBloodSiblingTerm(res, personA, personB, spouseA, spouseB, aCallsB, bCallsA);
+  aCallsB = adjusted.aCallsB;
+  bCallsA = adjusted.bCallsA;
+  const description = `Thông qua hôn nhân của cả ${spouseA.full_name} và ${spouseB.full_name}`;
+  const pathLabels = [
+    `${personA.full_name} là ${prefixA} của ${spouseA.full_name}`,
+    ...res.pathLabels,
+    `${personB.full_name} là ${prefixB} của ${spouseB.full_name}`
+  ];
+  return { ...res, aCallsB, bCallsA, description, pathLabels };
 }
-
-
 function checkViaBothSpouses(spousesA: string[], spousesB: string[], personsMap: Map<string, PersonNode>, parentMap: Map<string, string[]>, personA: PersonNode, personB: PersonNode): KinshipResult | null {
   for (const sIdA of spousesA) {
     const spouseA = personsMap.get(sIdA);
