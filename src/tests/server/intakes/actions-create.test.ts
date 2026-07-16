@@ -89,8 +89,8 @@ describe('createIntake', () => {
     expect(prisma.intake.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          clientId: 'c1234567890123456789012345',
-          ownerUserId: 'u1',
+          client: { connect: { id: 'c1234567890123456789012345' } },
+          ownerUser: { connect: { id: 'u1' } },
           createdById: 'u1',
           title: 'ExistingClientCase'
         })
@@ -143,7 +143,7 @@ describe('createIntake', () => {
     expect(prisma.intake.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          clientId: 'c2'
+          client: { connect: { id: 'c2' } }
         })
       })
     );
@@ -267,7 +267,7 @@ describe('createIntake', () => {
     });
     expect(prisma.contact.create).toHaveBeenCalledWith({
       data: {
-        clientId: 'c1234567890123456789012345',
+        client: { connect: { id: 'c1234567890123456789012345' } },
         name: 'Contact Person',
         phone: '123456789',
         isPrimary: false
@@ -369,7 +369,7 @@ describe('createIntake', () => {
     // Should use client name when contactName not provided
     expect(prisma.contact.create).toHaveBeenCalledWith({
       data: {
-        clientId: 'c1234567890123456789012345',
+        client: { connect: { id: 'c1234567890123456789012345' } },
         name: 'Client Name',
         phone: '1234567890',
         isPrimary: false
@@ -406,7 +406,7 @@ describe('createIntake', () => {
     // and create name should be empty string (unusual but for coverage)
     expect(prisma.contact.create).toHaveBeenCalledWith({
       data: {
-        clientId: 'c1234567890123456789012345',
+        client: { connect: { id: 'c1234567890123456789012345' } },
         name: '',
         phone: '1234567890',
         isPrimary: false

@@ -66,7 +66,7 @@ function buildClientCreateInput(name: string, data: IntakeCreateInput): Prisma.C
 
 function buildContactCreateInput(clientId: string, data: IntakeCreateInput, clientName: string): Prisma.ContactCreateInput {
   return {
-    clientId,
+    client: { connect: { id: clientId } },
     name: (data.contactName || clientName || "联系人").trim(),
     phone: data.contactPhone?.trim() || null,
     isPrimary: false
@@ -115,7 +115,7 @@ async function resolveClientAndContact(data: IntakeCreateInput, session: any): P
   } else if (clientId) {
     const client = await prisma.client.findUnique({ where: { id: clientId }, select: { name: true } });
     clientName = client?.name ?? null;
-    await ensureClientContact(clientId, data, clientName);
+    await ensureClientContact(clientId, data, clientName ?? "");
   }
   return { clientId, clientName };
 }
@@ -153,7 +153,7 @@ function buildCommonIntakeFields(data: IntakeCreateInput, finalTitle: string): P
   return {
     title: finalTitle,
     category: data.category,
-    causeId: data.causeId || null,
+    cause: data.causeId ? { connect: { id: data.causeId } } : undefined,
     causeFreeText: data.causeFreeText || null,
     description: data.description || null,
     status: "PENDING_CONFIRMATION" as const,
@@ -163,7 +163,7 @@ function buildCommonIntakeFields(data: IntakeCreateInput, finalTitle: string): P
 
 function buildClientRefFields(data: IntakeCreateInput, clientId: string | null): Partial<Prisma.IntakeCreateInput> {
   return {
-    clientId,
+    client: clientId ? { connect: { id: clientId } } : undefined,
     clientType: data.clientType ?? null,
     contactName: data.contactName?.trim() || null,
     contactPhone: data.contactPhone?.trim() || null
@@ -172,7 +172,7 @@ function buildClientRefFields(data: IntakeCreateInput, clientId: string | null):
 
 function buildOwnershipFields(data: IntakeCreateInput, session: any): Partial<Prisma.IntakeCreateInput> {
   return {
-    ownerUserId: data.ownerUserId || session.user.id,
+    ownerUser: { connect: { id: data.ownerUserId || session.user.id } },
     coUserIds: data.coUserIds,
     createdById: session.user.id
   };
@@ -245,8 +245,8 @@ function buildPartyCreateInput(p: any): any {
   });
 }
 
-function buildPartiesField(data: IntakeCreateInput): { create: any[] } {
-  return { create: data.parties.map(buildPartyCreateInput) };
+function buildPartiesField(data: IntakeCreateInput): { parties: { create: any[] } } {
+  return { parties: { create: data.parties.map(buildPartyCreateInput) } };
 }
 
 function mergePartial<T extends object>(...objects: Partial<T>[]): T {
@@ -288,7 +288,7 @@ function mergeIntakePayload(
   procedure: any,
   nonLitigation: any,
   fee: any,
-  parties: { create: any[] }
+  parties: { parties: { create: any[] } }
 ): Prisma.IntakeCreateInput {
   return mergePartial(base, procedure, nonLitigation, fee, parties);
 }

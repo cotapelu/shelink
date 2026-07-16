@@ -376,9 +376,9 @@ describe("intakes actions", () => {
           data: expect.objectContaining({
             title: "TestIntake",
             category: "CIVIL_COMMERCIAL",
-            clientId,
+            client: { connect: { id: clientId } },
             ourStanding: "PLAINTIFF",
-            ownerUserId: sessionUser.id,
+            ownerUser: { connect: { id: sessionUser.id } },
             createdById: sessionUser.id,
             status: "PENDING_CONFIRMATION"
           })

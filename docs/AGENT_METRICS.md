@@ -5501,3 +5501,44 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
   - Main `createIntake` now 12 lines, complexity ~5.
   - All existing tests pass (10/10 in actions-create.test.ts).
   - Audit: Missing transaction for atomic client+intake creation (MEDIUM, P2 improvement).
+
+### [CYCLE-AUTO-11] - 2026-07-14 Refactor: runConflictCheck Complexity Reduction
+
+**Type**: Refactor (R) - Complexity & Lines Reduction  
+**Priority**: HIGH (quality gate: functions ≤20 lines, complexity ≤10, file ≤300)  
+**Duration**: ~120 min  
+**Status**: ✅ Completed
+
+**Actions**:
+- Created new file `src/server/conflicts/helpers.ts` (core utilities: types, toMatterInfo, fetch functions, hit builders, dedup)
+- Created new file `src/server/conflicts/conflict-client.ts` (client-specific processing and orchestrators: processQuery, runConflictCheck)
+- Original `algorithm.ts` reduced to 2-line re-export barrel, complexity reduced, lines eliminated
+- Merged small helpers, split into 3 files (<300 lines each)
+- Fixed bug: `processExactMatches` used boolean instead of string literals for matchType; corrected to use 'id' | 'name'
+- Maintained backward compatibility by exporting needed utilities from algorithm.ts
+
+**Quality Gates**:
+- ✅ Lint: All conflict files pass (0 violations)
+- ✅ Typecheck: PASS
+- ✅ Tests: All 28 conflict algorithm tests pass
+- ✅ Build: SUCCESS
+
+**Impact**:
+- Reduced `runConflictCheck` cyclomatic complexity from ~38 → ~5
+- Reduced original monolithic function (217 lines) to orchestrator (15 lines)
+- Split large file (419 lines) into three files each <300 lines (helpers 225, conflict-client 140, algorithm 2)
+- Improved testability and maintainability
+- No functional regressions; all tests pass
+
+**Coverage Impact**:
+- Overall coverage unchanged (Functions ~70.15%)
+- Conflict module coverage remains adequate
+- No new tests added; refactor preserved existing test suite
+
+**Files Modified**:
+- src/server/conflicts/algorithm.ts (refactored to barrel)
+- src/server/conflicts/helpers.ts (new, 225 lines)
+- src/server/conflicts/conflict-client.ts (new, 140 lines)
+
+**Next**: Address remaining violations in other modules (e.g., `utils/kinship/compute.ts` complexity 96) and push function coverage toward 80%.
+

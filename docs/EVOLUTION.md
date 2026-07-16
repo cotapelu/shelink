@@ -1344,3 +1344,9 @@ Based on project context (AGENTS.md):
 - First tests for complex kinship algorithm (5 tests, covering main relationship types)
 - Coverage progression: Functions ~70.88% → ~70.96%
 - Demonstrates that even complex business logic can be tested with small, focused datasets if we isolate the public function.
+
+## [2025-07-16] Refactor Update
+- **Completed**: createIntake complexity reduced from 79 to 5, lines from 179 to 12.
+- **Impact**: Improves maintainability, testability, and aligns with quality gate (complexity ≤10, lines ≤20).
+- **Remaining High Complexity**: runConflictCheck (38), buildMatterRow (58), buildIntakeRow, etc.
+- **Next**: Continue refactoring high-complexity functions, then address coverage (branches 64.69% → target ≥80%).
