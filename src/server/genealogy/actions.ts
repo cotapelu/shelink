@@ -85,6 +85,29 @@ const GetPersonsQuerySchema = z.object({
   isDeceased: z.boolean().optional(),
 });
 
+const PERSON_SELECT = {
+  id: true, fullName: true, gender: true, birthYear: true,
+  birthMonth: true, birthDay: true, deathYear: true, deathMonth: true,
+  deathDay: true, isDeceased: true, isInLaw: true, birthOrder: true,
+  generation: true, avatarUrl: true, note: true,
+  father: { select: { id: true, fullName: true } },
+  mother: { select: { id: true, fullName: true } },
+  outgoingRelationships: {
+    include: {
+      toPerson: { select: { id: true, fullName: true } }
+    }
+  },
+  incomingRelationships: {
+    include: {
+      fromPerson: { select: { id: true, fullName: true } }
+    }
+  },
+  events: {
+    orderBy: { eventDate: 'desc' },
+    take: 10,
+  },
+} as any;
+
 // Actions
 function buildPersonWhere(validated: z.infer<typeof GetPersonsQuerySchema>): any {
   const where: any = {};
@@ -126,24 +149,7 @@ export async function getPerson(id: string) {
 
   const person = await prisma.person.findUnique({
     where: { id },
-    include: {
-      father: { select: { id: true, fullName: true } },
-      mother: { select: { id: true, fullName: true } }, // comment: children omitted
-      outgoingRelationships: {
-        include: {
-          toPerson: { select: { id: true, fullName: true } }
-        }
-      },
-      incomingRelationships: {
-        include: {
-          fromPerson: { select: { id: true, fullName: true } }
-        }
-      },
-      events: {
-        orderBy: { eventDate: 'desc' },
-        take: 10,
-      },
-    },
+    select: PERSON_SELECT,
   });
 
   if (!person) throw new Error('Person not found');
