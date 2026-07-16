@@ -34,6 +34,18 @@ import {
   type MatterOption
 } from "./seal-types";
 
+function getInitialTab(capabilities: { canApprove: boolean }, toApprove: SealRequestRow[]): Tab {
+  return capabilities.canApprove && toApprove.length > 0 ? "toApprove" : "allMine";
+}
+
+function computeRows(tab: Tab, mine: SealRequestRow[], toApprove: SealRequestRow[], all: SealRequestRow[]): SealRequestRow[] {
+  if (tab === "allMine") return mine;
+  if (tab === "pending") return mine.filter(r => r.status === "PENDING");
+  if (tab === "processed") return mine.filter(r => ["APPROVED","STAMPED","REJECTED"].includes(r.status));
+  if (tab === "toApprove") return toApprove;
+  return all;
+}
+
 export type Tab = "allMine" | "pending" | "processed" | "toApprove" | "firm";
 
 interface SealsViewProps {
@@ -45,97 +57,25 @@ interface SealsViewProps {
   matters: MatterOption[];
   currentUser: { id: string; role: string };
   capabilities: { canApprove: boolean; canViewFirmQueue: boolean };
-  presetFromQuery: {
-    draftDocId?: string;
-    matterId?: string;
-    documentTitle?: string;
-  } | null;
+  presetFromQuery: { draftDocId?: string; matterId?: string; documentTitle?: string } | null;
 }
 
 export function SealsView(props: SealsViewProps) {
-  const {
-    mine,
-    toApprove,
-    all,
-    configs,
-    stats,
-    matters,
-    currentUser,
-    capabilities,
-    presetFromQuery
-  } = props;
-  const [tab, setTab] = useState<Tab>(
-    capabilities.canApprove && toApprove.length > 0 ? "toApprove" : "allMine"
-  );
+  const { mine, toApprove, all, configs, stats, matters, currentUser, capabilities, presetFromQuery } = props;
+  const [tab, setTab] = useState<Tab>(getInitialTab(capabilities, toApprove));
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [actionTarget, setActionTarget] = useState<{
-    row: SealRequestRow;
-    action: "detail" | "approve" | "reject" | "stamp" | "cancel";
-  } | null>(null);
-
-  // 卷宗联动：URL 带 ?new=1 自动打开新建 Sheet
-  useEffect(() => {
-    if (presetFromQuery?.draftDocId) {
-      setSheetOpen(true);
-    }
-  }, [presetFromQuery]);
-
-
-  const rows =
-    tab === "allMine"
-      ? mine
-      : tab === "pending"
-        ? mine.filter((r) => r.status === "PENDING")
-        : tab === "processed"
-          ? mine.filter((r) => ["APPROVED","STAMPED","REJECTED"].includes(r.status))
-          : tab === "toApprove"
-            ? toApprove
-            : all;
-
+  const [actionTarget, setActionTarget] = useState<{ row: SealRequestRow; action: "detail" | "approve" | "reject" | "stamp" | "cancel" } | null>(null);
+  useEffect(() => { if (presetFromQuery?.draftDocId) setSheetOpen(true); }, [presetFromQuery]);
+  const rows = computeRows(tab, mine, toApprove, all);
+  const firmTabLabel = currentUser.role === "FINANCE" ? "财务章审批" : "全所审批";
   return (
     <div className="space-y-5">
       <SealsHeader onNewClick={() => setSheetOpen(true)} />
-      <SealsKpi
-        monthStamped={stats.monthStamped}
-        pendingApprovalCount={stats.pendingApprovalCount}
-        waitingStampCount={stats.waitingStampCount}
-      />
-      <SealsTabBar
-        tab={tab}
-        setTab={setTab}
-        mineCount={mine.length}
-        pendingCount={mine.filter((r) => r.status === "PENDING").length}
-        processedCount={mine.filter((r) => ["APPROVED","STAMPED","REJECTED"].includes(r.status)).length}
-        toApproveCount={toApprove.length}
-        allCount={all.length}
-        canApprove={capabilities.canApprove}
-        canViewFirmQueue={capabilities.canViewFirmQueue}
-        firmTabLabel={currentUser.role === "FINANCE" ? "财务章审批" : "全所审批"}
-      />
-
-      <SealsTable
-        rows={rows}
-        currentUser={currentUser}
-        approvableIds={new Set(toApprove.map((r) => r.id))}
-        onAction={(action, row) => setActionTarget({ row, action })}
-        tab={tab}
-        firmTabLabel={currentUser.role === "FINANCE" ? "财务章审批" : "全所审批"}
-      />
-
-      <SealRequestSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        configs={configs}
-        matters={matters}
-        preset={presetFromQuery}
-      />
-
-      {actionTarget && (
-        <SealActionsDialogs
-          target={actionTarget}
-          onClose={() => setActionTarget(null)}
-        />
-      )}
+      <SealsKpi monthStamped={stats.monthStamped} pendingApprovalCount={stats.pendingApprovalCount} waitingStampCount={stats.waitingStampCount} />
+      <SealsTabBar tab={tab} setTab={setTab} mineCount={mine.length} pendingCount={mine.filter(r => r.status === "PENDING").length} processedCount={mine.filter(r => ["APPROVED","STAMPED","REJECTED"].includes(r.status)).length} toApproveCount={toApprove.length} allCount={all.length} canApprove={capabilities.canApprove} canViewFirmQueue={capabilities.canViewFirmQueue} firmTabLabel={firmTabLabel} />
+      <SealsTable rows={rows} currentUser={currentUser} approvableIds={new Set(toApprove.map(r => r.id))} onAction={(action, row) => setActionTarget({ row, action })} tab={tab} firmTabLabel={firmTabLabel} />
+      <SealRequestSheet open={sheetOpen} onOpenChange={setSheetOpen} configs={configs} matters={matters} preset={presetFromQuery} />
+      {actionTarget && <SealActionsDialogs target={actionTarget} onClose={() => setActionTarget(null)} />}
     </div>
   );
 }

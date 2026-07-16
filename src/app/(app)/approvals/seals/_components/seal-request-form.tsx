@@ -21,7 +21,7 @@ interface SealRequestFormProps {
 
 export function SealRequestForm(props: SealRequestFormProps) {
   const { configs, matters, preset, onOpenChange } = props;
-  const {sealType,setSealType,matterId,setMatterId,purposePreset,setPurposePreset,purposeOther,setPurposeOther,documentTitle,setDocumentTitle,pageCount,setPageCount,crossPage,setCrossPage,copies,setCopies,urgency,setUrgency,requestNote,setRequestNote,file,setFile,alsoLegalRep,setAlsoLegalRep,pending,submit} = useSealRequestForm({configs,matters,preset,onOpenChange});
+  const {sealType,setSealType,matterId,setMatterId,purposePreset,setPurposePreset,purposeOther,setPurposeOther,documentTitle,setDocumentTitle,pageCount,setPageCount,crossPage,setCrossPage,copies,setCopies,urgency,setUrgency,requestNote,setRequestNote,file,setFile,alsoLegalRep,setAlsoLegalRep,pending,submit} = useSealRequestForm({preset,onOpenChange});
 
   return (
     <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
