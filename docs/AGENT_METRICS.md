@@ -6110,3 +6110,52 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - src/server/cron/jobs/scan-due-reminders.ts
 
 **Next**: Continue with remaining HIGH violations: `InvoiceBuilder` (18), `ReportBuilder` (12), `Topbar` (12), `ChartWidget` (14), `AiSettingsForm` (14), `DocumentReviewDialog` (28), `PartyCard` (28), `IntakeSheet` (31), etc. Strategy: similar extraction of helpers/subcomponents.
+
+### [CYCLE-AUTO-22] - 2026-07-16 Refactor: Conflicts Module Component Extraction
+
+**Type**: Refactor (R) - Component Extraction
+**Priority**: HIGH (Quality Gate: UI functions ≤50 lines, complexity ≤10)
+**Duration**: ~120 min
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS
+- ✅ Build: PASS
+- ✅ Lint: **0 errors** on conflicts components (previously multiple size/complexity violations)
+- ✅ Tests: 1987 passed (unchanged)
+
+**Refactor Actions**:
+- Split monolithic `ConflictsView` (226 lines) into modular components:
+  - `ConflictsHeader` (13 lines)
+  - `ConflictSearchBar` (29 lines)
+  - `ConflictResults` (18 lines)
+  - `ConflictListItem` (49 lines)
+  - `HitHeader` (31 lines)
+  - `MatterContext` (36 lines)
+  - `QueryRowEditor` (24 lines)
+  - `QueryRowFields` (38 lines)
+  - `field` & `date-utils` utilities
+- Introduced `conflict-query-types.ts` to avoid circular dependencies.
+- Resolved type errors in `archive/page.tsx` (MatterCategory indexing).
+
+**Impact**:
+- All conflicts UI components now satisfy quality gates (≤50 lines, complexity ≤10).
+- Maintainability improved: each component independently testable.
+- Lint violations reduced by ~10 (size/complexity) in conflicts module.
+
+**Files Modified** (11 new/refactored):
+- src/app/(app)/conflicts/_components/conflicts-view.tsx (refactored)
+- src/app/(app)/conflicts/_components/conflict-search-bar.tsx (refactored)
+- src/app/(app)/conflicts/_components/conflict-results.tsx (refactored)
+- src/app/(app)/conflicts/_components/conflict-list-item.tsx (refactored)
+- src/app/(app)/conflicts/_components/hit-header.tsx (new)
+- src/app/(app)/conflicts/_components/matter-context.tsx (new)
+- src/app/(app)/conflicts/_components/query-row-editor.tsx (refactored)
+- src/app/(app)/conflicts/_components/query-row-fields.tsx (new)
+- src/app/(app)/conflicts/_components/conflict-query-types.ts (new)
+- src/app/(app)/conflicts/_components/field.tsx (new)
+- src/app/(app)/conflicts/_components/date-utils.ts (new)
+- src/app/(app)/archive/page.tsx (type fix)
+
+**Next**: Continue remaining HIGH violations: scan-due-reminders done; target `InvoiceBuilder`, `ReportBuilder`, `Topbar`, `ChartWidget`, `AiSettingsForm`, `DocumentReviewDialog`, `PartyCard`, `IntakeSheet`, etc. Also push Function coverage ≥80% by adding tests for uncovered server modules.
+
