@@ -168,143 +168,105 @@ export async function archiveMatter(input: ArchiveSubmitInput) {
 /**
  * v0.16: 管理员审批通过归档申请（PENDING_REVIEW → APPROVED）
  */
-export async function approveArchiveRecord(input: { archiveId: string; note?: string }) {
-  const session = await requireSession();
-  if (session.user.role !== "ADMIN") {
-    throw new Error("只有管理员可以审批归档申请");
-  }
-
+async function findArchiveRecord(archiveId: string, sessionUserId: string) {
   const record = await prisma.archiveRecord.findUnique({
-    where: { id: input.archiveId },
-    select: {
-      id: true,
-      matterId: true,
-      status: true,
-      completedAt: true,
-      archiveNo: true,
-      archivedById: true
-    }
+    where: { id: archiveId },
+    select: { id: true, matterId: true, status: true, completedAt: true, archiveNo: true, archivedById: true }
   });
   if (!record) throw new Error("归档记录不存在");
   if (record.status !== "PENDING_REVIEW") throw new Error("此归档申请已审批");
+  if (record.archivedById === sessionUserId) throw new Error("你不能审批自己的申请");
+  return record;
+}
 
+function buildApprovalUpdateData(reviewedById: string, reviewedAt: Date, note?: string) {
+  return { status: "APPROVED" as const, reviewedById, reviewedAt, reviewNote: note?.trim() || null };
+}
+
+function buildMatterUpdateData(archivedAt: Date, closedAt: Date | null) {
+  return { status: "ARCHIVED" as const, archivedAt, closedAt: closedAt ?? archivedAt };
+}
+
+function buildApprovalTimelineEvent(matterId: string, archiveNo: string, note?: string, occurredAt: Date = new Date()) {
+  return {
+    matterId,
+    eventType: "MATTER_ARCHIVED" as const,
+    title: `案件已归档（${archiveNo}）`,
+    content: note?.trim() ? `管理员审批：${note.trim()}` : "管理员审批通过",
+    occurredAt
+  };
+}
+
+async function notifyApplicant(record: any, matter: { title?: string; internalCode?: string } | null, sessionUserId: string) {
+  if (!record.archivedById || record.archivedById === sessionUserId) return;
+  await createNotification({
+    userId: record.archivedById,
+    type: "ARCHIVE_APPROVED",
+    priority: "NORMAL",
+    title: `归档申请已通过（${record.archiveNo}）`,
+    content: `案件 ${matter?.internalCode ?? record.matterId}·${matter?.title ?? ""} 的归档申请已获管理员批准。`,
+    href: `/matters/${record.matterId}`,
+    refType: "ArchiveRecord",
+    refId: record.id
+  });
+}
+
+export async function approveArchiveRecord(input: { archiveId: string; note?: string }) {
+  const session = await requireSession();
+  if (session.user.role !== "ADMIN") throw new Error("只有管理员可以审批归档申请");
+  const record = await findArchiveRecord(input.archiveId, session.user.id);
   const now = new Date();
   await prisma.$transaction(async (tx) => {
-    await tx.archiveRecord.update({
-      where: { id: record.id },
-      data: {
-        status: "APPROVED",
-        reviewedById: session.user.id,
-        reviewedAt: now,
-        reviewNote: input.note?.trim() || null
-      }
-    });
-    await tx.matter.update({
-      where: { id: record.matterId },
-      data: { status: "ARCHIVED", archivedAt: now, closedAt: record.completedAt }
-    });
-    await tx.timelineEvent.create({
-      data: {
-        matterId: record.matterId,
-        eventType: "MATTER_ARCHIVED",
-        title: `案件已归档（${record.archiveNo}）`,
-        content: input.note?.trim() ? `管理员审批：${input.note.trim()}` : "管理员审批通过",
-        occurredAt: now
-      }
-    });
+    await tx.archiveRecord.update({ where: { id: record.id }, data: buildApprovalUpdateData(session.user.id, now, input.note) });
+    await tx.matter.update({ where: { id: record.matterId }, data: buildMatterUpdateData(now, record.completedAt) });
+    await tx.timelineEvent.create({ data: buildApprovalTimelineEvent(record.matterId, record.archiveNo, input.note, now) });
   });
-
-  // v0.18: 通知申请人
-  if (record.archivedById && record.archivedById !== session.user.id) {
-    const matter = await prisma.matter.findUnique({
-      where: { id: record.matterId },
-      select: { title: true, internalCode: true }
-    });
-    await createNotification({
-      userId: record.archivedById,
-      type: "ARCHIVE_APPROVED",
-      priority: "NORMAL",
-      title: `归档申请已通过（${record.archiveNo}）`,
-      content: `案件 ${matter?.internalCode ?? record.matterId}·${matter?.title ?? ""} 的归档申请已获管理员批准。`,
-      href: `/matters/${record.matterId}`,
-      refType: "ArchiveRecord",
-      refId: record.id
-    });
-  }
-
-  await audit({
-    userId: session.user.id,
-    action: "ARCHIVE_APPROVE",
-    targetType: "ArchiveRecord",
-    targetId: record.id,
-    detail: { matterId: record.matterId, archiveNo: record.archiveNo }
-  });
-
+  const matter = await prisma.matter.findUnique({ where: { id: record.matterId }, select: { title: true, internalCode: true } });
+  await notifyApplicant(record, matter, session.user.id);
+  await audit({ userId: session.user.id, action: "ARCHIVE_APPROVE", targetType: "ArchiveRecord", targetId: record.id, detail: { matterId: record.matterId, archiveNo: record.archiveNo } });
   revalidatePath(`/matters/${record.matterId}`);
   revalidatePath("/matters");
   revalidatePath("/archive");
   return { ok: true };
 }
 
-/**
- * v0.16: 管理员驳回归档申请
- */
-export async function rejectArchiveRecord(input: { archiveId: string; note: string }) {
-  const session = await requireSession();
-  if (session.user.role !== "ADMIN") {
-    throw new Error("只有管理员可以驳回归档申请");
-  }
-  if (!input.note.trim()) throw new Error("请填写驳回原因");
-
+async function findRejectRecord(archiveId: string, sessionUserId: string) {
   const record = await prisma.archiveRecord.findUnique({
-    where: { id: input.archiveId },
-    select: {
-      id: true,
-      matterId: true,
-      status: true,
-      archiveNo: true,
-      archivedById: true
-    }
+    where: { id: archiveId },
+    select: { id: true, matterId: true, status: true, archiveNo: true, archivedById: true }
   });
   if (!record) throw new Error("归档记录不存在");
   if (record.status !== "PENDING_REVIEW") throw new Error("此归档申请已审批");
+  return record;
+}
 
-  await prisma.archiveRecord.update({
-    where: { id: record.id },
-    data: {
-      status: "REJECTED",
-      reviewedById: session.user.id,
-      reviewedAt: new Date(),
-      reviewNote: input.note.trim()
-    }
+function buildRejectUpdateData(reviewedById: string, note: string) {
+  return { status: "REJECTED" as const, reviewedById, reviewedAt: new Date(), reviewNote: note.trim() };
+}
+
+async function notifyRejection(record: any, matter: { title?: string; internalCode?: string } | null, sessionUserId: string, note: string) {
+  if (!record.archivedById || record.archivedById === sessionUserId) return;
+  await createNotification({
+    userId: record.archivedById,
+    type: "ARCHIVE_REJECTED",
+    priority: "HIGH",
+    title: `归档申请被驳回（${record.archiveNo}）`,
+    content: `案件 ${matter?.internalCode ?? record.matterId}·${matter?.title ?? ""} 的归档申请被驳回。原因：${note}`,
+    href: `/matters/${record.matterId}`,
+    refType: "ArchiveRecord",
+    refId: record.id
   });
+}
 
-  // v0.18: 通知申请人
-  if (record.archivedById && record.archivedById !== session.user.id) {
-    const matter = await prisma.matter.findUnique({
-      where: { id: record.matterId },
-      select: { title: true, internalCode: true }
-    });
-    await createNotification({
-      userId: record.archivedById,
-      type: "ARCHIVE_REJECTED",
-      priority: "HIGH",
-      title: `归档申请被驳回（${record.archiveNo}）`,
-      content: `案件 ${matter?.internalCode ?? record.matterId}·${matter?.title ?? ""} 的归档申请被驳回。原因：${input.note.trim()}`,
-      href: `/matters/${record.matterId}`,
-      refType: "ArchiveRecord",
-      refId: record.id
-    });
-  }
-
-  await audit({
-    userId: session.user.id,
-    action: "ARCHIVE_REJECT",
-    targetType: "ArchiveRecord",
-    targetId: record.id,
-    detail: { matterId: record.matterId, archiveNo: record.archiveNo, note: input.note.trim() }
-  });
-
+export async function rejectArchiveRecord(input: { archiveId: string; note: string }) {
+  const session = await requireSession();
+  if (session.user.role !== "ADMIN") throw new Error("只有管理员可以驳回归档申请");
+  if (!input.note.trim()) throw new Error("请填写驳回原因");
+  const record = await findRejectRecord(input.archiveId, session.user.id);
+  await prisma.archiveRecord.update({ where: { id: record.id }, data: buildRejectUpdateData(session.user.id, input.note) });
+  const matter = await prisma.matter.findUnique({ where: { id: record.matterId }, select: { title: true, internalCode: true } });
+  await notifyRejection(record, matter, session.user.id, input.note);
+  await audit({ userId: session.user.id, action: "ARCHIVE_REJECT", targetType: "ArchiveRecord", targetId: record.id, detail: { matterId: record.matterId, archiveNo: record.archiveNo, note: input.note.trim() } });
   revalidatePath(`/matters/${record.matterId}`);
   revalidatePath("/archive");
   return { ok: true };
