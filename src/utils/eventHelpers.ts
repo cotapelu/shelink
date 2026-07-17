@@ -201,9 +201,10 @@ function gatherFamilyEvents(persons: PersonInput[], customEvents: CustomEventRec
 
 export function computeEvents(
   persons: PersonInput[],
-  customEvents: CustomEventRecord[] = []
+  customEvents: CustomEventRecord[] = [],
+  now?: Date
 ): FamilyEvent[] {
-  const today = new Date();
+  const today = now ? new Date(now) : new Date();
   today.setHours(0, 0, 0, 0);
   const events = gatherFamilyEvents(persons, customEvents, today);
   events.sort((a, b) => a.daysUntil - b.daysUntil);

@@ -14,11 +14,11 @@ export function ClientSheetFooter({ isEdit, isPending, onCancel }: ClientSheetFo
   return (
     <SheetFooter className="flex flex-row justify-end gap-2 sm:justify-end">
       <Button variant="outline" onClick={onCancel} disabled={isPending}>
-        取消
+        Hủy
       </Button>
       <Button type="submit" disabled={isPending}>
         {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {isEdit ? "保存修改" : "创建客户"}
+        {isEdit ? "Lưu thay đổi" : "Tạo khách hàng"}
  </Button>
     </SheetFooter>
   );

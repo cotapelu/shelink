@@ -30,7 +30,7 @@ describe("utils/eventHelpers", () => {
           is_deceased: true,
         },
       ];
-      const events = computeEvents(persons);
+      const events = computeEvents(persons, [], today);
       expect(events.length).toBeGreaterThanOrEqual(2);
       const types = new Set(events.map(e => e.type));
       expect(types.has("birthday")).toBe(true);
@@ -46,7 +46,7 @@ describe("utils/eventHelpers", () => {
         location: "",
         created_by: null,
       }];
-      const events = computeEvents([], customs);
+      const events = computeEvents([], customs, today);
       expect(events.some(e => e.type === "custom_event")).toBe(true);
     });
 
@@ -76,7 +76,7 @@ describe("utils/eventHelpers", () => {
           is_deceased: false,
         },
       ];
-      const events = computeEvents(persons);
+      const events = computeEvents(persons, [], today);
       if (events.length >= 2) {
         expect(events[0].personName).toBe("Early");
         expect(events[1].personName).toBe("Late");
@@ -84,7 +84,7 @@ describe("utils/eventHelpers", () => {
     });
 
     it("returns empty array when no persons or customs", () => {
-      const events = computeEvents([], []);
+      const events = computeEvents([], [], today);
       expect(events).toEqual([]);
     });
   });

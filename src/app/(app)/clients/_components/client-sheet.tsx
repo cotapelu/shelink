@@ -44,7 +44,7 @@ export function ClientSheet({ open, onOpenChange, editingClient }: Props) {
       >
         <SheetHeader className="border-b border-border bg-background px-6 py-4">
           <SheetTitle className="text-lg">
-            {isPending ? "Đang xử lý..." : "Khách hàng"}
+            {isPending ? "Đang xử lý..." : (isEdit ? "Chỉnh sửa" : "Tạo mới")}
           </SheetTitle>
           <SheetDescription className="text-xs">
             Thông tin chính khách hàng + Liên hệ, chi tiết liên hệ được quản lý riêng tại liên hệ

@@ -23,11 +23,14 @@ import { computeEvents, FamilyEvent, CustomEventRecord } from "@/utils/eventHelp
 import { getZodiacSign } from "@/utils/dateHelpers";
 import { motion } from "framer-motion";
 import { Solar } from "lunar-javascript";
-import { Cake, CalendarDays, Clock, Flower, Star, MapPin, AlignLeft, Plus } from "lucide-react";
+import { CalendarDays, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDashboard } from "@/components/layout/DashboardContext";
 import CustomEventModal from "@/components/domain/genealogy/events/CustomEventModal";
 import { useRouter } from "next/navigation";
+import { EventIcon } from "./event-icon";
+import { EventInfo } from "./event-info";
+import { EventDaysBadge } from "./event-days-badge";
 
 interface EventsListProps {
   persons: {
@@ -88,78 +91,9 @@ function EventCard({ event, index, onEditCustomEvent }: { event: FamilyEvent; in
               : "bg-white/80 border-stone-200/60 hover:border-rose-200"
       }`}
     >
-      {/* Icon */}
-      <div
-        className={`shrink-0 size-11 flex items-center justify-center rounded-xl mt-0.5 ${
-          isToday
-            ? "bg-amber-100 text-amber-600"
-            : isBirthday
-              ? "bg-blue-50 text-blue-500"
-              : isCustom
-                ? "bg-purple-50 text-purple-500"
-                : "bg-rose-50 text-rose-500"
-        }`}
-      >
-        {isBirthday ? (
-          <Cake className="size-5" />
-        ) : isCustom ? (
-          <Star className="size-5" />
-        ) : (
-          <Flower className="size-5" />
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className={`font-semibold text-stone-800 truncate transition-colors group-hover:text-amber-700`}>
-            {event.personName}
-          </p>
-          {isBirthday && event.originDay && event.originMonth && getZodiacSign(event.originDay, event.originMonth) && (
-            <span className="shrink-0 text-[10px] font-sans font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 rounded-md px-1.5 py-0.5 whitespace-nowrap shadow-xs tracking-wider">
-              {getZodiacSign(event.originDay, event.originMonth)}
-            </span>
-          )}
-        </div>
-        <div className="flex flex-col gap-1 mt-1">
-          <p className="text-sm text-stone-500 flex items-center gap-1.5 leading-tight">
-            <CalendarDays className="size-3.5 shrink-0" />
-            {isBirthday ? "Sinh nhật" : isCustom ? "Sự kiện" : "Ngày giỗ"} —{" "}
-            <span className="font-medium text-stone-600">
-              {event.eventDateLabel}
-            </span>
-            {event.originYear && (
-              <span className="text-stone-400">({event.originYear})</span>
-            )}
-          </p>
-          {event.location && (
-            <p className="text-sm text-stone-500 flex items-center gap-1.5 leading-tight">
-              <MapPin className="size-3.5 shrink-0" />
-              <span className="truncate">{event.location}</span>
-            </p>
-          )}
-          {event.content && (
-            <p className="text-sm text-stone-500 flex items-start gap-1.5 leading-tight mt-0.5">
-              <AlignLeft className="size-3.5 shrink-0 mt-0.5" />
-              <span className="line-clamp-2">{event.content}</span>
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Days badge */}
-      <div
-        className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold ${
-          isToday
-            ? "bg-amber-400 text-white"
-            : isSoon
-              ? "bg-red-100 text-red-600"
-              : "bg-stone-100 text-stone-500"
-        }`}
-      >
-        <Clock className="size-3" />
-        {daysUntilLabel(event.daysUntil)}
-      </div>
+      <EventIcon event={event} />
+      <EventInfo event={event} />
+      <EventDaysBadge event={event} />
     </motion.div>
   );
 }
