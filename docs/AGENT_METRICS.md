@@ -6610,3 +6610,35 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 
 **Notes**: Used container/presentational pattern: row component holds async logic, content component handles rendering. This reduces complexity of main list and improves testability. Next targets: ContactsView, ExternalContactFilterBar, FinanceView, ExpressView.
 
+
+### [CYCLE-AUTO-21] - 2025-07-17 - ContactsView Refactor
+
+**Type**: Violation Fix (Quality Gate)  
+**Priority**: HIGH  
+**Duration**: ~20 minutes  
+**Status**: ✅ Success  
+**Test Delta**: +0 tests (all 176 passing)  
+**Coverage Delta**: n/a  
+
+**Lint Impact**:
+- Reduced ContactsView from 56 lines to ~40 lines function size
+- Extracted `ContactsHeader` component and `useContactsState` hook
+- Moved shared types to `contacts-types.ts` to reduce redundancy
+- All components within quality gate
+
+**Files Modified** (6):
+- src/app/(app)/contacts/_components/contacts-view.tsx (refactored)
+- src/app/(app)/contacts/_components/contacts-header.tsx (new)
+- src/app/(app)/contacts/_components/use-contacts-state.ts (new)
+- src/app/(app)/contacts/_components/contacts-types.ts (new)
+- src/app/(app)/contacts/_components/external-contact-list.tsx (updated imports)
+- src/app/(app)/contacts/_components/external-contact-row-content.tsx (updated imports)
+
+**Verification**:
+- Typecheck: PASS
+- Build: PASS
+- Lint: No errors for ContactsView (ExternalContactFilterBar remains, to be addressed next)
+- Tests: 176 passed, 1 skipped
+
+**Notes**: ContactsView now meets quality gate (≤50 UI lines). Remaining violations: ExternalContactFilterBar (66 lines), DashboardPage, FinanceView, ExpressView, InvoiceCreateDialog, etc.
+

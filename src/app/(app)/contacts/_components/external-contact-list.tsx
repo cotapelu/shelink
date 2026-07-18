@@ -1,6 +1,6 @@
 "use client";
 
-import type { ExternalContactItem } from "./contacts-view";
+import type { ExternalContactItem } from "./contacts-types";
 import { ExternalContactItemRow } from "./external-contact-item-row";
 
 interface ExternalContactListProps {

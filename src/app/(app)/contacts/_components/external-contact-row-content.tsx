@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Check, XCircle, Pencil, Archive } from "lucide-react";
-import type { ExternalContactItem } from "./contacts-view";
+import type { ExternalContactItem } from "./contacts-types";
 import type { ExternalContactCategory } from "@prisma/client";
 const L: Record<ExternalContactCategory, string> = {
   COURT: "法院", PROSECUTOR: "检察院", POLICE: "公安", NOTARY: "公证处",
