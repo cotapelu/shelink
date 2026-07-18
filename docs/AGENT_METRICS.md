@@ -6581,3 +6581,32 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 
 **Notes**: Followed same extraction pattern as previous cycles. The preview section was split into 4 subcomponents to reduce size. Type safety maintained. Next target: `EventsList` (202 lines, complexity 11) and `EventCard` (107 lines, complexity 20) in genealogy events.
 
+
+### [CYCLE-AUTO-20] - 2025-07-17 - ExternalContactList Refactor
+
+**Type**: Violation Fix (Quality Gate)  
+**Priority**: HIGH  
+**Duration**: ~50 minutes  
+**Status**: ✅ Success  
+**Test Delta**: +0 tests (all 176 passing)  
+**Coverage Delta**: n/a  
+
+**Lint Impact**:
+- Refactored ExternalContactList (156 lines) into thin wrapper (43 lines) + item row components
+- Created: `ExternalContactRowContent` (pure presentational, 51→50 lines after compression), `ExternalContactItemRow` (container with handlers, 44 lines)
+- All UI components ≤50 lines, complexity ≤10
+- No new violations introduced
+
+**Files Modified** (3):
+- src/app/(app)/contacts/_components/external-contact-list.tsx (refactored)
+- src/app/(app)/contacts/_components/external-contact-item-row.tsx (new)
+- src/app/(app)/contacts/_components/external-contact-row-content.tsx (new)
+
+**Verification**:
+- Typecheck: PASS
+- Build: PASS
+- Lint: No errors for modified files
+- Tests: 176 passed, 1 skipped
+
+**Notes**: Used container/presentational pattern: row component holds async logic, content component handles rendering. This reduces complexity of main list and improves testability. Next targets: ContactsView, ExternalContactFilterBar, FinanceView, ExpressView.
+
