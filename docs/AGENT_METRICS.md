@@ -6546,3 +6546,38 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 
 **Notes**: Applied same extraction pattern as CustomEventModal. Introduced `FormState` interface shared between components to ensure type safety. Used compact function bodies to meet strict 20-line limit for business logic (hooks). Next: continue with remaining HIGH violations (EventsList, EventCard, etc.).
 
+
+### [CYCLE-AUTO-18] - 2025-07-17 - InvoiceBuilder Refactor
+
+**Type**: Violation Fix (Quality Gate)
+**Priority**: HIGH
+**Duration**: ~100 minutes
+**Status**: ✅ Success
+**Test Delta**: +0 tests (all 176 passing)
+**Coverage Delta**: n/a (unchanged)
+**Lint Impact**:
+- Refactored InvoiceBuilder from 515 lines (function size 411) into thin orchestrator (~40 lines) + 11 subcomponents
+- All new components meet quality gate (≤50 UI, ≤20 business, ≤10 complexity)
+- Eliminated the largest single-file violation
+
+**Files Modified** (12):
+- src/components/domain/erp/InvoiceBuilder/InvoiceBuilder.tsx (refactored)
+- src/components/domain/erp/InvoiceBuilder/invoice-builder-header.tsx (new)
+- src/components/domain/erp/InvoiceBuilder/invoice-builder-footer.tsx (new)
+- src/components/domain/erp/InvoiceBuilder/party-info-form.tsx (new)
+- src/components/domain/erp/InvoiceBuilder/invoice-metadata-form.tsx (new)
+- src/components/domain/erp/InvoiceBuilder/invoice-items-table.tsx (new)
+- src/components/domain/erp/InvoiceBuilder/invoice-preview.tsx (new)
+- src/components/domain/erp/InvoiceBuilder/invoice-preview-header.tsx (new)
+- src/components/domain/erp/InvoiceBuilder/invoice-parties.tsx (new)
+- src/components/domain/erp/InvoiceBuilder/invoice-preview-table.tsx (new)
+- src/components/domain/erp/InvoiceBuilder/invoice-preview-summary.tsx (new)
+- src/components/domain/erp/InvoiceBuilder/invoice-preview-notes.tsx (new)
+
+**Verification**:
+- Typecheck: PASS
+- Build: PASS
+- Tests: 176 passed, 1 skipped
+
+**Notes**: Followed same extraction pattern as previous cycles. The preview section was split into 4 subcomponents to reduce size. Type safety maintained. Next target: `EventsList` (202 lines, complexity 11) and `EventCard` (107 lines, complexity 20) in genealogy events.
+
