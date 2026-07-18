@@ -1,7 +1,6 @@
 "use client";
 
 import { X } from "lucide-react";
-import { motion } from "framer-motion";
 
 interface CustomEventHeaderProps {
   onClose: () => void;
