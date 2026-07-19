@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { describe, it, expect } from "vitest";
-import { resolveMattersExportParams } from "@/server/matters/export-xlsx";
+import { resolveMattersExportParams, buildMattersExportWorkbook } from "@/server/matters/export-xlsx";
 
 describe("resolveMattersExportParams", () => {
   it("should parse full params for active tab", () => {
@@ -147,3 +147,106 @@ describe("resolveMattersExportParams", () => {
     });
   });
 });
+
+describe("buildMattersExportWorkbook", () => {
+  const mockUser: ExportUser = { id: "u1", role: "LAWYER" };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(prisma.intake).findMany = vi.fn();
+    vi.mocked(prisma.matter).findMany = vi.fn();
+    vi.mocked(prisma.user).findMany = vi.fn();
+  });
+
+  it("handles empty intake tab with no data", async () => {
+    vi.mocked(prisma.intake).findMany.mockResolvedValue([]);
+
+    const result = await buildMattersExportWorkbook(
+      { tab: "intake", sortBy: "intakeDate", sortDir: "desc" },
+      mockUser
+    );
+
+    expect(result.total).toBe(0);
+    expect(result.filename).toContain("intake");
+    expect(result.tabLabel).toBe("Chờ duyệt");
+    expect(prisma.intake.findMany).toHaveBeenCalledTimes(1);
+  });
+
+  it("handles empty active tab with no matters", async () => {
+    vi.mocked(prisma.matter).findMany.mockResolvedValue([]);
+
+    const result = await buildMattersExportWorkbook(
+      { tab: "active", sortBy: "hearing", sortDir: "asc" },
+      mockUser
+    );
+
+    expect(result.total).toBe(0);
+    expect(result.filename).toContain("active");
+    expect(result.tabLabel).toBe("Đang xử lý");
+    expect(prisma.matter.findMany).toHaveBeenCalledTimes(1);
+  });
+
+  it("propagates prisma errors on intake tab", async () => {
+    const mockError = new Error("DB failure");
+    vi.mocked(prisma.intake).findMany.mockRejectedValue(mockError);
+
+    await expect(
+      buildMattersExportWorkbook(
+        { tab: "intake", sortBy: "intakeDate", sortDir: "desc" },
+        mockUser
+      )
+    ).rejects.toThrow("DB failure");
+  });
+
+  it("propagates prisma errors on active tab", async () => {
+    const mockError = new Error("DB failure");
+    vi.mocked(prisma.matter).findMany.mockRejectedValue(mockError);
+
+    await expect(
+      buildMattersExportWorkbook(
+        { tab: "active", sortBy: "hearing", sortDir: "asc" },
+        mockUser
+      )
+    ).rejects.toThrow("DB failure");
+  });
+
+  it("handles revision tab same as intake", async () => {
+    vi.mocked(prisma.intake).findMany.mockResolvedValue([]);
+
+    const result = await buildMattersExportWorkbook(
+      { tab: "revision", sortBy: "intakeDate", sortDir: "desc" },
+      mockUser
+    );
+
+    expect(result.total).toBe(0);
+    expect(result.tabLabel).toBe("Chờ bổ sung");
+  });
+
+  it("handles archived tab with no data", async () => {
+    vi.mocked(prisma.matter).findMany.mockResolvedValue([]);
+
+    const result = await buildMattersExportWorkbook(
+      { tab: "archived", sortBy: "intakeDate", sortDir: "desc" },
+      mockUser
+    );
+
+    expect(result.total).toBe(0);
+ expect(result.tabLabel).toBe("Đã lưu trữ");
+    expect(prisma.matter.findMany).toHaveBeenCalledTimes(1);
+  });
+
+  it("handles all tab with no data", async () => {
+    vi.mocked(prisma.matter).findMany.mockResolvedValue([]);
+
+    const result = await buildMattersExportWorkbook(
+      { tab: "all", sortBy: "intakeDate", sortDir: "desc" },
+      mockUser
+    );
+
+    expect(result.total).toBe(0);
+    expect(result.tabLabel).toBe("Tất cả vụ án");
+    // all tab queries matters without archive filter
+    expect(prisma.matter.findMany).toHaveBeenCalledTimes(1);
+  });
+});
+

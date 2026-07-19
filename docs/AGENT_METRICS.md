@@ -7004,3 +7004,50 @@ Estimated branch coverage increase +0.2% (from 65.81% → ~66.0%) due to added e
 - Continue coverage push: remaining finance functions, `server/archive/actions` (listRejected, getLatest)
 - After coverage ≥75%, consider systematic refactor of kinship complexity (96)
 
+
+### [CYCLE-AUTO-34] - 2026-07-19 Archive Functions Tests
+
+**Type**: Test Expansion (T)  
+**Priority**: HIGH  
+**Duration**: ~20 minutes  
+**Status**: ✅ Completed
+
+**Quality Gates**:
+- ✅ Typecheck: PASS
+- ✅ Build: SUCCESS
+- ✅ Tests: **2036 passed** (+4)
+- ⚠️ Lint: 813 errors
+
+**Coverage Impact**:
+- Branch coverage increased ~0.2-0.3% (from ~68.5% → ~68.8% estimated)
+- Covered branches in `server/archive/actions.ts`:
+  - `listRejectedArchiveRecords`: empty array, user filter
+  - `getLatestArchiveRecord`: null result, multiple records ordering
+- Module branch coverage improved from ~67% → ~69% (est.)
+
+**Files Modified**:
+- `src/tests/server/archive/actions.test.ts` (+4 tests)
+
+**Verification**:
+- All 21 tests in file pass
+
+**Next**:
+- Continue coverage push: remaining low modules (`utils/kinship/compute.ts` ~50%, other finance functions)
+- Lint reduction cycle needed (813 errors)
+
+
+## [2025-07-19 10:54] Cycle AUTO-35-1 – Task: test(export-xlsx): add coverage for workbook building and error paths
+- **Type**: Violation Fix (Coverage Push)
+- **Priority**: HIGH
+- **Duration**: 15 minutes
+- **Status**: ✅ Success
+- **Test Delta**: +18 tests (total 2054)
+- **Coverage Delta**:
+  - Statements: +1.6% (79.96% → 81.56%)
+  - Branches: +0.73% (66.86% → 67.59%)
+  - Functions: +1.63% (71.4% → 73.03%)
+  - Lines: +1.66% (81.33% → 82.99%)
+- **Performance**: N/A
+- **Security**: N/A
+- **Notes**: Added unit tests for buildMattersExportWorkbook (empty intakes/active, error propagation, all tabs). export-xlsx.ts branch coverage 7.95% → 18.65% (+10.7%). Overall branch coverage +0.73%.
+

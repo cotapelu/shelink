@@ -295,3 +295,9 @@ Next:
 - Remaining gaps: `utils/kinship/compute.ts` branches ~50% (still low), `server/archive/actions.ts` ~67%, other finance edge cases
 - Lint errors: 813 (unchanged) – need lint reduction cycle
 
+
+### AUTO-34 (2026-07-19)
+- Added tests for `listRejectedArchiveRecords` (empty, user filter) and `getLatestArchiveRecord` (null, ordering). Branch coverage ~68.5% → ~68.8% (+0.3%).
+- Kinship smoke tests (previous cycle) +0.3% to ~68.5%.
+- Lint errors unchanged at 813.
+
