@@ -7081,3 +7081,18 @@ Estimated branch coverage increase +0.2% (from 65.81% → ~66.0%) due to added e
 - **Module Impact**: archive/actions.ts branches increased (56.79% → ~58% est.)
 - **Notes**: Added validation tests (role, empty, >100) and partial failure handling. Branch coverage gain modest but critical error paths covered.
 
+
+## [2025-07-19 11:46] Cycle AUTO-36-1 – Task: test(archive): add validation and error tests for batchRejectArchiveRecords
+- **Type**: Violation Fix (Coverage Push)
+- **Priority**: HIGH
+- **Duration**: 15 minutes
+- **Status**: ✅ Success
+- **Test Delta**: +4 tests (total ~2065)
+- **Coverage Delta**:
+  - Statements: +0.08% (82.08% → 82.16%)
+  - Branches: +0.08% (68.73% → 68.81%)
+  - Functions: 0% (74.04% → 74.04%)
+  - Lines: +0.03% (83.46% → 83.49%)
+- **Module Impact**: archive/actions.ts branches increased (75.4% → ~75.8% est.)
+- **Notes**: Added tests for non-ADMIN rejection, empty IDs, >100 limit, and partial failures. Branch coverage gain modest but critical validation paths now covered.
+

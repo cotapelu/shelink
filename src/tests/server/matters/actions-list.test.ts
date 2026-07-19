@@ -175,4 +175,13 @@ describe("listMatters", () => {
     expect(result.items).toHaveLength(1);
   });
 
+  it("propagates prisma errors", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    const mockError = new Error("DB failure");
+    mockPrisma.matter.findMany.mockRejectedValue(mockError);
+    mockPrisma.matter.count.mockResolvedValue(0);
+
+    await expect(listMatters({})).rejects.toThrow("DB failure");
+  });
+
 });
