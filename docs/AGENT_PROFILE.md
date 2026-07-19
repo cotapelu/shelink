@@ -287,3 +287,11 @@ Next:
 
 ### Weaknesses (as of 2026-07-15 17:57)
 - High complexity in `src/utils/kinship/compute.ts`: multiple functions exceed 20 lines and cyclomatic complexity >10 (handleDirectLineage, handleSiblingTerms, handleUncleAuntTerms, handleCrossGenerationalTerms, resolveBloodTerms, findBloodKinship, buildMaps, createBothSpousesResult, checkViaBothSpouses, transformViaB_aCallsB, computeKinship). Requires systematic refactoring to meet quality gates.
+
+### Coverage Progress (2026-07-19)
+- Branch coverage: 64.74% → ~68.5% (cycles AUTO-26 → AUTO-33)
+- Test count: 2001 → 2032 (+31)
+- Key improvements: finance error paths, archive actions (errors + prep), kinship via-spouse + smoke tests
+- Remaining gaps: `utils/kinship/compute.ts` branches ~50% (still low), `server/archive/actions.ts` ~67%, other finance edge cases
+- Lint errors: 813 (unchanged) – need lint reduction cycle
+

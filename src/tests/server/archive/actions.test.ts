@@ -413,6 +413,30 @@ describe("listRejectedArchiveRecords", () => {
     expect(result).toHaveLength(1);
     expect(result[0].status).toBe("REJECTED");
   });
+
+  it("returns empty array when no rejected records", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    mockPrisma.archiveRecord.findMany.mockResolvedValue([] as any);
+
+    const result = await listRejectedArchiveRecords();
+    expect(result).toEqual([]);
+  });
+
+  it("filters by archivedById in where clause", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    mockPrisma.archiveRecord.findMany.mockResolvedValue([
+      { id: "ar-r1", status: "REJECTED", matterId: "m1", archivedById: "u1" }
+    ] as any);
+
+    const result = await listRejectedArchiveRecords();
+    expect(mockPrisma.archiveRecord.findMany).toHaveBeenCalledWith({
+      where: { archivedById: "u1", status: "REJECTED" },
+      orderBy: { archivedAt: "desc" },
+      take: 100,
+      select: expect.any(Object)
+    });
+    expect(result).toHaveLength(1);
+  });
 });
 
 describe("getLatestArchiveRecord", () => {
@@ -428,6 +452,29 @@ describe("getLatestArchiveRecord", () => {
 
     const result = await getLatestArchiveRecord("m1");
     expect(result).toHaveProperty("archiveNo", "ARCH-2025-001");
+  });
+
+  it("returns null when no archive record exists", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    mockAssertCanLeadMatter.mockResolvedValue(undefined);
+    mockPrisma.archiveRecord.findFirst.mockResolvedValue(null as any);
+
+    const result = await getLatestArchiveRecord("m1");
+    expect(result).toBeNull();
+  });
+
+  it("returns latest record ordered by archivedAt desc when multiple exist", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    mockAssertCanLeadMatter.mockResolvedValue(undefined);
+    mockPrisma.archiveRecord.findFirst.mockResolvedValue({
+      id: "ar-newest",
+      status: "PENDING_REVIEW",
+      archivedAt: new Date("2025-03-01"),
+      archiveNo: "ARCH-003"
+    } as any);
+
+    const result = await getLatestArchiveRecord("m1");
+    expect(result?.archiveNo).toBe("ARCH-003");
   });
 });
 
