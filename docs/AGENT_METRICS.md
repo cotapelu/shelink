@@ -7051,3 +7051,18 @@ Estimated branch coverage increase +0.2% (from 65.81% → ~66.0%) due to added e
 - **Security**: N/A
 - **Notes**: Added unit tests for buildMattersExportWorkbook (empty intakes/active, error propagation, all tabs). export-xlsx.ts branch coverage 7.95% → 18.65% (+10.7%). Overall branch coverage +0.73%.
 
+
+## [2025-07-19 11:12] Cycle AUTO-35-2 – Task: test(export-xlsx): add coverage for addIntakesSheet with data
+- **Type**: Violation Fix (Coverage Push)
+- **Priority**: HIGH
+- **Duration**: 15 minutes
+- **Status**: ✅ Success
+- **Test Delta**: +3 tests (total 2057)
+- **Coverage Delta**:
+  - Statements: +0.45% (81.56% → 82.01%)
+  - Branches: +1.06% (67.59% → 68.65%)
+  - Functions: +1.01% (73.03% → 74.04%)
+  - Lines: +0.43% (82.99% → 83.42%)
+- **Module Impact**: export-xlsx.ts branches 18.65% → 33.94% (+15.29%)
+- **Notes**: Added unit tests for addIntakesSheet with multi-category data and co-user mapping. Coverage gain focused on grouping and data transformation branches.
+

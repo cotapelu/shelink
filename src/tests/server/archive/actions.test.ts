@@ -256,6 +256,60 @@ describe("server/archive/actions", () => {
       expect(result).toEqual({ succeeded: ["ar-1", "ar-2"], failed: [] });
       expect(mockPrisma.archiveRecord.update).toHaveBeenCalledTimes(2);
     });
+
+    // Additional error path and validation tests for batchApproveArchiveRecords
+    it("rejects non-ADMIN role", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+      await expect(batchApproveArchiveRecords({ archiveIds: ["ar-1"] })).rejects.toThrow("只有管理员可以审批归档申请");
+    });
+
+    it("rejects empty archiveIds", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: "admin", role: "ADMIN" } });
+      await expect(batchApproveArchiveRecords({ archiveIds: [] })).rejects.toThrow("未选择任何归档申请");
+    });
+
+    it("rejects archiveIds > 100", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: "admin", role: "ADMIN" } });
+      const many = Array.from({ length: 101 }, (_, i) => `ar-${i}`);
+      await expect(batchApproveArchiveRecords({ archiveIds: many })).rejects.toThrow("单次批量不超过 100 条");
+    });
+
+    it("handles partial failures during batch approve", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: "admin", role: "ADMIN" } });
+      const ids = ["ar-1", "ar-2"];
+      mockPrisma.archiveRecord.findMany.mockResolvedValue([
+        { id: "ar-1", status: "PENDING_REVIEW", matterId: "m1" },
+        { id: "ar-2", status: "PENDING_REVIEW", matterId: "m2" }
+      ] as any);
+      // First update fails, second succeeds
+      mockPrisma.archiveRecord.update
+        .mockRejectedValueOnce(new Error("DB error"))
+        .mockResolvedValueOnce({} as any);
+      mockPrisma.matter.update.mockResolvedValueOnce({} as any);
+      mockPrisma.timelineEvent.create.mockResolvedValueOnce({} as any);
+      mockRevalidatePath.mockImplementation(() => {});
+      mockPrisma.archiveRecord.findUnique
+        .mockResolvedValueOnce({
+          id: "ar-1",
+          status: "PENDING_REVIEW",
+          matterId: "m1",
+          archiveNo: "ARCH-001",
+          archivedById: "user-2"
+        } as any)
+        .mockResolvedValueOnce({
+          id: "ar-2",
+          status: "PENDING_REVIEW",
+          matterId: "m2",
+          archiveNo: "ARCH-002",
+          archivedById: "user-2"
+        } as any);
+
+      const result = await batchApproveArchiveRecords({ archiveIds: ids });
+      expect(result).toEqual({
+        succeeded: ["ar-2"],
+        failed: [{ id: "ar-1", error: "DB error" }]
+      });
+    });
   });
 
   describe("batchRejectArchiveRecords", () => {
