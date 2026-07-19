@@ -23,7 +23,14 @@ function extractNames(
   return { client, opponent };
 }
 
-function runAutoTitle(): void {
+function runAutoTitle(
+  titleTouched: boolean,
+  watchedParties: any,
+  causeName: string,
+  watchedCauseFree: any,
+  watchedTitle: any,
+  setValue: any
+): void {
   if (titleTouched) return;
   const { client, opponent } = extractNames((watchedParties ?? []) as any);
   const cause = (causeName || watchedCauseFree || "").trim();
@@ -44,7 +51,8 @@ export function useAutoTitleSuggestion({}: UseAutoTitleProps) {
   const [causeName, setCauseName] = useState("");
 
   useEffect(() => {
-    runAutoTitle();
+    runAutoTitle(titleTouched, watchedParties, causeName, watchedCauseFree, watchedTitle, setValue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedParties, causeName, watchedCauseFree, titleTouched, watchedTitle, setValue]);
 
   return { titleTouched, setTitleTouched, causeName, setCauseName };
