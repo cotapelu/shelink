@@ -9,11 +9,11 @@
 ## Current Trajectory
 
 ### Health Score Trend
-- **Current**: ~84* (coverage 78.82% stmt, ~68.0% branches (est.), 70.72% func, 80.19% lines; test count 2024)
+- **Current**: ~84* (coverage 78.85% stmt, ~68.2% branches (est.), 70.75% func, 80.20% lines; test count 2027)
 - **Target**: ≥90 points
 - **Weekly Improvement Required**: +0.5% (≈ +0.5% coverage)
-- **Status**: 🔄 Mixed progress: Line coverage ≥80%, Branches ~68.0% (need +12.0%), Functions ~70.72% (need +9.28%). `utils/kinship/compute.ts` improved to ~45% branches, `server/archive/actions.ts` to ~65% (est.). Both still need significant coverage push.
-- **Next**: Continue coverage push on kinship (refactor needed for complexity 96) and other low modules; then resume lint reduction (813 errors).
+- **Status**: 🔄 Mixed progress: Line coverage ≥80%, Branches ~68.2% (need +11.8%), Functions ~70.75% (need +9.25%). `utils/kinship/compute.ts` ~45% branches, `server/archive/actions.ts` ~67% (est.).
+- **Next**: Continue coverage push on kinship (complexity 96) and other low-coverage modules; then lint reduction (813 errors).
 
 *Estimated partial score missing complexity/duplication metrics
 

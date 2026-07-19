@@ -6939,3 +6939,34 @@ Estimated branch coverage increase +0.2% (from 65.81% → ~66.0%) due to added e
 - Continue coverage push on remaining low modules: `utils/kinship/compute.ts` (branches ~45% after via tests, need +35% to 80%), other finance modules.
 - Lint reduction: 813 errors remain; next candidate UI components.
 
+
+### [CYCLE-AUTO-32] - 2026-07-19 Archive Prep Data Tests
+
+**Type**: Test Expansion (T)  
+**Priority**: HIGH  
+**Duration**: ~20 minutes  
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS
+- ✅ Build: SUCCESS
+- ✅ Tests: **2027 passed** (+2)
+- ⚠️ Lint: 813 errors, 180 warnings (unchanged)
+
+**Coverage Impact**:
+- Branch coverage increased ~0.2-0.3% (from ~68.0% → ~68.2% estimated)
+- Covered branches in `server/archive/actions.ts`:
+  - `getArchivePrepData`: linkedDocs mapping, null existingSummary
+- Module branch coverage improved from ~65% → ~67% (est.)
+
+**Files Modified**:
+- src/tests/server/archive/actions.test.ts (+2 tests)
+
+**Verification**:
+- All tests pass
+- No regressions
+
+**Next**:
+- Continue coverage push on remaining low modules: `utils/kinship/compute.ts` (branches ~45%), other finance modules
+- Lint reduction: 813 errors remain
+
