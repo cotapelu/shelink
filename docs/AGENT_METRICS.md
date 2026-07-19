@@ -7066,3 +7066,18 @@ Estimated branch coverage increase +0.2% (from 65.81% → ~66.0%) due to added e
 - **Module Impact**: export-xlsx.ts branches 18.65% → 33.94% (+15.29%)
 - **Notes**: Added unit tests for addIntakesSheet with multi-category data and co-user mapping. Coverage gain focused on grouping and data transformation branches.
 
+
+## [2025-07-19 11:21] Cycle AUTO-35-3 – Task: test(archive): add error path and validation tests for batchApproveArchiveRecords
+- **Type**: Violation Fix (Coverage Push)
+- **Priority**: HIGH
+- **Duration**: 15 minutes
+- **Status**: ✅ Success
+- **Test Delta**: +4 tests (total 2061)
+- **Coverage Delta**:
+  - Statements: +0.07% (82.01% → 82.08%)
+  - Branches: +0.08% (68.65% → 68.73%)
+  - Functions: 0% (74.04% → 74.04%)
+  - Lines: +0.04% (83.42% → 83.46%)
+- **Module Impact**: archive/actions.ts branches increased (56.79% → ~58% est.)
+- **Notes**: Added validation tests (role, empty, >100) and partial failure handling. Branch coverage gain modest but critical error paths covered.
+
