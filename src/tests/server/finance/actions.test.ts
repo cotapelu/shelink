@@ -168,6 +168,19 @@ describe("finance/actions", () => {
         })
       );
     });
+
+    it("should propagate assertMatterWritable error", async () => {
+      mockAssertMatterWritable.mockRejectedValue(new Error("Not writable"));
+      const input = { matterId: CUID(2), title: "Test", contractAmount: 1000, status: "DRAFT" } as any;
+      await expect(createBilling(input)).rejects.toThrow("Not writable");
+    });
+
+    it("should propagate prisma error", async () => {
+      mockAssertMatterWritable.mockResolvedValue(undefined);
+      mockPrisma.billing.create.mockRejectedValue(new Error("DB error"));
+      const input = { matterId: CUID(2), title: "Test", contractAmount: 1000, status: "DRAFT" } as any;
+      await expect(createBilling(input)).rejects.toThrow("DB error");
+    });
   });
 
   describe("deleteBilling", () => {
@@ -276,6 +289,22 @@ describe("finance/actions", () => {
         items: [{ userId: CUID(10), percent: 150 }],
       } as any;
       await expect(setCommissionPlan(input)).rejects.toThrow();
+    });
+
+    it("should propagate assertMatterWritable error", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: CUID(1), role: "LAWYER" } } as any);
+      mockAssertMatterWritable.mockRejectedValue(new Error("Not writable"));
+      const input = { matterId: CUID(2), items: [{ userId: CUID(10), percent: 10 }] } as any;
+      await expect(setCommissionPlan(input)).rejects.toThrow("Not writable");
+    });
+
+    it("should propagate prisma transaction error", async () => {
+      mockRequireSession.mockResolvedValue({ user: { id: CUID(1), role: "LAWYER" } } as any);
+      mockAssertMatterWritable.mockResolvedValue(undefined);
+      mockAssertCanLeadMatter.mockResolvedValue(undefined);
+      mockPrisma.$transaction.mockRejectedValueOnce(new Error("DB failure"));
+      const input = { matterId: CUID(2), items: [{ userId: CUID(10), percent: 10 }] } as any;
+      await expect(setCommissionPlan(input)).rejects.toThrow("DB failure");
     });
   });
 

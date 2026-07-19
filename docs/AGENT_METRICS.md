@@ -6758,3 +6758,44 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 
 ---
 
+
+### [CYCLE-AUTO-27] - 2026-07-19 Lint Reduction: JurisdictionSelect Refactor
+
+**Type**: Violation Fix (HIGH)  
+**Priority**: HIGH  
+**Duration**: ~30 minutes  
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS
+- ✅ Build: SUCCESS
+- ✅ Tests: 2001 passed (unchanged)
+- ✅ Lint: **Errors 812** (removed 1 error for jurisdiction-select)
+
+**Refactor Actions**:
+- Extracted `ProvinceSelect` component (22 lines)
+- Extracted `CitySelect` component (24 lines)
+- Extracted `AreaSelect` component (25 lines)
+- Refactored `JurisdictionSelect` to orchestration only (59 → 40 lines)
+- Removed helper `Field` component, inlined into JSX
+
+**Impact**:
+- Function size: 102 → 40 lines (meets ≤50 UI standard)
+- Complexity: unchanged but maintainability improved
+- Lint errors reduced by 1 (total 812 errors, 180 warnings)
+
+**Files Modified**:
+- src/app/(app)/intakes/_components/jurisdiction-select.tsx (refactored)
+- src/app/(app)/intakes/_components/province-select.tsx (new)
+- src/app/(app)/intakes/_components/city-select.tsx (new)
+- src/app/(app)/intakes/_components/area-select.tsx (new)
+
+**Verification**:
+- ESLint clean for all modified files
+- Typecheck & build pass
+- No test regressions
+
+**Next Steps**:
+- Continue with next high-size violations: `ClientCombobox` (221 lines), `InvoiceCreateDialog` (411 lines)
+- Target branch coverage push on `utils/kinship/compute.ts` (28.88% branches)
+

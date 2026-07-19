@@ -9,10 +9,10 @@
 ## Current Trajectory
 
 ### Health Score Trend
-- **Current**: ~84* (coverage 78.71% stmt, 65.75% branches, 70.56% func, 80.16% lines; test count 1996)
+- **Current**: ~84* (coverage 78.72% stmt, 65.81% branches, 70.56% func, 80.15% lines; test count 2001)
 - **Target**: ≥90 points
 - **Weekly Improvement Required**: +0.5% (≈ +0.5% coverage)
-- **Status**: 🔄 Coverage push in progress (Month 1). Branch coverage lags significantly; need +14.25% to reach 80%.
+- **Status**: 🔄 Mixed progress: Line coverage ≥80%, but Branches and Functions still lag (~65-70%). Continuing coverage push on low-branch modules and lint reduction.
 
 *Estimated partial score missing complexity/duplication metrics
 

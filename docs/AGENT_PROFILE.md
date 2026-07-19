@@ -121,10 +121,10 @@ Areas where modifications consume excessive time/risk:
 
 | Debt Type | Count (2026-07-19) | Trend | Target Reduction |
 |-----------|-------------------|-------|------------------|
-| Function size violations (UI >50 lines, server >20) | ~58 functions | ↘️ | -5/week |
+| Function size violations (UI >50 lines, server >20) | ~57 functions | ↘️ | -5/week |
 | Test Func coverage | 70.56% (<80%) | → | +2%/week |
 | Test Branch coverage | 65.84% (<80%) | ↗️ (+1.19% today) | +3%/week |
-| Lint errors | 813 errors, 179 warnings | ↘️ (from 2070) | Maintain 0 |
+| Lint errors | 812 errors, 180 warnings | ↘️ (from 2070) | Maintain 0 |
 | TODOs/FIXMEs | ~20 (estimated) | ↔️ | -2/week |
 | Missing indexes | 5-8 critical fields | ↔️ | -2/week |
 | Permission check gaps | Audited (consistent) | ✅ | Ongoing vigilance |
