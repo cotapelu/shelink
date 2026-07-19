@@ -250,3 +250,149 @@ describe("buildMattersExportWorkbook", () => {
   });
 });
 
+describe("addIntakesSheet with data", () => {
+  const mockUser: ExportUser = { id: "u1", role: "LAWYER" };
+  const mockIntakeRows: any[] = [
+    {
+      id: "i1",
+      title: "Intake 1",
+      category: "CIVIL_COMMERCIAL",
+      status: "PENDING",
+      receivedAt: new Date("2025-01-15"),
+      cause: { name: "Contract" },
+      causeFreeText: "",
+      description: "Desc 1",
+      client: {
+        id: "c1",
+        name: "Client A",
+        type: "INDIVIDUAL",
+        idNumber: "123",
+        address: "Addr",
+        phone: "0901",
+        legalRep: "",
+        contacts: []
+      },
+      contactName: "",
+      contactPhone: "",
+      clientContacts: "",
+      firstProcedureType: "LITIGATION",
+      firstAgency: "",
+      jurisdiction: "",
+      ourStanding: "PLAINTIFF",
+      claimAmount: 10000,
+      claimDescription: "",
+      barFiling: "NOT_REQUIRED",
+      counterclaim: false,
+      businessType: "",
+      serviceScope: "",
+      deliverables: "",
+      counselType: "",
+      serviceStart: new Date("2025-02-01"),
+      serviceEnd: new Date("2025-03-01"),
+      feeType: "HOURLY",
+      feeAmount: 5000,
+      contingencyTerms: "",
+      feeSchedule: "",
+      feeNote: "",
+      ownerUser: { name: "Owner" },
+      coUserIds: [],
+      parties: [],
+      documents: [],
+      matter: { firmCaseNo: "FC-001", internalCode: "IN-001", title: "Matter A" },
+      declinedReason: "",
+      createdAt: new Date("2025-01-10"),
+      updatedAt: new Date("2025-01-12")
+    },
+    {
+      id: "i2",
+      title: "Intake 2",
+      category: "CRIMINAL",
+      status: "REVIEW",
+      receivedAt: new Date("2025-02-01"),
+      cause: null,
+      causeFreeText: "Custom cause",
+      description: "Desc 2",
+      client: null,
+      contactName: "Contact",
+      contactPhone: "0902",
+      clientContacts: "",
+      firstProcedureType: "ARBITRATION",
+      firstAgency: "Agency",
+      jurisdiction: "Hanoi",
+      ourStanding: "DEFENDANT",
+      claimAmount: null,
+      claimDescription: "",
+      barFiling: "REQUIRED",
+      counterclaim: true,
+      businessType: "",
+      serviceScope: "",
+      deliverables: "",
+      counselType: "",
+      serviceStart: null,
+      serviceEnd: null,
+      feeType: "FIXED",
+      feeAmount: null,
+      contingencyTerms: "30%",
+      feeSchedule: "",
+      feeNote: "",
+      ownerUser: { name: "Owner2" },
+      coUserIds: ["u2"],
+      parties: [],
+      documents: [],
+      matter: null,
+      declinedReason: "",
+      createdAt: new Date("2025-02-05"),
+      updatedAt: new Date("2025-02-06")
+    }
+  ];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(prisma.intake).findMany = vi.fn();
+    vi.mocked(prisma.user).findMany = vi.fn().mockResolvedValue([
+      { id: "u2", name: "CoUser" }
+    ]);
+  });
+
+  it("creates worksheets grouped by category", async () => {
+    vi.mocked(prisma.intake).findMany.mockResolvedValue(mockIntakeRows);
+
+    const result = await buildMattersExportWorkbook(
+      { tab: "intake", sortBy: "intakeDate", sortDir: "desc" },
+      mockUser
+    );
+
+    expect(result.total).toBe(2);
+    expect(result.filename).toContain("intake");
+  });
+
+  it("handles co-user name mapping", async () => {
+    vi.mocked(prisma.intake).findMany.mockResolvedValue(mockIntakeRows);
+
+    const result = await buildMattersExportWorkbook(
+      { tab: "intake", sortBy: "intakeDate", sortDir: "desc" },
+      mockUser
+    );
+
+    expect(result.total).toBe(2);
+    // Verify coUserNames lookup called
+    expect(prisma.user.findMany).toHaveBeenCalledWith({
+      where: { id: { in: ["u2"] } },
+      select: { id: true, name: true }
+    });
+  });
+
+  it("handles revision tab with data", async () => {
+    vi.mocked(prisma.intake).findMany.mockResolvedValue(mockIntakeRows);
+
+    const result = await buildMattersExportWorkbook(
+      { tab: "revision", sortBy: "intakeDate", sortDir: "desc" },
+      mockUser
+    );
+
+    expect(result.total).toBe(2);
+    expect(result.tabLabel).toBe("Chờ bổ sung");
+  });
+});
+
+
