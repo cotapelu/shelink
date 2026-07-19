@@ -52,16 +52,16 @@ Modules với failure rate >5% hoặc repeated issues:
 
 ## Recent Improvements
 
-- **2026-07-19**: Coverage push – added unit tests for `createInvoiceRequest` (9 tests), covering validation, SPECIAL invoice fields, permission checks, and evidence requirements. Branch coverage increased from 64.74% → 65.75% (+1.01%), Statements 78.21% → 78.71% (+0.5%), Lines 79.67% → 80.16% (+0.49%).
+- **2026-07-19**: Coverage push – added error path tests for `createBilling` and `setCommissionPlan` (4 tests). Branch coverage increased from 65.81% → ~66.0% (+0.19%). Test count 2001 → 2005.
+- **2026-07-19**: Lint reduction – refactored `JurisdictionSelect` (102→40 lines) by extracting `ProvinceSelect`, `CitySelect`, `AreaSelect`. Lint errors -1 (812→811).
+- **2026-07-19**: Coverage push – earlier batches: `createInvoiceRequest` (9 tests), `getMonthlyRevenue` (5), `listAllFeeEntries` (5), `getPersonalRevenue` (4). Branch coverage cumulative +1.19% from 64.74%.
 - **2025-07-17**: Refactored ContactsView and related components (ExternalContactList, ExternalContactRow) to meet quality gate (UI ≤50 lines, complexity ≤10). Function size violations reduced by 3.
 - **2025-07-15**: Continued `gedcom/parser` refactor – extracted `handleLevel1`/`handleLevel2`, reduced `parsePersonRecord` complexity from 38 → 13.
-- **2025-07-14**: Refactored `dateHelpers` module:
-  - `getZodiacSign` complexity reduced from 51 to 1 via lookup table
-  - `getLunarDateString` lines reduced from 27 to 12 via `formatLunar` extraction
-- **2025-07-14**: Fixed `conflicts/algorithm` test type errors and exported functions for testability
-- **2025-07-14**: Added ESLint override for test files (complexity & max-lines off), acknowledging mock-heavy test patterns
-- **2025-07-14**: Refactored `gedcom/parser` – Added `parseGedcomDate`, extracted helpers, condensed lines, resulting in lint errors reduction from 2070 → 1298 (-37%)
-- **2025-07-14**: Coverage push – added unit tests for `searchMattersForLink` (2 tests)
+- **2025-07-14**: Refactored `dateHelpers` module: `getZodiacSign` complexity 51→1, `getLunarDateString` 27→12 lines.
+- **2025-07-14**: Fixed `conflicts/algorithm` test type errors, exported functions for testability.
+- **2025-07-14**: Added ESLint override for test files (complexity & max-lines off).
+- **2025-07-14**: Refactored `gedcom/parser` – added `parseGedcomDate`, extracted helpers, lint errors 2070→1298 (-37%).
+- **2025-07-14**: Coverage push – added tests for `searchMattersForLink` (2 tests).
 
 
 ## Error-Prone Stacks

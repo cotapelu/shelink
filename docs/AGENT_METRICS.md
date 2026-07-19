@@ -6799,3 +6799,36 @@ Also queued: `[R] matters/actions: Refactor updateProcedureInfo` (extract valida
 - Continue with next high-size violations: `ClientCombobox` (221 lines), `InvoiceCreateDialog` (411 lines)
 - Target branch coverage push on `utils/kinship/compute.ts` (28.88% branches)
 
+
+### [CYCLE-AUTO-28] - 2026-07-19 Coverage Push: Finance Error Paths
+
+**Type**: Test Expansion (T)  
+**Priority**: HIGH  
+**Duration**: ~20 minutes  
+**Status**: ✅ Completed
+
+**Quality Gates Run**:
+- ✅ Typecheck: PASS
+- ✅ Build: SUCCESS
+- ✅ Tests: **2005 passed** (+4)
+- ⚠️ Lint: 812 errors, 180 warnings (unchanged)
+
+**Coverage Impact**:  
+Estimated branch coverage increase +0.2% (from 65.81% → ~66.0%) due to added error path tests. Exact delta pending full coverage run.
+
+**Tests Added**:
+- `createBilling`: error propagation for `assertMatterWritable` and Prisma errors
+- `setCommissionPlan`: error propagation for `assertMatterWritable` and `$transaction` failures
+
+**Files Modified**:
+- src/tests/server/finance/actions.test.ts (expanded)
+
+**Verification**:
+- All finance/actions tests pass (20/20)
+- No regressions in other test suites
+- Error handling now covers failure scenarios
+
+**Next Steps**:
+- Continue coverage push on remaining low-branch modules: `utils/kinship/compute.ts` (28.88%), `server/archive/actions.ts` (56.79%)
+- Or continue lint reduction on remaining function size violations (target: ~57 functions → 0)
+
