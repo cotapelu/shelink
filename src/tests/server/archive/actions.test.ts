@@ -309,6 +309,54 @@ describe("getArchivePrepData", () => {
     expect(result.existingSummary).toBe("Summary");
     expect(result.docsByItem).toEqual({});
   });
+
+  it("should populate docsByItem from linked documents", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    mockAssertCanLeadMatter.mockResolvedValue(undefined);
+    mockPrisma.matter.findUnique.mockResolvedValue({
+      id: "m1",
+      title: "Matter",
+      category: "CIVIL",
+      internalCode: "INT-001",
+      archiveRecords: []
+    } as any);
+    mockChecklistForCategory.mockReturnValue([]);
+    mockPrisma.timelineEvent.findFirst.mockResolvedValue(null as any);
+    mockPrisma.document.findMany.mockResolvedValue([
+      { id: "d1", name: "Doc1", archiveChecklistItemId: "item1", createdAt: new Date("2025-01-01") },
+      { id: "d2", name: "Doc2", archiveChecklistItemId: "item1", createdAt: new Date("2025-01-02") },
+      { id: "d3", name: "Doc3", archiveChecklistItemId: "item2", createdAt: new Date("2025-01-03") }
+    ] as any);
+
+    const result = await getArchivePrepData("m1");
+    expect(result.docsByItem).toEqual({
+      item1: [
+        { id: "d1", name: "Doc1" },
+        { id: "d2", name: "Doc2" }
+      ],
+      item2: [
+        { id: "d3", name: "Doc3" }
+      ]
+    });
+  });
+
+  it("should return null existingSummary when no close event", async () => {
+    mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
+    mockAssertCanLeadMatter.mockResolvedValue(undefined);
+    mockPrisma.matter.findUnique.mockResolvedValue({
+      id: "m1",
+      title: "Matter",
+      category: "CIVIL",
+      internalCode: "INT-001",
+      archiveRecords: []
+    } as any);
+    mockChecklistForCategory.mockReturnValue([]);
+    mockPrisma.timelineEvent.findFirst.mockResolvedValue(null as any);
+    mockPrisma.document.findMany.mockResolvedValue([] as any);
+
+    const result = await getArchivePrepData("m1");
+    expect(result.existingSummary).toBeNull();
+  });
 });
 
 describe("listArchivedMatters", () => {

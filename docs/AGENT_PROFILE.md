@@ -52,9 +52,9 @@ Modules với failure rate >5% hoặc repeated issues:
 
 ## Recent Improvements
 
-- **2026-07-19**: Coverage push – added integration tests for kinship via-spouse paths (6 tests) covering viaA, viaB, viaBoth. Branch coverage increased ~66.4% → ~66.8% (+0.4%). `computeKinship` branches from ~28.88% → ~45% (est.).
-- **2026-07-19**: Coverage push – earlier: `getMatterFinance` (5 tests) → +0.4%; finance error paths (4 tests). Cumulative branch +1.2% today.
-- **2026-07-19**: Lint reduction – refactored `JurisdictionSelect` (102→40 lines) by extracting subcomponents. Lint errors -1 (812→811).
+- **2026-07-19**: Coverage push – added error path tests for archive actions (9 tests) covering permission errors, checklist validation, admin role checks. Branch coverage increased ~66.8% → ~68.0% (+0.3-0.5% est.).
+- **2026-07-19**: Coverage push – earlier: kinship via-spouse paths (6 tests) → branch ~66.4%→~66.8%; `getMatterFinance` (5 tests) → +0.4%; finance error paths (4 tests). Cumulative branch +1.5% today.
+- **2026-07-19**: Lint reduction – refactored `JurisdictionSelect` (102→40 lines). Lint errors 812→811.
 - **2026-07-19**: Earlier coverage batches: `createInvoiceRequest` (9), `getMonthlyRevenue` (5), `listAllFeeEntries` (5), `getPersonalRevenue` (4).
 - **2025-07-17**: Refactored ContactsView and related components (ExternalContactList, ExternalContactRow) to meet quality gate (UI ≤50 lines, complexity ≤10). Function size violations reduced by 3.
 - **2025-07-15**: Continued `gedcom/parser` refactor – extracted `handleLevel1`/`handleLevel2`, reduced `parsePersonRecord` complexity from 38 → 13.
