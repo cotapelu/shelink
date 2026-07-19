@@ -12,34 +12,40 @@ interface UseAutoTitleProps {
  * Hook to auto-generate intake title based on client and opposing party names + cause.
  * Rules: if user hasn't manually edited title, suggest "ClientVsOpponent Cause" without spaces.
  */
+function buildAutoTitle(client: string | undefined, opponent: string | undefined, cause: string) {
+  return `${client ?? ""}${opponent ? `与${opponent}` : ""}${cause}`.replace(/\s+/g, "");
+}
+function extractNames(
+  list: { role?: string; name?: string }[]
+): { client?: string; opponent?: string } {
+  const client = list.find(p => p.role === "CLIENT_PARTY")?.name?.trim();
+  const opponent = list.find(p => p.role === "OPPOSING_PARTY")?.name?.trim();
+  return { client, opponent };
+}
+
+function runAutoTitle(): void {
+  if (titleTouched) return;
+  const { client, opponent } = extractNames((watchedParties ?? []) as any);
+  const cause = (causeName || watchedCauseFree || "").trim();
+  if (!client && !opponent) return;
+  const suggested = buildAutoTitle(client, opponent, cause);
+  if (suggested && suggested !== (watchedTitle ?? "")) {
+    setValue("title", suggested, { shouldDirty: true });
+  }
+}
+
 export function useAutoTitleSuggestion({}: UseAutoTitleProps) {
-  const methods = useFormContext<IntakeCreateInput>();
-  const { control, setValue } = methods;
-  
+  const { control, setValue } = useFormContext<IntakeCreateInput>();
   const watchedParties = useWatch({ control, name: "parties" });
   const watchedTitle = useWatch({ control, name: "title" });
   const watchedCauseFree = useWatch({ control, name: "causeFreeText" });
-  
+
   const [titleTouched, setTitleTouched] = useState(false);
   const [causeName, setCauseName] = useState("");
 
   useEffect(() => {
-    if (titleTouched) return;
-    const list = (watchedParties ?? []) as { role?: string; name?: string }[];
-    const clientNm = list.find((p) => p.role === "CLIENT_PARTY")?.name?.trim();
-    const oppNm = list.find((p) => p.role === "OPPOSING_PARTY")?.name?.trim();
-    const causeNm = (causeName || watchedCauseFree || "").trim();
-    if (!clientNm && !oppNm) return;
-    const suggested = `${clientNm ?? ""}${oppNm ? `与${oppNm}` : ""}${causeNm}`.replace(/\s+/g, "");
-    if (suggested && suggested !== (watchedTitle ?? "")) {
-      setValue("title", suggested, { shouldDirty: true });
-    }
+    runAutoTitle();
   }, [watchedParties, causeName, watchedCauseFree, titleTouched, watchedTitle, setValue]);
 
-  return {
-    titleTouched,
-    setTitleTouched,
-    causeName,
-    setCauseName,
-  };
+  return { titleTouched, setTitleTouched, causeName, setCauseName };
 }

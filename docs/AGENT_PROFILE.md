@@ -52,21 +52,17 @@ Modules với failure rate >5% hoặc repeated issues:
 
 ## Recent Improvements
 
+- **2026-07-19**: Coverage push – added unit tests for `createInvoiceRequest` (9 tests), covering validation, SPECIAL invoice fields, permission checks, and evidence requirements. Branch coverage increased from 64.74% → 65.75% (+1.01%), Statements 78.21% → 78.71% (+0.5%), Lines 79.67% → 80.16% (+0.49%).
+- **2025-07-17**: Refactored ContactsView and related components (ExternalContactList, ExternalContactRow) to meet quality gate (UI ≤50 lines, complexity ≤10). Function size violations reduced by 3.
+- **2025-07-15**: Continued `gedcom/parser` refactor – extracted `handleLevel1`/`handleLevel2`, reduced `parsePersonRecord` complexity from 38 → 13.
 - **2025-07-14**: Refactored `dateHelpers` module:
   - `getZodiacSign` complexity reduced from 51 to 1 via lookup table
   - `getLunarDateString` lines reduced from 27 to 12 via `formatLunar` extraction
-  - Complexity and max-lines violations eliminated for this module
 - **2025-07-14**: Fixed `conflicts/algorithm` test type errors and exported functions for testability
 - **2025-07-14**: Added ESLint override for test files (complexity & max-lines off), acknowledging mock-heavy test patterns
-- **2025-07-14**: Refactored `gedcom/parser`:
-  - Added `parseGedcomDate` helper to centralize date parsing and eliminate duplication
-  - Refactored `parseFamilyRecord` into smaller helpers (`parseFamilyReferences`, `createMarriage`, `createChildRelationships`)
-  - Condensed `splitIntoRecords` to 12 lines (was 21)
-  - Simplified `parseGedcom` to 15 lines using unified loop
-  - Refactored `parsePersonRecord` using handler map, reducing complexity from 38 → 13 (still >10, needs further extraction)
-  - Result: Lint errors reduced from 2070 → 1298 (-37%)
-- **2025-07-14**: Coverage push – added unit tests for `searchMattersForLink` (2 tests) to increase function coverage.
-- **2025-07-14**: Continued `gedcom/parser` refactor – further reduction in complexity, improved testability.
+- **2025-07-14**: Refactored `gedcom/parser` – Added `parseGedcomDate`, extracted helpers, condensed lines, resulting in lint errors reduction from 2070 → 1298 (-37%)
+- **2025-07-14**: Coverage push – added unit tests for `searchMattersForLink` (2 tests)
+
 
 ## Error-Prone Stacks
 
@@ -123,17 +119,18 @@ Areas where modifications consume excessive time/risk:
 
 ## Recurring Debt
 
-| Debt Type | Count (2025-07-03) | Trend | Target Reduction |
+| Debt Type | Count (2026-07-19) | Trend | Target Reduction |
 |-----------|-------------------|-------|------------------|
-| Function size violations | 59 functions >30 lines | ↘️ (from 940) | -5/week |
-| Test Func coverage | 73.02% (<80%) | ↔️ | +2%/week |
-| Lint warnings | 0 (achieved) | ✅ | Maintain 0 |
+| Function size violations (UI >50 lines, server >20) | ~58 functions | ↘️ | -5/week |
+| Test Func coverage | 70.56% (<80%) | → | +2%/week |
+| Test Branch coverage | 65.84% (<80%) | ↗️ (+1.19% today) | +3%/week |
+| Lint errors | 813 errors, 179 warnings | ↘️ (from 2070) | Maintain 0 |
 | TODOs/FIXMEs | ~20 (estimated) | ↔️ | -2/week |
 | Missing indexes | 5-8 critical fields | ↔️ | -2/week |
-| Permission check gaps | TBD (audit needed) | ↔️ | -10 actions/week |
+| Permission check gaps | Audited (consistent) | ✅ | Ongoing vigilance |
 | Large components (>500 lines) | 5 modules | ↘️ | -1/week |
-| Test type bypass (@ts-nocheck) | 3 test files | ↗️ | -3 files/week |
-| Function size bypass (eslint-disable) | 6 functions | ↘️ | -2/week |
+| Test type bypass (@ts-nocheck) | 3 test files | → | -3 files/week |
+| Function size bypass (eslint-disable) | 6 functions | → | -2/week |
 
 **Debt Reduction Plan**:
 - Week P0-P1: Fix critical violations (rate limit, JWT, permission audit, coverage)

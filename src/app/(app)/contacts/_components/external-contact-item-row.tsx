@@ -1,5 +1,5 @@
 "use client";
-import type { ExternalContactItem } from "./contacts-view";
+import type { ExternalContactItem } from "./contacts-types";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ExternalContactRowContent } from "./external-contact-row-content";

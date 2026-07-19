@@ -9,10 +9,10 @@
 ## Current Trajectory
 
 ### Health Score Trend
-- **Current**: ~87* (coverage 98.85%, test count 990, complexity/dup pending)
+- **Current**: ~84* (coverage 78.71% stmt, 65.75% branches, 70.56% func, 80.16% lines; test count 1996)
 - **Target**: ≥90 points
-- **Weekly Improvement Required**: +0.5%
-- **Status**: 🚀 Baseline established, Sprint 1 complete
+- **Weekly Improvement Required**: +0.5% (≈ +0.5% coverage)
+- **Status**: 🔄 Coverage push in progress (Month 1). Branch coverage lags significantly; need +14.25% to reach 80%.
 
 *Estimated partial score missing complexity/duplication metrics
 

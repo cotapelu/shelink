@@ -2,7 +2,7 @@
 
 import { ExternalContactFilterBar } from "./external-contact-filter-bar";
 import { ExternalContactList } from "./external-contact-list";
-import type { ExternalContactItem } from "./contacts-view";
+import type { ExternalContactItem } from "./contacts-types";
 import type { ExternalContactCategory } from "@prisma/client";
 
 interface ExternalContactsSectionProps {
