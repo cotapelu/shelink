@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   addMatterLink,
   removeMatterLink
-} from "@/server/matters/actions";
+} from "@/server/matters/actions-link";
 import { requireSession } from "@/lib/auth/session";
 import { assertCanAssociateMatter } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";

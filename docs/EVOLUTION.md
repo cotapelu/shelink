@@ -33,6 +33,24 @@
 
 ---
 
+## Current Trajectory
+
+### Health Score Trend (2026-08 session, AUTO-38)
+- **Coverage**: Statements 83.96%, Branches 71.62%, Functions 79.48%, Lines 85.29%
+- **Lint**: 799 errors / 174 warnings
+- **Tests**: 2079 passed / 1 skipped (184 files)
+- **Gap to gate (≥80% all metrics)**: Branches -8.38%, Functions -0.52%
+- **Next**: branch coverage on `server/matters/export-xlsx.ts` (65.13%), `utils/kinship/bloodTerms.ts`; then finance/seals/preservations action files (16 violations each).
+
+### Completed with Approval (AUTO-38)
+- ✅ Dead code removed from `bloodGraph.ts` (transformAMap/transformBMap/suffix)
+- ✅ 6 unused imports removed from `matters/actions.ts`
+- ✅ `matters/actions.ts` split into 4 modules; file now 0 lint violations, max-lines eliminated
+
+### Blocked on Approval
+- `git commit` of AUTO-37 + AUTO-38 changes (7 modified + 4 new files) — user asked to commit, awaiting final confirmation on message.
+- `git push` — still a red line, not approved.
+
 ## Completed Work
 
 ### [CYCLE-AUDIT-1] - 2025-07-03 GOAL Framework Comprehensive Audit

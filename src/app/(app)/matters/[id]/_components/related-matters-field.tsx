@@ -31,7 +31,7 @@ import {
   searchMattersForLink,
   addMatterLink,
   removeMatterLink
-} from "@/server/matters/actions";
+} from "@/server/matters/actions-link";
 
 type MatterRef = { id: string; internalCode: string; title: string };
 

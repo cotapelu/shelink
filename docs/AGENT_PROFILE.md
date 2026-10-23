@@ -50,6 +50,17 @@ Modules với failure rate >5% hoặc repeated issues:
 
 ---
 
+## Dead Code Findings (2026-08 session, AUTO-37)
+
+| Symbol | Location | Evidence | Status |
+|--------|----------|----------|--------|
+| `transformAMap` (12 entries) | `src/utils/kinship/bloodGraph.ts:118` | Not exported, no importer in repo; ESLint `no-unused-vars` warning | ⚠️ NOT DELETED — needs Yến approval (AGENTS.md §5.1 forbids deleting code) |
+| `transformBMap` (19 entries) | `src/utils/kinship/bloodGraph.ts:135` | Not exported, no importer in repo; ESLint `no-unused-vars` warning | ⚠️ NOT DELETED — needs Yến approval |
+| `suffix` | `src/utils/kinship/bloodGraph.ts:133` | Used only by `transformBMap` | ✅ REMOVED (AUTO-38-1, approved) |
+| `emptyToNull`, `normalizeLitigationStanding`, `buildClientLinks`, `buildParties`, `buildProcedure`, `PartyType` | `src/server/matters/actions.ts` | Imported but never used → 6 `no-unused-vars` warnings | ✅ REMOVED (AUTO-38-2, approved) |
+
+**Impact**: bloodGraph.ts function coverage is capped at 13.51% (5/37 functions) purely because of the unused maps. Removing them would raise the module metric to ~100% and clear 2 lint warnings.
+
 ## Recent Improvements
 
 - **2026-07-19**: Coverage push – added happy-path tests for `getArchivePrepData` (2 tests: docsByItem mapping, null existingSummary). Branch coverage increased ~68.0% → ~68.2% (+0.2%).

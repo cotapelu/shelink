@@ -20,20 +20,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { LitigationStanding, PartyRole, PartyType, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
 import { audit } from "@/server/audit";
 import { assertMatterWritable } from "@/lib/archive/guard";
 import {
-  matterAssociationFilter,
-  matterVisibilityFilter,
   assertCanAccessMatter,
-  assertCanAssociateMatter,
   assertCanOwnMatter
 } from "@/lib/permissions";
 import { generateInternalCode, generateFirmCaseNo } from "./code-generator";
-import { seedDefaultFolders } from "@/lib/default-folders";
 import {
   matterCreateSchema,
   matterListQuerySchema,
@@ -44,17 +40,25 @@ import {
 } from "./schemas";
 
 import {
-  emptyToNull,
-  clientTypeToPartyType,
-  normalizeProcedureParties,
-  normalizeLitigationStanding,
-  normalizeNewProcedureParties,
-  type NewProcedurePartyInput,
-  buildClientLinks,
-  buildParties,
-  buildProcedure,
-  buildMatterCreateData
-} from "./helpers";
+  createMatterWithSideEffects,
+  buildMatterBasicUpdateData,
+  authorizeMatterEdit,
+  authorizeMatterTeam,
+  type MatterTeamUpdateInput
+} from "./matter-write-helpers";
+import {
+  MATTER_LIST_INCLUDE,
+  buildMatterListWhere,
+  sortMatterListItems
+} from "./actions-list-query";
+import {
+  type ProcedureInfoInput,
+  authorizeProcedureUpdate,
+  normalizeProcedurePartyInput,
+  assertProcedurePartiesBelongToMatter,
+  applyProcedureInfoUpdates
+} from "./procedure-info";
+
 
 /**
  * List matters with filtering, pagination, and visibility checks.
@@ -68,126 +72,13 @@ export async function listMatters(input: Partial<MatterListQuery> = {}) {
   const session = await requireSession();
   const query = matterListQuerySchema.parse(input);
 
-  const whereParts: Prisma.MatterWhereInput[] = [
-    matterVisibilityFilter(session.user.id, session.user.role),
-    { deletedAt: null }
-  ];
-  if (query.category) whereParts.push({ category: query.category });
-  if (query.status) whereParts.push({ status: query.status });
-  if (query.statusIn) whereParts.push({ status: { in: query.statusIn } });
-  if (query.statusNotIn) whereParts.push({ status: { notIn: query.statusNotIn } });
-  if (query.ownerId) whereParts.push({ ownerId: query.ownerId });
-  if (query.clientId) whereParts.push({ primaryClientId: query.clientId });
-  if (query.intakeDateFrom || query.intakeDateTo) {
-    whereParts.push({
-      intakeDate: {
-        ...(query.intakeDateFrom ? { gte: query.intakeDateFrom } : {}),
-        ...(query.intakeDateTo ? { lte: query.intakeDateTo } : {})
-      }
-    });
-  }
-  if (query.search) {
-    whereParts.push({
-      OR: [
-        { title: { contains: query.search, mode: "insensitive" } },
-        { internalCode: { contains: query.search, mode: "insensitive" } },
-        { primaryClient: { name: { contains: query.search, mode: "insensitive" } } }
-      ]
-    });
-  }
-  const where: Prisma.MatterWhereInput = { AND: whereParts };
-
-  const compareNullable = <T>(
-    a: T | null | undefined,
-    b: T | null | undefined,
-    compare: (x: T, y: T) => number
-  ) => {
-    const aEmpty = a === null || a === undefined;
-    const bEmpty = b === null || b === undefined;
-    if (aEmpty && bEmpty) return 0;
-    if (aEmpty) return 1;
-    if (bEmpty) return -1;
-    return compare(a as T, b as T);
-  };
-
+  const where = buildMatterListWhere(session.user.id, session.user.role, query);
   const [allItems, total] = await Promise.all([
-    prisma.matter.findMany({
-      where,
-      orderBy: [{ updatedAt: "desc" }],
-      include: {
-        primaryClient: { select: { id: true, name: true } },
-        owner: { select: { id: true, name: true } },
-        cause: { select: { id: true, name: true } },
-        procedures: {
-          where: { engagement: "ENGAGED" },
-          orderBy: { order: "desc" },
-          take: 20,
-          select: {
-            id: true,
-            type: true,
-            caseNumber: true,
-            status: true,
-            hearings: {
-              orderBy: { startsAt: "desc" },
-              take: 1,
-              select: { startsAt: true }
-            }
-          }
-        },
-        // v0.8.1: Cần vài ký tự đầu của đối phương/third party cho card UI
-        parties: {
-          where: { role: { in: ["OPPOSING_PARTY", "THIRD_PARTY"] } },
-          orderBy: [{ role: "asc" }, { ordinal: "asc" }],
-          take: 3,
-          select: { id: true, name: true, role: true, standing: true }
-        },
-        // v0.16: Có申请 lưu trữ待审批 không?
-        archiveRecords: {
-          where: { status: "PENDING_REVIEW" },
-          take: 1,
-          select: { id: true }
-        },
-        _count: { select: { procedures: true } }
-      }
-    }),
+    prisma.matter.findMany({ where, orderBy: [{ updatedAt: "desc" }], include: MATTER_LIST_INCLUDE }),
     prisma.matter.count({ where })
   ]);
 
-  const sorted = allItems
-    .map((matter) => ({
-      ...matter,
-      latestHearingAt:
-        matter.procedures
-          .map((p) => p.hearings[0]?.startsAt ?? null)
-          .filter((d): d is Date => !!d)
-          .sort((a, b) => b.getTime() - a.getTime())[0] ?? null
-    }))
-    .sort((a, b) => {
-      const sortValue = (matter: typeof a) => {
-        if (query.sortBy === "hearing") return matter.latestHearingAt;
-        if (query.sortBy === "claimAmount") {
-          return matter.claimAmount === null || matter.claimAmount === undefined
-            ? null
-            : Number(matter.claimAmount);
-        }
-        return matter.intakeDate;
-      };
-      const aValue = sortValue(a);
-      const bValue = sortValue(b);
-      const aEmpty = aValue === null || aValue === undefined;
-      const bEmpty = bValue === null || bValue === undefined;
-      if (aEmpty && bEmpty) return b.updatedAt.getTime() - a.updatedAt.getTime();
-      if (aEmpty) return 1;
-      if (bEmpty) return -1;
-      const direction = query.sortDir === "asc" ? 1 : -1;
-      const base =
-        aValue instanceof Date || bValue instanceof Date
-          ? compareNullable(aValue as Date | null, bValue as Date | null, (x, y) => x.getTime() - y.getTime())
-          : compareNullable(aValue as number | null, bValue as number | null, (x, y) => x - y);
-      if (base !== 0) return base * direction;
-      return b.updatedAt.getTime() - a.updatedAt.getTime();
-    });
-
+  const sorted = sortMatterListItems(allItems, query);
   const start = (query.page - 1) * query.pageSize;
   const items = sorted.slice(start, start + query.pageSize);
 
@@ -195,365 +86,65 @@ export async function listMatters(input: Partial<MatterListQuery> = {}) {
 }
 
 // v0.32: Chỉnh sửa thông tin cơ bản của thủ tục
-export async function updateProcedureInfo(input: {
-  procedureId: string;
-  jurisdiction?: string;
-  handlingAgency?: string;
-  caseNumber?: string;
-  presidingJudge?: string;
-  presidingJudgeContact?: string;
-  judgeAssistant?: string;
-  judgeAssistantContact?: string;
-  ourStanding?: string | null;
-  acceptedAt?: string | null;
-  concludedAt?: string | null;
-  procedureParties?: { partyId: string; standing: LitigationStanding }[];
-  newProcedureParties?: {
-    existingPartyId?: string | null;
-    name: string;
-    role: PartyRole;
-    partyType: PartyType;
-    idNumber?: string;
-    enterpriseSocialCode?: string;
-    standings: LitigationStanding[];
-  }[];
-}) {
-  const session = await requireSession();
-  const proc = await prisma.matterProcedure.findUnique({
-    where: { id: input.procedureId },
-    select: { matterId: true }
-  });
-  if (!proc) throw new Error("Thủ tục không tồn tại");
-  await assertCanAccessMatter(session.user.id, session.user.role, proc.matterId);
-  await assertMatterWritable(proc.matterId);
-
-  const partyRows = input.procedureParties
-    ? normalizeProcedureParties(input.procedureParties)
-    : null;
-  const newPartyRows = normalizeNewProcedureParties(input.newProcedureParties ?? []);
-  if ((input.newProcedureParties?.length ?? 0) !== newPartyRows.length) {
-    throw new Error("Thông tin party thủ tục mới không đầy đủ");
-  }
-
-  if (partyRows) {
-    const partyIds = [...new Set(partyRows.map((row) => row.partyId))];
-    const realPartyIds = partyIds.filter((partyId) => !partyId.startsWith("client:"));
-    const clientIds = partyIds
-      .filter((partyId) => partyId.startsWith("client:"))
-      .map((partyId) => partyId.slice("client:".length));
-    const validParties = await prisma.party.findMany({
-      where: { matterId: proc.matterId, id: { in: realPartyIds } },
-      select: { id: true }
-    });
-    const validPartyIds = new Set(validParties.map((p) => p.id));
-    const matterClients =
-      clientIds.length > 0
-        ? await prisma.matter.findUnique({
-            where: { id: proc.matterId },
-            select: {
-              primaryClientId: true,
-              clientLinks: { select: { clientId: true } }
-            }
-          })
-        : null;
-    const validClientIds = new Set([
-      ...(matterClients?.primaryClientId ? [matterClients.primaryClientId] : []),
-      ...(matterClients?.clientLinks.map((link) => link.clientId) ?? [])
-    ]);
-    if (
-      partyRows.some(
-        (row) =>
-          !row.partyId.startsWith("client:") &&
-          !validPartyIds.has(row.partyId)
-      ) ||
-      clientIds.some((clientId) => !validClientIds.has(clientId))
-    ) {
-      throw new Error("Tồn tại party không thuộc vụ án này");
-    }
-  }
-
-  await prisma.$transaction(async (tx) => {
-    const mergedProcedureParties = [...(partyRows ?? [])];
-    for (const row of mergedProcedureParties) {
-      if (row.partyId.startsWith("client:")) {
-        row.partyId = await ensureClientParty(tx, proc.matterId, row.partyId.slice("client:".length), row.standing);
-      }
-    }
-    if (newPartyRows.length > 0) {
-      const nextOrdinalByRole = new Map<PartyRole, number>();
-      for (const role of [...new Set(newPartyRows.map((row) => row.role))]) {
-        const max = await tx.party.aggregate({
-          where: { matterId: proc.matterId, role },
-          _max: { ordinal: true }
-        });
-        nextOrdinalByRole.set(role, (max._max.ordinal ?? 0) + 1);
-      }
-
-      for (const row of newPartyRows) {
-        let partyId = row.existingPartyId ?? null;
-        if (partyId) {
-          const existingParty = await tx.party.findFirst({
-            where: { id: partyId, matterId: proc.matterId },
-            select: { id: true }
-          });
-          if (!existingParty) throw new Error("Tồn tại party không thuộc vụ án này");
-          await tx.party.update({
-            where: { id: existingParty.id },
-            data: {
-              role: row.role,
-              name: row.name,
-              partyType: row.partyType,
-              standing: row.standings[0] ?? null,
-              idNumber: row.partyType === "NATURAL_PERSON" ? row.idNumber : null,
-              enterpriseSocialCode:
-                row.partyType === "NATURAL_PERSON" ? null : row.enterpriseSocialCode,
-              enterpriseName: row.partyType === "NATURAL_PERSON" ? null : row.name
-            }
-          });
-        } else {
-          const ordinal = nextOrdinalByRole.get(row.role) ?? 1;
-          nextOrdinalByRole.set(row.role, ordinal + 1);
-          const createdParty = await tx.party.create({
-            data: {
-              matterId: proc.matterId,
-              role: row.role,
-              ordinal,
-              name: row.name,
-              partyType: row.partyType,
-              standing: row.standings[0] ?? null,
-              idNumber: row.partyType === "NATURAL_PERSON" ? row.idNumber : null,
-              enterpriseSocialCode:
-                row.partyType === "NATURAL_PERSON" ? null : row.enterpriseSocialCode,
-              enterpriseName: row.partyType === "NATURAL_PERSON" ? null : row.name
-            },
-            select: { id: true }
-          });
-          partyId = createdParty.id;
-        }
-
-        for (const standing of row.standings) {
-          mergedProcedureParties.push({ partyId, standing });
-        }
-      }
-    }
-
-    await tx.matterProcedure.update({
-      where: { id: input.procedureId },
-      data: {
-        jurisdiction: input.jurisdiction?.trim() || null,
-        handlingAgency: input.handlingAgency?.trim() || null,
-        caseNumber: input.caseNumber?.trim() || null,
-        presidingJudge: input.presidingJudge?.trim() || null,
-        presidingJudgeContact: input.presidingJudgeContact?.trim() || null,
-        judgeAssistant: input.judgeAssistant?.trim() || null,
-        judgeAssistantContact: input.judgeAssistantContact?.trim() || null,
-        ourStanding: input.ourStanding ? (input.ourStanding as LitigationStanding) : null,
-        acceptedAt: input.acceptedAt ? new Date(input.acceptedAt) : null,
-        concludedAt: input.concludedAt ? new Date(input.concludedAt) : null
-      }
-    });
-
-    if (partyRows || newPartyRows.length > 0) {
-      await tx.procedureParty.deleteMany({ where: { procedureId: input.procedureId } });
-      if (mergedProcedureParties.length > 0) {
-        await tx.procedureParty.createMany({
-          data: mergedProcedureParties.map((row, idx) => ({
-            procedureId: input.procedureId,
-            partyId: row.partyId,
-            standing: row.standing,
-            ordinal: idx + 1
-          })),
-          skipDuplicates: true
-        });
-      }
-    }
-  });
+export async function updateProcedureInfo(input: ProcedureInfoInput) {
+  const { session, matterId } = await authorizeProcedureUpdate(input);
+  const { partyRows, newPartyRows } = normalizeProcedurePartyInput(input);
+  await assertProcedurePartiesBelongToMatter(matterId, partyRows);
+  await prisma.$transaction((tx) =>
+    applyProcedureInfoUpdates(tx, { procedureId: input.procedureId, matterId, input, partyRows, newPartyRows })
+  );
   await audit({
     userId: session.user.id,
     action: "PROCEDURE_INFO_UPDATE",
     targetType: "MatterProcedure",
     targetId: input.procedureId,
-    detail: { matterId: proc.matterId }
-  });
-  revalidatePath(`/matters/${proc.matterId}`);
-}
-
-
-
-async function ensureClientParty(
-  tx: Prisma.TransactionClient,
-  matterId: string,
-  clientId: string,
-  standing: LitigationStanding
-) {
-  const client = await tx.client.findUnique({
-    where: { id: clientId },
-    select: { id: true, name: true, type: true, idNumber: true }
-  });
-  if (!client) throw new Error("Khách hàng không tồn tại");
-
-  const existing = await tx.party.findFirst({
-    where: {
-      matterId,
-      role: "CLIENT_PARTY",
-      name: client.name
-    },
-    select: { id: true }
-  });
-  if (existing) return existing.id;
-
-  const max = await tx.party.aggregate({
-    where: { matterId, role: "CLIENT_PARTY" },
-    _max: { ordinal: true }
-  });
-  const partyType = clientTypeToPartyType(client.type);
-  const created = await tx.party.create({
-    data: {
-      matterId,
-      role: "CLIENT_PARTY",
-      ordinal: (max._max.ordinal ?? 0) + 1,
-      name: client.name,
-      partyType,
-      standing,
-      idNumber: partyType === "NATURAL_PERSON" ? client.idNumber : null,
-      enterpriseSocialCode: partyType === "NATURAL_PERSON" ? null : client.idNumber,
-      enterpriseName: partyType === "NATURAL_PERSON" ? null : client.name,
-      notes: "Tự động bổ sung từ client liên kết vụ án"
-    },
-    select: { id: true }
-  });
-  return created.id;
-}
-
-
-
-
-// v0.32: Liên kết vụ án —— Tìm kiếm / Liên kết / Hủy liên kết
-export async function searchMattersForLink(matterId: string, q: string) {
-  const session = await requireSession();
-  await assertCanAssociateMatter(session.user.id, matterId);
-  const query = q.trim();
-  // Đã liên kết (cả hai chiều) loại trừ
-  const links = await prisma.matterLink.findMany({
-    where: { OR: [{ matterId }, { relatedMatterId: matterId }] },
-    select: { matterId: true, relatedMatterId: true }
-  });
-  const excludeIds = new Set<string>([matterId]);
-  links.forEach((l) => {
-    excludeIds.add(l.matterId);
-    excludeIds.add(l.relatedMatterId);
-  });
-  const items = await prisma.matter.findMany({
-    where: {
-      deletedAt: null,
-      id: { notIn: Array.from(excludeIds) },
-      ...matterAssociationFilter(session.user.id),
-      ...(query
-        ? {
-            OR: [
-              { title: { contains: query, mode: "insensitive" } },
-              { internalCode: { contains: query, mode: "insensitive" } }
-            ]
-          }
-        : {})
-    },
-    select: { id: true, internalCode: true, title: true },
-    orderBy: { createdAt: "desc" },
-    take: 8
-  });
-  return items;
-}
-
-export async function addMatterLink(matterId: string, relatedMatterId: string) {
-  const session = await requireSession();
-  await assertCanAssociateMatter(session.user.id, matterId);
-  await assertCanAssociateMatter(session.user.id, relatedMatterId);
-  if (matterId === relatedMatterId) throw new Error("Không thể liên kết đến chính vụ án này");
-  await prisma.matterLink.upsert({
-    where: { matterId_relatedMatterId: { matterId, relatedMatterId } },
-    create: { matterId, relatedMatterId },
-    update: {}
-  });
-  await audit({
-    userId: session.user.id,
-    action: "MATTER_LINK_ADD",
-    targetType: "Matter",
-    targetId: matterId,
-    detail: { relatedMatterId }
+    detail: { matterId }
   });
   revalidatePath(`/matters/${matterId}`);
 }
 
-export async function removeMatterLink(matterId: string, relatedMatterId: string) {
-  const session = await requireSession();
-  await assertCanAssociateMatter(session.user.id, matterId);
-  await assertCanAssociateMatter(session.user.id, relatedMatterId);
-  // Xóa cả hai chiều (bất kể ban đầu ai liên kết ai)
-  await prisma.matterLink.deleteMany({
-    where: {
-      OR: [
-        { matterId, relatedMatterId },
-        { matterId: relatedMatterId, relatedMatterId: matterId }
-      ]
+
+
+const MATTER_DETAIL_INCLUDE = {
+  primaryClient: { include: { contacts: { where: { isPrimary: true }, take: 1 } } },
+  clientLinks: { include: { client: { select: { id: true, name: true, type: true, idNumber: true } } } },
+  owner: { select: { id: true, name: true, role: true } },
+  members: {
+    include: { user: { select: { id: true, name: true, role: true } } }
+  },
+  cause: true,
+  parties: { orderBy: [{ role: "asc" }, { ordinal: "asc" }] },
+  relatedEntities: { orderBy: { createdAt: "asc" } },
+  intake: { select: { counterclaim: true, claimDescription: true } },
+  linksFrom: {
+    include: { relatedMatter: { select: { id: true, internalCode: true, title: true } } }
+  },
+  linksTo: {
+    include: { matter: { select: { id: true, internalCode: true, title: true } } }
+  },
+  procedures: {
+    orderBy: { order: "asc" },
+    include: {
+      deadlines: { orderBy: [{ completed: "asc" }, { dueAt: "asc" }] },
+      hearings: { orderBy: { startsAt: "asc" } },
+      stages: { orderBy: { order: "asc" } },
+      procedureParties: {
+        orderBy: [{ standing: "asc" }, { ordinal: "asc" }],
+        include: { party: true }
+      },
+      memos: { orderBy: [{ done: "asc" }, { createdAt: "desc" }] }
     }
-  });
-  await audit({
-    userId: session.user.id,
-    action: "MATTER_LINK_REMOVE",
-    targetType: "Matter",
-    targetId: matterId,
-    detail: { relatedMatterId }
-  });
-  revalidatePath(`/matters/${matterId}`);
-}
+  },
+  timelineEvents: { orderBy: { occurredAt: "desc" }, take: 50 }
+} satisfies Prisma.MatterInclude;
 
-/**
- * Get matter by ID with full includes and permission check.
- * @param id - Matter ID
- * @returns Promise<Matter> - matter with all relations (client, parties, cause, members, etc.)
- * @throws {Error} - if matter not found or user lacks access
- * @access Requires authenticated session; checks matter visibility permissions
- * @audit Logs matter view
- */
 export async function getMatterById(id: string) {
   const session = await requireSession();
   await assertCanAccessMatter(session.user.id, session.user.role, id);
   const matter = await prisma.matter.findFirst({
     where: { id, deletedAt: null },
-    include: {
-      primaryClient: { include: { contacts: { where: { isPrimary: true }, take: 1 } } },
-      clientLinks: { include: { client: { select: { id: true, name: true, type: true, idNumber: true } } } },
-      owner: { select: { id: true, name: true, role: true } },
-      members: {
-        include: { user: { select: { id: true, name: true, role: true } } }
-      },
-      cause: true,
-      parties: { orderBy: [{ role: "asc" }, { ordinal: "asc" }] },
-      relatedEntities: { orderBy: { createdAt: "asc" } },
-      intake: { select: { counterclaim: true, claimDescription: true } },
-      linksFrom: {
-        include: { relatedMatter: { select: { id: true, internalCode: true, title: true } } }
-      },
-      linksTo: {
-        include: { matter: { select: { id: true, internalCode: true, title: true } } }
-      },
-      procedures: {
-        orderBy: { order: "asc" },
-        include: {
-          deadlines: { orderBy: [{ completed: "asc" }, { dueAt: "asc" }] },
-          hearings: { orderBy: { startsAt: "asc" } },
-          stages: { orderBy: { order: "asc" } },
-          procedureParties: {
-            orderBy: [{ standing: "asc" }, { ordinal: "asc" }],
-            include: { party: true }
-          },
-          memos: { orderBy: [{ done: "asc" }, { createdAt: "desc" }] }
-        }
-      },
-      timelineEvents: { orderBy: { occurredAt: "desc" }, take: 50 }
-    }
+    include: MATTER_DETAIL_INCLUDE
   });
-
   if (matter) {
     await audit({
       userId: session.user.id,
@@ -566,46 +157,25 @@ export async function getMatterById(id: string) {
 }
 
 
-export async function createMatter(input: MatterCreateInput) {
-  const session = await requireSession();
-  const data = matterCreateSchema.parse(input);
-
-  const internalCode = await generateInternalCode(data.category);
-  const firmCaseNo = await generateFirmCaseNo(data.category);
-  const [primaryClientId, ...otherClientIds] = data.clientIds;
-
-  const created = await prisma.$transaction(async (tx) => {
-    const matter = await tx.matter.create({
-      data: buildMatterCreateData(data, session.user.id, primaryClientId, internalCode, firmCaseNo)
-    });
-
-    // TimelineEvent: Tạo vụ án
-    await tx.timelineEvent.create({
-      data: {
-        matterId: matter.id,
-        eventType: "MATTER_CREATED",
-        title: "Vụ án đã được tạo",
-        occurredAt: new Date()
-      }
-    });
-
-    // v0.8: Thư mục mặc định
-    await seedDefaultFolders(tx, matter.id, data.category);
-
-    // Đánh dấu otherClientIds để tránh lint báo không dùng
-    void otherClientIds;
-
-    return matter;
-  });
-
+async function logMatterCreated(userId: string, created: { id: string; internalCode: string; title: string }) {
   await audit({
-    userId: session.user.id,
+    userId,
     action: "MATTER_CREATE",
     targetType: "Matter",
     targetId: created.id,
     detail: { internalCode: created.internalCode, title: created.title }
   });
+}
 
+export async function createMatter(input: MatterCreateInput) {
+  const session = await requireSession();
+  const data = matterCreateSchema.parse(input);
+  const [primaryClientId] = data.clientIds;
+  const internalCode = await generateInternalCode(data.category);
+  const firmCaseNo = await generateFirmCaseNo(data.category);
+  const args = { data, ownerId: session.user.id, primaryClientId, internalCode, firmCaseNo };
+  const created = await prisma.$transaction((tx) => createMatterWithSideEffects(tx, args));
+  await logMatterCreated(session.user.id, created);
   revalidatePath("/matters");
   return { ok: true, id: created.id, internalCode: created.internalCode };
 }
@@ -616,76 +186,74 @@ export async function createMatter(input: MatterCreateInput) {
  * - Khi ownerId thay đổi, đồng bộ thay LEAD trong MatterMember
  * - coLeadIds và assistantIds ghi đè các vai trò tương ứng (không ảnh hưởng đến LEAD tự động của chủ vụ)
  */
-export async function updateMatterTeam(input: {
+type MatterTeamMemberRow = {
   matterId: string;
-  ownerId: string;
-  coLeadIds: string[];
-  assistantIds: string[];
-}) {
-  const session = await requireSession();
-  const matter = await prisma.matter.findUnique({
-    where: { id: input.matterId, deletedAt: null },
-    select: { id: true, ownerId: true }
-  });
-  if (!matter) throw new Error("Vụ án không tồn tại");
-  await assertMatterWritable(input.matterId);
-  await assertCanOwnMatter(session.user.id, input.matterId, "Chỉ luật sư phụ trách hiện tại được sửa team vụ án");
+  userId: string;
+  role: "LEAD" | "CO_LEAD" | "ASSISTANT";
+};
 
-  // Validate: coLeadIds / assistantIds không được overlap với ownerId
+function buildTeamMemberRows(
+  matterId: string,
+  ownerId: string,
+  coLeadIds: string[],
+  assistantIds: string[]
+): MatterTeamMemberRow[] {
+  return [
+    { matterId, userId: ownerId, role: "LEAD" },
+    ...coLeadIds.map((uid) => ({ matterId, userId: uid, role: "CO_LEAD" as const })),
+    ...assistantIds.map((uid) => ({ matterId, userId: uid, role: "ASSISTANT" as const }))
+  ];
+}
+
+function sanitizeTeamIds(input: { ownerId: string; coLeadIds: string[]; assistantIds: string[] }) {
   const co = input.coLeadIds.filter((id) => id !== input.ownerId);
-  const ass = input.assistantIds.filter(
-    (id) => id !== input.ownerId && !co.includes(id)
-  );
+  const ass = input.assistantIds.filter((id) => id !== input.ownerId && !co.includes(id));
+  return { co, ass };
+}
 
-  await prisma.$transaction(async (tx) => {
-    // Cập nhật Matter.ownerId
-    if (matter.ownerId !== input.ownerId) {
-      await tx.matter.update({
-        where: { id: input.matterId },
-        data: { ownerId: input.ownerId }
-      });
-    }
-
-    // Rebuild MatterMember: xóa hết rồi insert lại theo cấu trúc mới
-    await tx.matterMember.deleteMany({ where: { matterId: input.matterId } });
-
-    const rows = [
-      { matterId: input.matterId, userId: input.ownerId, role: "LEAD" as const },
-      ...co.map((uid) => ({
-        matterId: input.matterId,
-        userId: uid,
-        role: "CO_LEAD" as const
-      })),
-      ...ass.map((uid) => ({
-        matterId: input.matterId,
-        userId: uid,
-        role: "ASSISTANT" as const
-      }))
-    ];
-    await tx.matterMember.createMany({ data: rows, skipDuplicates: true });
+async function applyMatterTeamUpdate(
+  tx: Prisma.TransactionClient,
+  input: { matterId: string; ownerId: string; currentOwnerId: string; co: string[]; ass: string[] }
+) {
+  if (input.currentOwnerId !== input.ownerId) {
+    await tx.matter.update({ where: { id: input.matterId }, data: { ownerId: input.ownerId } });
+  }
+  await tx.matterMember.deleteMany({ where: { matterId: input.matterId } });
+  await tx.matterMember.createMany({
+    data: buildTeamMemberRows(input.matterId, input.ownerId, input.co, input.ass),
+    skipDuplicates: true
   });
+}
 
-  await audit({
-    userId: session.user.id,
-    action: "MATTER_TEAM_UPDATE",
-    targetType: "Matter",
-    targetId: input.matterId,
-    detail: { ownerId: input.ownerId, coLeads: co.length, assistants: ass.length }
-  });
+type TeamUpdateDetail = { ownerId: string; coLeads: number; assistants: number };
 
+async function finishMatterTeamUpdate(userId: string, matterId: string, detail: TeamUpdateDetail) {
+  await audit({ userId, action: "MATTER_TEAM_UPDATE", targetType: "Matter", targetId: matterId, detail });
   // v0.43 mục 4: Ghi timeline vụ án
   await prisma.timelineEvent.create({
     data: {
-      matterId: input.matterId,
-      eventType: "TEAM_CHANGED",
-      title: "Cập nhật team xử lý",
-      occurredAt: new Date(),
-      refType: "Matter",
-      refId: input.matterId
+      matterId, eventType: "TEAM_CHANGED", title: "Cập nhật team xử lý", occurredAt: new Date(),
+      refType: "Matter", refId: matterId
     }
   });
+  revalidatePath(`/matters/${matterId}`);
+}
 
-  revalidatePath(`/matters/${input.matterId}`);
+export async function updateMatterTeam(input: MatterTeamUpdateInput) {
+  const session = await requireSession();
+  const message = "Chỉ luật sư phụ trách hiện tại được sửa team vụ án";
+  const matter = await authorizeMatterTeam(session, input.matterId, message);
+  // Validate: coLeadIds / assistantIds không được overlap với ownerId
+  const { co, ass } = sanitizeTeamIds(input);
+  await prisma.$transaction((tx) =>
+    applyMatterTeamUpdate(tx, { matterId: input.matterId, ownerId: input.ownerId, currentOwnerId: matter.ownerId, co, ass })
+  );
+
+  await finishMatterTeamUpdate(session.user.id, input.matterId, {
+    ownerId: input.ownerId,
+    coLeads: co.length,
+    assistants: ass.length
+  });
   return { ok: true };
 }
 
@@ -694,28 +262,12 @@ export async function updateMatterBasicInfo(input: MatterUpdateBasicInput) {
   const session = await requireSession();
   const data = matterUpdateBasicSchema.parse(input);
 
-  const matter = await prisma.matter.findUnique({
-    where: { id: data.id, deletedAt: null },
-    select: { id: true, ownerId: true, title: true }
-  });
-  if (!matter) throw new Error("Vụ án không tồn tại");
-  await assertMatterWritable(data.id);
-  await assertCanOwnMatter(session.user.id, data.id, "Chỉ luật sư phụ trách hiện tại được chỉnh sửa thông tin vụ án");
-
-  await prisma.matter.update({
-    where: { id: data.id },
-    data: {
-      title: data.title,
-      causeId: data.causeId ? data.causeId : null,
-      causeFreeText: data.causeFreeText ? data.causeFreeText : null,
-      claimAmount:
-        data.claimAmount === null || data.claimAmount === undefined
-          ? null
-          : new Prisma.Decimal(data.claimAmount),
-      ourStanding: data.ourStanding ?? null
-    }
-  });
-
+  const matter = await authorizeMatterEdit(
+    session,
+    data.id,
+    "Chỉ luật sư phụ trách hiện tại được chỉnh sửa thông tin vụ án"
+  );
+  await prisma.matter.update({ where: { id: data.id }, data: buildMatterBasicUpdateData(data) });
   await audit({
     userId: session.user.id,
     action: "MATTER_BASIC_UPDATE",
@@ -723,7 +275,6 @@ export async function updateMatterBasicInfo(input: MatterUpdateBasicInput) {
     targetId: data.id,
     detail: { titleBefore: matter.title, titleAfter: data.title }
   });
-
   revalidatePath(`/matters/${data.id}`);
   return { ok: true };
 }

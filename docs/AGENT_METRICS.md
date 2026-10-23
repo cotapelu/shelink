@@ -7096,3 +7096,98 @@ Estimated branch coverage increase +0.2% (from 65.81% → ~66.0%) due to added e
 - **Module Impact**: archive/actions.ts branches increased (75.4% → ~75.8% est.)
 - **Notes**: Added tests for non-ADMIN rejection, empty IDs, >100 limit, and partial failures. Branch coverage gain modest but critical validation paths now covered.
 
+
+## [2025-07-19 11:58] Cycle AUTO-36-2 – Task: test(matters): add error propagation test for listMatters
+- **Type**: Violation Fix (Coverage Push)
+- **Priority**: HIGH
+- **Duration**: 10 minutes
+- **Status**: ✅ Success
+- **Test Delta**: +1 test (total ~2066)
+- **Coverage Delta**:
+  - Branches: ~0% (68.81% → 68.81%)
+- **Notes**: Added test for prisma error propagation in listMatters. Minimal branch impact due to existing comprehensive tests.
+
+## [Cycle AUTO-37-1] Task: test(export-xlsx): cover build* section builders (litigation + counsel kinds)
+- **Type**: Violation Fix (Coverage Push) + Lint reduction
+- **Priority**: HIGH
+- **Duration**: 45 minutes
+- **Status**: ✅ Success
+- **Test Delta**: +11 tests (total 2054 → 2065)
+- **Coverage Delta** (module):
+  - export-xlsx.ts statements 59.37% → 85.15% (+25.78)
+  - export-xlsx.ts branches 33.94% → 65.13% (+31.19)
+  - export-xlsx.ts functions 46.42% → 94.04% (+47.62)
+  - export-xlsx.ts lines 60.96% → 87.28%
+- **Lint**: warnings 191 → 182 (-9: dangling unused imports of non-exported helpers removed from test file)
+- **Notes**: Tests assert the full matter row (base/client/cause/service/parties/related/intake-source/timestamp/procedures) by reading the generated xlsx buffer back with ExcelJS → verifies real DB→Excel data flow, not just "no exception". Column headers are resolved from a generated COL map to avoid transcription drift. Discovered and documented: procedureSummary/sourceBusinessType columns only exist for project/counsel kinds (not litigation), so those branches are covered by the counsel-kind test.
+
+## [Cycle AUTO-37-2] Task: test(kinship): cover findBloodKinship traversal + LCA resolution
+- **Type**: Violation Fix (Coverage Push)
+- **Priority**: MEDIUM
+- **Duration**: 25 minutes
+- **Status**: ✅ Success
+- **Test Delta**: +14 tests (total 2065 → 2079 local / 2068 suite)
+- **Coverage Delta** (module):
+  - bloodGraph.ts branches 46.42% → 57.14% (+10.72)
+- **Notes**: Covers no-common-ancestor (null), ghost parent ids, start node missing from personsMap, same-person (with and without personsMap entry → "Tổ tiên chung" fallback), direct lineage (parent/child both directions, grandparent nội/ngoại, great-grandparent), siblings with duplicate parents (BFS dedup guard + closest-LCA tie-break), cross-generational (cousins depth 2+2, uncle/aunt 2+1, distant cousins 3+3).
+
+## [Cycle AUTO-37-3] Task: refactor(matters/actions): reduce lint violations 18 → 13
+- **Type**: Refactor (function extraction)
+- **Priority**: MEDIUM
+- **Duration**: 40 minutes
+- **Status**: ✅ Success
+- **Lint Delta**: src/server/matters/actions.ts errors 18 → 13 (repo total 813 → 808)
+- **Notes**:
+  - `updateProcedureInfo`: worst offender (arrow 96 lines / complexity 41) split into pure builders (`buildProcedureInfoData` via `buildTrimmedTextData`/`buildProcedureDateData`/`buildProcedureStandingData`, `buildPartyData`) plus transactional helpers (`assertProcedurePartiesBelongToMatter`, `computeNextOrdinalByRole`, `upsertProcedurePartyRow`/`createProcedureParty`, `appendNewProcedureParties`, `replaceProcedureParties`, `applyProcedureInfoUpdates`, `authorizeProcedureUpdate`, `normalizeProcedurePartyInput`).
+  - `listMatters`: extracted `MATTER_LIST_INCLUDE` const, `buildMatterListWhere`, `compareNullable` (module-level), `matterSortValue`, `compareMatterItems`, `sortMatterListItems`.
+  - Remaining violations in file (13) all need module split (max-lines 300) or deeper behavioural refactor → deferred to next cycle.
+- **Verification**: tsc PASS, 160 matters tests PASS, full suite 2068 PASS, build SUCCESS, dev server GET /login 200, /matters 307 (auth redirect, expected).
+
+## [Cycle AUTO-37] Discovery Baseline (2026-08 session)
+- Typecheck PASS (tsc --noEmit clean)
+- Full suite: 183 files / 2068 passed / 1 skipped
+- Coverage: Statements 82.16% → 83.30%, Branches 68.81% → 71.19%, Functions 74.04% → 77.15%, Lines 83.49% → 84.64%
+- Lint: 813 errors → 808 errors, 191 warnings → 182 warnings
+
+## [Cycle AUTO-38-1] Task: cleanup(kinship): remove dead transform maps (approved by Yến)
+- **Type**: Dead Code Removal + Lint reduction
+- **Priority**: MEDIUM
+- **Status**: ✅ Success
+- **Duration**: 5 minutes
+- **Notes**: Removed `transformAMap`, `transformBMap`, `suffix` from `src/utils/kinship/bloodGraph.ts` (39 lines). They were never exported and had no importer anywhere in the repo (verified by repo-wide grep incl. non-TS files). Function coverage of the module is now limited only by real code.
+- **Verification**: tsc PASS, kinship tests PASS.
+
+## [Cycle AUTO-38-2] Task: cleanup(matters/actions): remove unused imports (approved by Yến)
+- **Type**: Lint reduction
+- **Priority**: LOW
+- **Status**: ✅ Success
+- **Duration**: 10 minutes
+- **Notes**: Removed 6 unused imports (`emptyToNull`, `normalizeLitigationStanding`, `buildClientLinks`, `buildParties`, `buildProcedure`, `PartyType`) after verifying each symbol had exactly 1 occurrence (the import itself) in the file.
+
+## [Cycle AUTO-38-3] Task: refactor(matters/actions): module split, violations 13 → 0 in actions.ts
+- **Type**: Refactor (module extraction)
+- **Priority**: MEDIUM
+- **Status**: ✅ Success
+- **Duration**: 75 minutes
+- **Lint Delta**: `src/server/matters/actions.ts` 13 → 0 errors; `max-lines` (file >300) **eliminated** by splitting into 3 new modules:
+  - `actions-list-query.ts` — MATTER_LIST_INCLUDE, buildMatterListWhere (+ filter builders), sort helpers
+  - `procedure-info.ts` — all procedure-party helpers + applyProcedureInfoUpdates
+  - `actions-link.ts` — searchMattersForLink / addMatterLink / removeMatterLink (server actions)
+  - `matter-write-helpers.ts` — createMatterWithSideEffects, team update helpers, authorize helpers
+- **Build fix**: `"use server"` files may only export async functions → removed non-exported type + re-export blocks; updated `related-matters-field.tsx` and 3 test files to import link actions from `actions-link` directly.
+- **Verification**: tsc PASS, matters tests 160 PASS, build SUCCESS, site 200.
+
+## [Cycle AUTO-38-4] Task: test(kinship): branch coverage push for compute.ts (28.33% → 46.11%)
+- **Type**: Proactive Improvement (Coverage Push)
+- **Priority**: MEDIUM
+- **Status**: ✅ Success
+- **Duration**: 25 minutes
+- **Test Delta**: +16 tests (total 2068 → 2084 suite-level 2079)
+- **Coverage Delta** (module): compute.ts branches 28.33% → 46.11% (+17.78)
+- **Notes**: New `src/tests/utils/kinship/computeKinship-extra.test.ts` covers: via-both-spouses (incl. blood-sibling adjustment "Anh em cột chèo"), adopted_child edges, ignored unknown edge types, missing spouse in personsMap, via-A and via-B in-law paths (including pathLabels ordering), direct-marriage precedence, same-gender marriage terms, uncle via spouse.
+
+## [Cycle AUTO-38] Discovery Baseline (2026-08 session, post A38)
+- Typecheck PASS
+- Full suite: 184 files / 2079 passed / 1 skipped
+- Coverage: Statements 83.96%, Branches 71.62%, Functions 79.48%, Lines 85.29%
+- Lint: 799 errors / 174 warnings

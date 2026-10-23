@@ -6,11 +6,13 @@ import {
   updateMatterBasicInfo,
   softDeleteMatter,
   listMatters,
+  updateMatterTeam
+} from "@/server/matters/actions";
+import {
   searchMattersForLink,
-  updateMatterTeam,
   addMatterLink,
   removeMatterLink
-} from "@/server/matters/actions";
+} from "@/server/matters/actions-link";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
 import { audit } from "@/server/audit";
