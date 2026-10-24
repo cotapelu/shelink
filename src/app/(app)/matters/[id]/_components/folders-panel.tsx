@@ -281,6 +281,30 @@ function FolderItem({
   );
 }
 
+function SealSubmitButton({ doc, matterId }: { doc: FolderDocument; matterId: string }) {
+  function submitForSeal() {
+    // 段 5 + 段 6 联动：跳转 /seals?new=1&draftDocId=...&matterId=...
+    const url = new URL("/approvals/seals", window.location.origin);
+    url.searchParams.set("new", "1");
+    url.searchParams.set("draftDocId", doc.id);
+    url.searchParams.set("matterId", matterId);
+    url.searchParams.set("documentTitle", doc.name);
+    window.location.href = url.toString();
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={submitForSeal}
+      className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary"
+      title="提交用章审批"
+    >
+      <Stamp className="h-3 w-3" />
+      提交用章
+    </button>
+  );
+}
+
 function DocCard({ doc, matterId }: { doc: FolderDocument; matterId: string }) {
   const sizeLabel =
     doc.size && doc.size > 1024 * 1024
@@ -313,26 +337,21 @@ function DocCard({ doc, matterId }: { doc: FolderDocument; matterId: string }) {
           <Download className="h-3 w-3" />
           下载
         </a>
-        <button
-          type="button"
-          onClick={() => {
-            // 段 5 + 段 6 联动：跳转 /seals?new=1&draftDocId=...&matterId=...
-            const url = new URL("/approvals/seals", window.location.origin);
-            url.searchParams.set("new", "1");
-            url.searchParams.set("draftDocId", doc.id);
-            url.searchParams.set("matterId", matterId);
-            url.searchParams.set("documentTitle", doc.name);
-            window.location.href = url.toString();
-          }}
-          className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary"
-          title="提交用章审批"
-        >
-          <Stamp className="h-3 w-3" />
-          提交用章
-        </button>
+        <SealSubmitButton doc={doc} matterId={matterId} />
       </div>
     </div>
   );
+}
+
+async function submitCreateFolder(matterId: string, name: string): Promise<boolean> {
+  try {
+    await createFolder({ matterId, name: name.trim() });
+    toast.success("已新建");
+    return true;
+  } catch (e) {
+    toast.error(e instanceof Error ? e.message : "新建失败");
+    return false;
+  }
 }
 
 function NewFolderDialog({
@@ -350,13 +369,10 @@ function NewFolderDialog({
   const submit = () => {
     if (!name.trim()) return;
     startTransition(async () => {
-      try {
-        await createFolder({ matterId, name: name.trim() });
-        toast.success("已新建");
+      const ok = await submitCreateFolder(matterId, name);
+      if (ok) {
         setName("");
         onOpenChange(false);
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "新建失败");
       }
     });
   };
