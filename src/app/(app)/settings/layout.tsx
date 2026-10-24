@@ -18,7 +18,7 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 import Link from "next/link";
-import { Settings, Users, Layers, ScrollText, KeyRound, Sparkles, Package, ListChecks, BellRing, Building2, FileUp } from "lucide-react";
+import { Settings, Users, Layers, ScrollText, KeyRound, Sparkles, Package, ListChecks, BellRing, Building2, FileUp, Wallet, Languages, Mail } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 
 export default async function SettingsLayout({
@@ -29,6 +29,7 @@ export default async function SettingsLayout({
   const session = await getSession();
   const isAdmin = session?.user.role === "ADMIN";
   const isManager = isAdmin || session?.user.role === "PRINCIPAL_LAWYER";
+  const canViewCash = isManager || session?.user.role === "FINANCE";
 
   return (
     <div className="space-y-5">
@@ -63,6 +64,14 @@ export default async function SettingsLayout({
                   批量导入
                 </SettingsNavLink>
               </>
+            )}
+            {canViewCash && (
+              <SettingsNavLink
+                href="/settings/cash-accounts"
+                icon={<Wallet className="h-3.5 w-3.5" />}
+              >
+                Quản lý quỹ
+              </SettingsNavLink>
             )}
             {isAdmin && (
               <>
@@ -101,6 +110,18 @@ export default async function SettingsLayout({
                   icon={<Package className="h-3.5 w-3.5" />}
                 >
                   快递接入
+                </SettingsNavLink>
+                <SettingsNavLink
+                  href="/settings/email"
+                  icon={<Mail className="h-3.5 w-3.5" />}
+                >
+                  Email giao dịch
+                </SettingsNavLink>
+                <SettingsNavLink
+                  href="/settings/terminology"
+                  icon={<Languages className="h-3.5 w-3.5" />}
+                >
+                  Thuật ngữ hiển thị
                 </SettingsNavLink>
                 <SettingsNavLink
                   href="/settings/audit"

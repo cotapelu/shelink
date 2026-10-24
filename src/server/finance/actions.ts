@@ -21,6 +21,7 @@
 
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
+import type { FeeEntryType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
 import { audit } from "@/server/audit";
@@ -45,6 +46,7 @@ import {
   invoiceMatterSearchLimit,
   invoiceMatterSearchWhere
 } from "./invoice-matter-search";
+import { buildAgingRows, summarizeAging, type AgingBucketKey, type AgingRow, type MatterAgg } from "./aging";
 
 // ============ Billing ============
 
@@ -613,4 +615,76 @@ export async function getPersonalRevenue(userId: string) {
     monthlyCommission: Number(monthly._sum.amount ?? 0),
     yearlyCommission: Number(yearly._sum.amount ?? 0)
   };
+}
+
+// ============ Bảng tuổi nợ (DATA-MODEL §4.31) ============
+
+type AgingEntry = {
+  matterId: string;
+  type: FeeEntryType;
+  amount: Prisma.Decimal;
+  occurredAt: Date;
+  matter: { internalCode: string; title: string; primaryClient: { name: string } | null };
+};
+
+/** Gom thu/chi nợ theo matter; anchor = RECEIVABLE xa nhất. */
+function aggregateMatterFlows(entries: AgingEntry[]): Map<string, MatterAgg> {
+  const map = new Map<string, MatterAgg>();
+  for (const e of entries) {
+    const agg = map.get(e.matterId) ?? { matterId: e.matterId, receivable: 0, received: 0, anchorAt: 0 };
+    if (e.type === "RECEIVABLE") {
+      agg.receivable += Number(e.amount);
+      const t = e.occurredAt.getTime();
+      agg.anchorAt = agg.anchorAt === 0 ? t : Math.min(agg.anchorAt, t);
+    } else {
+      agg.received += Number(e.amount);
+    }
+    map.set(e.matterId, agg);
+  }
+  return map;
+}
+
+export interface AgingViewRow {
+  matterId: string;
+  receivable: number;
+  received: number;
+  outstanding: number;
+  ageDays: number;
+  bucket: AgingBucketKey;
+  internalCode: string;
+  title: string;
+  clientName: string | null;
+}
+
+function fetchAgingEntries(actor: { id: string; role: string }): Promise<AgingEntry[]> {
+  const visFilter = matterVisibilityFilter(actor.id, actor.role);
+  return prisma.feeEntry.findMany({
+    where: { type: { in: ["RECEIVABLE", "RECEIVED"] }, matter: { deletedAt: null, ...visFilter } },
+    select: {
+      matterId: true,
+      type: true,
+      amount: true,
+      occurredAt: true,
+      matter: { select: { internalCode: true, title: true, primaryClient: { select: { name: true } } } }
+    }
+  });
+}
+
+function toViewRows(entries: AgingEntry[], rows: AgingRow[]): AgingViewRow[] {
+  const meta = new Map(entries.map((e) => [e.matterId, e.matter]));
+  return rows.map((r) => ({
+    ...r,
+    internalCode: meta.get(r.matterId)?.internalCode ?? "",
+    title: meta.get(r.matterId)?.title ?? "",
+    clientName: meta.get(r.matterId)?.primaryClient?.name ?? null
+  }));
+}
+
+export async function getReceivablesAging(now = Date.now()) {
+  const session = await requireSession();
+  const entries = await fetchAgingEntries(session.user);
+  const rows = buildAgingRows(Array.from(aggregateMatterFlows(entries).values()), now);
+  const viewRows = toViewRows(entries, rows);
+  const totalOutstanding = Math.round(viewRows.reduce((acc, r) => acc + r.outstanding, 0) * 100) / 100;
+  return { rows: viewRows, summary: summarizeAging(rows), totalOutstanding };
 }

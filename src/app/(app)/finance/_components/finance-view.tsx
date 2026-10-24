@@ -29,7 +29,8 @@ import {
   TrendingUp,
   Percent,
   Receipt,
-  FileText
+  FileText,
+  Clock
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -81,6 +82,7 @@ type Entry = {
 import type { InvoiceRequestStatus } from "@prisma/client";
 import { InvoiceManagementSection } from "./invoice-management";
 import { InvoiceCreateDialog } from "./invoice-create-dialog";
+import { ReceivablesAging, type AgingRowData, type AgingSummary } from "./receivables-aging";
 
 export type InvoiceRequestRow = {
   id: string;
@@ -132,6 +134,7 @@ type Props = {
   };
   invoiceRequests: InvoiceRequestRow[];
   canApproveInvoice: boolean;
+  aging: { rows: AgingRowData[]; summary: AgingSummary[]; totalOutstanding: number };
 };
 
 const TYPE_FILTERS: ("ALL" | keyof typeof feeTypeLabel)[] = [
@@ -148,10 +151,11 @@ export function FinanceView({
   monthly,
   stats,
   invoiceRequests,
-  canApproveInvoice
+  canApproveInvoice,
+  aging
 }: Props) {
   const [typeFilter, setTypeFilter] = useState<"ALL" | keyof typeof feeTypeLabel>("ALL");
-  const [tab, setTab] = useState<"overview" | "invoices">("overview");
+  const [tab, setTab] = useState<"overview" | "invoices" | "aging">("overview");
   const [invoiceCreateOpen, setInvoiceCreateOpen] = useState(false);
 
   const filtered = entries.filter((e) => typeFilter === "ALL" || e.type === typeFilter);
@@ -189,6 +193,10 @@ export function FinanceView({
           <Wallet className="h-3.5 w-3.5" strokeWidth={1.8} />
           总览
         </TabBtn>
+        <TabBtn active={tab === "aging"} onClick={() => setTab("aging")}>
+          <Clock className="h-3.5 w-3.5" strokeWidth={1.8} />
+          Công nợ
+        </TabBtn>
         <TabBtn active={tab === "invoices"} onClick={() => setTab("invoices")}>
           <Receipt className="h-3.5 w-3.5" strokeWidth={1.8} />
           开票管理
@@ -207,6 +215,8 @@ export function FinanceView({
             canApprove={canApproveInvoice}
           />
         </div>
+      ) : tab === "aging" ? (
+        <ReceivablesAging data={aging} />
       ) : (
         <>
       {/* KPI */}

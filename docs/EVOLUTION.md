@@ -28,6 +28,11 @@
 - Còn thiếu tới gate (≥80% cả 4 chỉ số): nhánh -8.38%, hàm -0.48% (sắp chạm ngưỡng hàm).
 - Trích 3 hàm gần ngưỡng + sửa 1 lỗi `rules-of-hooks` (bug tiềm ẩn runtime) + mọi cảnh báo lint đơn lẻ còn sót trong phạm vi đã chạm..
 
+**Phiên 2026-10-24 (AUTO-42)**:
+- Type [T] — đẩy phủ nhánh điểm nghẽt `server/archive/actions.ts`: branch **~74%→95%** (60/81→77/81), dòng 100% (thêm `archive-branches.test.ts`, 12 test, không sửa production). Test 2143→2155 pass / 1 skip.
+- Sau AUTO-39/40/41 (hoàn tất GĐ1: Quỹ/Thuật ngữ/Email/Tuổi nợ/Pipeline Kanban). Typecheck/Build PASS. `git commit/push` đỏ-vạch §7 — **chưa commit**, chờ chủ sở hữu duyệt.
+- **Điểm nghẽt còn lại**: `utils/kinship/compute.ts` nhánh ~50% (cần dựng đồ thị máu phức tạp; lên lịch sau).
+
 ## Đang chặn chờ duyệt
 - Xoá dead code `src/utils/kinship/bloodGraph.ts` (transformAMap/transformBMap/suffix) — cần duyệt theo AGENTS.md §5.7.
 - Gỡ 6 import không dùng trong `server/matters/actions.ts` — cùng luật, cần kiểm import trước.

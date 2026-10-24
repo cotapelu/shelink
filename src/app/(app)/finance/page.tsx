@@ -21,7 +21,8 @@ import { getSession } from "@/lib/auth/session";
 import {
   listAllFeeEntries,
   getMonthlyRevenue,
-  getPersonalRevenue
+  getPersonalRevenue,
+  getReceivablesAging
 } from "@/server/finance/actions";
 import { listInvoiceRequests, getInvoiceStats } from "@/server/invoices/actions";
 import { FinanceView } from "./_components/finance-view";
@@ -30,12 +31,13 @@ export default async function FinancePage() {
   const session = await getSession();
   const userId = session!.user.id;
 
-  const [entries, monthly, personal, invoiceRequests, invoiceStats] = await Promise.all([
+  const [entries, monthly, personal, invoiceRequests, invoiceStats, aging] = await Promise.all([
     listAllFeeEntries({ limit: 200 }),
     getMonthlyRevenue(6),
     getPersonalRevenue(userId),
     listInvoiceRequests(),
-    getInvoiceStats()
+    getInvoiceStats(),
+    getReceivablesAging()
   ]);
 
   const monthStart = new Date();
@@ -72,6 +74,7 @@ export default async function FinancePage() {
         session!.user.role === "ADMIN" ||
         session!.user.role === "PRINCIPAL_LAWYER"
       }
+      aging={aging}
     />
   );
 }

@@ -1,86 +1,54 @@
-/*
- * Copyright 2026 叶森 (Sen Ye) - Original work
- * Copyright 2026 COTAPELU - Modifications and additions
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * This file is part of a derivative work based on the original MIT-licensed project.
- * Original author: 叶森 (Sen Ye) - Copyright 2026
- */
 'use client';
 
-import { useState, useEffect } from 'react';
-import { listIntakes } from '@/server/intake/actions';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useCallback, useEffect, useState } from 'react';
+import { listIntakes } from '@/server/intakes/actions';
 import { toast } from 'sonner';
+import { IntakePipeline } from './_components/intake-pipeline';
+import type { PipelineItem } from './_components/pipeline-lib';
 
+/** Trang Tiếp nhận dạng pipeline (TD-A1/A2): kanban kéo-thả + chế độ danh sách. */
 export default function IntakesPage() {
-  const [intakes, setIntakes] = useState<any[]>([]);
+  const [items, setItems] = useState<PipelineItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadIntakes = async () => {
+  const load = useCallback(async () => {
     try {
-      const data = await listIntakes();
-      setIntakes(data);
+      const { items: rows } = await listIntakes({ pageSize: 100 });
+      setItems(
+        rows.map((r: any) => ({
+          id: r.id,
+          title: r.title,
+          status: r.status,
+          clientName: r.client?.name ?? null,
+          contactName: r.contactName ?? null,
+          ownerName: r.ownerUser?.name ?? null,
+          receivedAt: r.receivedAt,
+          claimAmount: r.claimAmount != null ? Number(r.claimAmount) : null
+        }))
+      );
     } catch (e: any) {
-      toast.error('Lỗi khi tải: ' + e.message);
+      toast.error('Lỗi khi tải tiếp nhận: ' + (e?.message ?? 'không rõ'));
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    loadIntakes();
   }, []);
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      INTAKE: 'default',
-      PENDING_CONFIRMATION: 'secondary',
-      CONVERTED: 'outline',
-      DECLINED: 'destructive',
-      NEEDS_REVISION: 'secondary',
-    };
-    return <Badge variant={variants[status] || 'outline'}>{status}</Badge>;
-  };
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Tiếp nhận hồ sơ</h1>
+    <div className="mx-auto max-w-[1440px] px-8 py-6">
+      <header className="mb-4 space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Tiếp nhận</h1>
+        <p className="text-[13px] text-muted-foreground">
+          Kéo thẻ giữa các giai đoạn đang xử lý để chuyển bước. Cảnh báo vàng khi chờ quá 24 giờ.
+        </p>
+      </header>
       {loading ? (
-        <p>Đang tải...</p>
+        <p className="py-12 text-center text-xs text-muted-foreground">Đang tải…</p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {intakes.map((intake) => (
-            <Card key={intake.id}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{intake.title}</CardTitle>
-                  {getStatusBadge(intake.status)}
-                </div>
-                <p className="text-sm text-stone-500">{intake.contactName}</p>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm mb-4 line-clamp-2">{intake.description}</p>
-                <div className="flex justify-between items-center text-xs text-stone-500">
-                  <span>Người nhận: {intake.ownerUser?.name}</span>
-                  <span>{new Date(intake.createdAt).toLocaleDateString('vi-VN')}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <IntakePipeline items={items} onMoved={load} />
       )}
     </div>
   );

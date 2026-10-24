@@ -1,6 +1,6 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2025-07-09
+Cập nhật lần cuối: 2026-10-24 (AUTO-41).
 
 ## Chu kỳ đã hoàn thành (gần đây)
 - ✅ Chu kỳ 0–75: khôi phục cổng chất lượng, đẩy phủ, refactor 3 lô.
@@ -74,9 +74,46 @@ Loại: Feature (docs-first → schema → migrate dev local → server → UI �
 - [x] TD-G1 Thuật ngữ: lib + server + hook qua SystemSetting.
 - Nền tảng: nextSequenceCode (đếm nguyên tử), nav mới (Báo giá/Hợp đồng/Ghi giờ/Chi phí), nodemailer.
 
-**Còn lại GĐ1**: TD-C1 UI quỹ (CashAccount settings page), TD-C2 bảng tuổi nợ, TD-A1/A2 pipeline lead kanban, settings/terminology page, settings/email page.
+**Còn lại GĐ1 sau AUTO-39**: TD-C1 UI quỹ, TD-C2 bảng tuổi nợ, settings/terminology, settings/email → **hoàn tất ở AUTO-40**; chỉ còn **TD-A1/A2 pipeline lead kanban** (SLA + kéo-thả) chưa làm.
 
 **Cổng chất lượng**: typecheck PASS; lint 944 (không tăng); test 2079→2103 pass; build SUCCESS; /login 200.
 
+
+### [CYCLE-AUTO-40] — 2026-10-24: Hoàn tất GĐ1 P0 (Quỹ/Thuật ngữ/Email/Tuổi nợ)
+Loại: Feature (docs đã có sẵn v0.48 §4.31/§4.32 §7.10 → Data→Types→Server Action→UI→Test). ~3 giờ. ✅.
+
+**Đã hoàn thành**:
+- [x] TD-C1 Quỹ (`/settings/cash-accounts`): model sẵn có → server `server/cash-accounts/` (schemas+actions+balance thuần); số dư tính tại chỗ `openingBalance + Σ thu(RECEIVED) − Σ chi(COST/REFUND)` qua `groupBy` (không N+1, bỏ qua RECEIVABLE/COMMISSION). UI bảng số dư + dialog tạo/sửa + bật/tắt. Phân quyền: xem = quản lý/FINANCE, sửa = quản lý. Nav link. 8 test.
+- [x] TD-G1 Thuật ngữ UI: page `/settings/terminology` + form client gọi `saveTerminologyAction` (revalidate layout). 2 test.
+- [x] TD-F1 Email settings UI: thêm template `test-email`; page `/settings/email` hiện trạng SMTP (che PASS/USER, chỉ xem env) + gửi thử `sendTestEmail`. Sửa đồng bộ lỗi tiềm ẩn AUTO-39: `SendMailInput.subject` required nhưng không dùng → optional. 9 test (templates + actions).
+- [x] TD-C2 Bảng tuổi nợ: helper thuần `server/finance/aging.ts` (buckets 0-30/31-60/61-90/>90, anchor = RECEIVABLE xa nhất; xấp xỉ FIFO vì chưa phân bổ từng đồng); action `getReceivablesAging` (mình hoá visibility, 1 query); tab "Công nợ" trong finance-view. 6 test.
+
+**Refactor nhỏ (gate ≤50 UI / ≤20 business)**: tách cash-accounts-view thành orchestrator + table + dialog + types; receivables-aging/email-form tách sub-component.
+
+**Còn lại GĐ1**: TD-A1/A2 pipeline lead kanban (`/intakes` kanban + SLA + moveIntakeStage).
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test 2126 pass (2079→…+24 mới); build SUCCESS; /login 200, 3 route mới compile (307→login đúng guard). Lint: các file module mới sạch; `server/finance/actions.ts` & `finance-view.tsx` là God Object **đã** vượt gate từ trước (nợ kỹ thuật, chưa đụng refactor lớn — ngoài phạm vi tuần này). **Chưa commit** (chờ chủ sở hữu duyệt theo §7).
+
+
+### [CYCLE-AUTO-41] — 2026-10-24: Pipeline tiếp nhận Kanban (TD-A1/A2, hoàn tất GĐ1)
+Loại: Feature (docs sẵn §3.a/§7.6 → Data→Types→Server Action→UI→Test). **Không đổi schema** (tránh đỏ-vạch migration). ~2.5 giờ. ✅.
+
+**Đã hoàn thành**:
+- [x] TD-A1/A2 Pipeline `/intakes`: `moveIntakeStage` (server, `server/intakes/actions.ts`) — kéo-thả chỉ đổi giữa 2 cột đang xử lý `INTAKE ↔ PENDING_CONFIRMATION`; quyền = quản lý (isManager) hoặc owner/co/creator (`assertCanMoveStage`); ghi `AuditLog` (không có bảng Timeline cho Intake → không migration); về `PENDING_CONFIRMATION` thì `notifyRoleApprovers`. Chuyển cần lý do/duyệt (BỔ SUNG/TỪ CHỐI/ĐÃ CHUYỂN) vẫn dùng `markIntakeNeedsRevision`/`declineIntake`/`convertIntakeToMatter` (không cho kéo). 8 test.
+- [x] UI kanban (`_components/intake-pipeline.tsx` + `pipeline-lib.ts` thuần): dnd-kit (dependency đã cài nhưng trước đó chưa dùng), cột theo `IntakeStatus`, chỉ 2 cột droppable; badge SLA `chờ X giờ` (cảnh báo vàng > 24h); toggle Kanban/`Danh sách`; avatar chữ cái phụ trách; link chi tiết. 7 test (SLA/canMove thuần).
+- [x] Trang `/intakes` viết lại: dùng `listIntakes` chuẩn (module số nhiều, `withMetrics`) thay cho `@/server/intake` (bản số ít trùng lặp cũ).
+
+**Follow-up (để đăng ký GĐ2)**: nút “Tạo tiếp nhận” trên trang (cần `IntakeSheet` + `clientOptions`/`colleagues`); `stageTemplates` mapping theo loại hình; đổi nhãn trạng thái qua thuật ngữ cấu hình.
+
+**Cổng chất lượng**: typecheck PASS; test **2143** pass /1 skip /0 fail (2126→+17); build SUCCESS; `/intakes` compile (307→login). Lint: file mới sạch; `server/intakes/schemas.ts` có 1 lỗi `requireLitigationStandings` (24>20) **có sẵn từ trước, không do chu kỳ này**. **Chưa commit** (chờ chủ sở hữu duyệt theo §7).
+
+### [CYCLE-AUTO-42] — 2026-10-24: Phủ nhánh server/archive/actions.ts (type [T])
+Loại: Test. Ưu tiên: MEDIUM (điểm nghẽt branch → Health Score). ~35 phút. ✅.
+
+**Mục tiêu**: `server/archive/actions.ts` là điểm nghẽt branch (~74%) ghi trong EVOLUTION/AGENT_PROFILE. **Không sửa production** — chỉ thêm `src/tests/server/archive/archive-branches.test.ts` (12 test) phủ các nhánh còn hở: catalog render fail (Error/String + dọn cover doc), `案件不存在`/`案件已归档`, force-with-missing, `archivedBy = name ?? id`, approve (completedAt null, note rỗng, matter null), reject (notify run/skip, record null/đã duyệt).
+
+**Cổng chất lượng**: typecheck PASS; build SUCCESS; test **2143→2155** pass /1 skip /0 fail; /login 200. Coverage (scoped) `archive/actions.ts`: branch **74→95%**, lines 100%. File mới lint sạch.
+
+**GĐ1**: ✅ hoàn tất (AUTO-40 + AUTO-41). **Ghi chú**: `git commit/push` là đỏ-vạch §7 — **chưa commit**, chờ chủ sở hữu duyệt (AUTO-CONTINULE yêu cầu commit sau mỗi loop → xung đột, ưu tiên AGENTS).
 
 - **AUTO-38 (2026-10-24)**: sửa `rules-of-hooks` (bug tiềm ẩn), 3 `prefer-as-const`, 2 `no-unused-expressions`, 2 `exhaustive-deps`, 1 `no-img-element`, 16 `no-unused-vars`; trích 3 hàm (`useIntakeFormStates` 26, `DocCard` 53, `NewFolderDialog` 51). Lint 973→944; coverage hàm 77.15→79.52%; test 2079 pass; typecheck/build xanh; site /login 200.

@@ -8,7 +8,8 @@ export type EmailTemplateKey =
   | "quote-sent"
   | "contract-expiring"
   | "password-reset"
-  | "account-invite";
+  | "account-invite"
+  | "test-email";
 
 interface TemplateDef {
   subject: string;
@@ -69,6 +70,14 @@ export const EMAIL_TEMPLATES: Record<EmailTemplateKey, TemplateDef> = {
       "Thư mời tham gia",
       `<p>Bạn được mời tham gia hệ thống quản trị Shelink với vai trò <strong>{{role}}</strong>.</p>
 <p>Đăng nhập tại: <a href="{{loginUrl}}" style="color:#5B8DEF">{{loginUrl}}</a></p>`
+    )
+  },
+  "test-email": {
+    subject: "[Shelink] Email kiểm tra cấu hình",
+    html: LAYOUT(
+      "Email kiểm tra",
+      `<p>Đây là email kiểm tra từ hệ thống quản trị <strong>Shelink</strong>.</p>
+<p>Nếu bạn nhận được thư này, cấu hình SMTP đang hoạt động bình thường.</p>`
     )
   }
 };

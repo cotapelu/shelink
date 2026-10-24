@@ -24,20 +24,22 @@ import { Prisma, type LitigationStanding } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
 import { audit } from "@/server/audit";
-import { intakeVisibilityFilter } from "@/lib/permissions";
+import { intakeVisibilityFilter, isManager } from "@/lib/permissions";
 import {
   intakeCreateSchema,
   intakeListQuerySchema,
   declineIntakeSchema,
+  moveIntakeStageSchema,
   type IntakeCreateInput,
   type IntakeListQuery,
-  type DeclineIntakeInput
+  type DeclineIntakeInput,
+  type MoveIntakeStageInput
 } from "./schemas";
 import { withMetrics } from "@/lib/telemetry/server-metrics";
 import { seedDefaultFolders } from "@/lib/default-folders";
 import { notifyRoleApprovers } from "@/server/notifications/approval";
 import * as helpers from "./helpers";
-import type { Matter, Intake } from "@prisma/client";
+import type { Matter, Intake, IntakeStatus } from "@prisma/client";
 import * as conversion from "./conversion-helpers";
 
 // ============================================
@@ -672,4 +674,72 @@ async function finalizeConversion(session: any, intake: Intake, matter: Matter, 
   revalidatePath(`/intakes/${intake.id}`);
   revalidatePath("/matters");
   revalidatePath(`/matters/${matter.id}`);
+}
+
+// ============ Pipeline tiếp nhận (TD-A1/A2) ============
+
+// Giai đoạn đang xử lý được phép kéo-thả đổi chỗ. Các trạng thái còn lại (bổ sung/từ chối/đã chuyển) dùng luật riêng.
+const WORKING_INTAKE_STAGES: IntakeStatus[] = ["INTAKE", "PENDING_CONFIRMATION"];
+
+function assertCanMoveStage(
+  actor: { id: string; role: string },
+  intake: { createdById: string; ownerUserId: string | null; coUserIds: string[] }
+) {
+  if (isManager(actor.role)) return;
+  if (intake.ownerUserId === actor.id || intake.createdById === actor.id || intake.coUserIds.includes(actor.id)) return;
+  throw new Error("Chỉ quản lý hoặc người phụ trách/đồng hành tiếp nhận được đổi giai đoạn");
+}
+
+async function notifyStageApprovers(
+  actor: { id: string; name?: string | null },
+  title: string,
+  intakeId: string,
+  toStatus: "INTAKE" | "PENDING_CONFIRMATION"
+) {
+  if (toStatus !== "PENDING_CONFIRMATION") return;
+  await notifyRoleApprovers({
+    roles: ["ADMIN", "PRINCIPAL_LAWYER"],
+    excludeUserId: actor.id,
+    title: "Tiếp nhận chờ xác nhận",
+    content: `${actor.name ?? "Có người"} chuyển tiếp nhận "${title}" sang chờ xác nhận.`,
+    href: `/intakes/${intakeId}`,
+    refType: "Intake",
+    refId: intakeId,
+    priority: "NORMAL"
+  });
+}
+
+async function loadMovableIntake(actor: { id: string; role: string }, id: string) {
+  const intake = await prisma.intake.findUnique({
+    where: { id },
+    select: { status: true, title: true, createdById: true, ownerUserId: true, coUserIds: true }
+  });
+  if (!intake) throw new Error("Tiếp nhận không tồn tại");
+  assertCanMoveStage(actor, intake);
+  if (!WORKING_INTAKE_STAGES.includes(intake.status)) {
+    throw new Error("Chỉ đổi giai đoạn cho tiếp nhận đang xử lý");
+  }
+  return intake;
+}
+
+/** Kéo-thả đổi giai đoạn tiếp nhận giữa các trạng thái đang xử lý (ghi AuditLog). */
+export async function moveIntakeStage(input: MoveIntakeStageInput) {
+  const session = await requireSession();
+  const { id, toStatus } = moveIntakeStageSchema.parse(input);
+  const intake = await loadMovableIntake(session.user, id);
+  if (intake.status === toStatus) return { ok: true };
+
+  await prisma.intake.update({ where: { id }, data: { status: toStatus } });
+  await audit({
+    userId: session.user.id,
+    action: "INTAKE_STAGE_MOVE",
+    targetType: "Intake",
+    targetId: id,
+    detail: { from: intake.status, to: toStatus }
+  });
+  await notifyStageApprovers(session.user, intake.title, id, toStatus);
+  revalidatePath("/intakes");
+  revalidatePath(`/intakes/${id}`);
+  revalidatePath("/matters");
+  return { ok: true };
 }

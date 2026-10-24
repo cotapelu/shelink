@@ -176,6 +176,13 @@ export const declineIntakeSchema = z.object({
   reason: z.string().min(1, "请填写不接案原因").max(500)
 });
 
+// Kéo-thả pipeline chỉ đổi giữa 2 giai đoạn đang xử lý; các chuyển cần lý do/duyệt (bổ sung/từ chối/chuyển) dùng luật riêng.
+export const moveIntakeStageSchema = z.object({
+  id: z.string().cuid(),
+  toStatus: z.enum(["INTAKE", "PENDING_CONFIRMATION"])
+});
+
 export type IntakeCreateInput = z.infer<typeof intakeCreateSchema>;
 export type IntakeListQuery = z.infer<typeof intakeListQuerySchema>;
 export type DeclineIntakeInput = z.infer<typeof declineIntakeSchema>;
+export type MoveIntakeStageInput = z.infer<typeof moveIntakeStageSchema>;

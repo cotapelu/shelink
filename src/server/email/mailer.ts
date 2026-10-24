@@ -19,7 +19,8 @@ export interface MailAttachment {
 
 export interface SendMailInput {
   to: string;
-  subject: string;
+  /** Tùy chọn: nếu bỏ trống, subject tự suy từ template (renderTemplate). */
+  subject?: string;
   template: EmailTemplateKey;
   variables: Record<string, string>;
   attachments?: MailAttachment[];

@@ -271,6 +271,22 @@ Theo chuẩn GOAL 4.5: mọi sửa đổi đều xác minh bằng lint trên t�
 **Test Delta**: +11 test (2068→2079 pass) — phần lớn từ chu kỳ trước chưa ghi; chu kỳ này chỉ refactor, không thêm test.
 **Coverage**: câu lệnh 83.30→83.97% (+0.67); nhánh 71.19→71.62% (+0.43); hàm 77.15→79.52% (+2.37); dòng 84.64→85.30% (+0.66).
 **Lint**: 973→944 problems (799→792 lỗi, 174→152 warning) = **-29 problems**.
+
+### [CYCLE-AUTO-42] — 2026-10-24: Phủ nhánh server/archive/actions.ts (điểm nghẽt)
+Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%). ~35 phút. ✅.
+
+**Mục tiêu**: `server/archive/actions.ts` là điểm nghẽt branch ghi trong EVOLUTION/AGENT_PROFILE (~74%, file ~562 dòng). Không sửa code production — chỉ **thêm test** cho các nhánh còn hở (tôn trọng nguyên tắc surgical + no-hallucination).
+
+**Test đã thêm** (`src/tests/server/archive/archive-branches.test.ts`, 12 test, tái dựng mock từ actions-error): render catalog fail (Error → `err.message`; non-Error → `String(err)` + dọn cover doc), `案件不存在`/`案件已归档`, force-with-missing (không throw, trả missingItems), `archivedBy = name ?? id` (cả 2 nhánh), approve (completedAt null → `closedAt ?? archivedAt`, note rỗng → timeline “通过”, `reviewNote` null; matter null → `matter?.internalCode ?? record.matterId`), reject (notify chạy + matter null, skip khi tự duyệt, record null/đã duyệt).
+
+**Cổng chất lượng**: Typecheck PASS; Build SUCCESS; Test **2143→2155 pass / 1 skip / 0 fail**; `/login` 200.
+
+**Coverage (file, đo scoped)**: `server/archive/actions.ts` branch **74.07%→95.06%** (60/81→77/81), câu lệnh 94.3→98.73%, dòng **100%**. (Số liệu toàn dự án chưa đo lại — chỉ đo file mục tiêu.)
+
+**Test Delta**: +12 (2143→2155).
+**Lint**: file mới sạch (dọn import không dùng). Toàn repo giữ nguyên mức nợ God Object có sẵn.
+**Rủi ro**: thấp (chỉ thêm test; không đụng production). Rollback: xoá tệp test.
+**Ghi chú**: `git commit` là đỏ-vạch AGENTS §7 — **chưa commit**, chờ chủ sở hữu duyệt (AUTO-CONTINULE bắt buộc commit sau mỗi loop → xung đột, ưu tiên AGENTS).
 **Security**: không phát hiện secret/bỏ qua quyền trong vùng sửa.
 **Notes**: hạng mục còn lại của `folders-panel.tsx` (max-lines 410>300, `FoldersPanel` complexity 14, `FolderItem` 77 dòng) và `use-archive-wizard.ts` (hook 135 dòng) để lại cho chu kỳ chuyên refactor — vượt 30 phút/task, ghi vào AGENT_TODO.
 
