@@ -20,7 +20,7 @@
 | Hàm >20 dòng | ~60*** | 0 | ↘️ |
 | Trùng lặp | 0% (0 clone) | <5% | ✅ |
 | Tốc độ tiến hoá | 6 (ngày hiện tại) | ≥10/tuần | → |
-| Nợ kỹ thuật (lỗi lint) | 813 lỗi, 179 warning | 0 | ↘️ |
+| Nợ kỹ thuật (lỗi lint) | 944 problems (792 lỗi, 152 warning) | 0 | ↘️ |
 
 \* Health theo công thức GOAL: (phủ%×0.3)+((1-avgC/20)×0.3)+(tests/1000×0.2)+((1-dup%)×0.2)
 \** Số vi phạm lấy từ ESLint (`max-lines-per-function`, `max-statements`). Số complexity thực chờ audit rà.
@@ -248,6 +248,31 @@ Loại: Refactor. ~90 phút. ✅.
 Loại: Fix HIGH. ~120 phút. ✅. Typecheck PASS (sửa cast MatterCategory); Test pass.
 
 *(Lưu ý: bản ghi AGENT_METRICS gốc có rất nhiều chu kỳ lặp với các cập nhật % phủ lặt vặt và tên chu kỳ trùng; phần trên đã quy về bản tiếng Việt tinh gọn, giữ mọi mốc chính và quyết định.)*
+
+### [CYCLE-AUTO-38] — 2026-10-24: Vi phạm lint đơn lẻ + trích hàm gần ngưỡng
+Loại: Violation Fix (QA). Ưu tiên: HIGH→LOW. ~50 phút. ✅.
+
+**Cổng chất lượng**: Typecheck PASS; Build SUCCESS; Test 2079 pass / 1 skip; Site localhost:3000/login = 200 (middleware 307 cho route (app) chưa đăng nhập — đúng bảo vệ route).
+
+**Vi phạm đã sửa (lỗi)**:
+1. `rules-of-hooks` — `useWatch` gọi trong helper `watchField` (không phải hook) ở `use-intake-form-states.ts` → đổi tên `useWatchField` (§3.2 fix).
+2. `prefer-as-const` ×3 — `as "litigation"` → `as const` ở 3 file test intakes.
+3. `no-unused-expressions` ×2 — ternary như câu lệnh trong `toggleOne` (pending-archive-table) và `toggleExpand` (audit-view) → if/else.
+
+Theo chuẩn GOAL 4.5: mọi sửa đổi đều xác minh bằng lint trên từng file trước khi chạy toàn bộ.
+
+**Vi phạm đã sửa (warning)**: `exhaustive-deps` ×2 (`refreshPrep` bọc `useCallback([matterId])`, thêm vào deps — không loop vì ref ổn định theo matterId); `no-img-element` (dùng `next/image` + `unoptimized` theo pattern `PersonSelector` cùng thư mục); directive `eslint-disable` không dùng ×1; `no-unused-vars` ×16 (`useState`, `cn`; bỏ tham số `g` không dùng ×14 trong `compute.ts` — TS cho phép callback ít tham số hơn gán vào signature).
+
+**Trích hàm (§3.1, gate ≤20 nghiệp vụ / ≤50 UI)**:
+- `useIntakeFormStates` 26→ tách `useIntakeFormCoreStates` + `useIntakeFormDraftStates` (compose; key giữ nguyên, test destructure theo tên vẫn pass).
+- `DocCard` 53→~41: trích `SealSubmitButton` (build URL /approvals/seals).
+- `NewFolderDialog` 51→~42: trích `submitCreateFolder` (createFolder + toast).
+
+**Test Delta**: +11 test (2068→2079 pass) — phần lớn từ chu kỳ trước chưa ghi; chu kỳ này chỉ refactor, không thêm test.
+**Coverage**: câu lệnh 83.30→83.97% (+0.67); nhánh 71.19→71.62% (+0.43); hàm 77.15→79.52% (+2.37); dòng 84.64→85.30% (+0.66).
+**Lint**: 973→944 problems (799→792 lỗi, 174→152 warning) = **-29 problems**.
+**Security**: không phát hiện secret/bỏ qua quyền trong vùng sửa.
+**Notes**: hạng mục còn lại của `folders-panel.tsx` (max-lines 410>300, `FoldersPanel` complexity 14, `FolderItem` 77 dòng) và `use-archive-wizard.ts` (hook 135 dòng) để lại cho chu kỳ chuyên refactor — vượt 30 phút/task, ghi vào AGENT_TODO.
 
 ## Phân bố Vi phạm (gần nhất)
 

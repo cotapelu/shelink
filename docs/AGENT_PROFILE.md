@@ -43,6 +43,12 @@
 - `dateHelpers.getZodiacSign`: 51→1.
 - Đẩy phủ nhánh ~64.7%→~68%+.
 - Giảm lint ~2070→~1300+.
+- **AUTO-38 (2026-10-24)**: sửa lỗi `rules-of-hooks` — hook `useWatch` bị gọi trong helper thường `watchField` (root cause: tên helper không bắt đầu `use`, tránh bằng cách đặt tên custom hook `use…`); trích `useIntakeFormStates` thành 2 sub-hook (+2.37% phủ hàm); `DocCard`/`NewFolderDialog` xuống ngưỡng 50 dòng; giảm 16 `no-unused-vars`.
+
+## Lỗi dễ lặp (ghi nhận từ AUTO-38)
+- **Tên helper chứa hook**: hàm gọi `useXxx` phải bắt đầu bằng `use` — rename thay vì `eslint-disable`.
+- **`argsIgnorePattern` chưa cấu hình**: tham số không dùng trong callback phải bỏ hẳn (TS cho phép ít tham số hơn), không đặt tên `_g` (vẫn warning).
+- **refreshPrep trong useCallback**: bọc callback theo `[matterId]` rồi thêm vào deps — ổn định ref, không gây vòng lặp effect.
 
 ## Stack dễ lỗi
 
@@ -88,9 +94,9 @@
 | Loại nợ | Số lượng (2026-07-19) | Xu hướng | Mục tiêu giảm |
 |---|---|---|---|
 | Vi phạm cỡ hàm (UI >50, server >20) | ~57 hàm | ↘️ | -5/tuần |
-| Phủ hàm test | 70.56% (<80%) | → | +2%/tuần |
-| Phủ nhánh | 65.84% (<80%) | ↗️ | +3%/tuần |
-| Lint | 812 lỗi, 180 warning | ↘️ (từ 2070) | Giữ 0 |
+| Phủ hàm test | 79.52% (<80%) | ↗️ | chạm 80% chu kỳ tới |
+| Phủ nhánh | 71.62% (<80%) | ↗️ | +3%/tuần |
+| Lint | 944 problems (792 lỗi, 152 warning) | ↘️ (từ 2070) | Giữ 0 |
 | TODO/FIXME | ~20 | ↔️ | -2/tuần |
 | Chỉ mục thiếu | 5–8 trường then chốt | ↔️ | -2/tuần |
 | Lỗ kiểm tra quyền | Đã rà (nhất quán) | ✅ | Cảnh giác |

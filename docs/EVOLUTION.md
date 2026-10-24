@@ -19,7 +19,14 @@
 - Phủ: câu lệnh 83.30%, nhánh 71.19%, hàm 77.15%, dòng 84.64% (tăng từ 82.16/68.81/74.04/83.49).
 - Lint: 808 lỗi / 182 warning.
 - Test: 2.068 pass / 1 skip.
-- Còn thiếu tới gate (≥80% cả 4 chỉ số): nhánh -8.81%, hàm -2.85%.
+- Còn thiếu tới gate (≥80% cả 4 chỉ số): nhánh -8.81%, hàm -2.85%
+
+**Phiên 2026-10-24 (AUTO-38)**:
+- Phủ: câu lệnh 83.97%, nhánh 71.62%, hàm 79.52%, dòng 85.30% (nhảy hàm +2.37% nhờ tách hook `useIntakeFormStates` thành 2 sub-hook, cả hai đều được test bao phủ).
+- Lint: 944 problems (792 lỗi / 152 warning) — giảm 29 so với đầu chu kỳ; còn lại chủ yếu `max-lines-per-function` (549), `complexity` (168), `no-unused-vars` (147).
+- Test: 2.079 pass / 1 skip; Typecheck PASS; Build SUCCESS.
+- Còn thiếu tới gate (≥80% cả 4 chỉ số): nhánh -8.38%, hàm -0.48% (sắp chạm ngưỡng hàm).
+- Trích 3 hàm gần ngưỡng + sửa 1 lỗi `rules-of-hooks` (bug tiềm ẩn runtime) + mọi cảnh báo lint đơn lẻ còn sót trong phạm vi đã chạm..
 
 ## Đang chặn chờ duyệt
 - Xoá dead code `src/utils/kinship/bloodGraph.ts` (transformAMap/transformBMap/suffix) — cần duyệt theo AGENTS.md §5.7.
