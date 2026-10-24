@@ -140,6 +140,21 @@ Không cạnh tranh với các hệ ERP lớn về "đủ mọi thứ", mà cạ
 
 ---
 
+### Các module mới — Giai đoạn 1 (P0, 2026-10)
+
+| Module | Đường dẫn | Mô tả | Task |
+|---|---|---|---|
+| **Pipeline tiếp nhận** | `(app)/intakes` | Tiếp nhận dạng kanban theo giai đoạn, gán phụ trách, SLA chờ xử lý, lý do thắng/thua khi đóng | TD-A1/A2 |
+| **Báo giá (Quote)** | `(app)/quotes`, `(app)/quotes/[id]` | Báo giá gửi khách: dòng hàng mục, chiết khấu/thuế, in PDF, hết hạn; chuyển thành hợp đồng/dự án | TD-A3 |
+| **Hợp đồng (Contract)** | `(app)/contracts`, `(app)/contracts/[id]` | Vòng đời nháp→review→ký→hiệu lực→gia hạn→hết hạn, nghĩa vụ, nhắc gia hạn, liên kết khách hàng/dự án | TD-A4 |
+| **Ghi giờ (Timesheet)** | `(app)/time-tracking` | Ghi giờ theo dự án/nhiệm vụ, billable vs nội bộ, duyệt, tổng hợp chi phí nhân công | TD-B1 |
+| **Chi phí (Expense)** | `(app)/expenses` | Phiếu chi/đề nghị thanh toán, duyệt, gắn dự án, chứng từ | TD-C5 |
+| **Quỹ & công nợ** | `(app)/finance` | Tài khoản quỹ (tiền mặt/ngân hàng/ví), tuổi nợ, nhắc nợ, phân bổ thu | TD-C1/C2 |
+| **Email giao dịch** | `settings/email` + `lib/email` | SMTP gửi mail: xác thực tài khoản, mời user, nhắc hạn, reset mật khẩu; biến môi trường cấu hình | TD-F1 |
+| **Thuật ngữ cấu hình** | `settings/terminology` | Đổi nhãn hiển thị (Matter→Dự án/Vụ/Đơn hàng…) theo triển khai, nền schema giữ nguyên | TD-G1 |
+
+---
+
 ## 五、Lộ trình V1.5 (sau khi lên V1 2–3 tháng)
 
 | Hạng mục | Ghi chú |
@@ -204,6 +219,10 @@ Không cạnh tranh với các hệ ERP lớn về "đủ mọi thứ", mà cạ
 | 16 | Quy trình phê duyệt tiếp nhận (OWNER/ADMIN duyệt; kiểm tra quyền ở server) | §10.3 |
 | 17 | Đánh giá rủi ro từ thanh trên + hộp thoại | §10.4 |
 | 18 | Chuyển đổi chủ đề sáng/tối (next-themes) | UI-DESIGN §二 |
+| 19 | Báo giá–hợp đồng là bước trung gian khuyến khích, không chặn tạo dự án từ tiếp nhận | PRD §3.b / TODO.md GĐ1 |
+| 20 | Mã nội bộ module mới: `QT-{NĂM}-{NNNN}` báo giá, `CT-{NĂM}-{NNNN}` hợp đồng, `EXP-{NĂM}-{NNNN}` chi phí (đếm qua `SystemSetting`) | DATA-MODEL §五 |
+| 21 | Email giao dịch chỉ đi qua SMTP cấu hình bằng biến môi trường; không hard-code thông tin đăng nhập | PRD §3.b |
+| 22 | Thuật ngữ hiển thị cấu hình được qua `SystemSetting.terminology`; schema/model Prisma giữ nguyên tên gốc | PRD §三
 
 ---
 
@@ -233,6 +252,20 @@ Không cạnh tranh với các hệ ERP lớn về "đủ mọi thứ", mà cạ
 
 ### 10.3 Chỉnh đội ngũ dự án
 `updateMatterTeam` — Quyền: ADMIN / OWNER / chủ trì hiện tại. Ghi đè toàn bộ MatterMember (chủ trì + cộng tác + trợ lý).
+
+### 10.4 Luồng báo giá → hợp đồng → dự án (mới, GĐ1)
+```
+[Tiếp nhận/Lead] chọn "Lập báo giá"
+  ↓ tạo Quote (DRAFT) + dòng hàng mục → tính subtotal/chiết khấu/thuế/total
+[Sẵn sàng gửi] → status SENT (ghi issuedAt, expiresAt = issuedAt + validDays)
+  ├─ Khách đồng ý → status ACCEPTED → "Tạo hợp đồng" (copy dữ liệu) hoặc "Tạo dự án"
+  ├─ Khách từ chối → REJECTED + lý do
+  └─ Quá expiresAt → EXPIRED (cron/đọc theo thời gian)
+[Hợp đồng] nháp → review → SIGNED (signedAt) → ACTIVE (effectiveAt) → EXPIRED (expiresAt) hoặc TERMINATED
+  ↓ nhắc gia hạn trước N ngày (renewRemindDays)
+[Dự án] tạo từ hợp đồng: liên kết matterId, giá trị mặc định = Contract.amount
+```
+Kiểm tra quyền ở server action (ADMIN/OWNER/MANAGER tạo-duyệt; STAFF tạo nháp).
 
 ---
 

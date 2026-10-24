@@ -483,6 +483,17 @@ model User {
   workflowAudits           WorkflowAudit[]               @relation("UserWorkflowAudits")
   uploadedFiles            File[]                        @relation("UserUploadedFiles")
   generatedReports         Report[]                      @relation("UserGeneratedReports")
+  quotesOwned              Quote[]                       @relation("QuoteOwner")
+  quotesCreated            Quote[]                       @relation("QuoteCreator")
+  contractsOwned           Contract[]                    @relation("ContractOwner")
+  contractsCreated         Contract[]                    @relation("ContractCreator")
+  contractEvents           ContractEvent[]               @relation("ContractEventActor")
+  timesheets               TimesheetEntry[]              @relation("TimesheetUser")
+  timesheetsApproved       TimesheetEntry[]              @relation("TimesheetApprover")
+  timesheetsCreated        TimesheetEntry[]              @relation("TimesheetCreator")
+  expenseClaims            ExpenseClaim[]                @relation("ExpenseClaimant")
+  expensesSubmitted        ExpenseClaim[]                @relation("ExpenseSubmitter")
+  expensesApproved         ExpenseClaim[]                @relation("ExpenseApprover")
   createdAt                DateTime                      @default(now())
   updatedAt                DateTime                      @updatedAt
 }
@@ -516,6 +527,8 @@ model Client {
   deletedAt         DateTime?
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
+  quotes            Quote[]
+  contracts         Contract[]
 
   @@index([name])
   @@index([idNumber])
@@ -534,6 +547,7 @@ model Contact {
   notes     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  quotes    Quote[]
 
   @@index([clientId])
 }
@@ -631,6 +645,7 @@ model Intake {
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  quotes      Quote[]
 
   @@index([status, receivedAt])
   @@index([causeId])
@@ -722,6 +737,10 @@ model Matter {
   @@index([primaryClientId])
   @@index([category, status])
   @@index([causeId])
+  quotes         Quote[]
+  contracts      Contract[]
+  timesheets     TimesheetEntry[]
+  expenseClaims  ExpenseClaim[]
 }
 
 // v0.28: 自定义字段（JSON 列方案）。字段定义存表，值存于实体的 customValues JSON。
@@ -875,6 +894,7 @@ model LegalTask {
   @@index([matterId, completed, dueAt])
   @@index([assigneeId, completed])
   @@index([teamId])
+  timesheets TimesheetEntry[]
 }
 
 model Hearing {
@@ -1145,6 +1165,8 @@ model Document {
   @@index([folderId])
   @@index([templateId])
   @@index([matterId, archiveChecklistItemId])
+  contracts Contract[] @relation("ContractDocument")
+  expenseReceipts ExpenseClaim[] @relation("ExpenseReceipt")
 }
 
 // ============================================================
@@ -1237,6 +1259,9 @@ model FeeEntry {
   method       String?
   note         String?
 
+  accountId String?
+  account   CashAccount? @relation(fields: [accountId], references: [id])
+
   parentFeeEntryId   String?
   parentFeeEntry     FeeEntry?  @relation("CommissionParent", fields: [parentFeeEntryId], references: [id])
   commissionChildren FeeEntry[] @relation("CommissionParent")
@@ -1253,6 +1278,7 @@ model FeeEntry {
   @@index([matterId, type, occurredAt])
   @@index([type, occurredAt])
   @@index([beneficiaryUserId, occurredAt])
+  @@index([accountId, occurredAt])
 }
 
 model CommissionPlan {
@@ -2087,6 +2113,7 @@ model WorkTask {
   @@index([status])
   @@index([dueDate])
   @@index([priority])
+  timesheets TimesheetEntry[]
 }
 
 model SubTask {
@@ -2177,6 +2204,7 @@ model Project {
   @@index([status])
   @@index([ownerId])
   @@index([managerId])
+  timesheets TimesheetEntry[]
 }
 
 model ProjectMember {
@@ -2423,4 +2451,286 @@ model TeamMember {
   @@unique([teamId, userId])
   @@index([teamId])
   @@index([userId])
+}
+
+// ============================================================
+// Giai đoạn 1 — thương mại: Báo giá / Hợp đồng / Ghi giờ / Chi phí / Quỹ
+// (docs/DATA-MODEL.md v0.48 §4.28–§4.32)
+// ============================================================
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CONVERTED
+  CANCELLED
+}
+
+enum ContractStatus {
+  DRAFT
+  REVIEW
+  SIGNED
+  ACTIVE
+  EXPIRED
+  TERMINATED
+  RENEWED
+}
+
+enum ContractEventKind {
+  CREATED
+  SENT
+  SIGNED
+  ACTIVATED
+  RENEWED
+  TERMINATED
+  EXPIRED
+  NOTE
+}
+
+enum TimesheetStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum TimesheetActivityType {
+  CLIENT_WORK
+  INTERNAL
+  MEETING
+  TRAVEL
+  ADMIN
+  OTHER
+}
+
+enum ExpenseStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PAID
+  CANCELLED
+}
+
+enum ExpenseCategory {
+  TRAVEL
+  HOSPITALITY
+  OFFICE
+  OUTSOURCING
+  EQUIPMENT
+  TAX_FEE
+  OTHER
+}
+
+enum CashAccountType {
+  CASH
+  BANK
+  EWALLET
+}
+
+model CashAccount {
+  id             String         @id @default(cuid())
+  name           String
+  type           CashAccountType
+  currency       String         @default("VND")
+  openingBalance Decimal        @default(0) @db.Decimal(14, 2)
+  bankName       String?
+  accountNoMasked String?
+  active         Boolean        @default(true)
+  note           String?
+  feeEntries     FeeEntry[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([active])
+}
+
+model Quote {
+  id              String      @id @default(cuid())
+  code            String      @unique
+  title           String
+  status          QuoteStatus @default(DRAFT)
+  currency        String      @default("VND")
+  issuedAt        DateTime?
+  expiresAt       DateTime?
+  validDays       Int         @default(30)
+  subtotal        Decimal     @default(0) @db.Decimal(14, 2)
+  discountPercent Decimal     @default(0) @db.Decimal(5, 2)
+  taxPercent      Decimal     @default(0) @db.Decimal(5, 2)
+  total           Decimal     @default(0) @db.Decimal(14, 2)
+  note            String?
+
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+
+  matterId String?
+  matter   Matter? @relation(fields: [matterId], references: [id])
+
+  intakeId String?
+  intake   Intake? @relation(fields: [intakeId], references: [id])
+
+  contractId String?
+  contract   Contract? @relation("QuoteContract", fields: [contractId], references: [id])
+  contractsFromQuote Contract[] @relation("ContractQuote")
+
+  ownerUserId String?
+  ownerUser   User?   @relation("QuoteOwner", fields: [ownerUserId], references: [id])
+
+  createdById String?
+  createdBy   User?   @relation("QuoteCreator", fields: [createdById], references: [id])
+
+  items    QuoteItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  deletedAt DateTime?
+
+  @@index([status, createdAt])
+  @@index([clientId])
+  @@index([ownerUserId])
+  @@index([intakeId])
+}
+
+model QuoteItem {
+  id          String  @id @default(cuid())
+  quoteId     String
+  quote       Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  unit        String?
+  quantity    Decimal @default(1) @db.Decimal(12, 2)
+  unitPrice   Decimal @default(0) @db.Decimal(14, 2)
+  amount      Decimal @default(0) @db.Decimal(14, 2)
+  orderIndex  Int     @default(0)
+
+  @@index([quoteId])
+}
+
+model Contract {
+  id              String         @id @default(cuid())
+  code            String         @unique
+  title           String
+  status          ContractStatus @default(DRAFT)
+  amount          Decimal        @default(0) @db.Decimal(14, 2)
+  currency        String         @default("VND")
+  scope           String?        @db.Text
+  paymentTerms    String?        @db.Text
+  termNote        String?        @db.Text
+  signedAt        DateTime?
+  effectiveAt     DateTime?
+  expiresAt       DateTime?
+  renewRemindDays Int            @default(30)
+
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+
+  quoteId String?
+  quote   Quote?  @relation("ContractQuote", fields: [quoteId], references: [id])
+  convertedQuotes Quote[] @relation("QuoteContract")
+
+  matterId String?
+  matter   Matter? @relation(fields: [matterId], references: [id])
+
+  documentId String?
+  document   Document? @relation("ContractDocument", fields: [documentId], references: [id])
+
+  ownerUserId String?
+  ownerUser   User?   @relation("ContractOwner", fields: [ownerUserId], references: [id])
+
+  createdById String?
+  createdBy   User?   @relation("ContractCreator", fields: [createdById], references: [id])
+
+  events    ContractEvent[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  deletedAt DateTime?
+
+  @@index([status, expiresAt])
+  @@index([clientId])
+  @@index([quoteId])
+  @@index([ownerUserId])
+}
+
+model ContractEvent {
+  id          String             @id @default(cuid())
+  contractId  String
+  contract    Contract           @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  kind        ContractEventKind
+  occurredAt  DateTime           @default(now())
+  actorUserId String?
+  actorUser   User?              @relation("ContractEventActor", fields: [actorUserId], references: [id])
+  detail      String?
+
+  @@index([contractId, occurredAt])
+}
+
+model TimesheetEntry {
+  id           String                 @id @default(cuid())
+  userId       String
+  user         User                   @relation("TimesheetUser", fields: [userId], references: [id])
+  matterId     String?
+  matter       Matter?                @relation(fields: [matterId], references: [id])
+  legalTaskId  String?
+  legalTask    LegalTask?             @relation(fields: [legalTaskId], references: [id])
+  workTaskId   String?
+  workTask     WorkTask?              @relation(fields: [workTaskId], references: [id])
+  projectId    String?
+  project      Project?               @relation(fields: [projectId], references: [id])
+  date         DateTime               @db.Date
+  hours        Decimal                @db.Decimal(5, 2)
+  billable     Boolean                @default(true)
+  activityType TimesheetActivityType @default(CLIENT_WORK)
+  description   String?
+  status       TimesheetStatus        @default(DRAFT)
+  approvedById String?
+  approvedBy   User?                  @relation("TimesheetApprover", fields: [approvedById], references: [id])
+  approvedAt   DateTime?
+  rejectNote   String?
+  createdById  String?
+  createdBy    User?                  @relation("TimesheetCreator", fields: [createdById], references: [id])
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  @@index([userId, date])
+  @@index([matterId, date])
+  @@index([status, date])
+}
+
+model ExpenseClaim {
+  id             String         @id @default(cuid())
+  code           String         @unique
+  title          String
+  category       ExpenseCategory
+  amount         Decimal        @db.Decimal(14, 2)
+  occurredAt     DateTime       @default(now())
+  vendor         String?
+  status         ExpenseStatus  @default(DRAFT)
+  approvedById   String?
+  approvedBy     User?          @relation("ExpenseApprover", fields: [approvedById], references: [id])
+  approvedAt     DateTime?
+  paidAt         DateTime?
+  receiptDocId   String?
+  receipt        Document?      @relation("ExpenseReceipt", fields: [receiptDocId], references: [id])
+  note           String?
+
+  matterId       String?
+  matter         Matter?        @relation(fields: [matterId], references: [id])
+
+  claimantUserId String
+  claimantUser   User           @relation("ExpenseClaimant", fields: [claimantUserId], references: [id])
+
+  submittedById  String?
+  submittedBy    User?          @relation("ExpenseSubmitter", fields: [submittedById], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status, createdAt])
+  @@index([claimantUserId, occurredAt])
+  @@index([matterId])
 }

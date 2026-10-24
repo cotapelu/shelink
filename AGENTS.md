@@ -91,6 +91,11 @@ repo-root/
 - Người liên hệ khách hàng → `Contact`
 - Bên liên quan/đối tác/người thứ ba → `Party`
 - Ghi chép thu/chi → `FeeEntry`
+- Báo giá (dự toán gửi khách) → `Quote` / `QuoteItem`
+- Hợp đồng (vòng đời ký–hiệu lực–gia hạn) → `Contract`
+- Ghi giờ làm việc → `TimesheetEntry`
+- Chi phí / đề nghị thanh toán → `ExpenseClaim`
+- Quỹ (tiền mặt/ngân hàng/ví điện tử) → `CashAccount`
 - Hóa đơn (hợp đồng/hóa đơn) → `Billing`
 - Hạn chế → `Deadline` (có `category`: thanh toán, giao hàng, duyệt, thực hiện, khác)
 - Người dùng hệ thống → `User`

@@ -1,7 +1,7 @@
 # LawLink — Tiêu chuẩn Thiết kế UI
 
-> 版本: v0.2 (đã khóa phạm vi V1)
-> Cập nhật: 2026-05-22
+> 版本: v0.3 (bổ sung pattern cho module thương mại GĐ1)
+> Cập nhật: 2026-10-24
 > Trạng thái: Đã xác nhận với chủ sở hữu (Yến)
 > **Ghi chú**: tài liệu này viết lại tiếng Việt từ bản gốc.
 
@@ -270,6 +270,40 @@ Nhập tên/mã định danh; kết quả phân cấp `LOW/…/BLOCKING`; nút "
 - Focus ring: `outline-2 outline-offset-2 outline-accent`.
 
 ---
+
+### 7.6 Pipeline tiếp nhận `/intakes` (kanban)
+
+- Cột = giai đoạn tiếp nhận (Tiếp nhận → Chờ xác nhận → Đang xử lý → Đã chuyển / Từ chối).
+- Thẻ: tên khách + tiêu đề + mức độ hạn + người phụ trách (avatar chữ cái) + "chờ X giờ" (màu warning > SLA 24h).
+- Kéo–thả (framer-motion/dnd-kit) đổi giai đoạn → server action `moveIntakeStage` (ghi TimelineEvent).
+- Chế độ "Danh sách" toggle cho ai quen bảng.
+
+### 7.7 Báo giá `/quotes/[id]`
+
+- Header: mã + trạng thái (badge trạng thái) + nút theo trạng thái: Gửi (SENT) → Đánh dấu đạt (ACCEPTED) → "Tạo hợp đồng"/"Tạo dự án".
+- Bảng dòng hàng mục: tên, đơn vị, SL, đơn giá, thành tiền (`font-mono tabular-nums`); chỉnh khi DRAFT.
+- Khối tổng tiền phải (subtotal → chiết khấu % → thuế % → total) nền `--bg-elevated`.
+- Nút "In/PDF": cửa sổ in CSS `@media print` ẩn shell — không dùng thư viện nặng ở GĐ1.
+- Hết hạn: badge đỏ nếu `expiresAt < today` và chưa ACCEPTED.
+
+### 7.8 Hợp đồng `/contracts/[id]`
+
+- Dòng thời gian trạng thái ngang (stepper): Nháp → Review → Đã ký → Hiệu lực → (Gia hạn/Hết hạn); mỗi bước ghi ngày + người thực hiện.
+- Thẻ điều kiện thanh toán + phạm vi việc; nhắc gia hạn `renewRemindDays` (badge cận).
+- Nút "Gia hạn" → sheet nhập `expiresAt` mới + lý do; lịch sử gia hạn hiển thị dưới dạng timeline.
+
+### 7.9 Ghi giờ `/time-tracking`
+
+- Lưới tuần: cột = ngày, dòng = dự án đang mở; ô nhập giờ (bước 0.25), tô billable bằng chấm chủ.
+- Tổng tuần góc phải + nút "Gửi duyệt" (SUBMITTED).
+- Người duyệt (MANAGER+) thấy tab "Chờ duyệt" với nút Duyệt/Từ chối (kèm lý do).
+- Tổng hợp theo dự án (billable giờ × bill rate) — bảng dưới, xuất CSV.
+
+### 7.10 Chi phí `/expenses`
+
+- Bảng + lọc trạng thái/nhân viên/dự án; dòng có badge trạng thái.
+- Tạo mới bằng Sheet (UI-DESIGN §6.3): tiêu đề, dự án (tuỳ chọn), loại, số tiền, ngày, nhà cung cấp, chứng từ (upload qua storage có sẵn).
+- Duyệt: hàng loạt trong toolbar (giống archive hiện có).
 
 ## 十、Quyết định đã khóa
 

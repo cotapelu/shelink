@@ -28,6 +28,10 @@ import {
   Archive,
   Settings,
   BarChart3,
+  FileSpreadsheet,
+  FileSignature,
+  Timer,
+  Receipt,
   UsersRound,
   Kanban,
 } from "lucide-react";
@@ -48,6 +52,10 @@ export type NavItem = {
 export const primaryNav: NavItem[] = [
   { label: "工作台", href: "/", icon: LayoutDashboard },
   { label: "案件", href: "/matters", icon: FolderOpen },
+  { label: "Báo giá", href: "/quotes", icon: FileSpreadsheet },
+  { label: "Hợp đồng", href: "/contracts", icon: FileSignature },
+  { label: "Ghi giờ", href: "/time-tracking", icon: Timer },
+  { label: "Chi phí", href: "/expenses", icon: Receipt },
   { label: "客户", href: "/clients", icon: Users },
   { label: "财务", href: "/finance", icon: Wallet },
   { label: "日程", href: "/schedule", icon: Calendar },
