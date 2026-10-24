@@ -75,7 +75,7 @@ const mockOnRemove = vi.fn();
 
 describe("PartiesSection", () => {
   const defaultProps = {
-    mode: "litigation" as "litigation",
+    mode: "litigation" as const,
     parties: [{ id: "1" }],
     watchedParties: [{ role: "OPPOSING_PARTY" }],
     ourStanding: undefined,

@@ -44,7 +44,7 @@ const mockSetValue = vi.fn();
 
 describe("FeeSection", () => {
   const defaultProps = {
-    kind: "litigation" as "litigation",
+    kind: "litigation" as const,
     feeType: undefined,
     register: mockRegister,
     setValue: mockSetValue,

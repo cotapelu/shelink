@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Paperclip, FileText, X, ScanLine } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 interface DocumentsSectionProps {
   contracts: File[];

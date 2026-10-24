@@ -196,13 +196,13 @@ function transformViaA_bCallsA(term: string, personA: PersonNode): string {
     (t, g) => t === "Cháu" ? (g === "male" ? "Cháu rể" : "Cháu dâu") : null,
     (t, g) => (t.includes("Anh trai") || t.includes("Chị gái")) ? (g === "male" ? "Anh rể" : "Chị dâu") : null,
     (t, g) => t.includes("Em") ? (g === "male" ? "Em rể" : "Em dâu") : null,
-    (t, g) => t === "Chị họ" ? "Anh (Chồng của Chị họ)" : null,
-    (t, g) => t === "Anh họ" ? "Chị (Vợ của Anh họ)" : null,
-    (t, g) => t === "Chú" ? "Cô" : null,
-    (t, g) => t === "Cô" ? "Chú" : null,
-    (t, g) => t === "Cậu" ? "Dì" : null,
-    (t, g) => t === "Dì" ? "Cậu" : null,
-    (t, g) => t === "Bà Cô" ? "Ông Dượng" : null,
+    (t) => t === "Chị họ" ? "Anh (Chồng của Chị họ)" : null,
+    (t) => t === "Anh họ" ? "Chị (Vợ của Anh họ)" : null,
+    (t) => t === "Chú" ? "Cô" : null,
+    (t) => t === "Cô" ? "Chú" : null,
+    (t) => t === "Cậu" ? "Dì" : null,
+    (t) => t === "Dì" ? "Cậu" : null,
+    (t) => t === "Bà Cô" ? "Ông Dượng" : null,
   ];
   return transformGenderBased(rules, term, personA.gender);
 }
@@ -213,13 +213,13 @@ function transformViaB_aCallsB(term: string, personB: PersonNode): string {
     (t, g) => t === "Cháu" ? (g === "male" ? "Cháu rể" : "Cháu dâu") : null,
     (t, g) => (t.includes("Anh trai") || t.includes("Chị gái")) ? (g === "male" ? "Anh rể" : "Chị dâu") : null,
     (t, g) => t.includes("Em") ? (g === "male" ? "Em rể" : "Em dâu") : null,
-    (t, g) => t === "Chị họ" ? "Anh (Chồng của Chị họ)" : null,
-    (t, g) => t === "Anh họ" ? "Chị (Vợ của Anh họ)" : null,
-    (t, g) => t === "Chú" ? "Cô" : null,
-    (t, g) => t === "Cô" ? "Chú" : null,
-    (t, g) => t === "Cậu" ? "Dì" : null,
-    (t, g) => t === "Dì" ? "Cậu" : null,
-    (t, g) => t === "Bà Cô" ? "Ông Dượng" : null,
+    (t) => t === "Chị họ" ? "Anh (Chồng của Chị họ)" : null,
+    (t) => t === "Anh họ" ? "Chị (Vợ của Anh họ)" : null,
+    (t) => t === "Chú" ? "Cô" : null,
+    (t) => t === "Cô" ? "Chú" : null,
+    (t) => t === "Cậu" ? "Dì" : null,
+    (t) => t === "Dì" ? "Cậu" : null,
+    (t) => t === "Bà Cô" ? "Ông Dượng" : null,
   ];
   return transformGenderBased(rules, term, personB.gender);
 }

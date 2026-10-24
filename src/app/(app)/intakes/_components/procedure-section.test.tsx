@@ -43,7 +43,7 @@ describe("ProcedureSection", () => {
   const mockSetValue = vi.fn();
   const mockOnProcedureChange = vi.fn();
   const defaultProps = {
-    kind: "litigation" as "litigation",
+    kind: "litigation" as const,
     firstProcedureType: undefined,
     jurisdiction: "",
     firstAgency: "",

@@ -52,7 +52,6 @@ export function useAutoTitleSuggestion({}: UseAutoTitleProps) {
 
   useEffect(() => {
     runAutoTitle(titleTouched, watchedParties, causeName, watchedCauseFree, watchedTitle, setValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedParties, causeName, watchedCauseFree, titleTouched, watchedTitle, setValue]);
 
   return { titleTouched, setTitleTouched, causeName, setCauseName };

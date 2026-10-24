@@ -12,7 +12,7 @@ function useSelection(records: PendingRecord[]) {
   const indeterminate = selected.size > 0 && !allChecked;
   const selectedRecords = records.filter((r) => selected.has(r.id));
   function toggleAll() { if (allChecked) setSelected(new Set()); else setSelected(new Set(records.map((r) => r.id))); }
-  function toggleOne(id: string) { setSelected((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; }); }
+  function toggleOne(id: string) { setSelected((p) => { const n = new Set(p); if (n.has(id)) n.delete(id); else n.add(id); return n; }); }
   function clear() { setSelected(new Set()); }
   return { selected, allChecked, indeterminate, selectedRecords, toggleAll, toggleOne, clear };
 }

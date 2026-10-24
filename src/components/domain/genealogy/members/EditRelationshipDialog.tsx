@@ -2,6 +2,7 @@
 
 import type { EnrichedRelationship } from "./use-relationship-data";
 import { RelationshipType } from "@/types";
+import Image from "next/image";
 
 interface Props {
   rel: EnrichedRelationship;
@@ -21,7 +22,14 @@ function PersonInfo({ rel }: { rel: EnrichedRelationship }) {
       <div className="flex items-center gap-2 p-2 bg-white rounded border border-stone-200">
         <div className="size-8 rounded-full overflow-hidden shrink-0">
           {rel.targetPerson.avatar_url ? (
-            <img src={rel.targetPerson.avatar_url} alt={rel.targetPerson.full_name} width={32} height={32} className="object-cover" />
+            <Image
+              unoptimized
+              src={rel.targetPerson.avatar_url}
+              alt={rel.targetPerson.full_name}
+              width={32}
+              height={32}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="size-8 bg-stone-200 flex items-center justify-center text-xs text-stone-500">
               {rel.targetPerson.gender === "male" ? "♂" : rel.targetPerson.gender === "female" ? "♀" : "?"}
