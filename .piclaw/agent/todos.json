@@ -3,32 +3,37 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "AUTO-38 hoàn tất",
+      "name": "GĐ1 hoàn tất (P0)",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Discovery: lint/typecheck/test/build/site — xong",
+          "content": "TD-C1 Quỹ: server+UI+nav+test",
           "status": "completed"
         },
         {
           "id": "task-2",
-          "content": "T1 rules-of-hooks + T2 lint đơn lẻ + T3 trích hàm — xong",
+          "content": "TD-G1 Thuật ngữ UI: action+page+form+nav+test",
           "status": "completed"
         },
         {
           "id": "task-3",
-          "content": "Verify: lint 973→944, typecheck PASS, test 2079, build OK, site 200 — xong",
+          "content": "TD-F1 Email settings UI + template + test",
           "status": "completed"
         },
         {
           "id": "task-4",
-          "content": "Docs + 5 commit conventional (không push) — xong",
+          "content": "TD-C2 Bảng tuổi nợ: helper+action+test+tab UI",
+          "status": "completed"
+        },
+        {
+          "id": "task-5",
+          "content": "Cổng chất lượng: typecheck+prisma+test(2126)+build+site /login 200",
           "status": "completed"
         }
       ]
     }
   ],
-  "nextTaskId": 5,
+  "nextTaskId": 6,
   "nextPhaseId": 2,
-  "updatedAt": "2026-10-24T00:46:24.472Z"
+  "updatedAt": "2026-10-24T06:10:50.162Z"
 }

@@ -8,5 +8,5 @@
 | `README.md` | Cửa nhà kho, hướng dẫn cài đặt chạy |
 | `CHANGELOG.md` | Thay đổi phiên bản (tạo khi phát hành V1) |
 | `docs/TODO.md` | 
-| `docs/AGENTS_TODO.md` |
+| `docs/AGENT_TODO.md` |
 | `GOAL1.md` |
