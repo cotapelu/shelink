@@ -57,4 +57,26 @@ Cập nhật lần cuối: 2025-07-09
 - Rollback: `git revert`.
 
 ## Nhật ký chu kỳ gần nhất
+
+### [CYCLE-AUTO-39] — 2026-10-24: Giai đoạn 1 thương mại (P0)
+Loại: Feature (docs-first → schema → migrate dev local → server → UI → test). ~4 giờ. ✅.
+
+**Docs-first (§5.1)**: AGENTS.md (luồng + thuật ngữ), PRD (§3.b module mới, quyết định #19-#22, §10.4), DATA-MODEL v0.48 (§4.28-§4.32), UI-DESIGN v0.3 (§7.6-§7.10), TODO.md (roadmap 70 task).
+
+**Schema**: migration `20261024022214_commercial_core_stage1` (6 model mới: Quote/QuoteItem/Contract/ContractEvent/TimesheetEntry/ExpenseClaim/CashAccount + 8 enum + FeeEntry.accountId). SQL thuần additive; đã apply DB dev local — **sản xuất cần chủ sở hữu duyệt `migrate deploy`**.
+
+**Đã hoàn thành**:
+- [x] TD-A3 Báo giá: server + UI + 11 test (pricing thuần + actions: convert contract/matter trong transaction).
+- [x] TD-A4 Hợp đồng: vòng đời + gia hạn + events + 4 test.
+- [x] TD-B1 Ghi giờ: validate 0.25h/bắt buộc gắn đối tượng + duyệt + 4 test.
+- [x] TD-C5 Chi phí: duyệt đa cấp, payExpense sinh FeeEntry COST cùng transaction + 5 test.
+- [x] TD-F1 Email: mailer SMTP (lazy, không hard-code secret) + 5 mẫu.
+- [x] TD-G1 Thuật ngữ: lib + server + hook qua SystemSetting.
+- Nền tảng: nextSequenceCode (đếm nguyên tử), nav mới (Báo giá/Hợp đồng/Ghi giờ/Chi phí), nodemailer.
+
+**Còn lại GĐ1**: TD-C1 UI quỹ (CashAccount settings page), TD-C2 bảng tuổi nợ, TD-A1/A2 pipeline lead kanban, settings/terminology page, settings/email page.
+
+**Cổng chất lượng**: typecheck PASS; lint 944 (không tăng); test 2079→2103 pass; build SUCCESS; /login 200.
+
+
 - **AUTO-38 (2026-10-24)**: sửa `rules-of-hooks` (bug tiềm ẩn), 3 `prefer-as-const`, 2 `no-unused-expressions`, 2 `exhaustive-deps`, 1 `no-img-element`, 16 `no-unused-vars`; trích 3 hàm (`useIntakeFormStates` 26, `DocCard` 53, `NewFolderDialog` 51). Lint 973→944; coverage hàm 77.15→79.52%; test 2079 pass; typecheck/build xanh; site /login 200.
