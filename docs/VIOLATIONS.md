@@ -1,221 +1,86 @@
-# Violations & Improvement Plan
+# Vi phạm & Kế hoạch cải thiện
 
-**Generated**: 2025-06-30  
-**Discovery Cycle**: Baseline  
-**Framework**: AUTO-CONTINUE.md v2.2
-
----
-
-## Summary
-
-| Category | Count | Severity Distribution |
-|----------|-------|-----------------------|
-| Quality (CODE_SMELL) | 32 | Medium: 32 |
-| Test Coverage Gap | 2 | High: 2 |
-| Configuration | 1 | Low: 1 |
-| **Total** | **35** | **Critical: 0, High: 2, Medium: 32, Low: 1** |
+**Tạo lúc**: 2025-06-30
+**Chu kỳ phát hiện**: Căn cứ
+**Khung**: AUTO-CONTINUE.md v2.2
 
 ---
 
-## Violations by Severity
+## Tổng hợp
 
-### 🔴 CRITICAL (0)
-*None*
-
-### 🟠 HIGH (0)
-*All HIGH violations resolved*
-
-*Previously resolved:*
-- HIGH-1: server/preservations/actions.ts ✅ (Sprint 1)
-- HIGH-2: lib/telemetry/metrics.ts ✅ (Sprint 2)
+| Loại | Số lượng | Phân bố mức độ |
+|---|---|---|
+| Chất lượng (CODE_SMELL) | 32 | Medium: 32 |
+| Lỗ hổng phủ test | 2 | High: 2 |
+| Cấu hình | 1 | Low: 1 |
+| **Tổng** | **35** | Critical: 0, High: 2, Medium: 32, Low: 1 |
 
 ---
 
-### 🟡 MEDIUM (32)
+## Vi phạm theo mức độ
 
-#### Quality Warnings - Unused Variables
+### 🟡 MEDIUM (32) — cảnh báo biến không dùng
 
-**Files affected** (23 files với unused imports/variables):
+Ảnh hưởng: code phình, dễ nhầm, tăng chi phí duy trì.
+Tổng ~40 cảnh báo rải ở 23 tệp (vd: `client-sheet.tsx`, `intake-sheet.tsx`, `matter-detail-tabs.tsx`, `procedure-forms.tsx`, `preservations-view.tsx`, `Avatar.tsx` dùng `<img>` thay `next/image`, ...).
+Cách sửa: bỏ import/biến không dùng; thay `<img>` bằng `next/image`.
+Công lượng ước tính: 8–12 giờ. Ưu tiên P2.
 
-1. `src/app/(app)/clients/[id]/_components/__tests__/matters-section.test.tsx` - 'Matter' unused
-2. `src/app/(app)/clients/_components/client-sheet.tsx` - 'watch' unused
-3. `src/app/(app)/intakes/_components/intake-sheet.tsx` - 4 unused (useWatch, watchedTitle, causeName, titleTouched)
-4. `src/app/(app)/matters/[id]/_components/finance-forms.tsx` - 'user' unused
-5. `src/app/(app)/matters/[id]/_components/info-panel.tsx` - 2 unused (FinancePayload, clientContact)
-6. `src/app/(app)/matters/[id]/_components/invoice-section.tsx` - 2 unused (FileText, Badge)
-7. `src/app/(app)/matters/[id]/_components/matter-detail-tabs.tsx` - 5 unused (Info, folders, folderDocuments, templates, preservations)
-8. `src/app/(app)/matters/[id]/_components/matter-preservation-panel.tsx` - 6 unused imports + 'isPending'
-9. `src/app/(app)/matters/[id]/_components/procedure-documents-section.tsx` - 'counts' unused
-10. `src/app/(app)/matters/[id]/_components/procedure-forms.tsx` - 5 issues (Upload, suggestHandlingAgency, procedureId, useEffect deps)
-11. `src/app/(app)/matters/[id]/_components/procedure-info-panel.tsx` - 'Pencil' unused
-12. `src/app/(app)/matters/_components/matters-table.tsx` - 'matterCategoryLabel' unused
-13. `src/app/(app)/preservation/_components/preservations-view.tsx` - 5 unused (Link, RotateCw, e, isPending)
-14. `src/app/(app)/preservations/page.tsx` - 'Button' unused
-15. `src/app/(app)/seals/page.tsx` - 'Button' unused
-16. `src/app/(app)/sms/page.tsx` - 'Button' unused
-17. `src/app/actions/data.ts` - 2 unused (type, formData)
-18. `src/app/actions/user.ts` - 4 unused (data, userId, role)
-19. `src/app/config.ts` - anonymous default export (style)
-20. `src/components/Avatar/Avatar.tsx` - using `<img>` instead of Next.js Image (performance)
-21. `src/components/Table/Table.tsx` - React compilation warning (useMemo/useCallback compatibility)
+### 🟢 LOW (1) — cấu hình Next.js cũ
 
-**Impact**: Code bloat, potential confusion, maintenance overhead  
-**Severity**: Medium (code quality, not functional)  
-**Total**: ~40 individual warnings  
-**Fix Strategy**: Remove unused imports/variables, fix anonymous exports, replace `<img>` with Image  
-**Estimated Effort**: 8-12 hours  
-**Priority**: P2
+- `next.config.mjs`: `experimental.instrumentationHook` không còn cần.
+- Cách sửa: xoá tag này. Ưu tiên P3.
 
 ---
 
-### 🟢 LOW (1)
+## Kế hoạch cải thiện (2 tuần)
 
-#### LOW-1: Deprecated Next.js Config
-- **File**: `next.config.mjs`
-- **Issue**: `experimental.instrumentationHook` is no longer needed/invalid
-- **Impact**: Warning at build time, potential future breakage
-- **Fix**: Remove `instrumentationHook` from config
-- **Effort**: 5 minutes
-- **Priority**: P3
+### Sprint 1: Sửa ưu tiên cao (ngày 1–5)
+Mục tiêu: dọn vi phạm HIGH, đẩy phủ module trọng yếu.
 
----
+1. **[T] server/preservations/actions.ts**: test đầy đủ (branch ≥80%).
+2. **[T] lib/telemetry/metrics.ts**: test đầy đủ (branch ≥90%).
+3. **[R]** giảm độ phức tạp server/preservations (tách hàm >50 dòng; cyclomatic ≤10).
+4. **[S]** rà soát quyền trên mọi endpoint ghi trạng thái; đảm bảo kiểm session; ghi tài liệu.
 
-## Improvement Plan (Next 2 Weeks)
+Tổng ~32 giờ. Thành công: sạch vi phạm HIGH; phủ câu lệnh ≥92%, nhánh ≥87%.
 
-### Sprint 1: High-Priority Fixes (Days 1-5)
+### Sprint 2: Dọn nợ kỹ thuật (ngày 6–10)
+1. Dọn import/biến không dùng (2 lô).
+2. Refactor component sang `next/image`.
+3. JSDoc cho API public (lib, server action).
+4. Cập nhật phụ thuộc non-major (`npm outdated`).
+5. Log có cấu trúc (JSON) kèm correlation id.
 
-**Goal**: Eliminate HIGH violations, improve critical coverage
+Tổng ~24 giờ.
 
-**Tasks**:
+### Sprint 3: Khả năng quan sát & hiệu năng (ngày 11–15)
+1. Endpoint health: `/health/live`, `/health/ready` (kiểm DB/cache).
+2. Prometheus metrics: `http_requests_total`, `http_request_duration_seconds`, `errors_total`.
+3. OpenTelemetry tracing.
+4. Tối ưu DB: dò N+1 (Prisma include/select), thêm chỉ mục còn thiếu.
 
-1. **[T] server/preservations/actions.ts: Add comprehensive unit tests**
-   - Target: Branch coverage ≥80%
-   - Strategy: Mock Prisma, test all branches, error paths
-   - Subtasks:
-     - Setup test fixtures and mocks (2h)
-     - Test each action handler (12h)
-     - Add integration tests (2h)
-   - Estimated: 16h
+Tổng ~18 giờ.
 
-2. **[T] lib/telemetry/metrics.ts: Add unit tests**
-   - Target: Branch coverage ≥90%
-   - Strategy: Mock telemetry backend, verify metrics emitted
-   - Estimated: 4h
+## Bảng tham chiếu loại tác vụ
 
-3. **[R] Reduce complexity of server/preservations/actions.ts**
-   - Split long functions (>50 lines)
-   - Extract validation logic
-   - Reduce cyclomatic complexity ≤10
-   - Estimated: 8h (could be part of test effort)
+| Mã | Loại | Hành động |
+|---|---|---|
+| R | Refactor | tách class/hàm lớn, trích interface, SOLID |
+| P | Hiệu năng | cache, tối ưu truy vấn, lazy load, memo |
+| S | Bảo mật | RBAC, WAF, mã hóa, luân chuyển secret, audit |
+| T | Test | branch >85%, fuzzing, integration, property-based |
+| D | Tài liệu | JSDoc, ADR, README, sơ đồ kiến trúc |
+| O | Quan sát | OpenTelemetry, Prometheus, log JSON |
+| C | Tuân thủ | GDPR/PCI/HIPAA |
+| U | Nâng cấp | cập nhật phiên bản |
+| M | Hiện đại | async/await, strict TS, CI/CD, container |
 
-4. **[S] Security audit: Verify auth on all state-changing endpoints**
-   - Review Server Actions and API routes
-   - Ensure NextAuth session checks
-   - Document findings
-   - Estimated: 4h
+## Chỉ số thành công
 
-**Total Estimated**: 32 hours  
-**Success Criteria**:
-- HIGH violations cleared
-- Coverage: statements ≥92%, branches ≥87%
-- No security gaps found
+- **Phủ test**: ≥92% câu lệnh, ≥87% nhánh.
+- **Điểm chất lượng**: ≥95/100.
+- **Không có vi phạm HIGH / Critical**.
+- **Health Score**: ≥75.
 
----
-
-### Sprint 2: Code Quality & Debt (Days 6-10)
-
-**Goal**: Eliminate MEDIUM violations, improve code hygiene
-
-**Tasks**:
-
-1. **[R] Cleanup unused imports/variables**
-   - Batch 1: Components with most warnings (procedure-forms, matter-preservation-panel)
-   - Batch 2: Remaining files
-   - Estimated: 10h
-
-2. **[R] Refactor components to use Next.js Image**
-   - Replace `<img>` with `next/image`
-   - Optimize images with proper sizes
-   - Estimated: 2h
-
-3. **[D] Update JSDoc for public APIs**
-   - lib/*.ts (exposed utilities)
-   - server/*/actions.ts (Server Actions)
-   - Estimated: 6h
-
-4. **[U] Update dependencies (non-major)**
-   - Run `npm outdated`
-   - Update patch/minor versions
-   - Test compatibility
-   - Estimated: 2h
-
-5. **[O] Add structured logging with correlation IDs**
-   - Audit current logging
-   - Add request ID propagation
-   - JSON format logs
-   - Estimated: 4h
-
-**Total Estimated**: 24 hours
-
----
-
-### Sprint 3: Observability & Performance (Days 11-15)
-
-**Goal**: Enhance observability, monitor performance
-
-**Tasks**:
-
-1. **[O] Implement health endpoints**
-   - `/health/live` (process alive)
-   - `/health/ready` (db, redis, external dependencies)
-   - Estimated: 2h
-
-2. **[O] Add Prometheus metrics**
-   - `http_requests_total` (method, path, status)
-   - `http_request_duration_seconds` (histogram)
-   - `errors_total` (type, component)
-   - Estimated: 4h
-
-3. **[O] Add OpenTelemetry tracing**
-   - Setup OTLP endpoint
-   - Instrument Next.js app
-   - Trace cross-service calls
-   - Estimated: 6h
-
-4. **[P] Database optimization audit**
-   - Find N+1 queries (Prisma include/select)
-   - Add missing indexes (prisma migrate)
-   - Optimize slow queries
-   - Estimated: 6h
-
-**Total Estimated**: 18 hours
-
----
-
-## Task Catalog Reference
-
-| Type | Category | Actions |
-|-----|----------|---------|
-| R | Refactor | Split large classes/functions, extract interfaces, apply SOLID |
-| P | Performance | Caching, query optimization, lazy loading, memoization |
-| S | Security | RBAC, WAF, encryption, secret rotation, audit logging |
-| T | Tests | Branch coverage >85%, fuzzing, integration tests, property-based |
-| D | Documentation | JSDoc, ADRs, README improvements, architecture diagrams |
-| O | Observability | OpenTelemetry, metrics (Prometheus), structured logs |
-| C | Compliance | GDPR/PCI/HIPAA controls (data retention, consent, audit) |
-| U | Upgrade | Dependencies updates, migrate to new major versions |
-| M | Modernization | Async/await, TypeScript strict mode, CI/CD, containerization |
-
----
-
-## Success Metrics
-
-- **Test Coverage**: ≥92% statements, ≥87% branches (from current 90.24%/84.89%)
-- **Quality Gate Score**: ≥95 points (max 100)
-- **Zero HIGH violations**
-- **Zero Critical violations**
-- **Health Score**: Increase to ≥75 (from 0 baseline)
-
----
-
-**Next Step**: Start Sprint 1, Task 1 immediately. Write test first, then implement fixes for `server/preservations/actions.ts`.
+**Bước tiếp**: Bắt đầu Sprint 1 việc 1 ngay — viết test trước rồi sửa cho `server/preservations/actions.ts`.

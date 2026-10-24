@@ -1,80 +1,73 @@
-# Modules Migration Summary
+# Tóm tắt Di trú Module
 
-**Date**: 2025-06-26
-**Status**: ✅ Backend Complete, UI Core Complete
+**Ngày**: 2025-06-26
+**Trạng thái**: ✅ Backend xong, UI lõi xong
 
-## Database Models (Total ~70)
+## Model cơ sở dữ liệu (tổng ~70)
 
-### LawLink Original (Legal Domain)
-- User, AuditLog, CustomField, CustomFieldDefinition, Matter, Client, Document, DocumentFolder, DocumentTemplate, DocumentVersion, Invoice, InvoiceItem, Fee, FeeEntry, Cause, CauseOfAction, ConflictCheck, ConflictResult, Archive, ArchiveReview, PreservationNotice, Intake, SealRequest, Procedure, ProcedureTemplate, ExpressTracking, ExpressEvent, ExternalContact, FirmFile, Note, Notification, Reminder, Report, ScheduleEvent, SearchLog, SystemSetting, SmsMessage, YuandianSettings, etc.
+### Gốc LawLink (miền nghiệp vụ cốt lõi)
+- User, AuditLog, CustomField(Def), Matter, Client, Document, DocumentFolder, DocumentTemplate, Invoice, Fee, FeeEntry, CauseOfAction, ConflictCheck, ArchiveRecord, Intake, SealRequest, MatterProcedure, ExpressTracking, ExternalContact, FirmFile, Note, Notification, Report, SystemSetting, SmsMessage, ...
 
-### Migrated from server-nest (Genealogy + ERP)
-- **Persons**: Person, Relationship, Event, Lineage
-- **ERP Core**: WorkTask, Project, ProjectMember, ProjectMilestone, Team, TeamMember
+### Di trú từ server-nest (genealogy + ERP)
+- **Person**: Person, Relationship, Event, Lineage
+- **ERP lõi**: WorkTask, Project, ProjectMember, ProjectMilestone, Team, TeamMember
 - **Workflow**: Workflow, WorkflowStep, WorkflowTransition, WorkflowAudit
-- **Shared**: File, Report (duplicate? keep one)
+- **Dùng chung**: File, Report (gộp cái trùng)
 
-## Server Actions Implemented
+## Server Actions đã cài
 
 ### Genealogy (`src/server/genealogy/`)
-| File | Actions | Purpose |
-|------|---------|---------|
-| actions.ts | getPersons, getPerson, createPerson, updatePerson, deletePerson; getRelationships, createRelationship, deleteRelationship; getEvents, createEvent, updateEvent, deleteEvent | Persons, relationships, events CRUD |
-| lineage.actions.ts | listLineages, getLineage, createLineage, updateLineage, deleteLineage | Lineage tree management |
-| users/actions.ts | getUsers | Admin user list |
+| Tệp | Hàm |
+|---|---|
+| actions.ts | Person/Relationship/Event: list/get/create/update/delete |
+| lineage.actions.ts | Lineage CRUD |
+| users/actions.ts | Liệt kê user (admin) |
 
 ### ERP (`src/server/erp/`)
-| File | Actions | Purpose |
-|------|---------|---------|
-| actions.ts | listTasks, getTask, createTask, updateTask, deleteTask; listProjects, getProject, createProject, updateProject, deleteProject | Task & project management |
-| workflow.actions.ts | listWorkflows, getWorkflow, createWorkflow, updateWorkflow, deleteWorkflow; addStep, updateStep, deleteStep; addTransition, updateTransition, deleteTransition; getWorkflowAudits | Workflow engine |
+| Tệp | Hàm |
+|---|---|
+| actions.ts | Task/Project CRUD |
+| workflow.actions.ts | Workflow/Step/Transition/Audit |
 
 ### Intake (`src/server/intake/`)
-| File | Actions | Purpose |
-|------|---------|---------|
-| actions.ts | listIntakes, getIntake, createIntake, updateIntake, assignIntake, convertIntakeToMatter, deleteIntake | Client intake → Matter pipeline |
+| Tệp | Hàm |
+|---|---|
+| actions.ts | listIntakes, getIntake, createIntake, updateIntake, assignIntake, convertIntakeToMatter, deleteIntake |
 
-### Shared Services (`src/server/shared/`)
-| File | Actions | Purpose |
-|------|---------|---------|
-| notification.actions.ts | listNotifications, getUnreadNotificationCount, markNotificationRead, markAllNotificationsRead, createNotification | Notification management |
-| files.actions.ts | uploadFile, getFile, deleteFile, listFiles | File upload & retrieval |
-| reports.actions.ts | listReports, getReport, generateReport, deleteReport | Report generation (stub) |
-| stats.actions.ts | getDashboardStats, getGenealogyStats | Dashboard aggregation |
-| seals.actions.ts | requestSeal, listSealRequests, getSealRequest, approveSeal, rejectSeal, stampSeal | Seal/Stamp workflow |
-| preservation.actions.ts | createPreservation, listPreservations, getPreservation, renewPreservation, closePreservation | Property preservation |
-| express.actions.ts | createExpressTracking, listExpressTrackings, updateExpressStatus | Express delivery tracking |
-| sms.actions.ts | sendSms, listSmsMessages | SMS messaging |
-| settings.actions.ts | getSettings, updateSetting | System settings CRUD |
+### Dịch vụ dùng chung (`src/server/shared/`)
+| Tệp | Hàm |
+|---|---|
+| notification.actions.ts | list, count-unread, mark-read, mark-all, create |
+| files.actions.ts | upload/get/delete/list |
+| reports.actions.ts | list/get/generate/delete |
+| stats.actions.ts | dashboard/genealogy/erp thống kê |
+| seals.actions.ts | request/list/get/approve/reject/stamp |
+| preservation.actions.ts | create/list/get/renew/close |
+| express.actions.ts | create/list/updateStatus |
+| sms.actions.ts | send/list |
+| settings.actions.ts | get/update |
 
-**Note**: `getErpStats` temporarily disabled due to type issues; can be re-enabled later.
+## Trang frontend đã di trú
 
-## Frontend Pages Migrated (client-next → LawLink)
-
-| Route | Domain | Backend Used | Status |
-|-------|--------|--------------|--------|
-| `/genealogy` | Genealogy | Dashboard (stub) | ✅ |
-| `/genealogy/persons` | Genealogy | getPersons | ✅ |
-| `/genealogy/events` | Genealogy | getEvents + getPersons | ✅ |
-| `/genealogy/kinship` | Genealogy | getRelationships + getPersons | ✅ |
-| `/genealogy/lineage` | Genealogy | lineage actions (client-side) | ✅ |
-| `/genealogy/stats` | Genealogy | stats actions | ✅ |
-| `/genealogy/users` | Genealogy | getUsers | ✅ |
+| Route | Miền | Backend | Trạng thái |
+|---|---|---|---|
+| `/genealogy/persons` | Gia phả | getPersons | ✅ |
+| `/genealogy/events` | Gia phả | getEvents+getPersons | ✅ |
+| `/genealogy/kinship` | Gia phả | tính quan hệ | ✅ |
+| `/genealogy/lineage` | Gia phả | lineage | ✅ |
+| `/genealogy/stats` | Gia phả | stats | ✅ |
+| `/genealogy/users` | Gia phả | getUsers | ✅ |
 | `/erp/tasks` | ERP | listTasks | ✅ |
 | `/erp/tasks/board` | ERP | listTasks (kanban) | ✅ |
 | `/erp/projects` | ERP | listProjects | ✅ |
 
-**UI Components**: All shadcn/ui components integrated; genealogy/ERP specific components already present in `src/components/domain/`.
+**Component UI**: Thành phần shadcn/ui đã tích hợp; component riêng genealogy/ERP nằm ở `src/components/domain/`.
 
-## Still Pending (Optional)
+## Còn treo (tuỳ chọn)
 
-- **UI Pages** for new modules: Files, Reports, Seals, Preservation, Express, SMS, Intakes, Settings (can be built using existing server actions)
-- **Testing**: Unit tests, E2E tests
-- **Deployment**: Docker, CI/CD
-- **RBAC**: Detailed permission checks in server actions (currently only session check)
-- **Error handling**: Custom error classes, user-friendly messages
-- **Audit logging**: Comprehensive audit for all actions (some present)
-
----
-
-**Conclusion**: The backend is fully migrated and functional. The UI can be extended as needed using the provided server actions.
+- Trang UI cho module mới: Files, Reports, Seals, Preservation, Express, SMS, Intake, Settings.
+- Test: unit, e2e.
+- Deploy: Docker, CI/CD.
+- RBAC chi tiết trong server actions (hiện chỉ kiểm session).
+- Xử lý lỗi thrown chuẩn hoá.
+- Ghi audit đầy đủ cho mọi hành động.

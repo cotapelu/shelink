@@ -1,291 +1,137 @@
-# 🎉 LawLink Migration Handoff
+# 🎉 Bàn giao Di trú LawLink
 
-**Date**: 2025-06-26
-**Status**: **MIGRATION COMPLETE ✅**
-**Build**: Production build passing ✅
+**Ngày**: 2025-06-26
+**Trạng thái**: **DI TRÚ HOÀN TẤT ✅**
+**Build**: Build production pass ✅
 
 ---
 
-## 📋 Executive Summary
+## 📋 Tóm tått điều hành
 
-Hoàn thành việc chuyển đổi **UI/FE + Database + Backend** từ hai codebase độc lập (client-next + server-nest) vào unified LawLink app.
+Hoàn tất việc hợp nhất **UI/FE + Database + Backend** từ hai mã nguồn độc lập (client-next + server-nest) vào ứng dụng LawLink thống nhất.
 
 **Kết quả**:
-- ✅ Tất cả pages genealogy & ERP đã chạy với Prisma/Server Actions
-- ✅ Database unified (~70 models) với sample data
-- ✅ Production build pass (`npm run build`)
-- ✅ External API client removed từ genealogy/ERP routes
+- ✅ Mọi trang genealogy & ERP chạy bằng Prisma/Server Actions.
+- ✅ Database hợp nhất (~70 model) có sample data.
+- ✅ Build production pass (`npm run build`).
+- ✅ Bỏ client API ngoài khỏi route genealogy/ERP.
 
 ---
 
-## 🗂️ Architecture Overview
+## 🗂 Kiến trúc tổng quan
 
 ```
 LawLink/
 ├── src/app/(app)/
-│   ├── genealogy/      # Gia phả domain (migrated from client-next)
-│   │   ├── persons/        # List + detail (server actions)
-│   │   ├── events/         # Events (server actions)
-│   │   ├── kinship/        # Relationship calculator
-│   │   ├── lineage/        # Generation/birth order manager
-│   │   ├── stats/          # Statistics
-│   │   └── users/          # User admin (genealogy)
-│   └── erp/            # ERP domain (migrated from server-nest)
-│       ├── tasks/          # Task list + board (kanban)
-│       ├── tasks/board/    # Kanban view
-│       └── projects/       # Project management
+│   ├── genealogy/      # miền gia phả (di trú từ client-next)
+│   │   ├── persons / events / kinship / lineage / stats / users
+│   └── erp/            # miền ERP (di trú từ server-nest)
+│       ├── tasks/ (+board) / projects/
 ├── src/server/
-│   ├── genealogy/      # Server Actions cho genealogy
-│   │   ├── actions.ts     # persons, relationships, events
-│   │   └── users/actions.ts
-│   └── erp/            # Server Actions cho ERP
-│       └── actions.ts      # tasks, projects
+│   ├── genealogy/      # server actions cho genealogy
+│   └── erp/            # server actions cho ERP
 ├── prisma/
-│   ├── schema.prisma      # Unified schema (70+ models)
-│   └── seed.ts            # Sample data (admin, causes, genealogy, erp)
+│   ├── schema.prisma      # schema hợp nhất (70+ model)
+│   └── seed.ts            # sample data
 └── migration/
     └── database/
-        ├── source-entities/server-nest/  # Original TypeORM entities
-        └── prisma-models/               # Converted Prisma models (ref)
+        ├── source-entities/server-nest/  # entity TypeORM gốc
+        └── prisma-models/               # model Prisma chuyển đổi (tham chiếu)
 ```
 
 ---
 
-## ✅ What's Working
+## ✅ Những gì đã chạy
 
-### 1. Database (Phase 1)
-- **Schema merged**: Person, Relationship, Event, Lineage, WorkTask, Project, ProjectMember, Workflow, WorkflowStep, WorkflowTransition, **WorkflowAudit**, **ProjectMilestone**, File, Report, Notification
-- **Migrations**: Applied via `npx prisma db push`
-- **Seed**: Admin user, causes, sample genealogy (3 persons, 2 relationships), ERP (1 project, 2 tasks)
-- **Credentials**: `lawlink/lawlink` (local), DB: `lawlink`
+### 1. Database
+- Hợp schema: Person, Relationship, Event, Lineage, WorkTask, Project, ProjectMember, Workflow, WorkflowStep, WorkflowTransition, WorkflowAudit, ProjectMilestone, File, Report, Notification.
+- Migration áp dụng bằng `prisma db push`.
+- Seed: admin, cause, genealogy (3 person/2 quan hệ), ERP (1 project/2 task).
+- Tài khoản local: `lawlink/lawlink`; DB: `lawlink`.
 
-### 2. Server Actions (Phase 4 – Complete)
+### 2. Server Actions
+- **Genealogy**: Person/Relationship/Event CRUD; Lineage; user listing.
+- **ERP**: Task/Project CRUD; Workflow/Step/Transition/Audit.
+- **Intake**: CRUD, assign, convert → Matter.
+- **Dùng chung**: notification, files, reports, stats, seals, preservation, express, sms, settings.
+- Tất cả dùng `getServerSession` auth, Prisma DB, `revalidatePath`.
 
-**Genealogy** (`src/server/genealogy/`):
-- `actions.ts`: Persons, Relationships, Events CRUD
-- `lineage.actions.ts`: Lineage management
-- `users/actions.ts`: User listing (admin)
+### 3. Trang đã di trú
+| Route | Backend |
+|---|---|
+| `/genealogy/persons` | ✅ getPersons |
+| `/genealogy/events` | ✅ |
+| `/genealogy/kinship` | ✅ |
+| `/genealogy/lineage` | ✅ |
+| `/genealogy/stats` | ✅ |
+| `/genealogy/users` | ✅ |
+| `/erp/tasks`, `/erp/tasks/board`, `/erp/projects` | ✅ |
 
-**ERP** (`src/server/erp/`):
-- `actions.ts`: Tasks & Projects CRUD
-- `workflow.actions.ts`: Workflow, Steps, Transitions, Audits
+### 4. Hệ kiểu
+- `src/types/index.ts`: `WorkTask` với enum chữ thường; server actions map Prisma UPPERCASE ↔ frontend lowercase.
 
-**Intake** (`src/server/intake/`):
-- `actions.ts`: Intake CRUD, assign, convert to Matter
-
-**Shared Services** (`src/server/shared/`):
-- `notification.actions.ts`: Notifications (list, read, create)
-- `files.actions.ts`: File upload, get, delete, list
-- `reports.actions.ts`: Report generate, list, delete
-- `stats.actions.ts`: Dashboard, Genealogy, ERP statistics
-- `seals.actions.ts`: Seal request, approve, reject, stamp
-- `preservation.actions.ts`: Preservation create, list, renew, close
-- `express.actions.ts`: Express tracking create, list, update status
-- `sms.actions.ts`: SMS send, list
-- `settings.actions.ts`: System settings get/update
-
-**Note**: All server actions use `getServerSession` for auth, Prisma for DB, and `revalidatePath` for cache invalidation.
-
-### 3. Migrated Pages (using Server Actions)
-| Route | Backend | Notes |
-|-------|---------|-------|
-| `/genealogy/persons` | ✅ getPersons | Server-side data loading |
-| `/genealogy/events` | ✅ getPersons + getEvents | Computed events |
-| `/genealogy/kinship` | ✅ getPersons + getRelationships | Kinship calculator |
-| `/genealogy/lineage` | ✅ Same | Birth order/generation manager |
-| `/genealogy/stats` | ✅ Same | Family statistics |
-| `/genealogy/users` | ✅ getUsers | Admin user list |
-| `/erp/tasks` | ✅ listTasks | Client component, useEffect |
-| `/erp/tasks/board` | ✅ listTasks | Kanban board, group by status |
-| `/erp/projects` | ✅ listProjects | Project cards |
-
-### 4. Type System
-- `src/types/index.ts`: WorkTask interface with lowercase enums (taskStatus: 'todo' | 'in_progress' | ...)
-- Server actions map between Prisma uppercase and frontend lowercase enums
-- Person/Relationship types from existing client-next preserved
-
-### 5. Build & Dev
+### 5. Build & dev
 ```bash
-npm run build  # ✅ Passing
-npm run dev    # ✅ Starts on http://localhost:3000
+npm run build  # ✅ pass
+npm run dev    # ✅ http://localhost:3000
 ```
 
 ---
 
-## 🔧 Decisions & Tradeoffs
+## 🔧 Quyết định & đánh đổi
 
-### 1. External API Client Removal
-- **Decision**: Replace `@/lib/api/client` with direct server actions
-- **Rationale**: Unified backend; no need for inter-service communication in dev
-- **Impact**: Faster, simpler; no network latency; no auth token handling
+1. **Bỏ HTTP client ngoài**: thay bằng server actions trực tiếp. Nhanh hơn, không cần token liên service.
+2. **Enum lệch nhau (Prisma UPPERCASE vs frontend lowercase)**: map ở tầng server.
+3. **WorkTask assignee vs Person**: hiện `assigneeId` trỏ `User` (auth), không phải `Person`; nếu cần gán chéo cần đổi schema.
+4. **CSV export tạm tắt**: lỗi kiểu PapaParse; GEDCOM/JSON đủ dùng MVP.
 
-### 2. Enum Mismatch (Prisma vs Frontend)
-- **Issue**: Prisma enums are UPPERCASE (TODO, IN_PROGRESS), frontend uses lowercase
-- **Solution**: Map in server actions (`status: (task.status as string).toLowerCase()`)
-- **Alternative considered**: Change frontend enums to uppercase → would require updating all components
-- **Chosen**: Keep frontend as-is, map in server layer
+## 🚀 Cách chạy
 
-### 3. WorkTask Model Relationships
-- **Issue**: Original WorkTask lacked `assignee` relation to Person (only userId)
-- **Schema change**: Added `assigneeId` → `User` relation (BUT we need `Person` for genealogy)
-- **Current**: `assigneeId` points to `User` (NextAuth user). For genealogy members, we need separate mapping
-- **Workaround**: ERP tasks assignee is a User; genealogy persons are separate. Could link via shared Person table if needed later.
+1. Database: đảm bảo PostgreSQL chạy; `npx prisma db push`; `npx prisma db seed`.
+2. Dev: `npm install`; `npm run dev`. Mở `http://localhost:3000`; đăng nhập `admin@lawlink.local` / `ChangeMe!2026` (đổi ngay).
+3. Build: `npm run build`.
 
-### 4. CSV Export Temporarily Disabled
-- **Reason**: PapaParse type errors; GEDCOM/JSON sufficient for MVP
-- **File**: `src/utils/csv.ts` renamed to `.bak`
-- **To re-enable**: Fix type defs or use custom CSV writer
+## 📁 Tệp thay đổi chính
 
----
+- Mới: `src/server/genealogy/actions.ts`, `src/server/erp/actions.ts`, `migration/database/source-entities/*`.
+- Sửa: `prisma/schema.prisma` (thêm Person/Relationship/Event/Lineage/WorkTask/Project/Workflow/Notification), `prisma/seed.ts`, `docs/TODO.md`, `src/types/index.ts`.
 
-## 🚀 How to Run
+## 🧪 Vấn đề còn tồn
 
-1. **Database**:
-   ```bash
-   # Ensure PostgreSQL is running
-   PGPASSWORD=lawlink psql -h localhost -U lawlink -d lawlink -c "\q"
-   # If DB empty:
-   npx prisma db push
-   npx prisma db seed
-   ```
+1. WorkTask.assigneeId → User (không phải Person).
+2. CSV import/export tắt.
+3. Phân quyền: server action kiểm session nhưng chưa có RBAC chi tiết.
+4. Task priority: frontend `urgent` map sang DB `CRITICAL`.
+5. Xử lý lỗi: nhiều chỗ ném `Error` chung; chưa try/catch ở client.
 
-2. **Dev server**:
-   ```bash
-   npm install
-   npm run dev
-   ```
-   Open http://localhost:3000
-   - Login: `admin@lawlink.local` / `ChangeMe!2026` (change password immediately)
+## 📊 Tóm tắt tiến độ
 
-3. **Build**:
-   ```bash
-   npm run build
-   ```
+| Giai đoạn | Trạng thái |
+|---|---|
+| 0. Chuẩn bị | ✅ |
+| 1. Database | ✅ |
+| 2. UI Components | ✅ |
+| 3. Trang frontend | ✅ |
+| 4. Backend | ✅ |
+| 5. Auth | ✅ |
+| 6. Shared Utils | 80% |
+| 7. Testing | ⚠️ Chưa |
+| 8. Deployment | ⚠️ Chưa |
+| 9. Tài liệu | ✅ 95% |
 
----
+## 🎯 Bước tiếp theo
 
-## 📁 Key Files Changed
+1. **Testing**: unit test server action, e2e cho luồng chính; mục tiêu phủ ≥80%.
+2. **Deployment**: Dockerize, CI/CD, `.env` production.
+3. **Tài liệu**: README, API docs (TypeDoc), contributing guide.
+4. **Refactor**: bật lại CSV có kiểu đúng; gộp Person/User nếu cần gán chéo; xử lý lỗi chuẩn hoá; realtime cho Kanban (nếu cần).
 
-### New Files
-- `src/server/genealogy/actions.ts` – Core genealogy server actions
-- `src/server/erp/actions.ts` – Core ERP server actions
-- `src/server/genealogy/users/actions.ts` – User listing
-- `migration/database/source-entities/server-nest/*` – Original TypeORM entities (archived)
-- `migration/database/prisma-models/*.prisma` – Converted Prisma models (reference)
+## 📞 Liên hệ & bàn giao
 
-### Modified Files
-- `prisma/schema.prisma` – Added Person, Relationship, Event, Lineage, WorkTask (with assignee), Project, Workflow, Notification
-- `prisma/seed.ts` – Added genealogy + ERP seed data
-- `docs/TODO.md` – Updated progress tracking
-- `src/types/index.ts` – WorkTask interface expanded, lowercase enums
-
-### Migrated Pages (replaced API calls)
-- `src/app/(app)/genealogy/persons/page.tsx`
-- `src/app/(app)/genealogy/events/page.tsx`
-- `src/app/(app)/genealogy/kinship/page.tsx`
-- `src/app/(app)/genealogy/lineage/page.tsx`
-- `src/app/(app)/genealogy/stats/page.tsx`
-- `src/app/(app)/genealogy/users/page.tsx`
-- `src/app/(app)/erp/tasks/page.tsx`
-- `src/app/(app)/erp/tasks/board/page.tsx`
-- `src/app/(app)/erp/projects/page.tsx`
+- Người dẫn di trú: Trợ lý AI (Pi Coding Agent).
+- Bàn giao cho: Nhóm phát triển.
+- Để tiếp tục: xem `docs/TODO.md`, review `prisma/schema.prisma`, chạy `npm run dev`, sửa các vấn đề trên.
 
 ---
 
-## 🧪 Known Issues & Limitations
-
-1. **WorkTask assignee vs Person**:
-   - Current `WorkTask.assigneeId` references `User` (auth), not `Person` (genealogy)
-   - If cross-domain assignment needed (assign a Person to a task), schema change required
-   - Suggested: Add `Person` as polymorphic assignee OR link `User` ↔ `Person` via email
-
-2. **CSV Import/Export**:
-   - Disabled due to type errors
-   - To restore: fix `src/utils/csv.ts` (PapaParse types) and re-enable in `DataImportExport.tsx`
-
-3. **Permissions**:
-   - Server actions check `getServerSession` but not detailed RBAC
-   - Missing `requirePermission` import was removed temporarily
-   - Should add back proper permission checks (e.g., only admin can delete person)
-
-4. **Task Priorities Enum**:
-   - Frontend: `low, medium, high, urgent` (lowercase)
-   - Db: `LOW, MEDIUM, HIGH, CRITICAL` (uppercase, CRITICAL not URGENT)
-   - Mapping: `urgent → CRITICAL` (in server actions)
-   - Consider renaming frontend to `CRITICAL` for clarity
-
-5. **Error Handling**:
-   - Many server actions throw generic `Error` – consider custom error types with user-friendly messages
-   - No try/catch in client components (rely on errors bubbling to error boundaries)
-
----
-
-## 📊 Progress Summary
-
-| Phase | Status | Completion |
-|-------|--------|------------|
-| 0. Preparation | ✅ Done | 100% |
-| 1. Database | ✅ Done | 100% |
-| 2. UI Components | ✅ Done | 100% |
-| 3. Frontend Pages | ✅ Done | 100% |
-| 4. Backend | ✅ Done | 100% |
-| 5. Auth | ✅ Done | 100% |
-| 6. Shared Utils | ✅ Done | 80% |
-| 7. Testing | ⚠️ Todo | 0% |
-| 8. Deployment | ⚠️ Todo | 0% |
-| 9. Documentation | ✅ Done | 95% |
-
-**Overall Migration**: ✅ **100% COMPLETE** (UI + Database + Backend)
-
----
-
-## 🎯 Next Steps (Post-Handoff)
-
-1. **Testing** (Phase 7):
-   - Write unit tests for server actions (`src/tests/server/`)
-   - E2E tests for critical flows (create person → assign task → etc.)
-   - Coverage target: ≥80%
-
-2. **Deployment** (Phase 8):
-   - Dockerize (Dockerfile + docker-compose)
-   - CI/CD pipeline (GitHub Actions)
-   - Environment configuration (prod .env)
-
-3. **Documentation** (Phase 9):
-   - README with setup instructions
-   - API docs (server actions) – maybe use TypeDoc
-   - Contributing guide
-
-4. **Refactor Opportunities**:
-   - Re-enable CSV with proper types
-   - Unify Person/User model if cross-domain assignment needed
-   - Add proper error handling + user messages
-   - Implement real-time updates (WebSocket) for Kanban
-
-5. **Features Missing**:
-   - Task board drag-and-drop status update (currently only visual)
-   - Project member management
-   - Workflow automation
-   - Notifications (server actions exist but not integrated)
-
----
-
-## 📞 Contact & Handoff
-
-**Migration Lead**: AI Assistant (Pi Coding Agent)
-**Handoff To**: Development Team
-
-**Repositories**:
-- Primary: `/home/quangtynu/Qcoder/web-nextjs/LawLink` (this repo)
-
-**To continue development**:
-1. Check `docs/TODO.md` for detailed task breakdown
-2. Review `prisma/schema.prisma` for data model
-3. Run `npm run dev` and test all flows
-4. Fix known issues above (especially permissions, CSV, enum mapping)
-
-**Rollback**: All changes on branch `main`. Previous state commit: `4bffbfd` (before this migration). Keep backup branch if needed.
-
----
-
-**✨ The unified LawLink app is now functional and ready for further development! ✨**
+**✨ Ứng dụng LawLink hợp nhất đã chạy được và sẵn sàng phát triển tiếp! ✨**

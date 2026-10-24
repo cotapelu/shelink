@@ -1,49 +1,49 @@
-# Agent-Specific TODO List
+# Danh sách TODO riêng cho Agent
 
-Last updated: 2025-07-09
+Cập nhật lần cuối: 2025-07-09
 
-## Completed Cycles (Recent)
-- ✅ Cycles 0-75: Quality gate restoration, coverage push, refactor batches 1-3
-- ✅ P0: Rate limit exemptions fixed (CVE-2025-001)
-- ✅ P1: JWT RS256 code complete (deploy pending), permission audit passed
-- ✅ Lint: 120 → 0 warnings
-- ✅ Tests: 1365+ passing; Coverage: Stmt 98%, Branch 94%, Func 70%
-- ✅ Typecheck, build all green
-- ✅ Refactor: Extracted PurposeSection from seal-request-sheet (327→317 lines)
+## Chu kỳ đã hoàn thành (gần đây)
+- ✅ Chu kỳ 0–75: khôi phục cổng chất lượng, đẩy phủ, refactor 3 lô.
+- ✅ P0: sửa ngoại lệ giới hạn tốc độ (CVE-2025-001).
+- ✅ P1: code JWT RS256 xong (chờ deploy); kiểm tra quyền pass.
+- ✅ Lint: 120 → 0 cảnh báo.
+- ✅ Test: 1.365+ pass; phủ câu lệnh 98%, nhánh 94%, hàm 70%.
+- ✅ Typecheck, build xanh.
+- ✅ Refactor: trích PurposeSection khỏi seal-request-sheet (327→317 dòng).
 
-## Active Tasks (Next 2 Weeks)
+## Tác vụ đang chạy (2 tuần tới)
 
-### High Priority
-- [ ] **Refactor God Objects**:
-  - [ ] `intake-sheet.tsx` (currently ~1570 lines): extract PartiesSection, CauseFeeSection, ProcedureSection, DocumentsSection, SubmissionSection
-  - [ ] `procedure-content.tsx` (1357 lines): split into procedure-form, procedure-info, procedure-documents
-  - [ ] `export-xlsx.ts` (1058 lines): modularize export logic by domain
-  - [ ] `finance-forms.tsx` (747 lines): separate fee entry, invoice creation
-  - [ ] `seal-request-sheet.tsx` (currently 317 lines): continue extracting PageCountSection, DocumentSection, FileUploadSection, ActionButtons; target <300 lines file
-  - [ ] `client-sheet.tsx` (604 lines), `seals-view.tsx` (376 lines), `conflicts-view.tsx` (226 lines)
-- [ ] **Coverage Push**: Function coverage target ≥80% (currently 70%)
-- [ ] **Reduce Lint Warnings**: Address remaining ~117 warnings (unused vars, img元素, incompatible-library) where appropriate
-- [ ] **Observability Integration**: Wrap more server actions (archive, ai, clients) with `withMetrics` to activate recorded metrics
-- [ ] **Enable Branch Protection**: Configure GitHub Actions to require `quality.yml` on main/develop branches
+### Ưu tiên cao
+- [ ] **Refactor God Object**:
+  - `intake-sheet.tsx` (~1570 dòng): trích Partie/CauseFee/Procedure/Documents/Submission.
+  - `procedure-content.tsx` (1357 dòng): tách procedure-form/info/documents.
+  - `export-xlsx.ts` (1058 dòng): module hoá export theo miền.
+  - `finance-forms.tsx` (747 dòng): tách fee entry / create invoice.
+  - `seal-request-sheet.tsx` (317 dòng): tiếp tục trích PageCount/Document/FileUpload/ActionButtons.
+  - `client-sheet.tsx` (604), `seals-view.tsx` (376), `conflicts-view.tsx` (226).
+- [ ] **Đẩy phủ**: hàm ≥80% (hiện 70%).
+- [ ] **Giảm cảnh báo lint còn lại** (~117).
+- [ ] **Quan sát**: bọc thêm server action (archive, ai, clients) bằng `withMetrics`.
+- [ ] **Bật bảo vệ nhánh**: GitHub Actions yêu cầu `quality.yml` trên main/develop.
 
-### Medium Priority
-- [ ] **Add Integration Tests**: For critical user flows (intake → matter conversion, client creation, invoice issuance)
-- [ ] **API Caching**: Integrate `fetch-cache.ts` into `client.ts` for enumeration endpoints
-- [ ] **Documentation**: Add JSDoc to newly created custom hooks and utility functions
-- [ ] **Performance**: Benchmark critical APIs; address any N+1 queries detected
+### Ưu tiên trung bình
+- [ ] **Test tích hợp**: luồng chính (intake→matter, tạo client, xuất hóa đơn).
+- [ ] **Cache API**: dùng `fetch-cache.ts` trong `client.ts` cho endpoint liệt kê.
+- [ ] **Tài liệu**: JSDoc cho hook/utils mới.
+- [ ] **Hiệu năng**: benchmark API then chốt; xử lý N+1.
 
-### Low Priority
-- [ ] **Upgrade Dependencies**: Review `npm outdated` and test upgrades (Next.js, Prisma, React)
-- [ ] **Code Modernization**: Migrate any remaining async/await patterns; enable stricter TypeScript options gradually
-- [ ] **Security Audit**: Rotate any hardcoded secrets (none found recently); ensure STRIDE mitigations
+### Ưu tiên thấp
+- [ ] **Nâng cấp phụ thuộc**: `npm outdated` rồi thử (Next.js, Prisma, React).
+- [ ] **Hiện đại hoá**: các pattern async/await còn lại; bật strict TS dần.
+- [ ] **Rà soát bảo mật**: quay secret nếu có; đảm bảo giảm thiểu STRIDE.
 
-## Metrics Target (Next Week)
+## Mục tiêu chỉ số (tuần tới)
 - Health Score: ≥88/100
-- Evolution Rate: ≥5 improvements/week
-- Technical Debt: TODOs/FIXMEs reduce by 5
-- Branch Coverage: ≥95% (currently 94%)
+- Tốc độ tiến hoá: ≥5 cải tiến/tuần
+- Nợ kỹ thuật: giảm 5 TODO/FIXME
+- Phủ nhánh: ≥95% (hiện 94%)
 
-## Notes
-- Discovery cycle runs every 2 hours; automated scanning in place.
-- All changes must pass quality gates before commit.
-- Rollback plan: `git revert` available if needed.
+## Ghi chú
+- Chu kỳ phát hiện 2 giờ/lần; đang quét tự động.
+- Mọi thay đổi phải qua cổng chất lượng trước khi commit.
+- Rollback: `git revert`.

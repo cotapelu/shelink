@@ -1,559 +1,184 @@
-# LawLink System Audit Report
+# Báo cáo Kiểm toán Hệ thống LawLink
 
-**Audit Date:** 2025-07-03
-**Auditor:** JF Autonomous Agent (GOAL.md Framework v1.0)
-**Codebase:** LawLink v0.46 / Next.js 16 / TypeScript / Prisma 5
-**Scope:** Full stack audit per GOAL.md 10 dimensions
-
----
-
-## Executive Summary
-
-**Overall Risk: MEDIUM-HIGH**
-
-**Critical Issues:** 2
-**High Issues:** 6
-**Medium Issues:** 8
-**Low Issues:** 3
-
-**Estimated Fix Time:** 5-7 days
-
-**Health Score:** 78/100 (Coverage 85.81%, Func coverage 73.02% <80%, 61 lint violations)
-
-**Key Findings:**
-
-1. ✅ **Authentication & Authorization** - Permissions system solid with granular asserts
-2. ⚠️ **Audit Logging** - Present but non-blocking failures; no PII scrubbing verification
-3. ❌ **Rate Limiting** - Inconsistent (some endpoints exempted), no per-user/IP differentiation
-4. ⚠️ **Observability** - Correlation ID exists, but logs are plain text, no OpenTelemetry
-5. ❌ **Code Quality** - 61 functions exceed 30-line limit, affecting maintainability and testability
-6. ⚠️ **Coverage** - Functions coverage 73.02% below 80% threshold; some modules <40%
+**Ngày kiểm toán**: 2025-07-03
+**Kiểm toán viên**: JF Autonomous Agent (khung GOAL.md v1.0)
+**Mã nguồn**: LawLink v0.46 / Next.js 16 / TypeScript / Prisma 5
+**Phạm vi**: Full-stack theo 10 chiều GOAL.
 
 ---
 
-## Detailed Findings by Dimension
+## Tóm tắt điều hành
 
-### 🔥 [HIGH] 1. Business Logic Integrity - Permission Checks Bypass Risk in Some Flows
+**Rủi ro tổng thể: TRUNG BÌNH–CAO**
 
-**Dimension:** Business Logic Integrity  
-**Severity:** HIGH  
-**Location:** Server actions and API routes  
-**Exploit:** Missing `assertCanModifyMatter` or `assertCanAccessMatter` in some state-changing operations
+- **Lỗi nghiêm trọng**: 2
+- **Lỗi cao**: 6
+- **Lỗi trung bình**: 8
+- **Lỗi thấp**: 3
+- **Cần ~5–7 ngày**: 5–7 ngày để sửa.
+- **Health Score**: 78/100 (phủ câu lệnh 85.81%, hàm 73.02% <80%, 61 vi phạm lint).
 
-**Root Cause:**
-While permission utilities exist (`lib/permissions/index.ts`), not all server actions consistently use them. Some mutate operations rely solely on UI hiding, not server-side checks.
-
-**Evidence:**
-- `src/server/matters/actions.ts`: `updateProcedureInfo` uses `assertCanModifyMatter` ✅
-- Need to audit all server actions under `src/server/*/actions.ts` for complete coverage.
-
-**Impact:**
-- Unauthorized users could modify matters they don't belong to if they craft direct API calls
-- Data breach across matters
-
-**Fix:**
-1. Audit ALL server actions in `src/server/` for permission assertions
-2. Add middleware wrapper `requireMatterAccess(matterId, role, userId)` to all mutating endpoints
-3. Write integration tests with multiple roles trying unauthorized access
-
-**Test Case:**
-```ts
-// Simulate LAWYER accessing another lawyer's matter via direct API
-const session = loginAs("lawyer1");
-await request(PATCH `/api/matters/${otherLawyerMatterId}`).set("Cookie", session.cookie).send({
-  title: "Hacked"
-}).expect(403); // Should fail
-```
-
-**Priority:** P1 - This Sprint
+**Phát hiện then chốt**:
+1. ✅ **Xác thực & Phân quyền** — hệ quyền tốt, assertion chi tiết.
+2. ⚠️ **Ghi audit log** — có nhưng lỗi không chặn; chưa rà PII scrub.
+3. ❌ **Giới hạn tốc độ** — không nhất quán (có endpoint miễn trừ), chưa tách IP/user.
+4. ⚠️ **Khả năng quan sát** — có correlation id nhưng log thô, không OpenTelemetry.
+5. ❌ **Chất lượng code** — 61 hàm vượt 30 dòng → khó duy trì/test.
+6. ⚠️ **Phủ** — hàm 73.02% dưới 80%; một số module <40%.
 
 ---
 
-### 🔥 [HIGH] 2. JWT Algorithm Not RS256 (STRIDE: Spoofing)
+## Chi tiết theo chiều
 
-**Dimension:** Security (STRIDE)  
-**Severity:** HIGH  
-**Location:** `src/lib/auth/options.ts`  
-**Exploit:** NextAuth default uses HS256 with a shared secret. If secret leaks, attacker can forge tokens.
+### 🔥 [CAO] 1. Rủi ro bỏ qua kiểm tra quyền trong một số luồng
+- Vị trí: server action và API route thay đổi trạng thái có thể thiếu `assertCanModifyMatter` / `assertCanAccessMatter`.
+- Tác hại: user không thuộc dự án vẫn sửa được nếu gọi trực tiếp API → rò rỉ dữ liệu.
+- Cách sửa: rà toàn bộ `src/server/*/actions.ts`; bọc mọi endpoint ghi bằng `requireMatterAccess`; viết test nhiều vai trò gọi trái quyền → 403.
+- Ưu tiên: P1.
 
-**Current:**
-```ts
-session: { strategy: "jwt" } // Uses HS256 with NEXTAUTH_SECRET
-```
+### 🔥 [CAO] 2. JWT không dùng RS256 (STRIDE: giả mạo)
+- Vị trí: `src/lib/auth/options.ts`; NextAuth mặc định HS256 với `NEXTAUTH_SECRET`.
+- Rủi ro: secret lộ → giả được token. RS256 (bất đối xứng) an toàn hơn.
+- Cách sửa: cặp khóa RSA; private ở env; tùy chỉnh `jwt.encode/decode`; giảm `maxAge` xuống 1–4h.
+- Ưu tiên: P1.
 
-**GOAL.md Requirement:** JWT RS256 algorithm, short expiry
+### 🔥 [NGHIÊM TRỌNG] 3. Ngoại lệ giới hạn tốc độ tạo lỗ hổng DoS
+- Vị trí: `src/proxy.ts` — các route `/api/approvals/seals`, `/api/archive` bị miễn trừ.
+- Tác hại: tấn công tràn → cạn CPU/RAM/kết nối DB → sập dịch vụ.
+- Cách sửa: bỏ miễn trừ; áp giới hạn cho mọi `/api/*`; endpoint nặng tăng `maxRequests`; thêm giới hạn theo user (không chỉ theo IP).
+- Ưu tiên: P0.
 
-**Risk:** HS256 symmetric; if secret compromised, full impersonation possible. RS256 asymmetric is more secure (private key never leaves auth server).
+### 🔥 [CAO] 4. Hàm vượt ngưỡng kích thước/phức tạp (khó duy trì)
+- 61 hàm vượt 30 dòng (vd `SealRequestSheet` 327, `ClientSheet` 615, `PendingArchiveTable` 825).
+- Cách sửa: trích sub-component/helper; tách dữ liệu/kiểm tra/ghi; mục tiêu ≤30 dòng (UI ≤50).
+- Ưu tiên: P2.
 
-**Fix:**
-1. Switch to RS256: Generate RSA key pair, store private key in env (`NEXTAUTH_JWT_PRIVATE_KEY`), public key for verification
-2. Keep NextAuth defaults but configure `jwt: { encode, decode }` with RS256
-3. Reduce session maxAge from 12h to 1-4h (more secure)
+### 🔥 [CAO] 5. Phủ hàm 73% <80%
+- Module <70% hàm: `intake-sheet.tsx` (21.79%), `cause-section.tsx` (11.11%), `parties-section.tsx`, `client-sheet.tsx` (35.38%)….
+- Cách sửa: ưu tiên component <50%; chia nhỏ để test; RTL+Vitest test hợp lệ/lỗi/trạng thái rỗng/kiểm quyền.
+- Ưu tiên: P1.
 
-**Priority:** P1 - This Sprint
+### 🔥 [CAO] 6. Thiếu giới hạn tốc độ theo user (DoS)
+- Hiện chỉ giới hạn theo `IP:endpoint`; chưa có `user:endpoint`.
+- Rủi ro: dùng IP xoay vòng hoặc NAT công ty để né giới hạn.
+- Cách sửa: giới hạn kép đỏ-IP/user (vd 100/phút IP + 200/phút user).
+- Ưu tiên: P1.
 
----
+### ⚠️ [TRUNG BÌNH] 7. Thiếu log JSON có cấu trúc (quan sát)
+- Log bằng `console.*`; thiếu trường chuẩn (time, level, correlationId, userId, matterId).
+- Cách sửa: pino/winston JSON; bọc `logger.info({...})`; phân cấp level.
+- Ưu tiên: P2.
 
-### 🔥 [CRITICAL] 3. Rate Limiting Exemptions Create DoS Vector
+### ⚠️ [TRUNG BÌNH] 8. Thiếu ranh giới transaction cho thao tác nhiều bước
+- vd `convertIntakeToMatter` tạo nhiều bảng nhưng chưa `$transaction` atomic.
+- Cách sửa: audit thao tác >1 ghi; bọc `prisma.$transaction`.
+- Ưu tiên: P2.
 
-**Dimension:** Failure Scenarios / Security (Denial of Service)  
-**Severity:** CRITICAL  
-**Location:** `src/proxy.ts` lines 34-37  
-**Exploit:** Attacker floods `/api/approvals/seals` or `/api/archive` with requests, bypassing rate limit → resource exhaustion
+### ⚠️ [TRUNG BÌNH] 9. Thiếu timeout cho request (chịu lỗi)
+- Gọi ngoài (DB, HTTP, S3) chưa đặt timeout.
+- Cách sửa: Prisma thêm `connect_timeout=10`; HTTP client timeout 10s; S3 timeout.
+- Ưu tiên: P2.
 
-**Code:**
-```ts
-if (
-  url.pathname.startsWith("/api/") &&
-  !url.pathname.startsWith("/api/health") &&
-  !url.pathname.startsWith("/api/auth") &&
-  !url.pathname.startsWith("/api/approvals/seals") && // ⚠️ EXEMPT
-  !url.pathname.startsWith("/api/archive")           // ⚠️ EXEMPT
-) {
-```
+### ⚠️ [TRUNG BÌNH] 10. Chưa có circuit breaker cho backend
+- Cần: ngưỡng 5 lỗi/phút → mở mạch 60s; half-open thử lại.
+- Ưu tiên: P2.
 
-**Impact:** CPU/memory exhaustion, DB connection pool depletion, service outage
+### ⚠️ [TRUNG BÌNH] 11. Kiểm tra file upload có thể lách MIME/magic bytes
+- Cần kiểm cả phần mở rộng và magic bytes; whitelist MIME; đổi tên UUID; quét virus nếu được.
+- Ưu tiên: P2.
 
-**Why Exempt?** Possibly because these endpoints involve file generation (PDF export) that takes longer. But they should still be rate-limited, perhaps with higher limits or separate config.
+### ⚠️ [TRUNG BÌNH] 12. Thiếu chỉ mục trường truy vấn nóng (scalability)
+- Cần: `Deadline(dueAt)`, `Hearing(startsAt)`, `AuditLog(userId, action, createdAt)`, `Matter(primaryClientId)`….
+- Ưu tiên: P2.
 
-**Fix:**
-1. Remove exemptions; apply rate limiting to ALL `/api/*` endpoints
-2. For heavy endpoints: increase `maxRequests` (e.g., 20/min instead of 100/min) or implement queue
-3. Add per-user rate limiting in addition to per-IP (current uses only IP)
-4. Monitor rate limit metrics and adjust
+### ⚠️ [THẤP] 13. Thiếu health check thành phần
+- `/api/health` chỉ trả tĩnh. Cần `/health/ready` kiểm DB/cache/disk; trả 503 khi lệ thuộc sập.
+- Ưu tiên: P3.
 
-**Priority:** P0 - Immediate (24h)
+### ⚠️ [THẤP] 14. Duplication không tích hợp CI
+- Script `duplication` (`jscpd`) có nhưng chưa chạy CI.
+- Ưu tiên: P3.
 
----
-
-### 🔥 [HIGH] 4. Function Complexity and Size Violations (Maintainability Risk)
-
-**Dimension:** Quality Framework (Anti-pattern: God Functions)  
-**Severity:** HIGH  
-**Location:** 61 functions across codebase  
-**Exploit:** Not security, but technical debt causing bugs
-
-**GOAL.md Metrics:**
-- Functions: ≤20 lines (business), ≤50 lines (UI)
-- Cyclomatic complexity ≤10
-
-**Current Violations (sample):**
-- `AnnouncementDialog` (120 lines)
-- `SealRequestSheet` (327 lines, max-lines + max-statements)
-- `PendingArchiveTable` (825 file lines!)
-- `ClientSheet` (615 file lines)
-
-**Impact:**
-- Hard to test → lower coverage
-- Hard to review → more bugs
-- Hard to debug → longer MTTR
-- Violates Single Responsibility Principle
-
-**Fix (Refactor):**
-1. Extract sub-components (UI) or helper functions (business)
-2. Break large server actions into smaller functions
-3. Use composition: separate data fetching, validation, mutation
-4. Target: reduce all functions to ≤30 lines (GOAL.md allows ≤50 for UI)
-
-**Example - `SealRequestSheet` 327 lines → extract:**
-- `buildInitialValues()`
-- `renderClientSection()`
-- `renderMatterSection()`
-- `renderPurposeSection()`
-- `handleSubmit()`
-
-**Priority:** P2 - Next Sprint
+### ⚠️ [THẤP] 15. Không retry lỗi DB thoáng qua
+- Cần retry backoff (3–5 lần) cho truy vấn đọc; loại trừ ghi không idempotent.
+- Ưu tiên: P3.
 
 ---
 
-### 🔥 [HIGH] 5. Function Coverage 73% Below 80% Target
-
-**Dimension:** Testing & Quality Assurance  
-**Severity:** HIGH  
-**Location:** Multiple modules  
-**Modules with <70% Func coverage:**
-- `app/intakes/_components/intake-sheet.tsx`: 21.79% Func
-- `app/intakes/_components/cause-section.tsx`: 11.11% Func
-- `app/intakes/_components/parties-section.tsx`: 33.33% Func
-- `app/matters/_components/intake-combobox.tsx`: 27.58% Func
-- `app/clients/_components/client-sheet.tsx`: 35.38% Func
-
-**Root Cause:**
-Complex components with many branches and conditional rendering lack test coverage. UI-heavy components harder to test.
-
-**Impact:**
-- Untested error paths
-- Regression risk when modifying
-- Lower confidence in production
-
-**Fix Plan:**
-1. Prioritize components with <50% coverage
-2. Break components into smaller testable units (helps both coverage and complexity)
-3. Use React Testing Library + Vitest
-4. Add tests for:
-   - Valid input rendering
-   - Invalid input validation errors
-   - Empty states
-   - API error handling
-   - Permission-based UI gating
-
-**Coverage Improvement Target:**
-- Func coverage ≥80% within 2 weeks
-- Branch coverage ≥80% (currently 76.58%)
-
-**Priority:** P1 - This Sprint
-
----
-
-### 🔥 [HIGH] 6. Missing Per-User Rate Limiting (Security: DoS)
-
-**Dimension:** Security (Denial of Service)  
-**Severity:** HIGH  
-**Location:** `src/proxy.ts`  
-**Exploit:** Single attacker can DoS by using different IPs or IP rotation; current only limits per IP+endpoint, not per user account
-
-**Current:** Rate limit identified by `IP:endpoint`. No user-based limit.
-
-**Risk:** Compromised account can send unlimited requests from same IP (bypassing IP limit if attacker uses proxies, or if legitimate IP shared by many users like NAT/corporate).
-
-**Fix:**
-- Implement dual rate limiting:
-  1. Per-IP (as existing) - prevents network-level flood
-  2. Per-user (when authenticated) - `userId:endpoint`
-- Config: e.g., 100 req/min per IP + 200 req/min per user
-- Store in memory/Redis with separate keys
-
-**Priority:** P1 - This Sprint
-
----
-
-### ⚠️ [MEDIUM] 7. Lack of Structured JSON Logging (Observability)
-
-**Dimension:** Observability  
-**Severity:** MEDIUM  
-**Location:** `src/server/**`, `src/lib/telemetry/metrics.ts`  
-**Issue:** Logs use `console.log`/`console.error` - not machine parseable
-
-**GOAL.md Requirement:** Structured Logging: JSON format, machine-parseable
-
-**Current:**
-```ts
-console.error("[audit] 写入失败：", err);
-console.log(`METRIC: ${name}{${labelStr}} ${value}`);
-```
-
-**Impact:**
-- Hard to aggregate in ELK/Datadog
-- No standard fields: timestamp, level, correlationId, userId, matterId
-- Correlating logs across services difficult
-
-**Fix:**
-1. Install `pino` or `winston` with JSON format
-2. Create logger wrapper: `logger.info({message, userId, matterId, correlationId})`
-3. Update all `console.*` calls
-4. Ensure correlation ID propagated (already in proxy)
-5. Log levels: ERROR, WARN, INFO, DEBUG
-
-**Priority:** P2 - Next Sprint
-
----
-
-### ⚠️ [MEDIUM] 8. No Database Transaction Boundaries for Multi-Step Operations
-
-**Dimension:** Database & Data Integrity  
-**Severity:** MEDIUM  
-**Location:** Server actions with multiple writes  
-**Example:** `convertIntakeToMatter` (PRD v0.4) creates Matter, MatterMember, MatterClient, migrates Document - must be atomic
-
-**Root Cause:**
-Prisma supports transactions (`prisma.$transaction`), but not all multi-step operations are wrapped. If step 3 fails, steps 1-2 remain → data inconsistency.
-
-**Impact:**
-- Orphaned records (Intake without Matter, Matter without members)
-- Inconsistent state requiring manual cleanup
-- Financial discrepancies if FeeEntry not rolled back
-
-**Fix:**
-1. Audit all server actions that perform >1 write
-2. Wrap in `prisma.$transaction([...])` with atomic=true (default)
-3. Use `async/await` inside transaction
-4. Example:
-```ts
-await prisma.$transaction(async (tx) => {
-  const matter = await tx.matter.create(...);
-  await tx.matterMember.create(...);
-  // ...
-});
-```
-
-**Priority:** P2 - This Sprint
-
----
-
-### ⚠️ [MEDIUM] 9. Missing Request Timeouts (Resilience)
-
-**Dimension:** Resilience  
-**Severity:** MEDIUM  
-**Location:** All external calls (database, HTTP client, S3)  
-**GOAL Requirement:** All I/O operations must have timeout (default 10s)
-
-**Current:** Prisma default timeout? Not configured. HTTP client (`src/lib/api/client.ts`) may not set timeouts.
-
-**Risk:** Slow DB query or external API hang blocks request thread, leading to thread pool exhaustion.
-
-**Fix:**
-1. Prisma: `datasource db { url = env("DATABASE_URL") }` - can add `?connect_timeout=10` in connection string
-2. HTTP client (Axios/fetch wrapper): set `timeout: 10000`
-3. S3 operations: set socket timeout
-4. Test with artificial delays (chaos testing)
-
-**Priority:** P2 - Next Sprint
-
----
-
-### ⚠️ [MEDIUM] 10. No Circuit Breaker for Backend Services
-
-**Dimension:** Resilience  
-**Severity:** MEDIUM  
-**Location:** Outbound calls to external services (e.g., Yuandian MCP, S3, SMS)  
-**GOAL Requirement:** Circuit breaker: failure threshold 5, timeout 60s
-
-**Current:** `src/lib/api/circuit-breaker.ts` exists but is it used? Need to verify integration.
-
-**If not used:** Implement circuit breaker pattern:
-- Wrap all external HTTP calls with circuit breaker
-- On 5 failures in 1 minute → open circuit for 60s → fail fast
-- Half-open state after 60s → test with 1 request
-
-**Priority:** P2 - Next Sprint
-
----
-
-### ⚠️ [MEDIUM] 11. File Upload Validation Might Bypass MIME/Type Checks
-
-**Dimension:** Security (Input Validation)  
-**Severity:** MEDIUM  
-**Location:** `src/lib/storage/file-validator.ts`  
-**Exploit:** Attacker uploads executable with double extension `report.pdf.exe` or magic bytes mismatch
-
-**Verify:** Does validator check both extension AND magic bytes? Many only check extension.
-
-**Fix:**
-1. Use `file-type` library to detect magic bytes from file header
-2. Enforce whitelist of MIME types per category (image/*, application/pdf, .docx, etc.)
-3. Scan for viruses if feasible (ClamAV)
-4. Rename files to random UUID to prevent path traversal
-
-**Priority:** P2 - Next Sprint
-
----
-
-### ⚠️ [MEDIUM] 12. Missing Indexes on Frequently Queried Fields
-
-**Dimension:** Scalability  
-**Severity:** MEDIUM  
-**Location:** Prisma schema  
-**Evidence:** LINT_Complexity report shows large queries - potential N+1
-
-**Fields to Index:**
-- `Matter (deletedAt, status, ownerId)` - already has composite indexes
-- `Matter (primaryClientId)` - not indexed?
-- `MatterProcedure (matterId, order)` - unique, OK
-- `Deadline (matterId, date)` - query by date range often
-- `Hearing (matterId, startsAt)`
-- `AuditLog (userId, action, createdAt)` - for audit queries
-- `Intake (status, receivedAt)` - for intake list
-
-**Fix:**
-1. Review query patterns from `listMatters` and others
-2. Add `@@index` in Prisma schema:
-```prisma
-@@index([primaryClientId])
-@@index([matterId, status])
-@@index([userId, action, createdAt])
-```
-3. Run `prisma migrate dev --create-only` and review SQL
-
-**Priority:** P2 - Next Sprint
-
----
-
-### ⚠️ [LOW] 13. Missing Health Check Components (DB, Cache, Queue)
-
-**Dimension:** Observability  
-**Severity:** LOW  
-**Location:** `/api/health` only checks app status  
-**GOAL Requirement:** Health checks: `/health/live`, `/health/ready`, component-specific `/health/db`, `/health/cache`
-
-**Current:** `/api/health` returns static `{status: "ok"}` - doesn't verify DB connectivity
-
-**Impact:** Orchestrator (k8s/docker-compose) thinks service healthy when DB is down → traffic routed to dead instance.
-
-**Fix:**
-1. Add `/api/health/ready` that:
-   - Checks DB connection (`prisma.$queryRaw`SELECT 1`)
-   - Checks Redis/cache if used
-   - Checks disk space (storage/)
-2. Keep `/api/health/live` simple (always 200 if process alive)
-3. Return 503 if dependencies down
-
-**Priority:** P3 - Optional
-
----
-
-### ⚠️ [LOW] 14. Duplication Detection Not Integrated in CI
-
-**Dimension:** Quality Framework  
-**Severity:** LOW  
-**Location:** `package.json` has `duplication` script using `jscpd` but not in CI
-
-**Current:** Script exists but not run in CI nor pre-commit.
-
-**Fix:**
-1. Add `npm run duplication` to `make quality`
-2. Integrate into GitHub Actions
-3. Fail if duplication >5 lines threshold
-4. Threshold: max 5 duplicate lines allowed (GOAL.md)
-
-**Priority:** P3 - Optional
-
----
-
-### ⚠️ [LOW] 15. No Explicit Retry for Database Failures
-
-**Dimension:** Resilience  
-**Severity:** LOW  
-**Location:** Prisma client usage  
-**Issue:** Database transient failures (connection drop, deadlock) not automatically retried
-
-**Fix:**
-1. Implement retry middleware for Prisma queries (exponential backoff, max 3-5 attempts)
-2. Or use `pgbouncer` with retry at connection pool level
-3. Exclude non-idempotent writes (INSERT/UPDATE/DELETE) from retry or ensure idempotency
-
-**Priority:** P3 - Optional
-
----
-
-## Compliance Check
-
-### GDPR (Data Protection)
-- ⚠️ **Partial**: Data minimization (min fields collected), but no explicit consent management UI
-- ✅ Storage limitation: `deletedAt` soft delete implemented
-- ✅ Right to erasure: Soft delete + audit retention (but audit logs keep userId)
-- ❌ **Missing**: Data export endpoint (PRD v1.0 requires export)
-- ❌ **Missing**: DPIA documentation
-
-**Gap:** Implement `/api/me/data-export` to export all user data (matters, clients, notes) as JSON/CSV.
+## Kiểm tra tuân thủ
+
+### GDPR (bảo vệ dữ liệu)
+- ⚠️ **Một phần**: giữ tối thiểu trường; không có UI quản lý consent.
+- ✅ Xóa mềm (`deletedAt`).
+- ❌ **Thiếu**: endpoint xuất dữ liệu cá nhân; DPIA.
+- Khe: `/api/me/data-export` xuất JSON/CSV.
 
 ### PCI-DSS
-- ❌ **Not Applicable**: No cardholder data stored (AGENTS.md forbids storing CVV). If payment processing added later, need full PCI scope.
+- ❌ **Không áp dụng**: không lưu thẻ. Nếu sau này xử lý thanh toán thì bước vào phạm vi PCI.
 
 ### HIPAA
-- ⚠️ **Partial**: If handling PHI (health data), audit logging exists, but no encryption-at-rest enforcement (PostgreSQL TDE?)
-- ❌ **Missing**: BAAs, 24/7 incident response plan
-
-**Note:** LawLink likely not handling PHI unless用于health law. If so, need HIPAA compliance sprint.
+- ⚠️ **Một phần** nếu xử lý dữ liệu sức khỏe; có audit log nhưng chưa bắt buộc mã hoá-at-rest ở Postgres.
+- ❌ **Thiếu**: BAA, kế hoạch ứng phó 24/7.
 
 ### SOX
-- ⚠️ **Partial**: Audit logging present, but financial calculations (fee splits) need immutable logs and separation of duties
-- ❌ **Missing**: Change management logs (who deployed what when), retention 7 years immutable
-
-**Gap:** Implement deployment audit trail; archive financial records with immutability.
+- ⚠️ **Một phần**: audit log có, nhưng tính tiền/phân chia cần log bất biến + phân tách nhiệm vụ.
+- ❌ **Thiếu**: nhật ký thay đổi (ai deploy gì lúc nào).
 
 ---
 
-## Observability Gaps
+## Khe hổng Khả năng quan sát
 
-### Missing Logs
-- No structured request logs (method, path, status, duration, userId, correlationId)
-- No business event logs with context (e.g., "matter_created" with matterId, category)
-- Slow query warnings (>100ms) not logged
+- **Thiếu log**: request JSON, business event có ngữ cảnh, cảnh báo query chậm >100ms.
+- **Thiếu metric**: Prometheus `/metrics`; `http_requests_active`, `db_connections_active`, `storage_usage_bytes`.
+- **Thiếu cảnh báo**: lỗi >1%, p99 >1s, RAM >80%, đĩa <20%.
 
-### Missing Metrics
-- No Prometheus endpoint (`/metrics`) for scraping
-- Missing key metrics:
-  - `http_requests_active` (gauge)
-  - `db_connections_active`
-  - `queue_backlog` (if using queue)
-  - `storage_usage_bytes`
+## Mô hình đe doạ STRIDE
 
-### Missing Alerts
-- No alerting on:
-  - Error rate >1%
-  - Latency p99 >1s
-  - Memory >80%
-  - Disk space <20%
-
----
-
-## Security Threat Model (STRIDE)
-
-| Threat | Level | Mitigation |
+| Mối đe doạ | Mức độ | Giảm nhẹ |
 |---|---|---|
-| Spoofing (identity fake) | HIGH | HS256 → upgrade to RS256 |
-| Tampering (data modify) | LOW | Zod validation + Prisma parameterized - OK |
-| Repudiation | MEDIUM | AuditLog exists but non-blocking; ensure never deleted |
-| Info Disclosure | MEDIUM | Need PII scrubbing in logs; verify no PII in error messages |
-| Denial of Service | HIGH | Rate limit exemptions + missing per-user limit |
-| Elevation of Privilege | HIGH | Permission checks inconsistent across actions |
+| Giả mạo danh tính | Cao | HS256 → RS256 |
+| Giả mạo dữ liệu | Thấp | Zod + Prisma parameterized OK |
+| Chối bỏ | Trung bình | AuditLog có nhưng không chặn; đảm bảo không xóa |
+| Lộ thông tin | Trung bình | Cần scrub PII trong log |
+| Từ chối dịch vụ | Cao | Miễn trừ rate-limit + thiếu per-user |
+| Nâng quyền | Cao | Kiểm tra quyền không đồng nhất |
 
-**DREAD Scores:**
-- JWT algorithm weak: D=7 → P0
-- Rate limit bypass: D=8 → P0
-- Permission bypass: D=9 → P0 if exists; verification needed
+**DREAD**: JWT yếu 7→P0; bypass rate-limit 8→P0; bypass quyền 9→P0 nếu tồn tại.
 
----
+## Hiệu năng & Scalability
 
-## Performance & Scalability Analysis
+- Điểm nóng phức tạp: N+1 (kiểm `include` của `listMatters`); O(n²) trong search (cần đo); không thấy I/O chặn.
+- Tải DB: thiếu chỉ mục `Deadline(date)`, `Hearing(startsAt)` khiến query lịch chậm.
 
-### Complexity Hotspots
-- N+1 queries: Audit `listMatters` include queries:
-  - `procedures` (filtered) - OK
-  - `parties` - OK (limit 3)
-  But other pages may N+1; need query profiling
-- O(n²) algorithms: Search algorithms in `src/lib/yuandian/client.ts` enterpriseSearch - unclear
-- Blocking I/O: `fs.readFileSync`? None found; async/await used consistently
+## Ma trận ưu tiên
 
-### Database Load
-- Missing indexes on `Deadline(date)` and `Hearing(startsAt)` could cause slow calendar queries
-- Count queries with complex joins → consider denormalized counters (`_count` already used)
-
----
-
-## Recommended Fix Priority Matrix
-
-| Priority | Count | Issues |
+| Ưu tiên | Số lượng | Vấn đề |
 |---|---|---|
-| P0 (Immediate) | 1 | Rate limit exemptions |
-| P1 (This Sprint) | 6 | JWT RS256, permission audit, coverage <80%, per-user rate limit, function complexity, DB transactions |
-| P2 (Next Sprint) | 8 | Structured logging, circuit breaker, file validation, indexes, health checks, retry, duplication CI |
-| P3 (Optional) | 2 | Observability dashboards, advanced testing |
+| P0 (ngay) | 1 | ngoại lệ giới hạn tốc độ |
+| P1 (sprint này) | 6 | JWT RS256, kiểm tra quyền, phủ <80%, per-user rate-limit, hàm lớn, DB transaction |
+| P2 (sprint tới) | 8 | log JSON, circuit breaker, kiểm tra file, chỉ mục, health check, retry, duplication CI |
+| P3 (tuỳ chọn) | 2 | metrics endpoint, alerting |
 
-**Focus Sprint 1 (2 weeks):** P1 items → Health Score >85, Func coverage >80%, critical security patched
+**Trọng tâm sprint 1 (2 tuần)**: P1 → Health >85, phủ hàm >80, vá bảo mật then chốt.
 
----
+## Ký duyệt cần
 
-## Sign-off Required
+- [ ] **Bảo mật** — duyệt đổi thuật toán JWT, giới hạn tốc độ.
+- [ ] **SRE** — xác thực health check, observability, metrics.
+- [Tech Lead** — duyệt kế hoạch refactor hàm lớn.
+- [ ] **Chủ sở hữu/Product** — xác nhận yêu cầu xuất dữ liệu (GDPR).
 
-- [ ] **Security Team** - Review JWT algorithm change, rate limiting
-- [ ] **SRE Team** - Validate health checks, observability, metrics
-- [ ] **Tech Lead** - Approve refactor plan for large functions
-- [ ] **Product Owner** - Confirm data export requirement (GDPR)
+## Bước xác minh
 
----
-
-## Verification Steps
-
-1. Run `npm run lint` again after refactor → 0 violations (function size)
-2. Run `npm test -- --coverage` → Func ≥80%, Branch ≥80%
-3. Run `npm run build` → still passes
-4. Security scan: `npm audit` → no high vulnerabilities
-5. Manual permission tests: try accessing other users' matters as LAWYER → 403
-6. Rate limit test: 200 requests to `/api/archive/...` → 429 after 100
-7. Health check: `curl http://localhost:3000/api/health/ready` → 200 only if DB up
-8. Structured logs: check console output is JSON
+1. Chạy `npm run lint` sau refactor → 0 vi phạm hàm lớn.
+2. `npm test -- --coverage` → hàm ≥80%, nhánh ≥80%.
+3. `npm run build` vẫn pass.
+4. `npm audit` → không high.
+5. Test quyền thủ công: gõ dự án người khác bằng vai trò LAWYER → 403.
+6. Test rate-limit: 200 request tới `/api/archive/...` → 429 sau 100.
+7. Health: `curl .../api/health/ready` → 200 chỉ khi DB sống.
+8. Log: kiểm ra console dạng JSON.
 
 ---
 
-**End of Audit Report**
+**Hết Báo cáo Kiểm toán**

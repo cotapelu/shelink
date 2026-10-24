@@ -1,47 +1,32 @@
-# LawLink 第一次发布到 GitHub 操作手册
+# Hướng dẫn công khai LawLink lên GitHub
 
-这份手册面向第一次使用 GitHub 发布项目的人。它只覆盖公开源代码仓库，不包含生产部署。
+Hướng dẫn dành cho người lần đầu phát hành dự án mã nguồn mở lên GitHub. Chỉ bao phủ repo nguồn công khai, không bao gồm deploy production.
 
-## 当前结论
+## Kết luận hiện tại
 
-LawLink 已具备公开仓库的基础材料：README、MIT License、`.env.example`、Dockerfile、docker-compose、发布检查清单和项目设计文档。
+LawLink đã có đủ nền tảng cho repo công khai: README, giấy phép MIT, `.env.example`, Dockerfile, docker-compose, checklist và tài liệu thiết kế.
 
-正式公开前还必须完成三件事：
+Trước khi công khai bắt buộc hoàn tất 3 việc:
+1. Xác nhận toàn bộ thay đổi chưa commit đều là nội dung muốn công khai.
+2. Chạy xong lệnh xác thực.
+3. Tạo repo trên GitHub rồi chờ bạn xác nhận mới push.
 
-1. 确认当前未提交改动全部都是准备公开的内容。
-2. 跑完验证命令。
-3. 在 GitHub 创建仓库后再由你确认是否推送。
+## Thông tin repo đề xuất
 
-## GitHub 仓库建议填写内容
-
-- Repository name: `LawLink`
-- Description: `Open-source, self-hosted case and project management system for small and mid-sized law firms.`
+- Tên repo: `LawLink`
+- Mô tả: `Hệ thống quản lý dự án/công việc mã nguồn mở, tự triển khai, cho công ty nhỏ và văn phòng độc lập.`
 - Visibility: `Public`
 - License: `MIT`
-- Topics:
-  - `legal-tech`
-  - `law-firm`
-  - `case-management`
-  - `self-hosted`
-  - `nextjs`
-  - `prisma`
-  - `postgresql`
-  - `typescript`
-  - `tailwindcss`
-  - `docker-compose`
+- Topics: `legal-tech` `law-firm` `case-management` `self-hosted` `nextjs` `prisma` `postgresql` `typescript` `tailwindcss` `docker-compose`
 
-如果你希望中文描述，可以用：
+## Kiểm tra trên máy trước khi công khai
 
-`开源、自部署的律师案件 / 项目管理系统，主要面向中小律所。`
-
-## 发布前本机检查
-
-在项目根目录执行：
+Chạy ở gốc dự án:
 
 ```bash
 git status --short --branch
-git ls-files | rg '^(\\.env$|\\.env\\.(local|production|development|test)|backups/|outputs/|\\.next|node_modules/)'
-git ls-files storage | rg -v '^storage/\\.gitkeep$'
+git ls-files | rg '^(\.env$|\.env\.(local|production|development|test)|backups/|outputs/|\.next|node_modules/)'
+git ls-files storage | rg -v '^storage/\.gitkeep$'
 git status --ignored --short
 rg -n -l 'API_KEY|SECRET|TOKEN|PASSWORD|sk-|Bearer ' . -g '!node_modules' -g '!.next*' -g '!storage/**' -g '!outputs/**'
 npm run lint
@@ -51,73 +36,69 @@ npm run build
 ./scripts/create-public-archive.sh
 ```
 
-解释：
+Giải thích:
+- `git status`: xem tệp nào sẽ được phát hành.
+- `git ls-files`: đảm bảo không có `.env`/tệp đính kèm/backup/build trong version control. Hai lệnh trên phải không có output.
+- `rg`: quét chuỗi giống khóa; bắt được chưa chắc đã lộ, cần xem lại từng cái.
+- 4 lệnh `npm`: chắc chắn chất lượng code, kiểu, schema Prisma, build production.
+- Script đóng gói: tạo bộ nguồn công khai để soát tay.
 
-- `git status`：确认哪些文件会被发布。
-- `git ls-files`：确认没有把 `.env`、附件、备份、构建产物加入版本库。上面两条命令正常应当没有输出。
-- `rg`：扫一遍看起来像密钥的字符串。命中不一定是泄露，需要逐条判断。
-- 四条 `npm` 命令：确认代码质量、类型、Prisma schema 和生产构建。
-- 打包脚本：生成一份可人工抽查的公开源码压缩包。
+## Thao tác trên web GitHub
 
-## GitHub 网页操作步骤
+1. Đăng nhập GitHub.
+2. Góc trên phải `+` → `New repository`.
+3. Đặt tên `LawLink`.
+4. Chọn `Public`.
+5. **Không** tick tự tạo README/LICENSE/.gitignore vì local đã có sẵn.
+6. Tạo repo.
+7. GitHub sẽ hiện đoạn `git remote add origin ...` và `git push ...`. Chưa chạy ngay; trước push hãy kiểm tra lại cây làm việc và kết quả xác thực.
 
-1. 登录 GitHub。
-2. 右上角点击 `+`，选择 `New repository`。
-3. 填写仓库名 `LawLink`。
-4. 选择 `Public`。
-5. 不要勾选自动创建 README、LICENSE、`.gitignore`，因为本地项目已经有这些文件。
-6. 创建仓库。
-7. GitHub 会显示一段 `git remote add origin ...` 和 `git push ...` 命令。先不要急着执行，推送前请再次确认工作树和验证结果。
+## Mẫu lệnh lần đầu push
 
-## 首次推送命令模板
-
-只有确认要公开后才执行：
+Chỉ chạy khi đã xác nhận công khai:
 
 ```bash
-git remote add origin git@github.com:<your-account>/LawLink.git
+git remote add origin git@github.com:<account>/LawLink.git
 git branch -M main
 git push -u origin main
 ```
 
-如果 GitHub 账号没有配置 SSH key，也可以使用 HTTPS 地址：
+Nếu chưa có SSH key:
 
 ```bash
-git remote add origin https://github.com/<your-account>/LawLink.git
+git remote add origin https://github.com/<account>/LawLink.git
 git branch -M main
 git push -u origin main
 ```
 
-推送属于公开发布动作。按本项目规则，必须由你明确确认后再执行。
+Push là hành động phát hành công khai; theo quy tắc dự án, phải được bạn xác nhận rõ ràng.
 
-## 发布后的仓库设置建议
+## Gợi ý cài đặt repo sau khi công khai
 
-建议发布后在 GitHub 网页上配置：
+- About: mô tả, website (nếu có), topics.
+- Features: bật Issues; Wiki có thể tắt.
+- Security: bật private vulnerability reporting.
+- Branch protection: bảo vệ `main`, yêu cầu PR.
+- Discussions: nếu sau này thu thập góp ý lộ trình thì bật.
 
-- About: 填写 description、website（如有）、topics。
-- Features: 开启 Issues；暂时不开 Wiki 也可以。
-- Security: 开启 private vulnerability reporting。
-- Branch protection: 保护 `main` 分支，要求 PR 合并。
-- Discussions: 如果之后想收集路线图建议再开。
+Tuỳ chọn (cần xác nhận thêm):
+- GitHub Actions: tự chạy lint/typecheck/prisma validate/build.
+- Dependabot: nhắc nâng cấp phụ thuộc.
 
-可选但需要另行确认后再加：
+## Không upload
 
-- GitHub Actions：自动跑 lint、typecheck、Prisma validate、build。
-- Dependabot：自动提醒依赖升级。
+- `.env` hoặc bất kỳ tệp biến môi trường thật.
+- Tệp đính kèm trong `storage/`, mẫu, gói lưu trữ.
+- DB dump, backup, gói khôi phục.
+- Dự án/khách hàng/liên hệ/đương sự/hóa đơn/yêu cầu dùng dấu/audit log/thiết lập AI thật.
+- Secret AI/Yuandian/AWS/DB/NextAuth/khóa mã hoá.
 
-## 不要上传的内容
+## Lời giới thiệu dự án khi phát hành
 
-- `.env` 或任何真实环境变量文件。
-- `storage/` 里的附件、模板、归档包。
-- 数据库 dump、备份文件、还原包。
-- 真实案件、客户、联系人、当事人、发票、用章、审计日志。
-- AI、元典、AWS、数据库、NextAuth、文件加密等密钥。
+Bản ngắn:
 
-## 你发布时可以用的项目介绍
+> LawLink là hệ thống quản lý dự án/công việc mã nguồn mở, tự triển khai, cho công ty nhỏ và văn phòng độc lập, phủ từ tiếp nhận, phân bổ, theo dõi tiến độ, ghi chép tài chính, duyệt lưu trữ tới xuất dữ liệu.
 
-短版：
+Bản dài:
 
-> LawLink 是一个开源、自部署的律师案件 / 项目管理系统，主要面向中小律所，也适用于独立律师和小团队自部署使用，覆盖收案登记、冲突检索、案件跟进、财务记录、结案归档和数据导出。
-
-长版：
-
-> LawLink is an open-source, self-hosted case and project management system primarily for small and mid-sized law firms, while still fitting solo lawyers and small teams that want to self-host their own practice workspace. It focuses on the everyday workflow from intake registration and conflict checks to matter management, finance records, archive review, and data export. The stack is Next.js, TypeScript, Prisma, PostgreSQL, shadcn/ui, and Docker Compose.
+> LawLink is an open-source, self-hosted project and case management system for small companies and independent offices, while still fitting solo practitioners and small teams that want to self-host their own workspace. It covers intake registration, conflict checks, project tracking, finance records, archive review, and data export. Stack: Next.js, TypeScript, Prisma, PostgreSQL, shadcn/ui, Docker Compose.

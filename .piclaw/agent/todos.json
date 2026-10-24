@@ -3,37 +3,42 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Autonomous Execution - Refactor Phase",
+      "name": "AUTO-38",
       "tasks": [
         {
           "id": "task-1",
-          "content": "✅ Task 1 COMPLETED: createIntake complexity reduced from 79→~5, lines 179→12",
+          "content": "Remove dead code transformAMap/transformBMap/suffix in bloodGraph.ts",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "🔲 Task 2: Refactor runConflictCheck in conflicts/algorithm.ts (complexity 38, lines 217)",
+          "content": "Remove 6 unused imports in matters/actions.ts",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "🔲 Task 3: Refactor buildMatterRow in matters/export-xlsx.ts (complexity 58, lines 85)",
+          "content": "Verify: typecheck, tests, lint, coverage",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "🔲 Task 4: Increase test coverage to ≥80% (currently statements 78.47%, branches 64.69%)",
+          "content": "Split matters/actions.ts to fix max-lines (727>300)",
           "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "🔲 Task 5: Security & performance audit",
+          "content": "Branch coverage push: compute.ts (42.22%)",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
+          "content": "Update docs + report + commit (no push)",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 6,
+  "nextTaskId": 7,
   "nextPhaseId": 2,
-  "updatedAt": "2026-07-16T00:49:48.174Z"
+  "updatedAt": "2026-10-23T07:35:42.404Z"
 }

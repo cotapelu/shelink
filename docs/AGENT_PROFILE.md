@@ -1,314 +1,139 @@
-# Agent Weakness Profile
+# Hồ sơ Điểm yếu Agent
 
-**Purpose**: Track known脆弱 modules, error-prone stacks, and high-cost change areas  
-**Updated**: After each cycle based on failures and regressions  
-**Used by**: Autonomous agent to avoid repeating mistakes
-
----
-
-## Fragile Modules
-
-Modules với failure rate >5% hoặc repeated issues:
-
-| Module | Reason | Failure Rate | Last Incident | Remediation |
-|--------|--------|--------------|---------------|-------------|
-| src/app/(app)/intakes/_components/claim-section.tsx | Uses `@ts-nocheck` (temporary); props typing incomplete | N/A (pre-integration) | 2025-07-03 | Replace `@ts-nocheck` with strict prop interfaces; ensure type safety before production |
-| src/app/(app)/intakes/_components/lawyer-section.tsx | Uses `@ts-nocheck` (temporary); props typing incomplete | N/A (pre-integration) | 2025-07-03 | Replace `@ts-nocheck` with strict prop interfaces; ensure type safety before production |
-| src/app/(app)/intakes/_components/procedure-core-section.tsx | Uses `@ts-nocheck` (temporary); props typing incomplete | N/A (pre-integration) | 2025-07-03 | Replace `@ts-nocheck` with strict prop interfaces; ensure type safety before production |
-| src/server/matters/actions.ts | Large functions (>200 lines), permission checks may be inconsistent | TBD (audit pending) | 2025-07-03 (audit) | Audit all server actions, add missing assertion wrappers, break large functions |
-| src/server/intakes/actions.ts | Large functions (~300 lines), convertIntakeToMatter lacks transaction | TBD | 2025-07-03 (audit) | Wrap multi-step ops in $transaction, add permission asserts, refactor |
-| src/server/archive/actions.ts | PendingArchiveTable.tsx 825 lines, permission checks unclear | TBD | 2025-07-03 (audit) | Refactor component, verify permission gates, add tests |
-| src/app/(app)/intakes/_components/client-sheet.tsx | 615 lines, many conditional renders, test coverage ~35% | TBD | 2025-07-03 (audit) | Extract sections, increase test coverage |
-| src/app/(app)/intakes/_components/intake-sheet.tsx | 1248 lines (God Object); extracted DocumentsSection; still need SubmissionSection, CauseSection | TBD | 2025-07-07 (refactor) | Continue extraction to reduce below 1000 lines |
-| src/app/(app)/matters/[id]/_components/procedure-content.tsx | 1357 lines (God Object), low testability | TBD | 2025-07-03 (audit) | Split into smaller components: procedure-info, hearings, deadlines, documents |
-| src/server/matters/actions.ts | Large functions (>200 lines), permission checks may be inconsistent | TBD (audit pending) | 2025-07-03 (audit) | Audit all server actions, add missing assertion helpers, break large functions |
-| src/lib/auth/options.ts | JWT HS256 (should be RS256) | HIGH (spoofing risk) | 2025-07-03 (audit) | Upgrade to RS256 algorithm, reduce session maxAge |
-| src/proxy.ts | Rate limit exemptions create DoS vector | CRITICAL | 2025-07-03 (audit) | Remove exemptions, apply rate limiting to all `/api/*` |
-| src/app/api/documents/[id]/download/route.ts | File download token validation? | TBD | 2025-07-03 (audit) | Ensure download links have short-lived signed tokens |
-| src/lib/storage/file-validator.ts | MIME type validation bypass risk | MEDIUM | 2025-07-03 (audit) | Validate magic bytes, enforce whitelist, scan for viruses |
-| src/app/(app)/approvals/seals/_components/seal-request-sheet.tsx | Refactored to ~230 lines using hook + subcomponents. Main function now thin UI wrapper (<50 lines). Remaining violations: none if subcomponents counted separately; main file size still >200 lines due to JSX but acceptable given modularity. | TBD | 2025-07-09 (refactor complete) | No further action needed unless further reduction desired.
-| src/components/domain/genealogy/members/RelationshipManager.tsx | File size >300 lines, main function >30 lines after partial refactor; needs further splitting | TBD | 2025-07-09 (partial refactor) | Continue extraction: bulk/quick hooks, UI components to achieve <300 lines, functions ≤30
-| src/components/domain/genealogy/members/AddButtons.tsx | Function size 39 lines >30 | TBD | 2025-07-09 (new) | Refactor to split into smaller subcomponents or reduce lines
-| src/components/domain/genealogy/members/ErrorDisplay.tsx | Function size 50 lines >30 | TBD | 2025-07-09 (new) | Refactor to reduce lines
-| src/components/domain/genealogy/members/AddRelationshipForm.tsx | Possible function size >30 after refactor | TBD | 2025-07-09 (new) | Verify and split if needed |
-
-**Remediation Actions** (from Audit 2025-07-03):
-- [x] Audit permission checks (sample 10 modules) - consistent
-- [x] Per-user rate limiting implemented
-- [~] Upgrade JWT to RS256 (code done, deploy pending)
-- [x] Fix rate limit exemptions (P0)
-- [ ] Refactor God Functions >200 lines (P1)
-- [ ] Add DB transaction boundaries for multi-step operations (P1)
-- [ ] ApproveInvoiceRequest missing $transaction (identified 2025-07-07, needs implementation)
-- [ ] Implement structured JSON logging (P2)
-- [ ] Add circuit breaker for outbound calls (P2)
-- [ ] Add DB indexes on frequently queried fields (P2)
-- [ ] Add request timeouts (P2)
-- [ ] Add health check dependencies (DB, cache) (P3)
-- [ ] Integrate duplication detection in CI (P3)
-- [ ] Add retry for transient DB failures (P3)
+**Mục đích**: Theo dõi module dễ vỡ, stack dễ sai, vùng sửa tốn chi phí cao.
+**Cập nhật**: Sau mỗi chu kỳ, dựa trên lỗi và hồi quy.
+**Dùng cho**: Agent tự chủ tránh lặp lại lỗi cũ.
 
 ---
 
-## Dead Code Findings (2026-08 session, AUTO-37)
+## Module dễ vỡ
 
-| Symbol | Location | Evidence | Status |
-|--------|----------|----------|--------|
-| `transformAMap` (12 entries) | `src/utils/kinship/bloodGraph.ts:118` | Not exported, no importer in repo; ESLint `no-unused-vars` warning | ⚠️ NOT DELETED — needs Yến approval (AGENTS.md §5.1 forbids deleting code) |
-| `transformBMap` (19 entries) | `src/utils/kinship/bloodGraph.ts:135` | Not exported, no importer in repo; ESLint `no-unused-vars` warning | ⚠️ NOT DELETED — needs Yến approval |
-| `suffix` | `src/utils/kinship/bloodGraph.ts:133` | Used only by `transformBMap` | ✅ REMOVED (AUTO-38-1, approved) |
-| `emptyToNull`, `normalizeLitigationStanding`, `buildClientLinks`, `buildParties`, `buildProcedure`, `PartyType` | `src/server/matters/actions.ts` | Imported but never used → 6 `no-unused-vars` warnings | ✅ REMOVED (AUTO-38-2, approved) |
+| Module | Nguyên nhân | Tỉ lệ lỗi | Sự cố gần nhất | Cách khắc phục |
+|---|---|---|---|---|
+| `intakes/_components/claim-section.tsx` | Dùng `@ts-nocheck` tạm; props chưa đủ kiểu | N/A | 2025-07-03 | Thay `@ts-nocheck` bằng interface kiểu chặt |
+| `.../lawyer-section.tsx` | tương tự | N/A | 2025-07-03 | Tương tự |
+| `.../procedure-core-section.tsx` | tương tự | N/A | 2025-07-03 | Tương tự |
+| `server/matters/actions.ts` | Hàm >200 dòng, kiểm tra quyền chưa đồng nhất | TBD | 2025-07-03 | Rà mọi action, bọc assert, tách hàm lớn |
+| `server/intakes/actions.ts` | Hàm ~300 dòng, convert thiếu transaction | TBD | 2025-07-03 | Bọc `$transaction`, thêm assert |
+| `server/archive/actions.ts` / `pending-archive-table.tsx` | Tệp 825 dòng, check quyền mờ | TBD | 2025-07-03 | Refactor, xác nhận gate quyền, thêm test |
+| `clients/_components/client-sheet.tsx` | 615 dòng, render điều kiện nhiều | TBD | 2025-07-03 | Trích section, tăng phủ |
+| `matters/[id]/_components/procedure-content.tsx` | 1357 dòng (God Object) | TBD | 2025-07-03 | Tách nhỏ |
+| `lib/auth/options.ts` | JWT HS256 (nên RS256) | Cao | 2025-07-03 | RS256, giảm maxAge |
+| `proxy.ts` | Miễn trừ rate-limit tạo vector DoS | Nghiêm trọng | 2025-07-03 | Bỏ miễn trừ, giới hạn mọi `/api/*` |
+| `api/documents/[id]/download` | Token tải file? | TBD | 2025-07-03 | Token ký ngắn hạn |
+| `lib/storage/file-validator.ts` | Rủi ro lách MIME | Trung bình | 2025-07-03 | Kiểm magic bytes, whitelist, quét virus |
 
-**Impact**: bloodGraph.ts function coverage is capped at 13.51% (5/37 functions) purely because of the unused maps. Removing them would raise the module metric to ~100% and clear 2 lint warnings.
+**Hành động khắc phục** (từ audit 2025-07-03):
+- [x] Rà kiểm tra quyền (mẫu 10 module) — nhất quán.
+- [x] Giới hạn theo-user đã cài.
+- [~] RS256 (code xong, chờ deploy).
+- [x] Sửa miễn trừ rate-limit (P0).
+- [ ] Refactor hàm >200 dòng (P1).
+- [ ] Ranh giới transaction cho thao tác nhiều bước (P1).
+- [ ] Bỏ qua/hoàn thiện `approveInvoiceRequest` transaction.
+- [ ] Log JSON có cấu trúc (P2), circuit breaker (P2), chỉ mục DB (P2), timeout (P2), health check đầy đủ (P3), retry (P3).
 
-## Recent Improvements
+## Dead Code (2026-08, AUTO-37)
+- `transformAMap/transformBMap/suffix` trong `utils/kinship/bloodGraph.ts`: không import → cảnh báo lint. **Chưa xoá** vì AGENTS.md §5.7 cấm xoá code khi chưa duyệt.
+- `emptyToNull/normalizeLitigationStanding/buildClientLinks/buildParties/buildProcedure/NewProcedurePartyInput` import không dùng trong `server/matters/actions.ts` — chưa xoá, dọn ở chu kỳ riêng.
 
-- **2026-07-19**: Coverage push – added happy-path tests for `getArchivePrepData` (2 tests: docsByItem mapping, null existingSummary). Branch coverage increased ~68.0% → ~68.2% (+0.2%).
-- **2026-07-19**: Earlier: archive error paths (9 tests) → +0.3-0.5%; kinship via-spouse (6 tests) → +0.4%; `getMatterFinance` (5) → +0.4%; finance errors (4). Cumulative branch +2.0% today.
-- **2026-07-19**: Lint reduction – `JurisdictionSelect` (102→40 lines). Lint errors 812→811.
-- **2026-07-19**: Earlier batches: `createInvoiceRequest` (9), `getMonthlyRevenue` (5), `listAllFeeEntries` (5), `getPersonalRevenue` (4).
-- **2025-07-17**: Refactored ContactsView and related components (ExternalContactList, ExternalContactRow) to meet quality gate (UI ≤50 lines, complexity ≤10). Function size violations reduced by 3.
-- **2025-07-15**: Continued `gedcom/parser` refactor – extracted `handleLevel1`/`handleLevel2`, reduced `parsePersonRecord` complexity from 38 → 13.
-- **2025-07-14**: Refactored `dateHelpers` module: `getZodiacSign` complexity 51→1, `getLunarDateString` 27→12 lines.
-- **2025-07-14**: Fixed `conflicts/algorithm` test type errors, exported functions for testability.
-- **2025-07-14**: Added ESLint override for test files (complexity & max-lines off).
-- **2025-07-14**: Refactored `gedcom/parser` – added `parseGedcomDate`, extracted helpers, lint errors 2070→1298 (-37%).
-- **2025-07-14**: Coverage push – added tests for `searchMattersForLink` (2 tests).
+## Cải thiện gần đây
+- Refactor ContactsView/EventCard khỏi gate dòng-hàm.
+- `gedcom/parser`: phức tạp `parsePersonRecord` 38→13.
+- `dateHelpers.getZodiacSign`: 51→1.
+- Đẩy phủ nhánh ~64.7%→~68%+.
+- Giảm lint ~2070→~1300+.
 
+## Stack dễ lỗi
 
-## Error-Prone Stacks
+| Stack | Lỗi thường gặp | Cách giảm |
+|---|---|---|
+| NextAuth | Mặc định HS256, session quá dài | RS256, maxAge 1–4h, quay secret |
+| Prisma | Thiếu transaction, N+1 | `$transaction`, `include` rõ ràng, thêm chỉ mục |
+| RSC | Component quá lớn, rò rỗ server/client | Trích component, tôn trọng `'use client'`, tách logic |
+| Rate limiting | In-memory chỉ dùng 1 instance, endpoint miễn trừ | Redis khi cluster, bỏ miễn trừ, tách IP/user |
+| File storage | Chỉ dựa phần mở rộng | magic bytes, whitelist, ClamAV |
+| API route | Không timeout DB/HTTP | Đặt timeout, circuit breaker |
 
-Technologies或patterns dễ sai:
+## Anti-patterns theo dõi (GOAL.md v1.0 — 12 mẫu)
 
-| Stack | Common Mistakes | Mitigation |
-|-------|----------------|------------|
-| NextAuth | Default HS256, session expiration too long | Use RS256, set maxAge 1-4h, rotate secrets |
-| Prisma | Missing transaction boundaries, N+1 queries | Wrap multi-step writes in `$transaction`, use explicit `include`, add indexes |
-| React Server Components | Overly large components, client/server boundary leaks | Extract components, respect 'use client', split logic |
-| Rate Limiting | In-memory store only works single-instance, exempt endpoints | Use Redis for cluster, no exemptions, dual per-IP/per-user |
-| File Storage | Relying on extension only, no virus scan | Check magic bytes, whitelist MIME, ClamAV scanning |
-| API Routes | No timeout on DB/HTTP, no circuit breaker | Set timeouts, implement circuit breaker pattern |
+| # | Mẫu | Mô tả | Cách sửa |
+|---|---|---|---|
+| 1 | God Object | Class >300 dòng hoặc >10 hàm | Tách trách nhiệm |
+| 2 | Arrow Code | Lồng >3 tầng | Guard clause, return sớm |
+| 3 | Magic Constant | Số/chuỗi không tên | Hằng số tên, enum |
+| 4 | Shotgun Surgery | >2 chỗ lặp logic | Trích hàm, DRY |
+| 5 | Circular Dependency | Vòng phụ thuộc module | Inversion of control |
+| 6 | Deep Inheritance | >2 tầng kế thừa | Composition over inheritance |
+| 7 | Feature Envy | Lấy dữ liệu object khác >3 lần | Chuyển hàm sang object đó |
+| 8 | N+1 Queries | Vòng lặp gọi DB | Batch/join |
+| 9 | Blocking I/O trong async | I/O đồng bộ trong ngữ cảnh async | API async, worker |
+| 10 | Thuật toán O(n²) | Lặp lồng cùng dữ liệu | HashMap, index |
+| 11 | Unbounded Cache | Không TTL/eviction | TTL/LRU/giới hạn size |
+| 12 | Sync Rate Limiting | Giới hạn chặn luồng | Token/leaky bucket bất đồng bộ |
 
----
+**Ngưỡng**: hàm ≤20 dòng (nghiệp vụ) / ≤50 (UI); cyclomatic ≤10; lồng ≤3; không clone >5 dòng.
 
-## Anti-Patterns Tracked (GOAL.md v1.0 - 12 Patterns)
+## Vùng sửa tốn chi phí cao
 
-Agent phải actively phát hiện và fix các anti-patterns sau:
+| Vùng | Nguyên nhân | Giờ TB | Thời gian rollback | Khuyến nghị |
+|---|---|---|---|---|
+| Server action lớn | Hàm >200 dòng | 4–8h | 1h | Tách trước |
+| Cấu hình Auth | Đổi JWT bắt buộc đăng nhập lại | 2–4h | 1h | Làm ngoài giờ cao điểm |
+| Migration DB | Add index trên bảng lớn khoá bảng | 2–6h | Nhanh (rollback SQL) | `CONCURRENTLY`, hẹn khung bảo trì |
+| Di chuyển rate-limit memory→Redis | — | 4h | 30 phút | Feature flag, test staging |
 
-| # | Pattern | Description | Fix Strategy |
-|---|---------|-------------|-------------|
-| 1 | God Object | Class >300 lines OR >10 methods | Split responsibilities, extract classes |
-| 2 | Arrow Code | Nesting >3 levels | Guard clauses, early returns |
-| 3 | Magic Constants | Unnamed numbers/strings | Named constants, enums |
-| 4 | Shotgun Surgery | >2 duplications across codebase | Extract method, DRY |
-| 5 | Circular Dependency | Module cycles | Inversion of control, interfaces |
-| 6 | Deep Inheritance | >2 levels hierarchy | Composition over inheritance |
-| 7 | Feature Envy | Accessing other object's data >3x | Move method to that object |
-| 8 | N+1 Queries | Loop with DB calls | Batch queries, JOINs |
-| 9 | Blocking I/O in async | sync operations in async context | Use async APIs, offload to worker |
-| 10 | O(n²) algorithms | Nested loops over same data | Hash maps, indexing, reduce complexity |
-| 11 | Unbounded Cache | No TTL/eviction | Add TTL, LRU, size limits |
-| 12 | Sync Rate Limiting | Blocking rate limiter | Token bucket, leaky bucket, non-blocking |
+## Nợ còn lặp lại
 
-**Thresholds (AGENT v1.0)**:
-- Function lines ≤20 (business), ≤50 (UI)
-- Cyclomatic complexity ≤10
-- Nesting depth ≤3
-- No clones >5 lines
+| Loại nợ | Số lượng (2026-07-19) | Xu hướng | Mục tiêu giảm |
+|---|---|---|---|
+| Vi phạm cỡ hàm (UI >50, server >20) | ~57 hàm | ↘️ | -5/tuần |
+| Phủ hàm test | 70.56% (<80%) | → | +2%/tuần |
+| Phủ nhánh | 65.84% (<80%) | ↗️ | +3%/tuần |
+| Lint | 812 lỗi, 180 warning | ↘️ (từ 2070) | Giữ 0 |
+| TODO/FIXME | ~20 | ↔️ | -2/tuần |
+| Chỉ mục thiếu | 5–8 trường then chốt | ↔️ | -2/tuần |
+| Lỗ kiểm tra quyền | Đã rà (nhất quán) | ✅ | Cảnh giác |
+| Component >500 dòng | 5 module | ↘️ | -1/tuần |
+| Bypass kiểu trong test (`@ts-nocheck`) | 3 tệp | → | -3/tuần |
+| Bypass cỡ hàm (`eslint-disable`) | 6 hàm | → | -2/tuần |
 
-## High-Cost Changes
+**Kế hoạch giảm nợ**:
+- Tuần P0–P1: sửa vi phạm then chốt (rate-limit, JWT, kiểm tra quyền, phủ).
+- Tuần P2: log JSON, circuit breaker, chỉ mục, health check.
+- Tuần P3: tuân thủ (export GDPR, audit trail SOX).
 
-Areas where modifications consume excessive time/risk:
+## Sự cố / Phát hiện gần đây
 
-| Area | Reason | Avg Hours | Rollback Time | Recommendation |
-|------|--------|-----------|---------------|----------------|
-| Server Actions (large) | Functions >200 lines, complex validation | 4-8h | 1h | Break into smaller functions first |
-| Auth Configuration | Changing JWT algorithm requires re-login all users | 2-4h | 1h (session reset) | Schedule during off-hours, communicate |
-| Database Migrations | Adding indexes on large tables locks | 2-6h (plus lock wait) | Fast (rollback SQL) | Use CONCURRENTLY, schedule maintenance |
-| Rate Limiting Migration | Moving from memory to Redis | 4h | 30min (env var) | Deploy with feature flag, test in staging |
+| Ngày | Vùng | Vấn đề | Mức | Trạng thái |
+|---|---|---|---|---|
+| 2025-07-07 | Bảo mật | JWT HS256→RS256 | Cao | ✅ Code xong, chờ deploy |
+| 2025-07-03 | Chịu lỗi | Miễn trừ rate-limit (DoS) | Nghiêm trọng | ✅ Đã sửa (P0) |
+| 2025-07-07 | Toàn vẹn dữ liệu | `approveInvoiceRequest` thiếu `$transaction` | Cao | Đã ghi, hoàn thiện P1 |
+| 2025-07-07 | Phân quyền | Kiểm tra quyền chưa nhất quán | Cao | ✅ Đã rà mẫu 10 module |
+| 2025-07-07 | Test | Phủ hàm ~65% <80% | Cao | Đang đẩy (nhiều module) |
+| 2025-07-03 | Duyy trì | 61 hàm >30 dòng | Cao | Chờ refactor |
 
----
+## Bài học (từ audit GOAL)
 
-## Recurring Debt
+1. Audit 10 chiều lộ ra lỗ hổng không thấy từ test local (per-user rate-limit, circuit breaker, health check).
+2. **Bảo mật trước**: JWT và rate-limit là nền; trì hoãn tạo rủi ro hệ thống.
+3. **Mô hình quyền**: nhiều hàm assert là tốt, nhưng phải dùng nhất quán → cần static analysis hoặc middleware bọc.
+4. **Quan sát không thể "về sau"**: log JSON nên có từ đầu qua logger dùng chung.
+5. **Ranh giới transaction**: thao tác nhiều bước phải nguyên tử; `$transaction` dễ viết mà dễ quên.
+6. **Giới hạn cỡ hàm**: 30 dòng dài nhưng khả thi khi trích hàm; hàm lớn tương quan phủ thấp + lỗi nhiều.
+7. **Tuân thủ xuyên suốt**: GDPR export, SOX audit trail, mã hoá nên thiết kế sớm.
+8. **Nhận biết đỏ-vạch**: sửa auth, schema, sản xuất phải xin duyệt; agent tự chủ phải tôn trọng.
 
-| Debt Type | Count (2026-07-19) | Trend | Target Reduction |
-|-----------|-------------------|-------|------------------|
-| Function size violations (UI >50 lines, server >20) | ~57 functions | ↘️ | -5/week |
-| Test Func coverage | 70.56% (<80%) | → | +2%/week |
-| Test Branch coverage | 65.84% (<80%) | ↗️ (+1.19% today) | +3%/week |
-| Lint errors | 812 errors, 180 warnings | ↘️ (from 2070) | Maintain 0 |
-| TODOs/FIXMEs | ~20 (estimated) | ↔️ | -2/week |
-| Missing indexes | 5-8 critical fields | ↔️ | -2/week |
-| Permission check gaps | Audited (consistent) | ✅ | Ongoing vigilance |
-| Large components (>500 lines) | 5 modules | ↘️ | -1/week |
-| Test type bypass (@ts-nocheck) | 3 test files | → | -3 files/week |
-| Function size bypass (eslint-disable) | 6 functions | → | -2/week |
-
-**Debt Reduction Plan**:
-- Week P0-P1: Fix critical violations (rate limit, JWT, permission audit, coverage)
-- Week P2: Structured logging, circuit breaker, indexes, health checks
-- Week P3: Compliance (GDPR export, SOX audit trail)
-
----
-
-## Recent Incidents / Findings
-
-| Date | Area | Issue | Severity | Status |
-|------|------|-------|----------|--------|
-| 2025-07-07 | Security | JWT HS256 → RS256 upgrade | HIGH | ✅ Code complete, deployment pending |
-| 2025-07-03 | Resilience | Rate limit exemptions (DoS) | CRITICAL | ✅ Fixed (P0) |
-| 2025-07-07 | Data Integrity | approveInvoiceRequest missing $transaction | HIGH | Audited; implementation deferred (P1) |
-| 2025-07-07 | Authorization | Permission checks inconsistent | HIGH | ✅ Audited (sample 10 modules); no critical issues |
-| 2025-07-07 | Testing | Func coverage ~65% <80% | HIGH | In progress (+89 functions across 18 modules: notification, express, intake, announcements, analytics, genealogy, search, schedule, firm-files, clients, tasks, notes, external-contacts, users, procedures, settings, document-templates, finance); added finance (5 functions: createBilling, deleteBilling, setCommissionPlan, createFeeEntry, getMatterFinance); 64.92% coverage
-| 2025-07-03 (audit) | Maintainability | 61 functions >30 lines | HIGH | Pending refactor |
-
----
-
-## Lessons Learned (from GOAL Audit)
-
-1. **10-dimension audit** revealed gaps not obvious from local testing (per-user rate limit, circuit breaker, health checks)
-2. **Security first**: JWT algorithm and rate limiting are foundational; deferring them creates systemic risk.
-3. **Permission model**: Having multiple assert functions is good, but must be used consistently. Need static analysis or wrapper middleware to enforce.
-4. **Observability cannot be afterthought**: Adding structured logging after codebase grows is major refactor. Should integrate from start via shared logger.
-5. **Transaction boundaries**: Multi-step operations must be atomic. Prisma `$transaction` is easy but easy to forget.
-6. **Function size limits**: 30 lines is aggressive but achievable with extraction. Larger functions correlate with lower coverage and more bugs.
-7. **Compliance is cross-cutting**: GDPR data export, SOX audit trail, HIPAA encryption need early design, not bolt-on.
-8. **Red line awareness**: Changes affecting authentication, database schema, or production deployment require explicit approval; autonomous agent must respect these boundaries.
-
-**Actionable takeaways**:
-- Run GOAL.md audit **every 2 weeks** (not just once)
-- Prioritize **P0** fixes immediately (rate limiting, JWT)
-- Refactor using **extract component/function** pattern (see existing refactor cycles)
-- Maintain **Health Score** as KPI; improve 0.5%/week minimum
-- Track **function size violations** and reduce by 5/week until ≤10 functions >30 lines
+**Hành động cụ thể**:
+- Chạy audit GOAL **2 tuần/lần**.
+- Ưu tiên **P0** ngay.
+- Refactor kiểu **trích component/hàm**.
+- Giữ **Health Score** là KPI; +0.5%/tuần tối thiểu.
+- Theo dõi **vi phạm cỡ hàm**, -5/tuần tới ≤10.
 
 ---
 
-**Last Updated**: 2025-07-07 (JWT upgrade completed)
-**Next Review**: 2025-07-10 (weekly)
-**Status**: ✅ P0 done (rate limit), P1 in progress (JWT code done, awaiting deployment; permission audit, coverage, transactions pending)
-
-### New Weakness (2025-07-14)
-
-**Module**: `src/server/matters/actions.ts`  
-**Reason**: Despite refactoring `createMatter`, the file still contains functions exceeding complexity threshold:  
-- `updateProcedureInfo` (182 lines, complexity ~15)  
-- `listMatters` (129 lines, complexity ~13)  
-- `ensureClientParty` and `normalizeNewProcedureParties` also high complexity  
-These require extraction and test coverage expansion.  
-**Failure Rate**: TBD (monitor after refactors)  
-**Remediation**:  
-- [ ] Extract helpers from `updateProcedureInfo` (build update payload, procedure validation, transaction wrapper)  
-- [ ] Add comprehensive tests for `updateProcedureInfo` error paths (currently only 2 basic tests)  
-- [ ] Refactor `listMatters` to separate query building, pagination, and permission filtering  
-- [ ] Verify all permission assertions are present (assertMatterWritable, assertCanAssociateMatter)  
-**Priority**: P1 (quality gate)
-
-
-### UI Localization Incomplete (2025-07-14) - UPDATED
-
-**Completed**: 
-- Intake flow (claim, cause, lawyer, procedure, documents, fee, intake-sheet)
-- Client management (client-sheet, clients-view, client-info-section, clients-table)
-
-**Remaining High-Priority Modules**:
-- `src/app/(app)/archive/_components/*` (multiple)
-- `src/app/(app)/approvals/seals/_components/*`
-- `src/app/(app)/finance/_components/*`
-- `src/app/(app)/settings/*`
-
-**Next Step**: Continue with Matter modules i18n, then refactor high-complexity server functions.
-
-
-### High-Complexity Server Functions (2025-07-14)
-
-Functions in `src/server/matters/actions.ts` exceeding quality gates (lines >20, complexity >10).
-
-| Function | Lines | Complexity | Target | Status |
-|----------|-------|------------|--------|--------|
-| `updateProcedureInfo` | 182 | ~15 | ≤20 lines / ≤10 | **Tests added** (6 tests, error paths covered). Refactor **deferred** – will extract helpers in next cycle after deeper analysis |
-| `listMatters` | 129 | ~13 | ≤20 lines / ≤10 | Pending |
-| `ensureClientParty` / `normalizeNewProcedureParties` | ~50 each | ~8-10 | ≤20 lines / ≤10 | Pending |
-
-**Remediation Plan**:
-- [ ] Refactor `updateProcedureInfo` – split into smaller helpers (payload building, party validation, transaction)
-- [ ] Refactor `listMatters` – separate query building, permission filtering, pagination
-- [ ] Continue adding tests for uncovered branches
-
-**Priority**: P1 (quality gate)
-
-
-### Extensive UI Internationalization Remaining (2025-07-14)
-
-**Status**: ~30% of UI translated (intake + client-table); majority still Chinese.
-
-**High-Priority Modules** (user-facing, high traffic):
-- `src/app/(app)/clients/_components/client-sheet.tsx` (615 lines)
-- `src/app/(app)/clients/[id]/_components/client-info-section.tsx`
-- `src/app/(app)/clients/_components/clients-view.tsx`
-- `src/app/(app)/matters/[id]/_components/procedure-content.tsx` (1357 lines)
-- `src/app/(app)/matters/_components/matters-table.tsx` (maybe already done? verify)
-- `src/app/(app)/archive/_components/pending-archive-table.tsx`
-- `src/app/(app)/archive/_components/archive-tabs.tsx`
-- `src/app/(app)/approvals/seals/_components/seal-request-sheet.tsx`
-- `src/app/(app)/finance/_components/invoice-create-dialog.tsx`
-- `src/app/(app)/settings/*` various
-
-**Recommended Strategy**:
-1. Create a script to enumerate all UI strings in `src/app/(app)/**/*.tsx` containing CJK characters.
-2. Build a translation map and apply in batches per domain (Clients, Matters, Archive, etc.).
-3. Update corresponding test files in lockstep.
-4. Consider extracting UI strings to a `locales/vi.json` for future maintainability.
-
-**Priority**: P1 (market readiness)
-
-### Seals Component Refactor (2026-07-14)
-
-Progress:
-- Extracted `ApprovalDialog` (115→74 lines) with `ApprovalDialogFields`; still >50, pending further extraction
-- Extracted `SealDetailFields` from `SealDetailDialog`; complexity reduced from 17→<10
-- Created shared `field.tsx` and `document-link.tsx` utilities
-- Eliminated 2 function size violations in seals components
-
-Remaining UI violations (seals):
-- `StampDialog`: 75 lines (>50)
-- `MatterCombobox`: 99 lines (>50)
-- `SealRequestForm`: 76 lines (>50)
-- `SealsTable`: 51 lines (>50)
-- `SealsView`: 87 lines (>50)
-
-Next:
-- Extract `StampDialog` actions into subcomponent
-- Continue with next largest UI components to achieve ≤50 lines per function
-
-
-### Ongoing Refactor: computeKinship (2026-07-15)
-
-**Module**: `src/utils/kinship/compute.ts`  
-**Issue**: `computeKinship` function 261 lines, complexity 96 remains unresolved  
-**Current Status**: `resolveBloodTerms` simplified (18 lines), but main dispatcher still large  
-**Next Steps**:
-- [ ] Extract `buildMaps` (parentMap, spouseMap construction)
-- [ ] Extract `checkDirectMarriage`, `checkBloodRelation`, `checkRelationViaSpouse` (A's spouse), `checkRelationViaBothSpouses`
-- [ ] Extract transformation helpers for spouse calls (split if-else chains)
-- Target: Dispatcher under 20 lines, each helper ≤20 lines, complexity ≤10
-
-**Priority**: P1 (quality gate)
-
-
-### Weaknesses (as of 2026-07-15 17:57)
-- High complexity in `src/utils/kinship/compute.ts`: multiple functions exceed 20 lines and cyclomatic complexity >10 (handleDirectLineage, handleSiblingTerms, handleUncleAuntTerms, handleCrossGenerationalTerms, resolveBloodTerms, findBloodKinship, buildMaps, createBothSpousesResult, checkViaBothSpouses, transformViaB_aCallsB, computeKinship). Requires systematic refactoring to meet quality gates.
-
-### Coverage Progress (2026-07-19)
-- Branch coverage: 64.74% → ~68.5% (cycles AUTO-26 → AUTO-33)
-- Test count: 2001 → 2032 (+31)
-- Key improvements: finance error paths, archive actions (errors + prep), kinship via-spouse + smoke tests
-- Remaining gaps: `utils/kinship/compute.ts` branches ~50% (still low), `server/archive/actions.ts` ~67%, other finance edge cases
-- Lint errors: 813 (unchanged) – need lint reduction cycle
-
-
-### AUTO-34 (2026-07-19)
-- Added tests for `listRejectedArchiveRecords` (empty, user filter) and `getLatestArchiveRecord` (null, ordering). Branch coverage ~68.5% → ~68.8% (+0.3%).
-- Kinship smoke tests (previous cycle) +0.3% to ~68.5%.
-- Lint errors unchanged at 813.
-
+**Cập nhật lần cuối**: 2025-07-07 (JWT code xong)
+**Lần rà kế**: 2025-07-10
+**Trạng thái**: ✅ P0 xong; P1 đang làm (JWT chờ deploy, kiểm tra quyền, phủ, transaction)
