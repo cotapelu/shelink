@@ -3,37 +3,32 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Cycle Execution (Phase 2-3)",
+      "name": "AUTO-38 hoàn tất",
       "tasks": [
         {
           "id": "task-1",
-          "content": "[T1 HIGH] Fix rules-of-hooks: useWatch trong watchField (use-intake-form-states.ts)",
-          "status": "in_progress"
+          "content": "Discovery: lint/typecheck/test/build/site — xong",
+          "status": "completed"
         },
         {
           "id": "task-2",
-          "content": "[T2 LOW] Fix lint đơn lẻ: prefer-as-const x3, no-unused-expressions x2, no-img x1, exhaustive-deps x2, unused eslint-disable",
-          "status": "pending"
+          "content": "T1 rules-of-hooks + T2 lint đơn lẻ + T3 trích hàm — xong",
+          "status": "completed"
         },
         {
           "id": "task-3",
-          "content": "[T3 MEDIUM] Trích hàm gần ngưỡng max-lines-per-function (50 dòng)",
-          "status": "pending"
+          "content": "Verify: lint 973→944, typecheck PASS, test 2079, build OK, site 200 — xong",
+          "status": "completed"
         },
         {
           "id": "task-4",
-          "content": "[P4] Verify: lint + typecheck + test + build + site check",
-          "status": "pending"
-        },
-        {
-          "id": "task-5",
-          "content": "[P5] Docs: cập nhật AGENT_METRICS / PROFILE + commit",
-          "status": "pending"
+          "content": "Docs + 5 commit conventional (không push) — xong",
+          "status": "completed"
         }
       ]
     }
   ],
-  "nextTaskId": 6,
+  "nextTaskId": 5,
   "nextPhaseId": 2,
-  "updatedAt": "2026-10-24T00:22:43.702Z"
+  "updatedAt": "2026-10-24T00:46:24.472Z"
 }
