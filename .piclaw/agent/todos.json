@@ -3,42 +3,37 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "AUTO-38",
+      "name": "Cycle Execution (Phase 2-3)",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Remove dead code transformAMap/transformBMap/suffix in bloodGraph.ts",
+          "content": "[T1 HIGH] Fix rules-of-hooks: useWatch trong watchField (use-intake-form-states.ts)",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Remove 6 unused imports in matters/actions.ts",
+          "content": "[T2 LOW] Fix lint đơn lẻ: prefer-as-const x3, no-unused-expressions x2, no-img x1, exhaustive-deps x2, unused eslint-disable",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Verify: typecheck, tests, lint, coverage",
+          "content": "[T3 MEDIUM] Trích hàm gần ngưỡng max-lines-per-function (50 dòng)",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Split matters/actions.ts to fix max-lines (727>300)",
+          "content": "[P4] Verify: lint + typecheck + test + build + site check",
           "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "Branch coverage push: compute.ts (42.22%)",
-          "status": "pending"
-        },
-        {
-          "id": "task-6",
-          "content": "Update docs + report + commit (no push)",
+          "content": "[P5] Docs: cập nhật AGENT_METRICS / PROFILE + commit",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 7,
+  "nextTaskId": 6,
   "nextPhaseId": 2,
-  "updatedAt": "2026-10-23T07:35:42.404Z"
+  "updatedAt": "2026-10-24T00:22:43.702Z"
 }
