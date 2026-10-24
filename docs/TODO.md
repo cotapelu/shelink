@@ -1,4 +1,205 @@
-# 🔥 KẾ HOẠCH DI TRÚ TOÀN DIỆN: gộp client-next + server-nest → LawLink
+# 🗺️ KẾ HOẠCH PHÁT TRIỂN TOÀN DIỆN — Hệ điều hành cho công ty nhỏ / văn phòng độc lập
+
+**Mục tiêu**: Trừ "công cụ quản lý vụ án" thành **hệ điều hành quản trị** cho mọi công ty nhỏ, văn phòng dịch vụ độc lập (tư vấn, thiết kế, kế toán, marketing, thương mại nhỏ…): tiếp nhận → báo giá/hợp đồng → điều phối → theo dõi tiến độ → ghi chép tài chính → lưu trữ → xuất dữ liệu.
+**Bối cảnh**: Luồng nghiệp vụ V1 đã chạy; nền tảng (auth, RBAC, audit, storage, notification, workflow, seeder) đã có. Thiếu toàn bộ mảng thương mại – tài chính sâu – vận hành nội bộ – cổng khách hàng – tích hợp.
+**Cách dùng**: mỗi task có ID `TD-<domain><số>`, ưu tiên P0→P3, công lượng ngày-dev. Khi làm 1 task: sửa PRD/DATA-MODEL trước (§5.1 AGENTS.md), rồi Data→Types→Server Action→UI→Test.
+**Cập nhật lần cuối**: 2026-10-24 (AUTO-38).
+
+---
+
+## Mục lục
+
+1. Trạng thái thực tế (đã có gì)
+2. Domain map & mảng trống
+3. Danh sách task toàn diện (A→H)
+4. Lộ trình theo giai đoạn (rà sequencing)
+5. Tiêu chí "full" cho công ty nhỏ / văn phòng độc lập
+6. Phụ lục: kế hoạch di trú cũ (lịch sử, đã hoàn thành pha 0–6)
+
+---
+
+## 1. Trạng thái thực tế (đã có, 2026-10-24)
+
+**Đã có và chạy** (schema + server action + UI):
+
+| Mảng | Thành phần |
+|---|---|
+| Danh tính & phân quyền | NextAuth credentials, vai trò ADMIN/OWNER/MANAGER/STAFF/FINANCE, AuditLog, Team/TeamMember |
+| Tiếp nhận & điều phối | `/intakes` (SMS parse, AI đánh giá, convert→Matter), conflicts check |
+| Quản lý dự án/vụ | `/matters` đầy đủ: stage, procedure, party, deadline, hearing, document folder, member, custom fields |
+| Khách hàng | `/clients`, `/contacts` (internal + external contact + duyệt), ExternalContact |
+| Công việc nội bộ | `/erp` tasks/projects/board, WorkTask, workflow engine, checklist, watcher, comment, milestone |
+| Tài chính | `/finance` FeeEntry (thu/chi), InvoiceRequest/Billing, CommissionPlan, reports export |
+| Tài liệu | document, folder, template, template engine, AI check, OCR flag |
+| Lưu trữ | `/archive` (duyệt 2 cấp) |
+| Lịch & nhắc | `/schedule`, Deadline, reminders, cron, `lib/ics.ts` (iCal export) |
+| Thông báo | in-app Notification + Announcement |
+| Báo cáo | `/reports` multi-sheet Excel |
+| Hạ tầng | Docker Compose app+postgres, Prisma migration, storage local (AES tuỳ chọn), rate-limit, telemetry cơ bản, `/api/health` |
+| Dọc ngành (giữ lại tuỳ chọn) | seals (phê duyệt con dấu), preservation (bảo toàn tài sản), express (chuyển phát), causes of action, genealogy (gia phả) |
+
+**Chưa có / thiếu nghiêm trọng** (chi tiết task ở mục 3): CRM bán hàng, báo giá–hợp đồng, kế toán sổ sách, timesheet, công nợ nâng cao, HR (nghỉ phép, chấm công, hồ sơ NV), mua sắm–tài sản–subscription, cổng khách hàng, email/Zalo/chat, tích hợp (hóa đơn điện tử, cổng thanh toán, kế toán MISA/Fast), API/webhook công khai, import/export dữ liệu đại trà, SSO/2FA, i18n/đa tiền tệ, PWA, E2E test, phân tích/BI, automation engine, đa chi nhánh.
+
+---
+
+## 2. Domain map & mảng trống
+
+```
+[Thương mại]   Lead/Opportunity ▸ Báo giá ▸ Hợp đồng ▸ Dự án ▸ Nghiệm thu ▸ Xuất hoá đơn ▸ Thu tiền
+   có: ░░Lead(intake)░░░░░░░░Dự án░░░░░FeeEntry░░InvoiceRequest░░  ▸ thiếu: pipeline, quote, contract, đối soát, nhắc nợ
+[Vận hành]     Điều phối ▸ Task/Board ▸ Deadline ▸ Tài liệu ▸ Bàn giao ▸ Lưu trữ
+   có: ████████████████████████████████████████████████████  ▸ thiếu: timesheet, capacity, template dự án
+[Tài chính]    Sổ quỹ ▸ Công nợ ▸ Chi phí ▸ Báo cáo tài chính
+   có: ████████████  ▸ thiếu: kế toán tổng hợp, hóa đơn GTGT, chi phí dự án, ngân hàng đối soát
+[Nội bộ]       Nhân sự ▸ Duyệt ▸ Mua sắm ▸ Tài sản ▸ Subscription
+   có: ██ (user/team)  ▸ thiếu: gần như toàn bộ
+[Khách hàng]   Portal ▸ Tự phục vụ ▸ Ticket ▸ Thanh toán
+   có: ░░░░░░░░░░░░░░  ▸ thiếu: gần như toàn bộ
+[Tích hợp]     Email/Zalo/Chat ▸ HDDT ▸ Payment ▸ Kế toán ▸ Calendar ▸ API/Webhook
+   có: ░░░░░░░░░░░░░░  ▸ thiếu: gần như toàn bộ
+```
+
+---
+
+## 3. Danh sách task toàn diện
+
+### Nhóm A — Thương mại & Khách hàng (CRM/Quote/Contract)
+
+| ID | Task | Ưu tiên | Công lượng |
+|---|---|---|---|
+| TD-A1 | Bảng điều khiển Lead: kanban giai đoạn, nguồn lead, gán người phụ trách, SLA chờ xử lý | P0 | 5d |
+| TD-A2 | Máy trạng thái Lead→Project: trạng thái thân thiện (thành công/thất bại/lý do), chuyển đổi giữ liệu | P0 | 3d |
+| TD-A3 | Module Báo giá (Quote): bản nháp/phê duyệt/gửi, version, PDF, hết hạn, chuyển Quote→Contract→Project | P0 | 7d |
+| TD-A4 | Module Hợp đồng (Contract): vòng đợi (nháp→review→ký→hiệu lực→gia hạn→hết hạn), điều khoản/nghĩa vụ, nhắc gia hạn | P0 | 7d |
+| TD-A5 | Khách hàng 360: timeline mọi tương tác (call/email/họp/phiếu), ticket/phiếu yêu cầu, điểm hài lòng (CSAT/NPS) | P1 | 5d |
+| TD-A6 | Đối tác/Nhà cung cấp (Party) cho thương mại: hợp đồng mua, điều khoản thanh toán, đánh giá | P1 | 4d |
+| TD-A7 | Marketing lite: chiến dịch, nguồn giới thiệu (UTM/referral), báo cáo chuyển đổi theo kênh | P2 | 4d |
+| TD-A8 | Email hai chiều: gửi từ app, đồng bộ hộp thư (IMAP), tự động gắn vào khách hàng/dự án | P1 | 8d |
+
+### Nhóm B — Vận hành & Dự án (Sản xuất dịch vụ)
+
+| ID | Task | Ưu tiên | Công lượng |
+|---|---|---|---|
+| TD-B1 | Timesheet/time-tracking: ghi giờ theo task/dự án, billable vs nội bộ, duyệt, tổng hợp chi phí nhân công | P0 | 6d |
+| TD-B2 | Ngân sách dự án: ngân sách giờ/chi phí, cảnh báo vượt, so sánh thực tế–kế hoạch | P1 | 4d |
+| TD-B3 | Gantt + phụ thuộc công việc (predecessor), critical path nhẹ | P1 | 5d |
+| TD-B4 | Template dự án: sinh dự án từ mẫu (giai đoạn, task, tài liệu, checklist theo ngành) | P1 | 4d |
+| TD-B5 | Khối lượng công việc/capacity view: ai làm gì tuần tới, quá tải | P2 | 4d |
+| TD-B6 | Quy trình duyệt đa cấp gói thác (expense, mua sắm, nghỉ phép, seal…): engine cấu hình được (bước, người duyệt, điều kiện) | P1 | 7d |
+| TD-B7 | Nghiệm thu/bàn giao: checklist nghiệm thu, sinh biên bản, chốt phí | P2 | 4d |
+| TD-B8 | Tự động hoá (automation rules): khi X thì Y (tạo task, gửi thông báo, đổi trạng thái, nhắc hạn) — scheduler + builder luật | P2 | 8d |
+
+### Nhóm C — Tài chính & Kế toán (mảng trống lớn nhất)
+
+| ID | Task | Ưu tiên | Công lượng |
+|---|---|---|---|
+| TD-C1 | Sổ quỹ + thu chi nâng cao: phương thức thanh toán, tài khoản quỹ, dự toán chi, đối chiếu | P0 | 5d |
+| TD-C2 | Công nợ: tuổi nợ (aging), nhắc nợ tự động (email/Zalo), phân bổ thu theo hoá đơn | P0 | 5d |
+| TD-C3 | Hệ thống tài khoản + bút toán kép (chart of accounts, journal, ledger, trial balance) | P1 | 8d |
+| TD-C4 | Báo cáo tài chính: Bảng cân đối kế toán, KQKD, LCTT theo chuẩn VN (TT200 hoặc VAS) | P1 | 6d |
+| TD-C5 | Chi phí/đề nghị tạm ứng: phiếu chi, đề nghị thanh toán, duyệt đa cấp, gắn dự án | P0 | 5d |
+| TD-C6 | Hóa đơn điện tử (Viettel/VNPT): phát hành từ Billing, ký số, tra cứu, hủy | P1 | 7d |
+| TD-C7 | Cổng thanh toán (VNPay/MoMo/ZaloPay/chuyển khoản QR): khách tự thanh toán hoá đơn trên portal | P2 | 6d |
+| TD-C8 | Đối soát ngân hàng: import sao kê, khớp tự động/khớp tay | P2 | 5d |
+| TD-C9 | Kế nối phần mềm kế toán (MISA/Fast): export bút toán, import số dư | P2 | 5d |
+| TD-C10 | Thuế: VAT đầu ra/vào, GTGT, khấu trừ, tờ khai tóm tắt; đa tiền tệ (nếu có khách nước ngoài) | P2 | 5d |
+
+### Nhóm D — Nội bộ, Nhân sự & Mua sắm
+
+| ID | Task | Ưu tiên | Công lượng |
+|---|---|---|---|
+| TD-D1 | Hồ sơ nhân viên: hợp đồng lao động, chứng chỉ (hết hạn cảnh báo), phụ cấp, hợp đồng scan | P1 | 5d |
+| TD-D2 | Nghỉ phép: đăng ký, duyệt, số dư phép, lịch nghỉ chung | P1 | 5d |
+| TD-D3 | Chấm công: check-in/out (web+geolocation optional), bảng công tháng, xuất Excel | P2 | 5d |
+| TD-D4 | Sơ đồ tổ chức (org chart) | P2 | 2d |
+| TD-D5 | Mua sắm: đề nghị mua → duyệt → đặt hàng → nhận → thanh toán, nhà cung cấp | P1 | 6d |
+| TD-D6 | Tài sản & Subscription: sổ tài sản (khấu hao), theo dõi license SaaS/domain/hosting, nhắc gia hạn | P1 | 5d |
+| TD-D7 | KPI/mục tiêu nhân viên lite (OKR/KPI theo kỳ) | P3 | 4d |
+| TD-D8 | Helpdesk nội bộ (ticket giữa các phòng ban) | P3 | 4d |
+
+### Nhóm E — Cổng khách hàng & Tự phục vụ
+
+| ID | Task | Ưu tiên | Công lượng |
+|---|---|---|---|
+| TD-E1 | Cổng khách hàng (client login): xem tiến độ dự án, tài liệu được chia sẻ, phiếu yêu cầu, tin nhắn | P1 | 8d |
+| TD-E2 | Khách xem/thanh toán hoá đơn trên portal (xem PDF, thanh toán — cần TD-C7) | P2 | 4d |
+| TD-E3 | Nộp tài liệu/tải lên từ portal (link có hạn, không cần tài khoản) | P1 | 3d |
+| TD-E4 | CSAT/NPS sau nghiệm thu | P3 | 2d |
+
+### Nhóm F — Truyền thông & Tích hợp
+
+| ID | Task | Ưu tiên | Công lượng |
+|---|---|---|---|
+| TD-F1 | Email giao dịch (SMTP): xác thực, mời user, nhắc hạn, reset mật khẩu, template HTML | P0 | 3d |
+| TD-F2 | Zalo OA: gửi thông báo/nhắc hạn cho khách (nội bộ dùng Zalo ZCA nếu được) | P1 | 5d |
+| TD-F3 | Chat nội bộ (thread theo dự án) hoặc tích hợp Slack/Teams/Telegram | P2 | 6d |
+| TD-F4 | Google/Outlook Calendar hai chiều (Deadline/Hearing/Task) | P2 | 5d |
+| TD-F5 | Web push (PWA) cho thông báo | P2 | 3d |
+| TD-F6 | API công khai + webhook (REST/GraphQL, key scoped, retry, chữ ký HMAC) cho tích hợp bên ngoài | P2 | 8d |
+| TD-F7 | MCP server (AGENTS §2 "Dự trữ V1.5"): expose tool cho AI agent bên ngoài | P3 | 6d |
+
+### Nhóm G — Nền tảng, Bảo mật, Tuân thủ
+
+| ID | Task | Ưu tiên | Công lượng |
+|---|---|---|---|
+| TD-G1 | Thuật ngữ cấu hình được (Matter→Dự án/Vụ/Công việc/Đơn hàng): bảng ánh xạ UI theo triển khai | P0 | 4d |
+| TD-G2 | Thương hiệu hoá triển khai (logo, màu, tên app, tên miền, favicon) cho mỗi công ty cài đặt | P1 | 2d |
+| TD-G3 | 2FA/TOTP + chính sách mật khẩu + quản lý phiên (thu hồi, danh sách thiết bị) | P1 | 5d |
+| TD-G4 | SSO (Google/Microsoft) + LDAP/AD (nếu công ty có) | P2 | 6d |
+| TD-G5 | Đa chi nhánh/phòng ban (đúng 1 công ty, nhiều văn phòng): phân quyền theo chi nhánh, báo cáo gộp | P2 | 8d |
+| TD-G6 | Xuất dữ liệu tự phục vụ: backup toàn bộ (JSON/SQL), export theo module, retention & xoá ẩn danh (GDPR export/erasure) | P1 | 5d |
+| TD-G7 | Import dữ liệu: wizard CSV/XLSX cho Client/Contact/Project/Task/Finance; migrate từ Excel cũ | P1 | 6d |
+| TD-G8 | i18n (vi/en…), đa tiền tệ, timezone, định dạng ngày/số theo locale | P2 | 5d |
+| TD-G9 | PWA: offline nhẹ, cài về màn hình, push; kiểm toán responsive mobile | P1 | 5d |
+| TD-G10 | Quan sát: log JSON có cấu trúc + correlation id, metrics Prometheus, alert, health chi tiết (db/cache/queue) | P1 | 5d |
+| TD-G11 | Resilience: timeout toàn I/O, circuit breaker tối thiểu, retry có jitter cho tích hợp ngoài | P2 | 5d |
+| TD-G12 | Hiệu năng: rà only mục lục DB cho cột lọc/sắp xếp, phân trang mọi bảng lớn, cache đọc, xoá N+1 | P1 | 5d |
+| TD-G13 | E2E (Playwright): luồng vàng (lead→quote→project→invoice→payment), phủ regression | P1 | 6d |
+| TD-G14 | Tích hợp CI: required checks (lint/typecheck/test+coverage≥80%/build/security-scan) trên PR | P1 | 3d |
+| TD-G15 | Backup/restore DB theo lịch + restore drill | P1 | 3d |
+
+### Nhóm H — Dọn dẹp & Khái quát hoá (đặc thù dòng ngành)
+
+| ID | Task | Ưu tiên | Công lượng |
+|---|---|---|---|
+| TD-H1 | Tách "vertical plugin": seals, preservation, express, causes, genealogy → module tuỳ chọn bật/tắt theo triển khai | P1 | 6d |
+| TD-H2 | Onboarding wizard cho công ty mới (profile, người dùng, dữ liệu mẫu, luồng gợi ý theo ngành) | P1 | 5d |
+| TD-H3 | Trung tâm trợ giúp in-app: hướng dẫn theo vai trò, changelog, form góp ý | P2 | 4d |
+| TD-H4 | Analytics nội bộ: KPI công ty (doanh thu, lợi nhuận, công nợ, pipeline), dashboard biểu đồ, xuất | P2 | 6d |
+| TD-H5 | Tìm kiếm ngữ nghĩa / đề xuất (dự án tương tự, tài liệu liên quan) bằng embedding (AGENTS V2 nâng lên) | P3 | 8d |
+
+**Tổng công lượng ước lượng**: ~220 ngày-dev (≈ 4–5 tháng 1 dev, hoặc 2–2.5 tháng 2 dev) cho P0+P1; P2+P3 theo nhu cầu triển khai từng công ty.
+
+---
+
+## 4. Lộ trình theo giai đoạn (rà sequencing)
+
+- **Giai đoạn 1 — "Thương mại hoá lõi" (P0, ~4 tuần)**: TD-A1, TD-A2, TD-A3, TD-A4, TD-B1, TD-C1, TD-C2, TD-C5, TD-F1, TD-G1.
+  *Mục tiêu: một văn phòng bình thường đi từ khách hàng gọi điện → báo giá → hợp đồng → dự án → thu tiền, đủ dùng hằng ngày.*
+- **Giai đoạn 2 — "Hoàn chỉnh vận hành" (P1, ~6 tuần)**: TD-A5, TD-A8, TD-B2, TD-B3, TD-B4, TD-B6, TD-C3, TD-C4, TD-C6, TD-D1, TD-D2, TD-D5, TD-D6, TD-E1, TD-E3, TD-F2, TD-G2, TD-G3, TD-G6, TD-G7, TD-G9, TD-G10, TD-G12, TD-G13, TD-G14, TD-G15, TD-H1, TD-H2.
+- **Giai đoạn 3 — "Nâng cao" (P2, ~6 tuần)**: TD-A7, TD-B5, TD-B7, TD-B8, TD-C7, TD-C8, TD-C9, TD-C10, TD-D3, TD-D4, TD-E2, TD-F3, TD-F4, TD-F5, TD-F6, TD-G4, TD-G5, TD-G8, TD-G11, TD-H3, TD-H4.
+- **Giai đoạn 4 — "Mở rộng" (P3)**: TD-D7, TD-D8, TD-E4, TD-F7, TD-H5.
+
+**Nguyên tắc ưu tiên khi thay đổi**: vi phạm cổng chất lượng & bảo mật luôn nhảy hàng trước task tính năng (GOAL.md §2.2). Không bắt đầu task mới khi lint/typecheck/test đang đỏ.
+
+---
+
+## 5. Tiêu chí "full" cho công ty nhỏ / văn phòng độc lập
+
+Một triển khai coi là **đủ dùng** khi đạt đồng thời:
+
+1. **Thương mại đóng vòng**: lead → báo giá → hợp đồng → dự án → nghiệm thu → hoá đơn → thu tiền, có nhắc nợ.
+2. **Tài chính tự chủ**: sổ quỹ, công nợ, chi phí theo dự án, báo cáo tài chính cơ bản không cần phần mềm ngoài.
+3. **Vận hành nhìn được**: ai đang làm gì, tới hạn gì, dự án nào trễ, dự án nào vượt ngân sách (dashboard + cảnh báo).
+4. **Nội bộ tự chảy**: duyệt (chi phí, mua sắm, nghỉ phép), hồ sơ nhân viên, tài sản/subscription.
+5. **Khách hàng tự phục vụ**: portal xem tiến độ, nộp tài liệu, thanh toán hoá đơn.
+6. **Bảo mật & tuân thủ**: 2FA, audit bất biến, backup-restore tự phục vụ, xuất/xoá dữ liệu cá nhân.
+7. **Triển khai dễ**: docker compose up → onboarding wizard → import dữ liệu cũ → dùng được trong ngày.
+---
+
+# Phụ lục (lịch sử): KẾ HOẠCH DI TRÚ TOÀN DIỆN — gộp client-next + server-nest
+
+> Kế hoạch gộp 3 mã nguồn năm 2025. Pha 0–6 đã hoàn thành (schema hợp nhất ~74 model, server actions đầy đủ, auth NextAuth). Chỉ giữ lại làm tài liệu lịch sử; các hạng mục còn treo (test phủ sâu, deploy) quy về nhóm G ở trên.
 
 **Mục tiêu**: Ứng dụng Next.js hợp nhất (LawLink) gồm miền nghiệp vụ + genealogy + ERP.
 **Thời gian**: 11–12 tuần (2.5–3 tháng).
