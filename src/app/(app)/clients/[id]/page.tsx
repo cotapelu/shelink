@@ -22,7 +22,7 @@ import Link from "next/link";
 import {
   ArrowLeft
 } from "lucide-react";
-import { getClientById, getClientFinanceSummary } from "@/server/clients/actions";
+import { getClientById, getClientFinanceSummary, getClientCommercialSummary } from "@/server/clients/actions";
 
 
 
@@ -31,6 +31,7 @@ import { ClientHeader } from "./_components/client-header";
 import { ClientInfoSection } from "./_components/client-info-section";
 import { ContactsSection } from "./_components/contacts-section";
 import { MattersSection } from "./_components/matters-section";
+import { CommercialSection } from "./_components/commercial-section";
 
 
 
@@ -41,7 +42,10 @@ import { MattersSection } from "./_components/matters-section";
 export default async function ClientDetailPage({ params }: { params: { id: string } }) {
   const client = await getClientById(params.id);
   if (!client) notFound();
-  const finance = await getClientFinanceSummary(params.id);
+  const [finance, commercial] = await Promise.all([
+    getClientFinanceSummary(params.id),
+    getClientCommercialSummary(params.id)
+  ]);
 
   // 按案件分组合同，关联案件与签约合同合并展示（左案件 / 右合同）
   const billingsByMatter = new Map<string, typeof finance.billings>();
@@ -65,6 +69,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
       <ClientInfoSection client={client} finance={finance} />
       <ContactsSection contacts={client.contacts} />
       <MattersSection matters={client.matters} billingsMap={billingsByMatter} />
+      <CommercialSection quotes={commercial.quotes} contracts={commercial.contracts} />
     </div>
   );
 }

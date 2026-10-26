@@ -1,6 +1,6 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-24 (AUTO-46).
+Cập nhật lần cuối: 2026-10-24 (AUTO-47).
 
 ## Chu kỳ đã hoàn thành (gần đây)
 - ✅ Chu kỳ 0–75: khôi phục cổng chất lượng, đẩy phủ, refactor 3 lô.
@@ -101,6 +101,18 @@ Loại: Fix. ~20 phút. ✅. **Sửa theo yêu cầu chủ sở hữn duyệt co
 **Xác thực**: rebuild → `registerCronJobs` đã nằm trong server chunk; `next start` :3100 `/login`=**200** (trước 500), `/intakes`+`/settings/templates` 307→login; log khởi động "[cron] da dang ky 5 tac vu dinh ky" → instrumentation chạy đúng. Dev :3200 `/login`=200, `/intakes`=307, không lỗi → **không hồi quy**. tsc=0; lint file=0; test **2176 pass/1 skip/0 fail**; build SUCCESS.
 
 **Giai đoạn 1 (P0)**: ✅ hoàn tất toàn bộ (AUTO-39→46: quote/contract/timesheet/expense/cash/terminology/email/aging/pipeline UI + nút tạo + wire thuật ngữ + seed giai đoạn + sửa `next start`).
+
+### [CYCLE-AUTO-47] — 2026-10-24: Customer 360 — Báo giá & Hợp đồng trên /clients/[id] (TD-A5 partial) + seed mẫu khái quát
+Loại: Feature (không đổi schema/migration). Owner đã duyệt commit. ~1h30. ✅.
+
+**Đã hoàn thành**:
+- [x] Seed mặc định (commit `fabe967`): thêm `StageTemplate` `NON_LITIGATION_PHASE` tiếng Việt (4 bước: Tiếp nhận&làm rõ YC → Triển khai → Nghiệm thu/bàn giao → Kết thúc&lưu trữ) để tính năng seed giai đoạn (AUTO-45) phát huy cho công ty phi tố tụng. DB xác nhận 5 template.
+- [x] TD-A5 partial: `getClientCommercialSummary(clientId)` (`server/clients/actions.ts`) — báo giá + hợp đồng gần đây của khách; **trích `assertClientReadable`** dùng chung với finance summary (gỡ trùng lặp quyền — anti-pattern Shotgun Surgery) + 2 helper query. UI `commercial-section.tsx` (2 bảng dùng chung `CommercialTable`, badge báo giá tái dùng `QuoteStatusBadge`) lắp vào trang `/clients/[id]`.
+- [x] Test: +2 (`getClientCommercialSummary`: nhánh quản lý map số tiền + quyền non-manager).
+
+**Cổng chất lượng**: typecheck PASS; lint **không phát sinh lỗi mới** (7 lỗi `clients/actions.ts` là nợ có sẵn từ HEAD — hàm >20 dòng/file >300; hàm mới ≤20); test toàn bộ **2178 pass /1 skip /0 fail** (2176→+2); build SUCCESS; dev `/login`200, `/clients/[id]` 307→login đúng guard.
+
+**Roadmap TD-A5 còn lại**: timeline tương tác hợp nhất (call/email/họp/phiếu), ticket, CSAT/NPS; và các module GĐ2 khác (TD-A8 email 2 chiều, TD-B2 ngân sách dự án [cần migration], TD-B6 workflow duyệt, TD-G3 2FA [cần migration], TD-D1/D2/D6…). Lưu ý: task cần **schema migration** phải xin chủ sở hữn duyệt trước (AGENTS.md đỏ-vạch).
 
 ### [CYCLE-AUTO-39] — 2026-10-24: Giai đoạn 1 thương mại (P0)
 Loại: Feature (docs-first → schema → migrate dev local → server → UI → test). ~4 giờ. ✅.

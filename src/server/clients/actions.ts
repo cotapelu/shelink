@@ -137,21 +137,70 @@ export async function getClientById(id: string) {
   return client;
 }
 
+type SessionUser = Awaited<ReturnType<typeof requireSession>>;
+
+/** Quyền đọc theo khách hàng (dùng chung cho finance + commercial). */
+async function assertClientReadable(session: SessionUser, clientId: string): Promise<void> {
+  if (isManager(session.user.role) || session.user.role === "FINANCE") return;
+  const accessible = await prisma.client.findFirst({
+    where: {
+      id: clientId,
+      deletedAt: null,
+      ...clientVisibilityFilter(session.user.id, session.user.role)
+    },
+    select: { id: true }
+  });
+  if (!accessible) throw new Error("Khách hàng không tồn tại");
+}
+
+/** Báo giá gần đây của khách (TD-A5). */
+async function listClientQuotes(clientId: string) {
+  return prisma.quote.findMany({
+    where: { clientId, deletedAt: null },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    select: {
+      id: true,
+      code: true,
+      title: true,
+      status: true,
+      total: true,
+      currency: true,
+      issuedAt: true,
+      expiresAt: true,
+      matterId: true,
+      contractId: true,
+      createdAt: true
+    }
+  });
+}
+
+/** Hợp đồng gần đây của khách (TD-A5). */
+async function listClientContracts(clientId: string) {
+  return prisma.contract.findMany({
+    where: { clientId, deletedAt: null },
+    orderBy: { createdAt: "desc" }, take: 20,
+    select: {
+      id: true,
+      code: true,
+      title: true,
+      status: true,
+      amount: true,
+      currency: true,
+      signedAt: true,
+      effectiveAt: true,
+      expiresAt: true,
+      matterId: true,
+      quoteId: true,
+      createdAt: true
+    }
+  });
+}
+
 // v0.37: Tổng hợp tài chính khách hàng —— Tổng hợp hợp đồng/có thu/đã thu xuyên qua tất cả vụ án của khách hàng
 export async function getClientFinanceSummary(clientId: string) {
   const session = await requireSession();
-  // 权限：与 getClientById 一致
-  if (!isManager(session.user.role) && session.user.role !== "FINANCE") {
-    const accessible = await prisma.client.findFirst({
-      where: {
-        id: clientId,
-        deletedAt: null,
-        ...clientVisibilityFilter(session.user.id, session.user.role)
-      },
-      select: { id: true }
-    });
-    if (!accessible) throw new Error("Khách hàng không tồn tại");
-  }
+  await assertClientReadable(session, clientId);
 
   const matterWhere = { primaryClientId: clientId, deletedAt: null };
   const [billings, fees, matterCount] = await Promise.all([
@@ -182,6 +231,23 @@ export async function getClientFinanceSummary(clientId: string) {
     outstanding: Math.max(0, receivable - received),
     matterCount,
     billings
+  };
+}
+
+/**
+ * Vòng đời thương mại của khách (TD-A5, đọc-quan): báo giá + hợp đồng gần đây.
+ * Quyền giống getClientFinanceSummary/getClientById; chỉ đọc, không mutation.
+ */
+export async function getClientCommercialSummary(clientId: string) {
+  const session = await requireSession();
+  await assertClientReadable(session, clientId);
+  const [quotes, contracts] = await Promise.all([
+    listClientQuotes(clientId),
+    listClientContracts(clientId)
+  ]);
+  return {
+    quotes: quotes.map((q) => ({ ...q, total: Number(q.total) })),
+    contracts: contracts.map((c) => ({ ...c, amount: Number(c.amount) }))
   };
 }
 

@@ -4,6 +4,7 @@ import {
   listClients,
   getClientById,
   getClientFinanceSummary,
+  getClientCommercialSummary,
   createClient,
   updateClient,
   softDeleteClient,
@@ -42,6 +43,8 @@ vi.mock("@/lib/prisma", () => ({
     billing: { findMany: vi.fn() },
     feeEntry: { findMany: vi.fn() },
     matter: { count: vi.fn() },
+    quote: { findMany: vi.fn() },
+    contract: { findMany: vi.fn() },
     $transaction: vi.fn(),
   },
 }));
@@ -214,6 +217,64 @@ describe("clients/actions", () => {
       mockPrisma.client.findFirst.mockResolvedValue(null); // permission check fails
 
       await expect(getClientFinanceSummary("c1")).rejects.toThrow("Khách hàng không tồn tại");
+    });
+  });
+
+  describe("getClientCommercialSummary", () => {
+    it("returns recent quotes + contracts with numeric amounts (manager path)", async () => {
+      mockIsManager.mockReturnValue(true);
+      mockPrisma.quote.findMany.mockResolvedValue([
+        {
+          id: "q1",
+          code: "QT-2026-0001",
+          title: "Báo giá A",
+          status: "SENT",
+          total: "5000000",
+          currency: "VND",
+          issuedAt: null,
+          expiresAt: null,
+          matterId: null,
+          contractId: null,
+          createdAt: new Date(),
+        },
+      ]);
+      mockPrisma.contract.findMany.mockResolvedValue([
+        {
+          id: "ct1",
+          code: "CT-2026-0001",
+          title: "Hợp đồng B",
+          status: "ACTIVE",
+          amount: "10000000",
+          currency: "VND",
+          signedAt: null,
+          effectiveAt: null,
+          expiresAt: null,
+          matterId: null,
+          quoteId: null,
+          createdAt: new Date(),
+        },
+      ]);
+
+      const result = await getClientCommercialSummary("c1");
+
+      expect(mockPrisma.quote.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { clientId: "c1", deletedAt: null }, take: 20 })
+      );
+      expect(mockPrisma.contract.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { clientId: "c1", deletedAt: null }, take: 20 })
+      );
+      expect(result.quotes[0].total).toBe(5000000);
+      expect(result.contracts[0].amount).toBe(10000000);
+      expect(mockPrisma.client.findFirst).not.toHaveBeenCalled(); // manager bỏ qua check visibility
+    });
+
+    it("enforces permission like getClientById for non-managers", async () => {
+      mockIsManager.mockReturnValue(false);
+      mockClientVisibility.mockReturnValue({});
+      mockPrisma.client.findFirst.mockResolvedValue(null);
+
+      await expect(getClientCommercialSummary("c1")).rejects.toThrow("Khách hàng không tồn tại");
+      expect(mockPrisma.quote.findMany).not.toHaveBeenCalled();
     });
   });
 
