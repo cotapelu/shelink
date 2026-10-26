@@ -590,6 +590,8 @@ async function seedCauses(category: MatterCategory, causes: CauseSeed[]) {
 async function seedStageTemplates() {
   // 第一版只放最常用的一审/二审/侦查/审查起诉默认模板
   // 编辑入口在 /settings/templates
+  // NOTE(vi): bổ sung mẫu khái quát phi tố tụng (NON_LITIGATION_PHASE) cuối mảng —
+  // phủ luồng dự án/dịch vụ cho công ty nhỏ mọi ngành; tên giai đoạn dùng tiếng Việt.
   const templates = [
     {
       procedureType: "FIRST_INSTANCE" as const,
@@ -628,6 +630,18 @@ async function seedStageTemplates() {
         { name: "阅卷", order: 1, defaultTasks: ["阅卷", "复制证据"] },
         { name: "辩护意见", order: 2, defaultTasks: ["提交不起诉/罪轻辩护意见"] },
         { name: "认罪认罚", order: 3, defaultTasks: ["签署具结书（如认罪）"] }
+      ]
+    },
+    {
+      // Khái quát hoá: mặc định cho mọi công ty/dự án/dịch vụ (consulting, design, accounting…)。
+      // Các category NON_LITIGATION / LEGAL_COUNSEL / SPECIAL_PROJECT đều rơi vào type này.
+      procedureType: "NON_LITIGATION_PHASE" as const,
+      name: "Quy trình dự án/dịch vụ (khái quát)",
+      steps: [
+        { name: "Tiếp nhận & làm rõ yêu cầu", order: 1, defaultTasks: ["Ký hợp đồng / biên bản giao việc", "Xác nhận phạm vi & sản phẩm bàn giao"] },
+        { name: "Triển khai / thực hiện", order: 2, defaultTasks: ["Lập kế hoạch", "Báo cáo tiến độ định kỳ"] },
+        { name: "Nghiệm thu / bàn giao", order: 3, defaultTasks: ["Biên bản nghiệm thu", "Bàn giao tài liệu"] },
+        { name: "Kết thúc & lưu trữ", order: 4, defaultTasks: ["Chốt thu chi", "Lưu trữ hồ sơ"] }
       ]
     }
   ];
