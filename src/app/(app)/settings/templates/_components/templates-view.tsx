@@ -78,6 +78,32 @@ const ALL_PROCEDURE_TYPES: ProcedureType[] = [
 
 type Step = { name: string; order: number; defaultTasks?: string[] };
 
+/** Xem trước các giai đoạn của mẫu + nhiệm vụ mặc định sẽ sinh ra (đọc-quan). */
+function StageList({ steps }: { steps: Step[] }) {
+  const sorted = steps.slice().sort((a, b) => a.order - b.order);
+  return (
+    <ol className="space-y-2">
+      {sorted.map((s, idx) => (
+        <li key={idx} className="rounded-md border border-border bg-background p-3">
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-xs text-muted-foreground tabular">{s.order}</span>
+            <span className="text-sm font-medium">{s.name}</span>
+          </div>
+          {s.defaultTasks && s.defaultTasks.length > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {s.defaultTasks.map((t, ti) => (
+                <span key={ti} className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
+                  {t}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function TemplatesView({ templates }: { templates: StageTemplate[] }) {
   const [selected, setSelected] = useState<ProcedureType>(
     (templates[0]?.procedureType as ProcedureType) ?? "FIRST_INSTANCE"
@@ -128,24 +154,7 @@ export function TemplatesView({ templates }: { templates: StageTemplate[] }) {
             该程序类型还没有默认模板
           </div>
         ) : (
-          <ol className="space-y-2">
-            {((current.steps ?? []) as unknown as Step[])
-              .slice()
-              .sort((a, b) => a.order - b.order)
-              .map((s, idx) => (
-                <li
-                  key={idx}
-                  className="rounded-md border border-border bg-background p-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs text-muted-foreground tabular">
-                      {s.order}
-                    </span>
-                    <span className="text-sm font-medium">{s.name}</span>
-                  </div>
-                </li>
-              ))}
-          </ol>
+          <StageList steps={((current.steps ?? []) as unknown as Step[])} />
         )}
       </section>
 
@@ -199,7 +208,7 @@ function EditTemplateDialog({
   function handleSave() {
     const cleaned = steps
       .filter((s) => s.name.trim())
-      .map((s, i) => ({ name: s.name.trim(), order: i + 1, defaultTasks: [] }));
+      .map((s, i) => ({ name: s.name.trim(), order: i + 1, defaultTasks: s.defaultTasks ?? [] }));
     if (cleaned.length === 0) {
       toast.warning("至少需要一个阶段");
       return;

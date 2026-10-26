@@ -73,6 +73,20 @@ describe("normalizeStageSteps", () => {
     const many = Array.from({ length: 80 }, (_, i) => ({ name: `S${i}`, order: i + 1 }));
     expect(normalizeStageSteps(many)).toHaveLength(MAX_TEMPLATE_STEPS);
   });
+
+  it("giữ defaultTasks hợp lệ, bỏ rỗng/lạ; không đính kèm khi không có", () => {
+    expect(
+      normalizeStageSteps([
+        { name: "A", order: 1, defaultTasks: ["  Việc 1  ", "", "  ", 5, "Việc 2"] },
+        { name: "B", order: 2, defaultTasks: [] },
+        { name: "C", order: 3 }
+      ])
+    ).toEqual([
+      { name: "A", order: 1, defaultTasks: ["Việc 1", "Việc 2"] },
+      { name: "B", order: 2 },
+      { name: "C", order: 3 }
+    ]);
+  });
 });
 
 function makeClient(steps: unknown | null) {
@@ -81,6 +95,22 @@ function makeClient(steps: unknown | null) {
       findUnique: vi.fn().mockResolvedValue(steps === null ? null : { steps })
     },
     matterStage: { createMany: vi.fn().mockResolvedValue({ count: 0 }) }
+  };
+}
+
+function makeTaskClient(steps: unknown) {
+  const stageCount = Array.isArray(steps) ? steps.length : 0;
+  return {
+    stageTemplate: { findUnique: vi.fn().mockResolvedValue({ steps }) },
+    matterStage: {
+      createMany: vi.fn().mockResolvedValue({ count: stageCount }),
+      findMany: vi.fn().mockResolvedValue([
+        { id: "stg-1", name: "Tiếp nhận", order: 1 },
+        { id: "stg-2", name: "Xử lý", order: 2 }
+      ])
+    },
+    matterProcedure: { findUnique: vi.fn().mockResolvedValue({ matterId: "m1" }) },
+    legalTask: { createMany: vi.fn().mockResolvedValue({ count: 0 }) }
   };
 }
 
@@ -119,5 +149,40 @@ describe("seedStagesFromTemplate", () => {
     const client = makeClient([{ name: "A", order: 1 }]);
     client.matterStage.createMany.mockResolvedValue({ count: 1 });
     expect(await seedStagesFromTemplate(client, "proc-9", "ADMIN_RECONSIDERATION")).toBe(1);
+  });
+
+  it("sinh LegalTask theo defaultTasks, gắn đúng stage (theo tên) + matterId", async () => {
+    const client = makeTaskClient([
+      { name: "Tiếp nhận", order: 1, defaultTasks: ["Nhận hồ sơ", "Gửi xác nhận"] },
+      { name: "Xử lý", order: 2, defaultTasks: ["Làm việc"] }
+    ]);
+    const count = await seedStagesFromTemplate(client, "proc-1", "FIRST_INSTANCE");
+    expect(count).toBe(2);
+    expect(client.matterProcedure.findUnique).toHaveBeenCalledWith({
+      where: { id: "proc-1" },
+      select: { matterId: true }
+    });
+    expect(client.legalTask.createMany).toHaveBeenCalledWith({
+      data: [
+        { matterId: "m1", stageId: "stg-1", title: "Nhận hồ sơ" },
+        { matterId: "m1", stageId: "stg-1", title: "Gửi xác nhận" },
+        { matterId: "m1", stageId: "stg-2", title: "Làm việc" }
+      ]
+    });
+  });
+
+  it("không gọi legalTask khi steps không có defaultTasks", async () => {
+    const client = makeTaskClient([{ name: "Tiếp nhận", order: 1 }, { name: "Xử lý", order: 2 }]);
+    await seedStagesFromTemplate(client, "proc-1", "FIRST_INSTANCE");
+    expect(client.matterStage.createMany).toHaveBeenCalled();
+    expect(client.legalTask.createMany).not.toHaveBeenCalled();
+    expect(client.matterProcedure.findUnique).not.toHaveBeenCalled();
+  });
+
+  it("bỏ qua task khi không đọc được matterId", async () => {
+    const client = makeTaskClient([{ name: "Tiếp nhận", order: 1, defaultTasks: ["T1"] }]);
+    client.matterProcedure.findUnique.mockResolvedValue(null);
+    await seedStagesFromTemplate(client, "proc-1", "FIRST_INSTANCE");
+    expect(client.legalTask.createMany).not.toHaveBeenCalled();
   });
 });

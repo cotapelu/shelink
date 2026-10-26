@@ -1,8 +1,22 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-26 (AUTO-50).
+Cập nhật lần cuối: 2026-10-26 (AUTO-51).
 
 ## Chu kỳ đã hoàn thành (gần đây)
+
+### [CYCLE-AUTO-51] — 2026-10-26: TD-B4 — Sinh nhiệm vụ mặc định theo giai đoạn từ mẫu (StageTemplate.defaultTasks → LegalTask)
+Loại: Feature (không đổi schema/migration). Owner đã duyệt. ~1h30.
+
+**Phát hiện**: `stepSchema` (settings) và seed ĐÃ có sẵn `defaultTasks` cho cả 5 mẫu giai đoạn (FIRST/SECOND/INVESTIGATION/PROSECUTION_REVIEW/NON_LITIGATION_PHASE, 31 nhiệm vụ), nhưng `normalizeStageSteps` **bỏ qua** và `seedStagesFromTemplate` không tạo `LegalTask` → nhiệm vụ mặc định "ngủ đông", chưa bao giờ sinh. Cộng thêm: `handleSave` trong editor templates reset `defaultTasks: []` → **xóa task** mỗi khi admin lưu.
+
+**Đã hoàn thành**:
+- [x] `stage-template.ts`: `normalizeStageSteps` giữ `defaultTasks` (chỉ đính kèm khi có → không vỡ dữ liệu/kỳ vọng cũ); `seedStagesFromTemplate` nay gọi `seedTasksForStages` sinh `LegalTask` gắn đúng giai đoạn (map theo tên) + `matterId`, giới hạn (20/bước, 200 tổng). Guard no-op khi không có task / client thiếu method / thiếu matterId → không bao giờ chặn tạo thủ tục (an toàn cho tx/mock). Tách hàm ≤20 dòng, complexity ≤10.
+- [x] Editor templates: sửa bug mất dữ liệu (`handleSave` giữ `defaultTasks`); tách `StageList` hiển thị giai đoạn + nhiệm vụ mặc định (đọc-quan). `TemplatesView` 81→64 dòng (giảm nợ).
+- [x] Test: +4 (normalize defaultTasks; sinh task gắn stage; không gọi khi không có task; bỏ qua khi thiếu matterId) → 13.
+
+**Cổng chất lượng**: typecheck PASS; build SUCCESS; test toàn bộ **2219 pass /1 skip/0 fail** (2215→+4, không hồi quy ở 5 test flow gọi seeder — nhờ guard); lint code mới sạch (2 lỗi `templates-view` là nợ God-object >50 dòng có sẵn, đã giảm). Xác thực DB thật: 5/5 mẫu có `defaultTasks` (31 task), normalize giữ nguyên, 3 delegate (`matterProcedure`/`matterStage`/`legalTask`) chạy đúng.
+
+**Roadmap**: mỗi thủ tục mới từ mẫu giờ tự sinh giai đoạn + nhiệm vụ. Follow-up: UI nhập/sửa `defaultTasks` trong dialog template + Việt hoá màn /settings/templates (đang còn chuỗi tiếng Trung — nợ i18n cũ); lưu ý auth dev 500 do key SSH (AUTO-49).
 
 ### [CYCLE-AUTO-50] — 2026-10-26: TD-G6 — Sao lưu toàn bộ dữ liệu (JSON) tự phục vụ (thay stub)
 Loại: Feature (không đổi schema/migration). Owner đã duyệt commit. ~1h30.
