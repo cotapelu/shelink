@@ -24,16 +24,16 @@
  * Trách nhiệm hiện tại: Đăng ký cron jobs (chỉ chạy trong production / nodejs runtime).
  * Bỏ qua trong dev mode, tránh gửi thông báo thật trong lúc phát triển.
  *
- * ⚠ Quan trọng: Next 14.x ngay cả khi dùng dynamic import trong register(), dev mode vẫn quét
- * dependency chain để biên dịch cho edge runtime (next-auth/bcryptjs phụ thuộc node:crypto sẽ gây lỗi 500).
- * Giải pháp: Trong dev mode, không chỉ bỏ qua thực thi, mà không được viết cả đường dẫn import – hoàn toàn noop.
+ * Lưu ý: cron chỉ chạy ở production/nodejs runtime (next start). Import của scheduler là đường dẫn
+ * nội bộ nên **phải** để bundler gói; từng dùng `webpackIgnore: true` khiến `next start` không resolve
+ * được `./server/cron/scheduler` trong `.next/*` → mọi request lỗi 500. Dev mode vẫn noop ở guard dưới.
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
   if (process.env.NODE_ENV !== "production") return;
   if (process.env.DISABLE_CRON === "1") return;
 
-  // Register cron jobs
-  const mod = await import(/* webpackIgnore: true */ "./server/cron/scheduler");
+  // Register cron jobs (bundled; chỉ chạy production/nodejs — xem guard ở trên)
+  const mod = await import("./server/cron/scheduler");
   (mod as { registerCronJobs: () => void }).registerCronJobs();
 }

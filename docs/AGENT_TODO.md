@@ -1,6 +1,6 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-24 (AUTO-45).
+Cập nhật lần cuối: 2026-10-24 (AUTO-46).
 
 ## Chu kỳ đã hoàn thành (gần đây)
 - ✅ Chu kỳ 0–75: khôi phục cổng chất lượng, đẩy phủ, refactor 3 lô.
@@ -91,7 +91,16 @@ Loại: Feature (dùng model sẵn có, **không đổi schema/migration**). ~1 
 
 **Cổng chất lượng**: typecheck PASS; lint — file mới sạch, không phát sinh lỗi mới (9 lỗi `procedures/actions.ts` là nợ **có sẵn** từ HEAD: God function/file >300 dòng; `addProcedure` gọn 1 dòng để giảm footprint); test toàn bộ **2176 pass /1 skip /0 fail** (2167→+9); build SUCCESS; dev :3000 (1 lệnh tự chứa) `/login`200, `/intakes`+`/settings/templates`+`/settings/terminology` 307→login đúng guard, không lỗi runtime.
 
-**Còn lại**: cân nhắc sửa dynamic import `server/cron/scheduler` để `next start` production hết 500 (lỗi có sẵn, instrumentation — DEV chạy bình thường).
+### [CYCLE-AUTO-46] — 2026-10-24: Sửa `next start` production 500 (instrumentation bọc bundler sai) 🔧
+Loại: Fix. ~20 phút. ✅. **Sửa theo yêu cầu chủ sở hữn duyệt commit.**
+
+**Root cause**: `instrumentation.ts` import scheduler bằng `await import(/* webpackIgnore: true */ "./server/cron/scheduler")`. `webpackIgnore` bảo bundler **không** gói import nội bộ này → khi `next start`, runtime tìm `./server/cron/scheduler` trong `.next-build/server/chunks/` và không thấy → instrumentation hook crash → **mọi request 500** (kể cả `/login`). Đường dẫn local phải để bundler gói.
+
+**Sửa**: bỏ `webpackIgnore: true` (giữ nguyên guard `NEXT_RUNTIME==="nodejs"` + `NODE_ENV!=="production"` + `DISABLE_CRON`); hiệu chỉnh comment cũ (nói Next 14.x/edge, gây hiểu nhầm).
+
+**Xác thực**: rebuild → `registerCronJobs` đã nằm trong server chunk; `next start` :3100 `/login`=**200** (trước 500), `/intakes`+`/settings/templates` 307→login; log khởi động "[cron] da dang ky 5 tac vu dinh ky" → instrumentation chạy đúng. Dev :3200 `/login`=200, `/intakes`=307, không lỗi → **không hồi quy**. tsc=0; lint file=0; test **2176 pass/1 skip/0 fail**; build SUCCESS.
+
+**Giai đoạn 1 (P0)**: ✅ hoàn tất toàn bộ (AUTO-39→46: quote/contract/timesheet/expense/cash/terminology/email/aging/pipeline UI + nút tạo + wire thuật ngữ + seed giai đoạn + sửa `next start`).
 
 ### [CYCLE-AUTO-39] — 2026-10-24: Giai đoạn 1 thương mại (P0)
 Loại: Feature (docs-first → schema → migrate dev local → server → UI → test). ~4 giờ. ✅.
