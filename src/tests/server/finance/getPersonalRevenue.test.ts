@@ -39,7 +39,7 @@ describe("getPersonalRevenue", () => {
     mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } } as any);
     mockIsManager.mockReturnValue(false);
 
-    await expect(getPersonalRevenue("u2")).rejects.toThrow("只能查看自己的收入数据");
+    await expect(getPersonalRevenue("u2")).rejects.toThrow("Chỉ được xem dữ liệu thu nhập của chính mình");
   });
 
   it("allows manager to view any user's revenue", async () => {

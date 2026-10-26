@@ -33,8 +33,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
 const schema = z.object({
-  email: z.string().email("请填写有效邮箱"),
-  password: z.string().min(1, "请填写密码")
+  email: z.string().email("Vui lòng nhập email hợp lệ"),
+  password: z.string().min(1, "Vui lòng nhập mật khẩu")
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -65,7 +65,7 @@ export function LoginForm() {
       router.replace(callbackUrl);
       router.refresh();
     } else {
-      setAuthError("邮箱或密码错误");
+      setAuthError("Email hoặc mật khẩu không đúng");
     }
   }
 
@@ -79,7 +79,7 @@ export function LoginForm() {
       ) : null}
 
       <div className="space-y-1.5">
-        <Label htmlFor="email">邮箱</Label>
+        <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"
@@ -95,7 +95,7 @@ export function LoginForm() {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="password">密码</Label>
+        <Label htmlFor="password">Mật khẩu</Label>
         <div className="relative">
           <Input
             id="password"
@@ -112,7 +112,7 @@ export function LoginForm() {
             type="button"
             onClick={() => setShowPassword((v) => !v)}
             tabIndex={-1}
-            aria-label={showPassword ? "隐藏密码" : "显示密码"}
+            aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
             className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -129,11 +129,11 @@ export function LoginForm() {
         disabled={isSubmitting}
       >
         {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-        {isSubmitting ? "登录中..." : "登录"}
+        {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
-        忘记密码？联系系统管理员重置
+        Quên mật khẩu? Liên hệ quản trị hệ thống để đặt lại
       </p>
     </form>
   );

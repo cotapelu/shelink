@@ -25,42 +25,42 @@ function ymd(d: Date): [number, number, number] {
 }
 
 describe("periodPresets", () => {
-  it("2026-05-26 → 本月 = 2026-05-01 到 2026-06-01", () => {
+  it("2026-05-26 → Tháng này = 2026-05-01 đến 2026-06-01", () => {
     const p = periodPresets(new Date(2026, 4, 26));
     expect(ymd(p.month.start)).toEqual([2026, 5, 1]);
     expect(ymd(p.month.end)).toEqual([2026, 6, 1]);
-    expect(p.month.label).toBe("2026 年 5 月");
+    expect(p.month.label).toBe("Tháng 5/2026");
   });
 
-  it("2026-05-26 → 本季 = 2026 Q2（4-7 月）", () => {
+  it("2026-05-26 → Quý này = 2026 Q2 (4-7 tháng)", () => {
     const p = periodPresets(new Date(2026, 4, 26));
     expect(ymd(p.quarter.start)).toEqual([2026, 4, 1]);
     expect(ymd(p.quarter.end)).toEqual([2026, 7, 1]);
-    expect(p.quarter.label).toBe("2026 年 Q2");
+    expect(p.quarter.label).toBe("Q2/2026");
   });
 
-  it("2026-05-26 → 本年 = 2026-01-01 到 2027-01-01", () => {
+  it("2026-05-26 → Năm này = 2026-01-01 đến 2027-01-01", () => {
     const p = periodPresets(new Date(2026, 4, 26));
     expect(ymd(p.year.start)).toEqual([2026, 1, 1]);
     expect(ymd(p.year.end)).toEqual([2027, 1, 1]);
-    expect(p.year.label).toBe("2026 年度");
+    expect(p.year.label).toBe("Năm 2026");
   });
 
-  it("2026-05-26 → 上年 = 2025-01-01 到 2026-01-01", () => {
+  it("2026-05-26 → Năm trước = 2025-01-01 đến 2026-01-01", () => {
     const p = periodPresets(new Date(2026, 4, 26));
     expect(ymd(p.lastYear.start)).toEqual([2025, 1, 1]);
     expect(ymd(p.lastYear.end)).toEqual([2026, 1, 1]);
-    expect(p.lastYear.label).toBe("2025 年度");
+    expect(p.lastYear.label).toBe("Năm 2025");
   });
 
-  it("Q1（1 月）边界", () => {
+  it("Biên Q1 (tháng 1)", () => {
     const p = periodPresets(new Date(2026, 0, 15));
     expect(ymd(p.quarter.start)).toEqual([2026, 1, 1]);
     expect(ymd(p.quarter.end)).toEqual([2026, 4, 1]);
-    expect(p.quarter.label).toBe("2026 年 Q1");
+    expect(p.quarter.label).toBe("Q1/2026");
   });
 
-  it("Q4（12 月）边界，本月 end 跨年", () => {
+  it("Biên Q4 (tháng 12), cuối tháng năm nay vượt năm", () => {
     const p = periodPresets(new Date(2026, 11, 31));
     expect(ymd(p.month.start)).toEqual([2026, 12, 1]);
     expect(ymd(p.month.end)).toEqual([2027, 1, 1]);
@@ -70,36 +70,36 @@ describe("periodPresets", () => {
 });
 
 describe("customPeriod", () => {
-  it("2026-01-01 ~ 2026-03-31 → start=01-01, end=04-01（含末日 → 半开 +1）", () => {
+  it("2026-01-01 ~ 2026-03-31 → start=01-01, end=04-01 (gồm ngày cuối → nửa mở +1)", () => {
     const p = customPeriod("2026-01-01", "2026-03-31");
     expect(ymd(p.start)).toEqual([2026, 1, 1]);
     expect(ymd(p.end)).toEqual([2026, 4, 1]);
     expect(p.label).toBe("2026-01-01 ~ 2026-03-31");
   });
 
-  it("月末跨月正确递增（2026-01-31 → 2026-02-01）", () => {
+  it("Cuối tháng tăng đúng khi qua tháng (2026-01-31 → 2026-02-01)", () => {
     const p = customPeriod("2026-01-01", "2026-01-31");
     expect(ymd(p.end)).toEqual([2026, 2, 1]);
   });
 
-  it("日期格式不合法抛错", () => {
-    expect(() => customPeriod("2026/01/01", "2026-03-31")).toThrow(/格式/);
-    expect(() => customPeriod("2026-1-1", "2026-3-31")).toThrow(/格式/);
+  it("Báo lỗi khi định dạng ngày không hợp lệ", () => {
+    expect(() => customPeriod("2026/01/01", "2026-03-31")).toThrow(/hợp lệ/i);
+    expect(() => customPeriod("2026-1-1", "2026-3-31")).toThrow(/hợp lệ/i);
   });
 
-  it("同一天合法（含当天 → 半开 +1 后仍 > start）", () => {
+  it("Cùng một ngày vẫn hợp lệ (gồm ngày → sau khi nửa mở +1 vẫn > start)", () => {
     expect(() => customPeriod("2026-03-01", "2026-03-01")).not.toThrow();
   });
 
-  it("end < start 抛错", () => {
-    expect(() => customPeriod("2026-03-01", "2026-02-28")).toThrow(/晚于/);
+  it("Báo lỗi khi end < start", () => {
+    expect(() => customPeriod("2026-03-01", "2026-02-28")).toThrow(/sau/i);
   });
 
-  it("跨度 > 5 年抛错", () => {
-    expect(() => customPeriod("2020-01-01", "2026-01-02")).toThrow(/5 年/);
+  it("Báo lỗi khi khoảng > 5 năm", () => {
+    expect(() => customPeriod("2020-01-01", "2026-01-02")).toThrow(/5 năm/);
   });
 
-  it("正好 5 年内合法", () => {
+  it("Đúng trong vòng 5 năm thì hợp lệ", () => {
     expect(() => customPeriod("2021-01-01", "2025-12-31")).not.toThrow();
   });
 });

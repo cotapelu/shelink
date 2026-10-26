@@ -22,8 +22,8 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "LawLink — 律师案件管理系统",
-  description: "面向独立律师、小团队和小型律所的开源案件管理系统"
+  title: "LawLink — Hệ thống quản lý vụ việc",
+  description: "Hệ thống quản lý vụ việc mã nguồn mở dành cho luật sư độc lập, nhóm nhỏ và văn phòng luật quy mô vừa"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

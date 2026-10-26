@@ -121,12 +121,12 @@ describe("archive/actions error paths", () => {
       judgmentSummary: "js",
       forceWithMissing: false
     };
-    await expect(archiveMatter(input)).rejects.toThrow("必填项");
+    await expect(archiveMatter(input)).rejects.toThrow("hạng mục bắt buộc");
   });
 
   it("approveArchiveRecord: rejects non-ADMIN", async () => {
     mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
-    await expect(approveArchiveRecord({ archiveId: "a1" })).rejects.toThrow("只有管理员");
+    await expect(approveArchiveRecord({ archiveId: "a1" })).rejects.toThrow("Chỉ quản trị");
   });
 
   it("approveArchiveRecord: rejects self-approval", async () => {
@@ -137,7 +137,7 @@ describe("archive/actions error paths", () => {
       status: "PENDING_REVIEW",
       archivedById: "admin1"
     });
-    await expect(approveArchiveRecord({ archiveId: "a1" })).rejects.toThrow("你不能审批自己的申请");
+    await expect(approveArchiveRecord({ archiveId: "a1" })).rejects.toThrow("Bạn không thể duyệt yêu cầu của chính mình");
   });
 
   it("approveArchiveRecord: rejects if not pending", async () => {
@@ -148,21 +148,21 @@ describe("archive/actions error paths", () => {
       status: "APPROVED",
       archivedById: "other"
     });
-    await expect(approveArchiveRecord({ archiveId: "a1" })).rejects.toThrow("此归档申请已审批");
+    await expect(approveArchiveRecord({ archiveId: "a1" })).rejects.toThrow("Yêu cầu lưu trữ này đã được duyệt");
   });
 
   it("rejectArchiveRecord: rejects non-ADMIN", async () => {
     mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
-    await expect(rejectArchiveRecord({ archiveId: "a1", note: "reason" })).rejects.toThrow("只有管理员");
+    await expect(rejectArchiveRecord({ archiveId: "a1", note: "reason" })).rejects.toThrow("Chỉ quản trị");
   });
 
   it("rejectArchiveRecord: rejects empty note", async () => {
     mockRequireSession.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
-    await expect(rejectArchiveRecord({ archiveId: "a1", note: "   " })).rejects.toThrow("请填写驳回原因");
+    await expect(rejectArchiveRecord({ archiveId: "a1", note: "   " })).rejects.toThrow("Vui lòng nhập lý do từ chối");
   });
 
   it("listPendingArchiveRecords: rejects non-ADMIN", async () => {
     mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
-    await expect(listPendingArchiveRecords()).rejects.toThrow("仅管理员");
+    await expect(listPendingArchiveRecords()).rejects.toThrow("Chỉ quản trị");
   });
 });

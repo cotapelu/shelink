@@ -45,7 +45,7 @@ describe("periodPresets", () => {
   it("computes current month correctly", () => {
     const now = new Date(2024, 5, 15); // June 2024
     const presets = periodPresets(now);
-    expect(presets.month.label).toBe("2024 年 6 月");
+    expect(presets.month.label).toBe("Tháng 6/2024");
     expect(presets.month.start).toEqual(new Date(2024, 5, 1));
     expect(presets.month.end).toEqual(new Date(2024, 6, 1));
   });
@@ -53,7 +53,7 @@ describe("periodPresets", () => {
   it("computes current quarter correctly", () => {
     const now = new Date(2024, 5, 15); // Q2 (Apr-Jun)
     const presets = periodPresets(now);
-    expect(presets.quarter.label).toBe("2024 年 Q2");
+    expect(presets.quarter.label).toBe("Q2/2024");
     expect(presets.quarter.start).toEqual(new Date(2024, 3, 1)); // Apr 1
     expect(presets.quarter.end).toEqual(new Date(2024, 6, 1)); // Jul 1
   });
@@ -61,7 +61,7 @@ describe("periodPresets", () => {
   it("computes current year correctly", () => {
     const now = new Date(2024, 5, 15);
     const presets = periodPresets(now);
-    expect(presets.year.label).toBe("2024 年度");
+    expect(presets.year.label).toBe("Năm 2024");
     expect(presets.year.start).toEqual(new Date(2024, 0, 1));
     expect(presets.year.end).toEqual(new Date(2025, 0, 1));
   });
@@ -69,7 +69,7 @@ describe("periodPresets", () => {
   it("computes last year correctly", () => {
     const now = new Date(2024, 5, 15);
     const presets = periodPresets(now);
-    expect(presets.lastYear.label).toBe("2023 年度");
+    expect(presets.lastYear.label).toBe("Năm 2023");
     expect(presets.lastYear.start).toEqual(new Date(2023, 0, 1));
     expect(presets.lastYear.end).toEqual(new Date(2024, 0, 1));
   });
@@ -84,20 +84,20 @@ describe("customPeriod", () => {
   });
 
   it("throws on invalid format", () => {
-    expect(() => customPeriod("2024/01/01", "2024-01-31")).toThrow("日期格式不合法");
-    expect(() => customPeriod("2024-01-01", "01-31-2024")).toThrow("日期格式不合法");
+    expect(() => customPeriod("2024/01/01", "2024-01-31")).toThrow("Định dạng ngày không hợp lệ");
+    expect(() => customPeriod("2024-01-01", "01-31-2024")).toThrow("Định dạng ngày không hợp lệ");
   });
 
   it("throws if end <= start", () => {
     // end < start: after +1 day, end still <= start? Let's compute: start=1, end=1 -> end+1=2 >1, so not throw.
     // Need end date before start date: end day < start day
-    expect(() => customPeriod("2024-01-10", "2024-01-05")).toThrow("结束日期必须晚于起始日期");
+    expect(() => customPeriod("2024-01-10", "2024-01-05")).toThrow("Ngày kết thúc phải sau ngày bắt đầu");
     // Edge: exactly one day apart: start=1, end=1 -> end+1=2, > start, ok
     expect(() => customPeriod("2024-01-01", "2024-01-01")).not.toThrow();
   });
 
   it("throws if span > 5 years", () => {
-    expect(() => customPeriod("2010-01-01", "2025-01-02")).toThrow("不能超过 5 年");
+    expect(() => customPeriod("2010-01-01", "2025-01-02")).toThrow("Khoảng tự chọn không được quá 5 năm");
   });
 
   it("accepts 5 year span", () => {

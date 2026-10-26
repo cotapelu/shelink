@@ -94,26 +94,26 @@ type SameNameClient = { clientId: string; name: string };
 type IdMatchedClient = { clientId: string; name: string; idNumber: string };
 
 const severityStyle: Record<ConflictSeverity, { color: string; bg: string; label: string }> = {
-  BLOCKING: { color: "#F87171", bg: "rgba(248,113,113,0.12)", label: "阻塞" },
-  HIGH: { color: "#FB923C", bg: "rgba(251,146,60,0.12)", label: "高" },
-  MEDIUM: { color: "#FBBF24", bg: "rgba(251,191,36,0.12)", label: "中" },
-  LOW: { color: "#4ADE80", bg: "rgba(74,222,128,0.12)", label: "低" }
+  BLOCKING: { color: "#F87171", bg: "rgba(248,113,113,0.12)", label: "Chan" },
+  HIGH: { color: "#FB923C", bg: "rgba(251,146,60,0.12)", label: "Cao" },
+  MEDIUM: { color: "#FBBF24", bg: "rgba(251,191,36,0.12)", label: "Trung binh" },
+  LOW: { color: "#4ADE80", bg: "rgba(74,222,128,0.12)", label: "Thap" }
 };
 
 const queryRoleOptions: { value: QueryRole; label: string }[] = [
-  { value: "CLIENT_PARTY", label: "拟委托方" },
-  { value: "OPPOSING_PARTY", label: "相对方" },
-  { value: "THIRD_PARTY", label: "第三人" }
+  { value: "CLIENT_PARTY", label: "Ben du kien uy quyen" },
+  { value: "OPPOSING_PARTY", label: "Ben tuong ung" },
+  { value: "THIRD_PARTY", label: "Nguoi thu ba" }
 ];
 
 const partyRoleLabel: Record<PartyRole, string> = {
-  CLIENT_PARTY: "委托方",
-  OPPOSING_PARTY: "对方",
-  THIRD_PARTY: "第三人",
-  CO_LITIGANT: "共同诉讼人",
-  AGENT: "代理人",
-  WITNESS: "证人",
-  OTHER: "其他"
+  CLIENT_PARTY: "Ben uy quyen",
+  OPPOSING_PARTY: "Ben doi dinh",
+  THIRD_PARTY: "Nguoi thu ba",
+  CO_LITIGANT: "Dong nguyen don",
+  AGENT: "Nguoi dai dien",
+  WITNESS: "Nhan chung",
+  OTHER: "Khac"
 };
 
 function emptyQuery(): QueryRow {
@@ -147,7 +147,7 @@ export function ConflictDialog({
       .map((q) => ({ role: q.role, name: q.name.trim(), idNumber: q.idNumber.trim() }))
       .filter((q) => q.name || q.idNumber);
     if (cleaned.length === 0) {
-      toast.warning("请至少填写一个姓名或证件号");
+      toast.warning("Vui long nhap it nhat mot ho ten hoac so giay to");
       return;
     }
 
@@ -160,15 +160,15 @@ export function ConflictDialog({
         setHasRun(true);
         const extra =
           res.idMatchedClients?.length || res.sameNameClients?.length
-            ? `（同名 ${res.sameNameClients?.length ?? 0} · 证件号匹配 ${res.idMatchedClients?.length ?? 0}）`
+            ? ` (cung ten ${res.sameNameClients?.length ?? 0} · khop so giay to ${res.idMatchedClients?.length ?? 0})`
             : "";
         if (res.hits.length === 0) {
-          toast.success(`未命中冲突${extra}`);
+          toast.success(`Khong trung xung dot${extra}`);
         } else {
-          toast.success(`命中 ${res.hits.length} 条${extra}，请审阅`);
+          toast.success(`Trung ${res.hits.length} ban ghi${extra}, vui long xem xet`);
         }
       } catch (err) {
-        toast.error("检索失败", {
+        toast.error("Tra cuu that bai", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -187,18 +187,18 @@ export function ConflictDialog({
         <DialogHeader className="border-b border-border bg-background px-6 py-4">
           <DialogTitle className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-primary" />
-            利益冲突检索
+            Tra cuu xung dot loi ich
           </DialogTitle>
           <DialogDescription className="text-xs">
-            填入待查的姓名或证件号（至少一项），快速比对历史客户与案件
+            Nhap ho ten hoac so giay to can tra (it nhat mot), doi chieu nhanh voi khach hang va vu an trong lich su
           </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[calc(85vh-140px)] space-y-4 overflow-y-auto px-6 py-4">
-          {/* 输入项 */}
+          {/* Muc nhap */}
           <section>
             <div className="mb-2 flex items-center justify-between">
-              <Label className="text-xs">检索项</Label>
+              <Label className="text-xs">Muc tra cuu</Label>
               <Button
                 type="button"
                 variant="outline"
@@ -207,7 +207,7 @@ export function ConflictDialog({
                 className="h-7 gap-1"
               >
                 <Plus className="h-3 w-3" />
-                添加
+                Them
               </Button>
             </div>
 
@@ -248,7 +248,7 @@ export function ConflictDialog({
                           qs.map((row, i) => (i === idx ? { ...row, name: e.target.value } : row))
                         )
                       }
-                      placeholder="姓名 / 名称"
+                      placeholder="Ho ten / Ten to chuc"
                       className="h-9 bg-background"
                     />
                   </div>
@@ -262,7 +262,7 @@ export function ConflictDialog({
                           )
                         )
                       }
-                      placeholder="身份证 / 统一社会信用代码"
+                      placeholder="CCCD / Ma so thue doanh nghiep"
                       className="h-9 bg-background font-mono"
                     />
                   </div>
@@ -289,7 +289,7 @@ export function ConflictDialog({
                 className="text-[11px] text-muted-foreground hover:text-primary"
                 onClick={() => onOpenChange(false)}
               >
-                查看完整记录页 →
+                Xem trang ban ghi day du →
               </Link>
               <Button
                 type="button"
@@ -302,17 +302,17 @@ export function ConflictDialog({
                 ) : (
                   <Search className="h-4 w-4" />
                 )}
-                开始检索
+                Bat dau tra cuu
               </Button>
             </div>
           </section>
 
-          {/* 客户库同名（非冲突，仅提示） */}
+          {/* Cung ten trong kho khach hang (khong phai xung dot, chi ganh y) */}
           {hasRun && sameName.length > 0 && (
             <section className="rounded-md border border-[#5B8DEF]/30 bg-[#5B8DEF]/10 p-3">
               <div className="flex items-center gap-2 text-xs text-[#5B8DEF]">
                 <Info className="h-3.5 w-3.5" />
-                客户库已有 {sameName.length} 个同名记录（仅提示，非冲突）
+                Kho khach hang da co {sameName.length} ban ghi cung ten (chi ganh y, khong phai xung dot)
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {sameName.map((c) => (
@@ -330,12 +330,12 @@ export function ConflictDialog({
             </section>
           )}
 
-          {/* 身份证 / 信用代码精确匹配（强提示） */}
+          {/* Khop chinh xac CCCD / ma tin dung (ganh y manh) */}
           {hasRun && idMatched.length > 0 && (
             <section className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
               <div className="flex items-center gap-2 text-xs text-amber-400">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                身份证 / 信用代码与客户库 {idMatched.length} 条记录精确匹配，请人工核对
+                CCCD / ma tin dung khop chinh xac voi {idMatched.length} ban ghi trong kho khach hang, vui long doi chieu thu cong
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {idMatched.map((c) => (
@@ -354,18 +354,18 @@ export function ConflictDialog({
             </section>
           )}
 
-          {/* 结果 */}
+          {/* Ket qua */}
           {hasRun && (
             <section>
               <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                检索结果（{results?.length ?? 0}）
+                Ket qua tra cuu ({results?.length ?? 0})
               </h3>
 
               {!results || results.length === 0 ? (
                 <div className="rounded-md border border-[#4ADE80]/30 bg-[#4ADE80]/10 p-3 text-sm">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-[#4ADE80]" />
-                    <span>未命中任何历史客户或案件</span>
+                    <span>Khong trung khach hang hay vu an nao trong lich su</span>
                   </div>
                 </div>
               ) : (
@@ -399,7 +399,7 @@ export function ConflictDialog({
                               </span>
                               <span className="text-xs text-muted-foreground">·</span>
                               <span className="text-xs text-muted-foreground">
-                                {h.hitType === "HISTORICAL_CLIENT" ? "历史客户" : "历史案件"}
+                                {h.hitType === "HISTORICAL_CLIENT" ? "Khach hang lich su" : "Vu an lich su"}
                               </span>
                             </div>
                             <p className="mt-1 text-sm">{h.reason}</p>
@@ -408,7 +408,7 @@ export function ConflictDialog({
                               {h.matchedField} = {h.matchedValue}
                               {h.matchedRatio !== null && h.matchedRatio < 1 && (
                                 <span className="ml-2">
-                                  相似度 {(h.matchedRatio * 100).toFixed(0)}%
+                                  Do tuong dong {(h.matchedRatio * 100).toFixed(0)}%
                                 </span>
                               )}
                             </div>
@@ -419,7 +419,7 @@ export function ConflictDialog({
                               onClick={() => onOpenChange(false)}
                               className="flex shrink-0 items-center gap-1 text-xs text-primary hover:underline"
                             >
-                              查看
+                              Xem
                               <ExternalLink className="h-3 w-3" />
                             </Link>
                           )}
@@ -447,15 +447,15 @@ function MatterContext({ info, hit }: { info: NonNullable<HitResult["matterInfo"
         <span className="min-w-0 truncate font-medium text-foreground">{info.title}</span>
       </div>
       <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-muted-foreground">
-        <Field label="系统收案">{formatDate(info.intakeDate)}</Field>
-        <Field label="当前状态">{matterStatusLabel[info.status]}</Field>
-        <Field label="案由/类型">{causeOrCategory}</Field>
-        <Field label="主办律师">{info.ownerName ?? "—"}</Field>
-        <Field label="命中角色">
+        <Field label="Tiep nhan tu he thong">{formatDate(info.intakeDate)}</Field>
+        <Field label="Trang thai hien tai">{matterStatusLabel[info.status]}</Field>
+        <Field label="Can cu khoi kien/Loai">{causeOrCategory}</Field>
+        <Field label="Luat su chu tri">{info.ownerName ?? "—"}</Field>
+        <Field label="Vai tro trung">
           {partyRoleLabel[info.partyRole]}
           {info.partyStanding ? ` · ${litigationStandingLabel[info.partyStanding]}` : ""}
         </Field>
-        <Field label="命中主体">{hit.matchedName}</Field>
+        <Field label="Chu the trung">{hit.matchedName}</Field>
       </div>
     </div>
   );
@@ -464,7 +464,7 @@ function MatterContext({ info, hit }: { info: NonNullable<HitResult["matterInfo"
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex min-w-0 gap-1.5">
-      <span className="shrink-0 text-muted-foreground/70">{label}：</span>
+      <span className="shrink-0 text-muted-foreground/70">{label}:</span>
       <span className="truncate text-foreground/85">{children}</span>
     </div>
   );

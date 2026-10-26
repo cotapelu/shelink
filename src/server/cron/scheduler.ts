@@ -18,26 +18,26 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.22: 进程内 cron 调度（node-cron）
+ * v0.22: Lap lich cron trong tien trinh (node-cron)
  *
- * 在 next start 进程启动时通过 instrumentation.ts → register() 调用。
+ * Duoc goi qua instrumentation.ts → register() khi tien trinh next start khoi dong.
  *
- * 限制：
- * - **仅在 next start（生产）下生效**。dev 模式不跑（避免开发时误推通知）。
- * - 不支持 serverless（Vercel Edge / Lambda）。LawLink 自部署场景默认是
- *   长驻 Node 进程，OK。
- * - 进程重启会重新注册定时作业；如果在触发时间点重启，可能错过本次。
+ * Han che:
+ * - **Chi co hieu luc o next start (production)**. Che do dev khong chay (tranh day thong bao nham khi phat trien).
+ * - Khong ho tro serverless (Vercel Edge / Lambda). Kich ban LawLink tu trien khai mac dinh la
+ *   tien trinh Node lau dai, OK.
+ * - Khoi dong lai tien trinh se dang ky lai cac tac vu dinh ky; neu khoi dong dung vao thoi diem kich hoat co the bo qua lan nay.
  *
- * 当前定时作业：
- * - 每周一 09:00 推送本周报告
- * - 每天 09:00 扫描归档逾期 30 天的案件
- * - 每天 03:00 清理超过 N 天的 AuditLog
+ * Cac tac vu dinh ky hien tai:
+ * - 09:00 thu Hai hang tuan: day bao cao tuan nay
+ * - 09:00 hang ngay: quet cac vu luu tru qua han 30 ngay
+ * - 03:00 hang ngay: don dep AuditLog qua N ngay
  *
- * 时区：所有 cron 用 Asia/Shanghai（避免容器 UTC 跑出来 8 小时偏差）。
+ * Mui gio: moi cron dung Asia/Shanghai (tranh lech 8 tieng khi chay container o UTC).
  *
- * v0.26 cron 可观测性：
- * - 成功路径由各 job 内部自己写 *_CRON audit（已有）
- * - 失败路径在此处统一捕获 + 写 *_FAILED_CRON audit，避免 cron 静默失败
+ * v0.26 kha nang quan sat cua cron:
+ * - Duong thanh cong do moi job tu ghi audit *_CRON (da co)
+ * - Duong that bai bat thong nhat o day + ghi audit *_FAILED_CRON, tranh cron that bai am tham
  */
 import cron from "node-cron";
 import { runWeeklyReportPush } from "@/server/reports/push-weekly";
@@ -57,11 +57,11 @@ async function runWithFailureAudit(
 ) {
   const startedAt = Date.now();
   const triggeredAt = new Date().toISOString();
-  console.log(`[cron] ${triggeredAt} 触发：${jobName}`);
+  console.log(`[cron] ${triggeredAt} kich hoat: ${jobName}`);
   try {
     const result = await fn();
     const durationMs = Date.now() - startedAt;
-    console.log(`[cron] ${jobName} 完成（${durationMs}ms）`, result);
+    console.log(`[cron] ${jobName} xong (${durationMs}ms)`, result);
   } catch (err) {
     const durationMs = Date.now() - startedAt;
     const message = err instanceof Error ? err.message : String(err);
@@ -69,7 +69,7 @@ async function runWithFailureAudit(
       err instanceof Error
         ? err.stack?.split("\n").slice(0, 5).join("\n")
         : undefined;
-    console.error(`[cron] ${jobName} 异常（${durationMs}ms）：`, err);
+    console.error(`[cron] ${jobName} loi (${durationMs}ms):`, err);
     await audit({
       userId: null,
       action: failureAction,
@@ -82,65 +82,65 @@ async function runWithFailureAudit(
 
 export function registerCronJobs() {
   if (started) {
-    console.warn("[cron] registerCronJobs 重复调用，跳过");
+    console.warn("[cron] registerCronJobs goi lai, bo qua");
     return;
   }
   started = true;
 
-  // 每周一 09:00 推周报
+  // 09:00 thu Hai hang tuan: day bao cao tuan
   cron.schedule(
     "0 9 * * 1",
     () =>
       runWithFailureAudit(
-        "周报推送",
+        "Day bao cao tuan",
         "WEEKLY_REPORT_PUSH_FAILED_CRON",
         () => runWeeklyReportPush(null)
       ),
     { timezone: TIMEZONE }
   );
 
-  // 每天 09:00 扫归档逾期
+  // 09:00 hang ngay: quet luu tru qua han
   cron.schedule(
     "0 9 * * *",
     () =>
       runWithFailureAudit(
-        "归档逾期扫描",
+        "Quet luu tre qua han",
         "ARCHIVE_OVERDUE_SCAN_FAILED_CRON",
         () => scanArchiveOverdue()
       ),
     { timezone: TIMEZONE }
   );
 
-  // 每天 03:00 清理超过 N 天的 AuditLog（默认 365 天，AUDIT_RETENTION_DAYS 可覆盖）
+  // 03:00 hang ngay: don dep AuditLog qua N ngay (mac dinh 365 ngay, ghi de bang AUDIT_RETENTION_DAYS)
   cron.schedule(
     "0 3 * * *",
     () =>
       runWithFailureAudit(
-        "AuditLog 清理",
+        "Don dep AuditLog",
         "AUDIT_CLEANUP_FAILED_CRON",
         () => runAuditCleanup()
       ),
     { timezone: TIMEZONE }
   );
 
-  // v0.27: 每天 09:00 扫到期期限（T-3/T-1/T/T+1 四档），发 DEADLINE_REMINDER
+  // v0.27: 09:00 hang ngay quet cac muc thoi han den han (T-3/T-1/T/T+1 bon muc), gui DEADLINE_REMINDER
   cron.schedule(
     "0 9 * * *",
     () =>
       runWithFailureAudit(
-        "到期提醒扫描",
+        "Quet nhac nho han",
         "DUE_REMINDER_SCAN_FAILED_CRON",
         () => scanDueReminders()
       ),
     { timezone: TIMEZONE }
   );
 
-  // 每天 09:10 扫描已审批但未回填盖章件的用章申请；同一申请 3 天内不重复提醒
+  // 09:10 hang ngay: quet cac yeu cau dong dau da duyet nhung chua dien lai ban dong dau; khong nhac lai trong vong 3 ngay cua cung yeu cau
   cron.schedule(
     "10 9 * * *",
     () =>
       runWithFailureAudit(
-        "用章盖章件回填提醒扫描",
+        "Quet nhac dien lai ban dong dau",
         "SEAL_BACKFILL_REMINDER_SCAN_FAILED_CRON",
         () => scanSealBackfillReminders()
       ),
@@ -148,6 +148,6 @@ export function registerCronJobs() {
   );
 
   console.log(
-    "[cron] 已注册 5 个定时作业（周报推送 / 归档逾期扫描 / AuditLog 清理 / 到期提醒扫描 / 用章回填提醒扫描），时区 Asia/Shanghai"
+    "[cron] da dang ky 5 tac vu dinh ky (day bao cao tuan / quet luu tru qua han / don dep AuditLog / quet nhac nho han / quet nhac dien lai ban dong dau), mui gio Asia/Shanghai"
   );
 }

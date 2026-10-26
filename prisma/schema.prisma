@@ -1,6 +1,6 @@
-// LawLink 数据 schema
-// 对应 docs/DATA-MODEL.md v0.3
-// 修改前先改文档，再改 schema
+// Schema dữ liệu LawLink
+// Tương ứng với docs/DATA-MODEL.md v0.3
+// Trước khi sửa hãy sửa tài liệu, rồi mới sửa schema
 
 generator client {
   provider = "prisma-client-js"
@@ -12,7 +12,7 @@ datasource db {
 }
 
 // ============================================================
-// 枚举
+// Kiểu liệt kê (Enum)
 // ============================================================
 
 enum UserRole {
@@ -24,14 +24,14 @@ enum UserRole {
 }
 
 enum MatterCategory {
-  CIVIL_COMMERCIAL // 民商诉讼
-  LABOR_ARBITRATION // v0.34 劳动仲裁
-  COMMERCIAL_ARBITRATION // v0.34 商事仲裁
-  CRIMINAL // 刑事诉讼
-  ADMINISTRATIVE // 行政诉讼
-  NON_LITIGATION // 非诉项目
-  LEGAL_COUNSEL // 常年顾问
-  SPECIAL_PROJECT // 法律专项
+  CIVIL_COMMERCIAL // Tố tụng dân sự & thương mại
+  LABOR_ARBITRATION // v0.34 Trọng tài lao động
+  COMMERCIAL_ARBITRATION // v0.34 Trọng tài thương mại
+  CRIMINAL // Tố tụng hình sự
+  ADMINISTRATIVE // Tố tụng hành chính
+  NON_LITIGATION // Việc ngoài tố tụng
+  LEGAL_COUNSEL // Cố vấn thường trực
+  SPECIAL_PROJECT // Dự án pháp lý chuyên sâu
 }
 
 enum MatterStatus {
@@ -138,8 +138,8 @@ enum IntakeStatus {
   INTAKE
   PENDING_CONFIRMATION
   CONVERTED
-  DECLINED // 最终拒绝（无法补正）
-  NEEDS_REVISION // 待补正（可由律师补充材料后重新提交审批）
+  DECLINED // Từ chối dứt khoát (không thể bổ sung)
+  NEEDS_REVISION // Chờ bổ sung (luật sư bổ sung tài liệu rồi gửi duyệt lại)
 }
 
 enum LitigationStanding {
@@ -150,56 +150,56 @@ enum LitigationStanding {
   THIRD_PARTY
   COUNTERCLAIM_PLAINTIFF
   COUNTERCLAIM_DEFENDANT
-  // v0.5: 二审 / 再审 / 执行
+  // v0.5: Phúc thẩm / Giám đốc thẩm / Thi hành án
   APPELLANT
   APPELLEE
   RETRIAL_APPLICANT
   RETRIAL_RESPONDENT
   ENFORCEMENT_APPLICANT
   EXECUTED_PERSON
-  // 刑事
+  // Hình sự
   CRIMINAL_DEFENDANT
   CRIMINAL_VICTIM
   PRIVATE_PROSECUTOR
   CRIMINAL_INCIDENTAL_PLAINTIFF
-  // 仲裁
+  // Trọng tài
   ARBITRATION_CLAIMANT
   ARBITRATION_RESPONDENT
-  // 行政
+  // Hành chính
   ADMIN_PLAINTIFF
   ADMIN_DEFENDANT
   ADMIN_RECONSIDERATION_APPLICANT
   ADMIN_RECONSIDERATION_RESPONDENT
-  // 非诉
+  // Ngoài tố tụng
   NON_LITIGATION_PARTY
 }
 
 enum FeeType {
-  FIXED // 固定收费
-  CONTINGENCY // 风险代理
-  TIMED // 计时收费
+  FIXED // Thu phí cố định
+  CONTINGENCY // Đại diện theo rủi ro (success fee)
+  TIMED // Thu phí theo thời gian
 }
 
 enum InvoiceType {
-  PLAIN // 普通发票
-  SPECIAL // 增值税专用发票
+  PLAIN // Hóa đơn thông thường
+  SPECIAL // Hóa đơn GTGT đặc biệt
 }
 
 enum InvoiceItem {
-  LAWYER_FEE // 律师服务费
-  CONSULTING_FEE // 法律咨询费
-  AGENCY_FEE // 代理费
-  OTHER // 其他法律服务
+  LAWYER_FEE // Phí dịch vụ luật sư
+  CONSULTING_FEE // Phí tư vấn pháp luật
+  AGENCY_FEE // Phí đại diện
+  OTHER // Dịch vụ pháp lý khác
 }
 
 enum InvoiceRequestStatus {
-  PENDING // 律师已申请、待财务处理
-  APPROVED // 财务已批准、待开票
-  ISSUED // 已开具（含电子发票）
-  REJECTED // 被拒
+  PENDING // Luật sư đã yêu cầu, chờ Tài chính xử lý
+  APPROVED // Tài chính đã duyệt, chờ xuất hóa đơn
+  ISSUED // Đã xuất (gồm hóa đơn điện tử)
+  REJECTED // Bị từ chối
 }
 
-// v0.10: 文书审批状态
+// v0.10: Trạng thái duyệt văn bản
 enum DocumentStatus {
   DRAFT
   PENDING_REVIEW
@@ -208,7 +208,7 @@ enum DocumentStatus {
 }
 
 enum ProcedureType {
-  // 审判通用
+  // Dùng chung cho xét xử
   FIRST_INSTANCE
   SECOND_INSTANCE
   RETRIAL_REVIEW
@@ -216,26 +216,26 @@ enum ProcedureType {
   REMAND_FIRST
   REMAND_SECOND
   PROSECUTORIAL_SUPERVISION
-  // 仲裁
+  // Trọng tài
   COMMERCIAL_ARBITRATION
   LABOR_ARBITRATION
   ARBITRATION_SET_ASIDE
   ARBITRATION_ENFORCEMENT_REVIEW
-  // 执行
+  // Thi hành án
   ENFORCEMENT
   ENFORCEMENT_OBJECTION
-  // 刑事
+  // Hình sự
   INVESTIGATION
   PROSECUTION_REVIEW
   DEATH_PENALTY_REVIEW
   CRIMINAL_ENFORCEMENT
   COMMUTATION_PAROLE_REVIEW
-  // 行政
+  // Hành chính
   ADMIN_RECONSIDERATION
   ADMIN_NON_LITIGATION_ENFORCEMENT
-  // 非诉
+  // Ngoài tố tụng
   NON_LITIGATION_PHASE
-  // 兜底
+  // Dự phòng (fallback)
   CUSTOM
 }
 
@@ -272,11 +272,11 @@ enum PartyRole {
   OTHER
 }
 
-// v0.27: 当事人主体类型（自然人需身份证号；其余主体需统一社会信用代码）
-// v0.30: 细分主体类型（公司/合伙企业/个体工商户/事业单位/社会组织/政府机关/其他组织）
+// v0.27: Loại chủ thể tham gia (cá nhân cần số giấy tờ tùy thân; các chủ thể khác cần mã số thuế doanh nghiệp)
+// v0.30: Chi tiết loại chủ thể (công ty / hợp doanh / hộ kinh doanh cá thể / đơn vị sự nghiệp / tổ chức xã hội / cơ quan nhà nước / tổ chức khác)
 enum PartyType {
   NATURAL_PERSON
-  ORGANIZATION // 旧数据兼容（= 其他组织）
+  ORGANIZATION // Tương thích dữ liệu cũ (= Tổ chức khác)
   COMPANY
   PARTNERSHIP
   INDIVIDUAL_BUSINESS
@@ -286,13 +286,13 @@ enum PartyType {
   OTHER_ORG
 }
 
-// v0.30: 需向律协备案与否
+// v0.30: Có cần khai báo với Đoàn Luật sư hay không
 enum BarFilingType {
-  NONE // 否
-  COLLECTIVE // 涉集体案件
-  SENSITIVE // 涉敏感案件
-  MAJOR // 涉重大案件
-  OTHER // 其他特殊案件
+  NONE // Không
+  COLLECTIVE // Vụ án tập thể
+  SENSITIVE // Vụ án nhạy cảm
+  MAJOR // Vụ án lớn
+  OTHER // Vụ án đặc biệt khác
 }
 
 enum ClientType {
@@ -301,15 +301,15 @@ enum ClientType {
   ORGANIZATION
 }
 
-// v0.39: 客户合作状态（生命周期）
+// v0.39: Trạng thái hợp tác với khách (vòng đời)
 enum ClientCooperationStatus {
-  POTENTIAL // 潜在
-  NEGOTIATING // 洽谈中
-  SIGNED // 已签约
-  TERMINATED // 已终止
+  POTENTIAL // Tiềm năng
+  NEGOTIATING // Đang đàm phán
+  SIGNED // Đã ký hợp đồng
+  TERMINATED // Đã chấm dứt
 }
 
-// v0.39: 客户性别（个人客户）
+// v0.39: Giới tính khách (khách lẻ)
 enum ClientGender {
   MALE
   FEMALE
@@ -337,7 +337,7 @@ enum DeadlineCategory {
   RESPONSE
   ENFORCEMENT
   ARBITRATION_SET_ASIDE
-  // v0.42: 保全期限（含续期）
+  // v0.42: Thời hạn bảo toàn (kể cả gia hạn)
   PRESERVATION
   CUSTOM
 }
@@ -374,44 +374,44 @@ enum FeeEntryType {
   COMMISSION
 }
 
-// v0.8: 文档模板分类
+// v0.8: Phân loại mẫu văn bản
 enum TemplateCategory {
-  INTAKE // 收案文书：收案登记表 / 风险告知书 / 质量反馈卡
-  RETAINER // 委托文书：委托代理合同 / 授权委托书
-  LITIGATION // 诉讼文书：起诉状 / 答辩状 / 上诉状 / 反诉状 / 仲裁申请书
-  HEARING // 庭审文书：谈话笔录 / 庭审笔录 / 阅卷笔录 / 询问笔录
-  WORK_PRODUCT // 工作成果：办案小结 / 法律意见书 / 代理意见 / 律师函 / 公函
-  ARCHIVE // 卷宗文书：卷宗封皮 / 卷宗目录 / 备考表 / 证据目录
-  CLOSING // 结案文书：结案登记表 / 结算单
-  BLANK // 空白文档（套律所抬头）
+  INTAKE // Văn bản tiếp nhận vụ: bảng đăng ký tiếp nhận / thông báo rủi ro / phiếu phản hồi chất lượng
+  RETAINER // Văn bản ủy quyền: hợp đồng ủy quyền đại diện / giấy ủy quyền
+  LITIGATION // Văn bản tố tụng: đơn khởi kiện / bản biện hộ / đơn kháng cáo / đơn phản tố / đơn yêu cầu trọng tài
+  HEARING // Văn bản phiên tòa: biên bản đối thoại / biên bản phiên tòa / biên bản nghiên cứu hồ sơ / biên bản hỏi cung
+  WORK_PRODUCT // Kết quả công việc: bản tóm tắt xử lý vụ / ý kiến pháp lý / luận điểm đại diện / thư luật sư / công hàm
+  ARCHIVE // Văn bản hồ sơ vụ: bìa hồ sơ / mục lục hồ sơ / bìa gáy / bảng kê chứng cứ
+  CLOSING // Văn bản kết thúc: bảng đăng ký kết thúc vụ / phiếu quyết toán
+  BLANK // Văn bản trắng (in theo đầu trang văn phòng luật)
 }
 
-// v0.8: 用章种类
+// v0.8: Loại dấu
 enum SealType {
-  OFFICIAL_SEAL // 律师事务所公章
-  CONTRACT_SEAL // 合同专用章
-  FINANCE_SEAL // 财务专用章
-  LEGAL_REP_SEAL // 法定代表人章
-  CONTRACT_REVIEW_SEAL // 合同审核章
+  OFFICIAL_SEAL // Dấu tròn văn phòng luật
+  CONTRACT_SEAL // Dấu hợp đồng
+  FINANCE_SEAL // Dấu tài chính
+  LEGAL_REP_SEAL // Dấu đại diện pháp luật
+  CONTRACT_REVIEW_SEAL // Dấu duyệt hợp đồng
 }
 
-// v0.8: 用章申请状态
+// v0.8: Trạng thái yêu cầu đóng dấu
 enum SealRequestStatus {
-  PENDING // 待审批
-  APPROVED // 已批准，待盖章
-  STAMPED // 已盖章并回填扫描件（终态）
-  REJECTED // 被驳回（终态，但可新建一条引用此 ID 重新申请）
-  CANCELLED // 申请人主动撤销
+  PENDING // Chờ duyệt
+  APPROVED // Đã duyệt, chờ đóng dấu
+  STAMPED // Đã đóng dấu và cập nhật bản scan (trạng thái cuối)
+  REJECTED // Bị từ chối (trạng thái cuối, nhưng có thể tạo yêu cầu mới trỏ tới ID này để xin lại)
+  CANCELLED // Người yêu cầu tự rút lại
 }
 
-// v0.8: 紧急程度
+// v0.8: Mức độ khẩn cấp
 enum Urgency {
   NORMAL
   URGENT
 }
 
 // ============================================================
-// 用户与权限
+// Người dùng và phân quyền
 // ============================================================
 
 model User {
@@ -455,30 +455,30 @@ model User {
   ownedIntakes             Intake[]                      @relation("IntakeOwner")
   invoiceRequests          InvoiceRequest[]              @relation("InvoiceRequester")
   invoiceProcessing        InvoiceRequest[]              @relation("InvoiceProcessor")
-  // v0.8: 模板创建者 + 用章申请人/审批人/盖章人
+  // v0.8: người tạo mẫu + người xin đóng dấu / duyệt / đóng dấu
   createdTemplates         DocumentTemplate[]            @relation("TemplateCreator")
   sealRequests             SealRequest[]                 @relation("SealRequester")
   sealApprovals            SealRequest[]                 @relation("SealApprover")
   sealStamps               SealRequest[]                 @relation("SealStamper")
-  // v0.9: 短信收件人 / 保全负责人 / 保全续保操作人 / 快递创建人
+  // v0.9: người nhận tin nhắn / người phụ trách bảo toàn / người thực hiện gia hạn bảo toàn / người tạo vận đơn
   receivedSmsMessages      SmsMessage[]                  @relation("SmsReceiver")
   ownedPreservations       Preservation[]                @relation("PreservationOwner")
   preservationRenewals     PreservationRenewal[]         @relation("RenewalPerformer")
-  // v0.44: 保全三层重构
+  // v0.44: Tái cấu trúc bảo toàn 3 tầng
   ownedPreservationCases   PreservationCase[]            @relation("PreservationCaseOwner")
   propertyRenewals         PreservationPropertyRenewal[] @relation("PropertyRenewalPerformer")
   createdExpress           ExpressTracking[]             @relation("ExpressCreator")
-  // v0.10: 通知
+  // v0.10: Thông báo
   notifications            Notification[]
-  // v0.21: AI 文书审查历史（发起人）
+  // v0.21: Lịch sử rà soát văn bản bằng AI (người khởi tạo)
   aiReviews                ReviewRecord[]                @relation("ReviewAuthor")
-  // v0.22: 律所资料上传者
+  // v0.22: Người tải lên tài liệu văn phòng
   firmFilesUploaded        FirmFile[]                    @relation("FirmFileUploader")
-  // v0.27: 服务中心 - 公告发布者 / 外部联系人录入者
+  // v0.27: Trung tâm dịch vụ - người đăng thông báo / người nhập liên hệ ngoài
   publishedAnnouncements   Announcement[]                @relation("AnnouncementAuthor")
   createdExternalContacts  ExternalContact[]             @relation("ExternalContactCreator")
   reviewedExternalContacts ExternalContact[]             @relation("ExternalContactReviewer")
-  // v0.44: 程序主办律师
+  // v0.44: Luật sư chủ trì chương trình
   leadProcedures           MatterProcedure[]             @relation("ProcedureLeadLawyer")
   workflowAudits           WorkflowAudit[]               @relation("UserWorkflowAudits")
   uploadedFiles            File[]                        @relation("UserUploadedFiles")
@@ -499,7 +499,7 @@ model User {
 }
 
 // ============================================================
-// 客户与联系人
+// Khách hàng và người liên hệ
 // ============================================================
 
 model Client {
@@ -514,12 +514,12 @@ model Client {
   tags              String[]
   notes             String?
   legalRep          String?
-  // v0.39: 案件云式补充字段
-  internalCode      String?                 @unique // 客户编号 KH-{YYYY}-{4位}
-  cooperationStatus ClientCooperationStatus @default(SIGNED) // 合作状态
-  industry          String? // 所属行业
-  gender            ClientGender? // 性别（个人客户）
-  ethnicity         String? // 民族（个人客户）
+  // v0.39: Các trường bổ sung theo mô hình hồ sơ vụ án điện tử
+  internalCode      String?                 @unique // Mã khách hàng KH-{YYYY}-{4 số}
+  cooperationStatus ClientCooperationStatus @default(SIGNED) // Trạng thái hợp tác
+  industry          String? // Ngành nghề
+  gender            ClientGender? // Giới tính (khách lẻ)
+  ethnicity         String? // Dân tộc (khách lẻ)
   contacts          Contact[]
   intakes           Intake[]
   matterLinks       MatterClient[]
@@ -553,7 +553,7 @@ model Contact {
 }
 
 // ============================================================
-// 案由规范库
+// Kho danh mục căn cứ khởi kiện (案由) chuẩn hóa
 // ============================================================
 
 model CauseOfAction {
@@ -583,7 +583,7 @@ model CauseOfAction {
 }
 
 // ============================================================
-// 收案
+// Tiếp nhận vụ án
 // ============================================================
 
 model Intake {
@@ -598,41 +598,41 @@ model Intake {
   receivedAt     DateTime       @default(now())
   declinedReason String?
 
-  // v0.5: 客户 + 联系人
+  // v0.5: Khách hàng + người liên hệ
   clientId     String?
   client       Client?     @relation(fields: [clientId], references: [id])
-  clientType   ClientType? // 提交时自动建档用，转化后随 Client 表
+  clientType   ClientType? // Dùng để tự động tạo hồ sơ khi gửi; sau khi chuyển đổi thì gắn theo bảng Client
   contactName  String?
   contactPhone String?
 
-  // v0.5: 程序 + 诉讼地位 + 争议解决机构 + 标的
+  // v0.5: Chương trình + tư cách tố tụng + cơ quan giải quyết tranh chấp + giá trị tranh chấp
   firstProcedureType ProcedureType?
-  firstAgency        String? // 争议解决机构：法院/仲裁机构/侦查机关 名称
-  jurisdiction       String? // v0.30 管辖地：省/市/区县 路径
+  firstAgency        String? // Cơ quan giải quyết tranh chấp: tên của Tòa án / Trung tâm trọng tài / Cơ quan điều tra
+  jurisdiction       String? // v0.30 Địa bàn: đường dẫn tỉnh / thành phố / quận huyện
   ourStanding        LitigationStanding?
   claimAmount        Decimal?            @db.Decimal(14, 2)
-  claimDescription   String? // 非金钱标的描述
+  claimDescription   String? // Mô tả giá trị tranh chấp phi tiền
 
-  // v0.30: 律协备案 + 是否反诉（诉讼/仲裁类）
+  // v0.30: Khai báo Đoàn Luật sư + có phản tố không (loại tố tụng / trọng tài)
   barFiling    BarFilingType?
   counterclaim Boolean        @default(false)
 
-  // v0.31: 非诉 / 顾问 / 专项（非诉讼类）专属字段
-  businessType String? // 业务类型（非诉/专项）
-  serviceScope String? // 服务范围 / 内容（非诉/专项/顾问）
-  deliverables String? // 交付成果（非诉/专项）
-  counselType  String? // 顾问类型：常年 / 专项（顾问）
-  serviceStart DateTime? // 起始 / 顾问期限起
-  serviceEnd   DateTime? // 结束 / 顾问期限止
+  // v0.31: Trường riêng cho nhóm ngoài tố tụng / cố vấn / chuyên đề
+  businessType String? // Loại hình (ngoài tố tụng / chuyên đề)
+  serviceScope String? // Phạm vi / nội dung dịch vụ (ngoài tố tụng / chuyên đề / cố vấn)
+  deliverables String? // Sản phẩm bàn giao (ngoài tố tụng / chuyên đề)
+  counselType  String? // Loại cố vấn: thường trực / chuyên đề (cố vấn)
+  serviceStart DateTime? // Bắt đầu / mở đầu hạn cố vấn
+  serviceEnd   DateTime? // Kết thúc / kết thúc hạn cố vấn
 
-  // v0.5: 律师费
+  // v0.5: Phí luật sư
   feeType          FeeType?
-  feeAmount        Decimal? @db.Decimal(14, 2) // FIXED: 总金额；CONTINGENCY: 基础办案费
-  contingencyTerms String? // 风险代理收费方式自由文本（仅 CONTINGENCY 用）
-  feeSchedule      String? // 付款节点
+  feeAmount        Decimal? @db.Decimal(14, 2) // FIXED: tổng số tiền; CONTINGENCY: phí xử lý cơ bản
+  contingencyTerms String? // Diễn giải tự do cách tính phí đại diện theo rủi ro (chỉ dùng cho CONTINGENCY)
+  feeSchedule      String? // Mốc thanh toán
   feeNote          String?
 
-  // v0.5: 主办律师 + 共同律师（转化时生成 MatterMember）
+  // v0.5: Luật sư chủ trì + luật sư đồng (sinh MatterMember khi chuyển đổi)
   ownerUserId String?
   ownerUser   User?    @relation("IntakeOwner", fields: [ownerUserId], references: [id])
   coUserIds   String[] @default([])
@@ -653,13 +653,13 @@ model Intake {
 }
 
 // ============================================================
-// 案件 (Matter) + 团队成员 + 多客户
+// Vụ án (Matter) + thành viên nhóm + nhiều khách hàng
 // ============================================================
 
 model Matter {
   id           String         @id @default(cuid())
   internalCode String         @unique
-  firmCaseNo   String?        @unique // v0.42 所内案号（按可配置模板生成）
+  firmCaseNo   String?        @unique // v0.42 Số hiệu vụ trong văn phòng (sinh theo mẫu cấu hình được)
   title        String
   category     MatterCategory @default(CIVIL_COMMERCIAL)
   status       MatterStatus   @default(IN_PROGRESS)
@@ -673,15 +673,15 @@ model Matter {
   ourStanding             LitigationStanding?
   counterclaimAsPlaintiff Boolean             @default(false)
   counterclaimAsDefendant Boolean             @default(false)
-  barFiling               BarFilingType? // v0.35 是否需向律协备案（诉讼/仲裁类）
+  barFiling               BarFilingType? // v0.35 Có cần khai báo Đoàn Luật sư không (loại tố tụng / trọng tài)
 
-  // v0.35: 非诉 / 顾问 / 专项 专属（从 Intake 转化带入）
-  businessType String? // 业务类型（非诉/专项）
-  serviceScope String? // 服务范围 / 内容
-  deliverables String? // 交付成果（非诉/专项）
-  counselType  String? // 顾问类型（顾问）
-  serviceStart DateTime? // 起始 / 顾问期限起
-  serviceEnd   DateTime? // 结束 / 顾问期限止
+  // v0.35: Riêng ngoài tố tụng / cố vấn / chuyên đề (mang theo khi chuyển từ Intake)
+  businessType String? // Loại hình (ngoài tố tụng / chuyên đề)
+  serviceScope String? // Phạm vi / nội dung dịch vụ
+  deliverables String? // Sản phẩm bàn giao (ngoài tố tụng / chuyên đề)
+  counselType  String? // Loại cố vấn (cố vấn)
+  serviceStart DateTime? // Bắt đầu / mở đầu hạn cố vấn
+  serviceEnd   DateTime? // Kết thúc / kết thúc hạn cố vấn
 
   intakeDate DateTime?
 
@@ -703,8 +703,8 @@ model Matter {
   procedures        MatterProcedure[]
   parties           Party[]
   relatedEntities   RelatedEntity[]
-  linksFrom         MatterLink[]       @relation("MatterLinkFrom") // v0.32 关联案件（本案 → 关联案）
-  linksTo           MatterLink[]       @relation("MatterLinkTo") // 反向（关联案 → 本案）
+  linksFrom         MatterLink[]       @relation("MatterLinkFrom") // v0.32 Vụ án liên quan (vụ này → vụ liên quan)
+  linksTo           MatterLink[]       @relation("MatterLinkTo") // Chiều ngược (vụ liên quan → vụ này)
   notes             Note[]
   tasks             LegalTask[]
   documents         Document[]
@@ -714,18 +714,18 @@ model Matter {
   commissionPlans   CommissionPlan[]
   archiveRecords    ArchiveRecord[]
   invoiceRequests   InvoiceRequest[]
-  // v0.8: 卷宗 + 用章
+  // v0.8: Hồ sơ vụ + đóng dấu
   folders           DocumentFolder[]
   sealRequests      SealRequest[]
-  // v0.9: 法院短信 + 财产保全 + 快递追踪
+  // v0.9: Tin nhắn tòa án + bảo toàn tài sản + theo dõi chuyển phát
   smsMessages       SmsMessage[]
   preservations     Preservation[]
   preservationCases PreservationCase[]
   expressTrackings  ExpressTracking[]
-  // v0.21: AI 文书审查历史
+  // v0.21: Lịch sử rà soát văn bản bằng AI
   reviewRecords     ReviewRecord[]
 
-  // v0.28: 自定义字段值（{ [CustomFieldDef.key]: string }）
+  // v0.28: Giá trị trường tùy chỉnh { [CustomFieldDef.key]: string }
   customValues Json @default("{}")
 
   deletedAt DateTime?
@@ -743,7 +743,7 @@ model Matter {
   expenseClaims  ExpenseClaim[]
 }
 
-// v0.28: 自定义字段（JSON 列方案）。字段定义存表，值存于实体的 customValues JSON。
+// v0.28: Trường tùy chỉnh (giải pháp cột JSON). Định nghĩa trường lưu ở bảng, giá trị lưu ở customValues JSON của thực thể.
 enum CustomFieldEntity {
   MATTER
   CLIENT
@@ -759,10 +759,10 @@ enum CustomFieldType {
 model CustomFieldDef {
   id         String            @id @default(cuid())
   entityType CustomFieldEntity
-  key        String // 稳定键，写入实体 customValues 的属性名
+  key        String // Khoá ổn định, là tên thuộc tính ghi vào customValues của thực thể
   label      String
   fieldType  CustomFieldType   @default(TEXT)
-  options    String[] // SELECT 类型的可选值
+  options    String[] // Giá trị chọn được của loại SELECT
   required   Boolean           @default(false)
   order      Int               @default(0)
   enabled    Boolean           @default(true)
@@ -799,7 +799,7 @@ model MatterClient {
 }
 
 // ============================================================
-// 程序阶段
+// Giai đoạn chương trình
 // ============================================================
 
 model MatterProcedure {
@@ -813,25 +813,25 @@ model MatterProcedure {
   order       Int
 
   caseNumber     String?
-  handlingAgency String? // 管辖机构（法院/仲裁委/执行法院…）
+  handlingAgency String? // Cơ quan giải quyết (Tòa án / Hội đồng trọng tài / Tòa án thi hành án…)
   panel          String?
   handler        String?
 
-  // v0.32: 程序级补充信息
-  jurisdiction          String? // 管辖地（省/市/区县）
-  presidingJudge        String? // 主审法官 / 首席仲裁员 / 执行法官
-  presidingJudgeContact String? // 主审法官联系方式
-  judgeAssistant        String? // 法官助理 / 仲裁庭助理
-  judgeAssistantContact String? // 助理联系方式
-  ourStanding           LitigationStanding? // 我方地位（按程序确定可选项）
+  // v0.32: Thông tin bổ sung cấp chương trình
+  jurisdiction          String? // Địa bàn (tỉnh / thành phố / quận huyện)
+  presidingJudge        String? // Thẩm phán chủ trì / Trọng tài viên chính / Thẩm phán thi hành án
+  presidingJudgeContact String? // Thông tin liên hệ thẩm phán chủ trì
+  judgeAssistant        String? // Trợ lý thẩm phán / Trợ lý Hội đồng trọng tài
+  judgeAssistantContact String? // Thông tin liên hệ trợ lý
+  ourStanding           LitigationStanding? // Tư cách phía ta (các lựa chọn tùy theo chương trình)
 
-  // v0.44: 主办律师
-  leadLawyerId   String? // 主办律师（所内律师）
+  // v0.44: Luật sư chủ trì
+  leadLawyerId   String? // Luật sư chủ trì (luật sư trong văn phòng)
   leadLawyer     User?   @relation("ProcedureLeadLawyer", fields: [leadLawyerId], references: [id], onDelete: SetNull)
-  isExternalLead Boolean @default(false) // 是否非本所代理
+  isExternalLead Boolean @default(false) // Có phải đại diện ngoài văn phòng không
 
-  acceptedAt  DateTime? // 立案时间
-  concludedAt DateTime? // 裁决 / 结案时间
+  acceptedAt  DateTime? // Thời điểm thụ lý
+  concludedAt DateTime? // Thời điểm phán quyết / kết thúc vụ
 
   status      ProcedureStatus   @default(PENDING)
   outcome     ProcedureOutcome?
@@ -842,7 +842,7 @@ model MatterProcedure {
   deadlines        Deadline[]
   documents        Document[]
   procedureParties ProcedureParty[]
-  // v0.42: 程序备忘录（待办/已办）
+  // v0.42: Ghi chú chương trình (cần làm / đã làm)
   memos            ProcedureMemo[]
 
   createdAt DateTime @default(now())
@@ -870,7 +870,7 @@ model MatterStage {
 }
 
 // ============================================================
-// 任务 / 开庭 / 期限
+// Nhiệm vụ / Mở phiên tòa / Thời hạn
 // ============================================================
 
 model LegalTask {
@@ -934,7 +934,7 @@ model Deadline {
   @@index([dueAt, completed])
 }
 
-// v0.42: 程序备忘录（与重要时限并排，待办/已办状态）
+// v0.42: Ghi chú chương trình (đặt cạnh các mốc thời hạn quan trọng, trạng thái cần làm / đã làm)
 model ProcedureMemo {
   id          String          @id @default(cuid())
   procedureId String
@@ -950,7 +950,7 @@ model ProcedureMemo {
 }
 
 // ============================================================
-// 当事人 / 关联实体
+// Chủ thể tham gia / Thực thể liên quan
 // ============================================================
 
 model Party {
@@ -960,20 +960,20 @@ model Party {
   matterId             String?
   matter               Matter?             @relation(fields: [matterId], references: [id], onDelete: Cascade)
   role                 PartyRole
-  // v0.5: 具体诉讼地位（依首程序联动），role 保留作粗粒度
+  // v0.5: Tư cách tố tụng cụ thể (liên kết theo chương trình đầu tiên); role giữ lại làm mức thô
   standing             LitigationStanding?
   ordinal              Int                 @default(1)
   name                 String
-  // v0.27: 主体类型决定必填字段分支（自然人 → idNumber；公司 → enterpriseSocialCode + legalRep + address）
+  // v0.27: Loại chủ thể quyết định nhánh trường bắt buộc (cá nhân → idNumber; công ty → enterpriseSocialCode + legalRep + address)
   partyType            PartyType           @default(NATURAL_PERSON)
   idNumber             String?
   phone                String?
   address              String?
   legalRep             String?
-  // v0.27: 经办联系人（区别于 phone 当事人本人电话，常用于公司路径）
+  // v0.27: Người liên hệ phụ trách (khác với phone là điện thoại của chính chủ thể, thường dùng cho nhánh công ty)
   contactName          String?
   notes                String?
-  // v0.26: 对方公司风险查询 — 绑定元典企业后，可一键拉取风险总览
+  // v0.26: Tra cứu rủi ro công ty đối phương — sau khi liên kết doanh nghiệp 元典 (Yuandian) có thể tải tổng quan rủi ro một chạy
   enterpriseId         String?
   enterpriseSocialCode String?
   enterpriseName       String?
@@ -1019,7 +1019,7 @@ model RelatedEntity {
   @@index([name])
 }
 
-// v0.32: 关联案件（案件 ↔ 案件，方向性记录，展示时双向合并）
+// v0.32: Vụ án liên quan (vụ ↔ vụ, ghi có hướng, hiển thị gộp cả hai chiều)
 model MatterLink {
   id              String   @id @default(cuid())
   matterId        String
@@ -1034,7 +1034,7 @@ model MatterLink {
 }
 
 // ============================================================
-// 冲突检索
+// Tra cứu xung đột lợi ích
 // ============================================================
 
 model ConflictCheck {
@@ -1067,7 +1067,7 @@ model ConflictHit {
 }
 
 // ============================================================
-// 沟通记录
+// Lịch sử trao đổi
 // ============================================================
 
 model Note {
@@ -1090,12 +1090,12 @@ model Note {
 }
 
 // ============================================================
-// 材料（含加密支持）
+// Tài liệu (hỗ trợ mã hóa)
 // ============================================================
 
 model Document {
   id           String           @id @default(cuid())
-  // v0.4: matterId 可空（收案阶段挂在 Intake 上），转 Matter 时回填
+  // v0.4: matterId có thể null (giai đoạn tiếp nhận gắn trên Intake); khi chuyển sang Matter thì điền lại
   matterId     String?
   matter       Matter?          @relation(fields: [matterId], references: [id], onDelete: Cascade)
   intakeId     String?
@@ -1104,9 +1104,9 @@ model Document {
   procedure    MatterProcedure? @relation(fields: [procedureId], references: [id])
   name         String
   category     DocumentCategory @default(OTHER)
-  // v0.42: 材料来源方（我方/对方/第三人 等，取自本案当事人，可空）
+  // v0.42: Bên cung cấp tài liệu (phía ta / đối phương / người thứ ba…, lấy từ chủ thể của vụ, có thể null)
   sourceParty  String?
-  // v0.10: 文书审批流程
+  // v0.10: Quy trình duyệt văn bản
   status       DocumentStatus   @default(DRAFT)
   reviewedById String?
   reviewedBy   User?            @relation("DocumentReviewer", fields: [reviewedById], references: [id])
@@ -1135,27 +1135,27 @@ model Document {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  // v0.5: 发票工作流附件反向
+  // v0.5: Ngược lại - tệp đính kèm của quy trình hóa đơn
   invoiceAsContract InvoiceRequest? @relation("InvoiceContractScan")
   invoiceAsFile     InvoiceRequest? @relation("InvoiceFile")
 
-  // v0.8: 卷宗归属 + 模板生成
+  // v0.8: Thuộc hồ sơ vụ + sinh từ mẫu
   folderId                String?
   folder                  DocumentFolder?   @relation(fields: [folderId], references: [id])
   templateId              String?
   template                DocumentTemplate? @relation("TemplateGenerated", fields: [templateId], references: [id])
   templateContextSnapshot Json?
-  // v0.8: 反向 - 作为某模板的源 docx
+  // v0.8: Ngược lại - là file docx nguồn của một mẫu
   templateBlobOf          DocumentTemplate? @relation("TemplateBlob")
-  // v0.8: 反向 - 作为用章申请的待盖章稿 / 盖章后扫描件
+  // v0.8: Ngược lại - bản nháp chờ đóng dấu / bản scan sau khi đóng dấu của yêu cầu đóng dấu
   sealAsDraft             SealRequest?      @relation("SealDraft")
   sealAsStamped           SealRequest?      @relation("SealStamped")
 
-  // v0.17: 归档清单关联——上传时绑定到 ArchiveChecklistItem.id（lib/archive/checklists.ts 内的字符串 id），
-  // 用于归档向导自动勾选已上传的必交项。一个材料只能绑定一个 checklist item。
+  // v0.17: Liên kết danh mục lưu trữ — khi tải lên thì bind với ArchiveChecklistItem.id (id dạng chuỗi trong lib/archive/checklists.ts),
+  // dùng để trình hướng dẫn lưu trữ tự động tích các hạng mục bắt buộc đã tải lên. Một tài liệu chỉ bind được một checklist item.
   archiveChecklistItemId String?
 
-  // v0.21: 反向 - AI 审查历史
+  // v0.21: Ngược lại - lịch sử rà soát AI
   reviewRecords ReviewRecord[]
 
   @@index([matterId, category])
@@ -1170,34 +1170,34 @@ model Document {
 }
 
 // ============================================================
-// 发票申请工作流（v0.5）
-// 律师在案件详情提交申请 → 财务审核 → 上传扫描件合同 + 电子发票
+// Quy trình xin xuất hóa đơn (v0.5)
+// Luật sư gửi yêu cầu ở chi tiết vụ án → Tài chính duyệt → tải lên hợp đồng bản scan + hóa đơn điện tử
 // ============================================================
 
 model InvoiceRequest {
   id             String               @id @default(cuid())
-  // v0.43 项5：matterId 可空——支持「无关联案件」开票（须填 noMatterReason）
+  // v0.43 mục 5: matterId có thể null — hỗ trợ xuất hóa đơn "không liên kết vụ án" (bắt buộc điền noMatterReason)
   matterId       String?
   matter         Matter?              @relation(fields: [matterId], references: [id], onDelete: Cascade)
-  noMatterReason String? // 无关联案件时的原因说明（matterId 为空时必填）
+  noMatterReason String? // Giải thích lý do khi không liên kết vụ án (bắt buộc khi matterId null)
   amount         Decimal              @db.Decimal(14, 2)
-  title          String? // 备注 / 客户称谓（仅做兼容，新字段用 buyerName）
+  title          String? // Ghi chú / cách xưng hô với khách (chỉ để tương thích; trường mới dùng buyerName)
   status         InvoiceRequestStatus @default(PENDING)
   requestNote    String?
 
-  // v0.12: 开票类型 + 名目 + 抬头 + 税号 + 开票依据
+  // v0.12: Loại hóa đơn + danh mục + tên đơn vị mua + mã số thuế + căn cứ xuất hóa đơn
   invoiceType      InvoiceType?
   invoiceItem      InvoiceItem?
-  buyerName        String? // 开票抬头（客户名，可编辑）
-  buyerTaxNo       String? // 客户税号（专票必填）
-  // v0.42: 增值税专用发票购方"六要素"补全（税法：开户行/账号/地址/电话必填）
-  buyerAddress     String? // 购方地址（专票必填）
-  buyerPhone       String? // 购方电话（专票必填）
-  buyerBank        String? // 购方开户银行（专票必填）
-  buyerBankAccount String? // 购方银行账号（专票必填）
-  evidenceDocIds   String[]     @default([]) // 开票依据 Document id 列表
+  buyerName        String? // Tên đơn vị mua (tên khách, sửa được)
+  buyerTaxNo       String? // Mã số thuế khách (bắt buộc với hóa đơn đặc biệt)
+  // v0.42: Bổ sung "6 yếu tố" bên mua của hóa đơn GTGT đặc biệt (theo luật thuế: ngân hàng mở tài khoản, số tài khoản, địa chỉ, điện thoại là bắt buộc)
+  buyerAddress     String? // Địa chỉ bên mua (bắt buộc hóa đơn đặc biệt)
+  buyerPhone       String? // Điện thoại bên mua (bắt buộc hóa đơn đặc biệt)
+  buyerBank        String? // Ngân hàng mở tài khoản bên mua (bắt buộc hóa đơn đặc biệt)
+  buyerBankAccount String? // Số tài khoản ngân hàng bên mua (bắt buộc hóa đơn đặc biệt)
+  evidenceDocIds   String[]     @default([]) // Danh sách Document id làm căn cứ xuất hóa đơn
 
-  // v0.14: 真实发票号（财务开票完成时回填）
+  // v0.14: Số hóa đơn thực (điền lại khi Tài chính xuất xong)
   invoiceNo String?
   issuedAt  DateTime?
 
@@ -1210,7 +1210,7 @@ model InvoiceRequest {
   processedAt   DateTime?
   processNote   String?
 
-  // 财务上传：扫描件合同 + 电子发票文件（均走 Document）
+  // Tài chính tải lên: hợp đồng bản scan + tệp hóa đơn điện tử (đều qua Document)
   contractScanId String?   @unique
   contractScan   Document? @relation("InvoiceContractScan", fields: [contractScanId], references: [id])
   invoiceFileId  String?   @unique
@@ -1225,7 +1225,7 @@ model InvoiceRequest {
 }
 
 // ============================================================
-// 财务：合同 / 收付 / 分成
+// Tài chính: Hợp đồng / Thu chi / Chia hoa hồng
 // ============================================================
 
 model Billing {
@@ -1299,7 +1299,7 @@ model CommissionPlan {
 }
 
 // ============================================================
-// 时间线 / 归档 / 审计
+// Dòng thời gian / Lưu trữ / Kiểm toán
 // ============================================================
 
 model TimelineEvent {
@@ -1318,9 +1318,9 @@ model TimelineEvent {
 }
 
 enum ArchiveStatus {
-  PENDING_REVIEW // 归档申请已提交，等管理员审批
-  APPROVED // 已审批通过，正式归档
-  REJECTED // 管理员驳回
+  PENDING_REVIEW // Yêu cầu lưu trữ đã gửi, chờ quản trị duyệt
+  APPROVED // Đã duyệt, chính thức lưu trữ
+  REJECTED // Quản trị từ chối
 }
 
 model ArchiveRecord {
@@ -1339,13 +1339,13 @@ model ArchiveRecord {
   coverDocId   String?
   catalogDocId String?
 
-  archivedBy   String // 申请人姓名快照（兼容历史，不删）
-  archivedById String? // v0.18: 申请人 User.id，用于审批通知路由
+  archivedBy   String // Ảnh chụp tên người yêu cầu (tương thích lịch sử, không xóa)
+  archivedById String? // v0.18: User.id người yêu cầu, dùng để định tuyến thông báo duyệt
   archivedAt   DateTime @default(now())
   exportPath   String?
   checksum     String?
 
-  // v0.16: 归档审批流
+  // v0.16: Quy trình duyệt lưu trữ
   status       ArchiveStatus @default(PENDING_REVIEW)
   reviewedById String?
   reviewedAt   DateTime?
@@ -1419,7 +1419,7 @@ model Report {
 }
 
 // ============================================================
-// 系统配置
+// Cấu hình hệ thống
 // ============================================================
 
 model StageTemplate {
@@ -1441,20 +1441,20 @@ model SystemSetting {
 }
 
 // ============================================================
-// v0.8: 文档模板系统
+// v0.8: Hệ thống mẫu văn bản
 // ============================================================
 
-// 模板定义（系统/律所级，不属于具体 Matter）
+// Định nghĩa mẫu (cấp hệ thống / văn phòng; không thuộc Matter cụ thể)
 model DocumentTemplate {
   id                   String           @id @default(cuid())
   name                 String
   category             TemplateCategory
   description          String?
-  applicableCategories MatterCategory[] // 空数组 = 适用全部案件类别
+  applicableCategories MatterCategory[] // Mảng rỗng = áp dụng cho mọi loại vụ án
   docxBlobId           String           @unique
   docxBlob             Document         @relation("TemplateBlob", fields: [docxBlobId], references: [id])
-  variables            Json // 变量清单 ["client.name", "matter.caseNumber", ...] 用于缺失提示
-  isBuiltIn            Boolean          @default(false) // 系统内置不可删
+  variables            Json // Danh sách biến ["client.name", "matter.caseNumber", ...] dùng để cảnh báo thiếu
+  isBuiltIn            Boolean          @default(false) // Tích hợp sẵn của hệ thống, không xóa được
   enabled              Boolean          @default(true)
   createdById          String?
   createdBy            User?            @relation("TemplateCreator", fields: [createdById], references: [id])
@@ -1466,14 +1466,14 @@ model DocumentTemplate {
   @@index([isBuiltIn])
 }
 
-// 卷宗（每个 Matter 内的物理归档目录）
+// Hồ sơ vụ (thư mục lưu trữ vật lý trong mỗi Matter)
 model DocumentFolder {
   id         String     @id @default(cuid())
   matterId   String
   matter     Matter     @relation(fields: [matterId], references: [id], onDelete: Cascade)
   name       String
   orderIndex Int        @default(0)
-  isDefault  Boolean    @default(false) // 系统按案件类别预置（可改名不可删）
+  isDefault  Boolean    @default(false) // Hệ thống đặt sẵn theo loại vụ án (đổi tên được, không xóa được)
   documents  Document[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
@@ -1483,21 +1483,21 @@ model DocumentFolder {
 }
 
 // ============================================================
-// v0.8: 用章审批工作流
+// v0.8: Quy trình duyệt đóng dấu
 // ============================================================
 
-// 章种类配置（决策 §12.9.2：approverRoles: Role[] 多角色 OR 关系）
+// Cấu hình loại dấu (quyết định §12.9.2: approverRoles: Role[] nhiều vai trò, quan hệ OR)
 model SealTypeConfig {
   type             SealType   @id
-  label            String // 中文显示名
+  label            String // Tên hiển thị
   description      String?
-  approverRoles    UserRole[] // 多角色 OR 关系；空数组 = 仅 requiresLegalRep 生效
-  requiresLegalRep Boolean    @default(false) // 必须法定代表人本人审批（取 SystemSetting key=firmLegalRepUserId）
+  approverRoles    UserRole[] // Nhiều vai trò, quan hệ OR; mảng rỗng = chỉ requiresLegalRep có hiệu lực
+  requiresLegalRep Boolean    @default(false) // Bắt buộc đại diện pháp luật tự duyệt (lấy SystemSetting key=firmLegalRepUserId)
   enabled          Boolean    @default(true)
   updatedAt        DateTime   @updatedAt
 }
 
-// 用章申请
+// Yêu cầu đóng dấu
 model SealRequest {
   id       String   @id @default(cuid())
   code     String   @unique // SEAL-2026-0001
@@ -1505,14 +1505,14 @@ model SealRequest {
   matterId String?
   matter   Matter?  @relation(fields: [matterId], references: [id])
 
-  purpose              String // 用章事由
-  documentTitle        String // 待盖章文件标题
+  purpose              String // Lý do đóng dấu
+  documentTitle        String // Tiêu đề văn bản chờ đóng dấu
   pageCount            Int     @default(1)
   requireCrossPageSeal Boolean @default(false)
   copies               Int     @default(1)
   urgency              Urgency @default(NORMAL)
 
-  // 待盖章稿（必传） + 盖章后扫描件（盖章完成时必补）
+  // Bản nháp chờ đóng dấu (bắt buộc) + bản scan sau khi đóng dấu (bắt buộc bổ sung khi đóng xong)
   draftDocId   String    @unique
   draftDoc     Document  @relation("SealDraft", fields: [draftDocId], references: [id])
   stampedDocId String?   @unique
@@ -1536,7 +1536,7 @@ model SealRequest {
 
   rejectedAt DateTime?
 
-  // 被驳回后重新申请的溯源链（旧 → 新）
+  // Chuỗi truy vết khi tạo lại yêu cầu sau khi bị từ chối (cũ → mới)
   parentSealRequestId String?
   parentSealRequest   SealRequest?  @relation("SealResubmission", fields: [parentSealRequestId], references: [id])
   resubmissions       SealRequest[] @relation("SealResubmission")
@@ -1551,46 +1551,46 @@ model SealRequest {
 }
 
 // ============================================================
-// v0.9: 法院短信收件箱
+// v0.9: Hộp thư tin nhắn tòa án
 // ============================================================
 
-// 短信类型（与旧系统 SMS_TYPE_KEYWORDS 对齐）
+// Loại tin nhắn (khớp với SMS_TYPE_KEYWORDS của hệ thống cũ)
 enum SmsType {
-  HEARING_NOTICE // 开庭通知
-  SERVICE_NOTICE // 送达通知
-  FEE_NOTICE // 缴费通知
-  MEDIATION // 调解通知
-  ENFORCEMENT // 执行通知
-  FILING_NOTICE // 立案通知
-  JUDGMENT_NOTICE // 判决通知
-  EVIDENCE_SUBMIT // 提交材料 / 举证
+  HEARING_NOTICE // Thông báo mở phiên tòa
+  SERVICE_NOTICE // Thông báo tống đạt
+  FEE_NOTICE // Thông báo nộp án phí / lệ phí
+  MEDIATION // Thông báo hòa giải
+  ENFORCEMENT // Thông báo thi hành án
+  FILING_NOTICE // Thông báo thụ lý
+  JUDGMENT_NOTICE // Thông báo bản án
+  EVIDENCE_SUBMIT // Nộp tài liệu / trình chứng cứ
   OTHER
 }
 
-// 与 Matter 的匹配来源
+// Nguồn khớp với Matter
 enum SmsMatchSource {
-  AUTO_CASE_NUMBER // 按案号自动匹配
-  MANUAL // 用户手动指派
+  AUTO_CASE_NUMBER // Tự khớp theo số hiệu vụ án
+  MANUAL // Người dùng gán thủ công
   UNMATCHED
 }
 
 model SmsMessage {
   id           String   @id @default(cuid())
-  rawText      String // 原始短信全文
+  rawText      String // Toàn văn tin nhắn gốc
   receivedAt   DateTime @default(now())
   receivedById String
   receivedBy   User     @relation("SmsReceiver", fields: [receivedById], references: [id], onDelete: Restrict)
 
-  // 解析结果（含 caseNumbers / court / hearingDate / urls / judge / clerk / phones ...）
+  // Kết quả phân tích (gồm caseNumbers / court / hearingDate / urls / judge / clerk / phones...)
   parsedJson Json
   smsType    SmsType @default(OTHER)
 
-  // 关联匹配
+  // Khớp liên quan
   matchedMatterId String?
   matchedMatter   Matter?        @relation(fields: [matchedMatterId], references: [id], onDelete: SetNull)
   matchedBy       SmsMatchSource @default(UNMATCHED)
 
-  // 一键生成动作的产物 id（追溯）
+  // id sản phẩm sinh ra từ thao tác một chạy (để truy vết)
   generatedHearingId  String?
   generatedDeadlineId String?
 
@@ -1606,54 +1606,54 @@ model SmsMessage {
 }
 
 // ============================================================
-// v0.9: 财产保全
+// v0.9: Bảo toàn tài sản
 // ============================================================
 
 enum PreservationType {
-  PRE_LITIGATION // 诉前保全
-  LITIGATION // 诉中保全
-  ENFORCEMENT // 执行保全
+  PRE_LITIGATION // Bảo toàn trước khi kiện
+  LITIGATION // Bảo toàn trong quá trình kiện
+  ENFORCEMENT // Bảo toàn phục vụ thi hành án
 }
 
 enum PropertyType {
-  BANK_DEPOSIT // 银行存款
-  REAL_ESTATE // 房产
-  VEHICLE // 车辆
-  EQUITY // 股权
-  IP // 知识产权
-  OTHER // 其他财产
+  BANK_DEPOSIT // Tiền gửi ngân hàng
+  REAL_ESTATE // Bất động sản
+  VEHICLE // Phương tiện giao thông
+  EQUITY // Cổ phần / vốn góp
+  IP // Sở hữu trí tuệ
+  OTHER // Tài sản khác
 }
 
 enum GuaranteeType {
-  CASH_DEPOSIT // 保证金
-  GUARANTEE_LETTER // 保函
-  PROPERTY // 财产担保
-  NONE // 无需担保
+  CASH_DEPOSIT // Tiền ký quỹ
+  GUARANTEE_LETTER // Thư bảo lãnh
+  PROPERTY // Đảm bảo bằng tài sản
+  NONE // Không cần đảm bảo
 }
 
 enum PreservationStatus {
-  ACTIVE // 生效中
-  RENEWED // 已续保
-  EXPIRED // 已到期
-  LIFTED // 已解除
+  ACTIVE // Đang hiệu lực
+  RENEWED // Đã gia hạn bảo toàn
+  EXPIRED // Đã hết hạn
+  LIFTED // Đã giải tỏa
 }
 
 model Preservation {
   id       String  @id @default(cuid())
-  // 诉前保全可空（决策 §13.8.3）；立案后回填 matterId
+  // Bảo toàn trước khi kiện có thể null (quyết định §13.8.3); sau khi thụ lý thì điền lại matterId
   matterId String?
   matter   Matter? @relation(fields: [matterId], references: [id], onDelete: SetNull)
 
   type          PreservationType
   propertyType  PropertyType
   amount        Decimal?         @db.Decimal(18, 2)
-  respondent    String // 被保全人
+  respondent    String // Người bị bảo toàn
   guaranteeType GuaranteeType?
 
-  appliedAt  DateTime? // 申请日
-  startDate  DateTime // 生效日（必填）
-  duration   Int // 保全期限（天）；默认按 propertyType 推荐
-  expiryDate DateTime // 到期日 = startDate + duration（可手动覆盖）
+  appliedAt  DateTime? // Ngày nộp đơn
+  startDate  DateTime // Ngày có hiệu lực (bắt buộc)
+  duration   Int // Thời hạn bảo toàn (ngày); mặc định gợi ý theo propertyType
+  expiryDate DateTime // Ngày hết hạn = startDate + duration (ghi đè thủ công được)
 
   court          String?
   rulingNumber   String?
@@ -1663,7 +1663,7 @@ model Preservation {
   ownerId String?
   owner   User?   @relation("PreservationOwner", fields: [ownerId], references: [id], onDelete: SetNull)
 
-  // 提醒阈值（天）默认 [30, 15, 7, 3, 1]
+  // Ngưỡng nhắc nhở (ngày) mặc định [30, 15, 7, 3, 1]
   remindDays Int[]                 @default([30, 15, 7, 3, 1])
   status     PreservationStatus    @default(ACTIVE)
   renewals   PreservationRenewal[]
@@ -1684,7 +1684,7 @@ model PreservationRenewal {
   renewedAt       DateTime
   oldExpiryDate   DateTime
   newExpiryDate   DateTime
-  renewalDuration Int // 新增的天数
+  renewalDuration Int // Số ngày thêm vào
   note            String?
 
   performedById String
@@ -1695,7 +1695,7 @@ model PreservationRenewal {
 }
 
 // ============================================================
-// v0.44: 保全三层重构（案件 → 被保全人 → 财产）
+// v0.44: Tái cấu trúc bảo toàn 3 tầng (vụ án → người bị bảo toàn → tài sản)
 // ============================================================
 
 model PreservationCase {
@@ -1729,7 +1729,7 @@ model PreservationTarget {
   caseId String
   case   PreservationCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
-  name String // 被保全人名称
+  name String // Tên người bị bảo toàn
   note String?
 
   properties PreservationProperty[]
@@ -1779,12 +1779,12 @@ model PreservationPropertyRenewal {
 }
 
 // ============================================================
-// v0.9.3: 快递追踪
+// v0.9.3: Theo dõi chuyển phát
 // ============================================================
 
 enum ExpressDirection {
-  OUTBOUND // 寄出（律所 → 法院 / 当事人 / 对方）
-  INBOUND // 收到（法院 / 当事人 → 律所）
+  OUTBOUND // Gửi đi (văn phòng → tòa án / đương sự / đối phương)
+  INBOUND // Nhận vào (tòa án / đương sự → văn phòng)
 }
 
 model ExpressTracking {
@@ -1792,15 +1792,15 @@ model ExpressTracking {
   matterId       String?
   matter         Matter?          @relation(fields: [matterId], references: [id], onDelete: SetNull)
   trackingNo     String
-  companyCode    String? // 中文公司名（顺丰速运 / 中通快递 等）
+  companyCode    String? // Tên hãng (Shunfeng / Zhongtong…)
   direction      ExpressDirection
-  purpose        String // 用途（如：起诉状寄朝阳法院 / 法院送达判决书）
-  recipient      String? // 收件人/单位
+  purpose        String // Mục đích (vd: gửi đơn khởi kiện tới Tòa án Chaoyang / tòa án tống đạt bản án)
+  recipient      String? // Người nhận / đơn vị
   recipientPhone String?
 
-  lastState    String? // 揽件 / 在途 / 到达派件 / 已签收 / 退签 / 疑难
+  lastState    String? // Đã nhận hàng / đang vận chuyển / đến nơi đi phát / đã ký nhận / trả lại / vướng mắc
   lastUpdateAt DateTime?
-  tracesJson   Json? // 完整轨迹快照（旧次刷新覆盖；不入历史）
+  tracesJson   Json? // Ảnh chụp toàn bộ lộ trình (lần làm mới sau ghi đè lần trước; không lưu vào lịch sử)
 
   createdById String
   createdBy   User     @relation("ExpressCreator", fields: [createdById], references: [id], onDelete: Restrict)
@@ -1813,7 +1813,7 @@ model ExpressTracking {
 }
 
 // ============================================================
-// v0.10: 通知系统
+// v0.10: Hệ thống thông báo
 // ============================================================
 
 enum NotificationType {
@@ -1824,7 +1824,7 @@ enum NotificationType {
   SMS_ARRIVAL
   TASK_ASSIGNED
   SYSTEM
-  // v0.18: 归档审批通知
+  // v0.18: Thông báo duyệt lưu trữ
   ARCHIVE_APPROVED
   ARCHIVE_REJECTED
 }
@@ -1855,8 +1855,8 @@ model Notification {
   @@index([userId, createdAt])
 }
 
-// v0.21: AI 文书审查历史
-// 每次点「AI 审查」+ 拿到结果都会写一条；按 document/matter 反查能拿全部历史
+// v0.21: Lịch sử rà soát văn bản bằng AI
+// Mỗi lần bấm "Rà soát AI" và có kết quả sẽ ghi một bản ghi; tra ngược theo document/matter sẽ lấy được toàn bộ lịch sử
 model ReviewRecord {
   id           String   @id @default(cuid())
   matterId     String
@@ -1876,17 +1876,17 @@ model ReviewRecord {
   @@index([matterId, reviewedAt])
 }
 
-// v0.22: 律所级资料库（与案件无关）
-// 制度 / 指引 / 参考模板（不同于 v0.8 生成型 DocumentTemplate）/ 其他文件
+// v0.22: Kho tài liệu cấp văn phòng (không gắn với vụ án)
+// Quy chế / hướng dẫn / mẫu tham khảo (khác với DocumentTemplate sinh văn bản ở v0.8) / tệp khác
 enum FirmFileCategory {
-  POLICY // 制度（员工手册、保密协议、薪酬制度等）
-  GUIDE // 指引（办案指引、客户接待指引等）
-  TEMPLATE // 参考模板（律师下载手动改的样本，区别于 docxtemplater 生成型）
-  REFERENCE // 其他文件（营业执照、执业证扫描件等）
-  CONTRACT // 合同
-  LETTER // 函件
-  LICENSE // 证照
-  OTHER_FIRM // 其他
+  POLICY // Quy chế (sổ tay nhân viên, cam kết bảo mật, quy chế lương…)
+  GUIDE // Hướng dẫn (hướng dẫn xử lý vụ, hướng dẫn tiếp khách…)
+  TEMPLATE // Mẫu tham khảo (bản mẫu luật sư tải về sửa tay, khác với loại sinh bằng docxtemplater)
+  REFERENCE // Tệp khác (giấy phép đăng ký kinh doanh, bản scan chứng chỉ hành nghề…)
+  CONTRACT // Hợp đồng
+  LETTER // Thư tín / công văn
+  LICENSE // Giấy phép / chứng chỉ hành nghề
+  OTHER_FIRM // Khác
 }
 
 model FirmFile {
@@ -1904,7 +1904,7 @@ model FirmFile {
   uploadedById String
   uploadedBy   User   @relation("FirmFileUploader", fields: [uploadedById], references: [id])
 
-  // 旧版被新版替代时，旧版指向新版 id；列表默认隐藏被替代的
+  // Khi bản cũ bị bản mới thay thế, bản cũ trỏ tới id bản mới; danh sách mặc định ẩn các bản bị thay thế
   supersededById String?
   supersededBy   FirmFile?  @relation("FirmFileSupersedes", fields: [supersededById], references: [id])
   supersedes     FirmFile[] @relation("FirmFileSupersedes")
@@ -1917,14 +1917,14 @@ model FirmFile {
   @@index([supersededById])
 }
 
-// v0.27: 服务中心 —— 律所公告（独立 Model，pinned 公告作顶部 banner）
+// v0.27: Trung tâm dịch vụ — thông báo văn phòng (Model độc lập; thông báo pinned làm banner đầu trang)
 model Announcement {
   id          String    @id @default(cuid())
   title       String
   content     String    @db.Text
   pinned      Boolean   @default(false)
   publishedAt DateTime  @default(now())
-  // 到期后 banner 不再显示；列表仍保留
+  // Sau khi hết hạn, banner không hiển thị nữa; vẫn giữ trong danh sách
   expiresAt   DateTime?
   authorId    String
   author      User      @relation("AnnouncementAuthor", fields: [authorId], references: [id])
@@ -1936,22 +1936,22 @@ model Announcement {
   @@index([authorId, createdAt])
 }
 
-// v0.27: 服务中心 —— 外部联系人（法院 / 公证 / 他所律师 等）
+// v0.27: Trung tâm dịch vụ — liên hệ ngoài (tòa án / công chứng / luật sư văn phòng khác…)
 enum ExternalContactCategory {
-  COURT // 法院
-  PROSECUTOR // 检察院
-  POLICE // 公安
-  NOTARY // 公证处
-  ARBITRATION // 仲裁机构
-  OTHER_FIRM // 他所律师
-  EXPERT // 鉴定 / 评估专家
-  OTHER // 其他
+  COURT // Tòa án
+  PROSECUTOR // Viện kiểm sát
+  POLICE // Công an
+  NOTARY // Phòng công chứng
+  ARBITRATION // Trung tâm trọng tài
+  OTHER_FIRM // Luật sư văn phòng khác
+  EXPERT // Chuyên gia giám định / thẩm định giá
+  OTHER // Khác
 }
 
 enum ExternalContactStatus {
-  PENDING_REVIEW // 待审核
-  APPROVED // 已通过
-  REJECTED // 已驳回
+  PENDING_REVIEW // Chờ duyệt
+  APPROVED // Đã duyệt
+  REJECTED // Đã từ chối
 }
 
 model ExternalContact {

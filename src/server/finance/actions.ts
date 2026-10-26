@@ -90,7 +90,7 @@ export async function deleteBilling(id: string) {
     await assertMatterWritable(billing.matterId, { allowFinanceRole: true });
   } else {
     await assertMatterWritable(billing.matterId);
-    await assertCanLeadMatter(session.user.id, billing.matterId, "仅案件主办/协办或财务可删除合同");
+    await assertCanLeadMatter(session.user.id, billing.matterId, "Chỉ chủ trì / hợp tác viên của vụ hoặc Tài chính mới được xóa hợp đồng");
   }
 
   await prisma.billing.delete({ where: { id } });
@@ -104,12 +104,12 @@ export async function deleteBilling(id: string) {
   return { ok: true };
 }
 
-// ============ FeeEntry + 自动分成 ============
+// ============ FeeEntry + tự động chia hoa hồng ============
 
 /**
- * 创建一条收付记录。
- * - 创建 RECEIVED 时自动按 CommissionPlan 派生 COMMISSION 子条目（每位受益人一条）
- * - parent / children 通过 parentFeeEntryId 关联
+ * Tạo một bản ghi thu chi.
+ * - Khi tạo RECEIVED thì tự động sinh các dòng con COMMISSION theo CommissionPlan (mỗi người hưởng một dòng)
+ * - parent / children liên kết qua parentFeeEntryId
  */
 export async function createFeeEntry(input: FeeEntryCreateInput) {
   const session = await requireSession();
@@ -132,7 +132,7 @@ export async function createFeeEntry(input: FeeEntryCreateInput) {
       }
     });
 
-    // 自动分成
+    // Tự động chia hoa hồng
     if (data.type === "RECEIVED" && data.amount > 0) {
       const plans = await tx.commissionPlan.findMany({
         where: { matterId: data.matterId, active: true }
@@ -149,20 +149,20 @@ export async function createFeeEntry(input: FeeEntryCreateInput) {
             occurredAt: data.occurredAt,
             parentFeeEntryId: entry.id,
             beneficiaryUserId: plan.userId,
-            note: plan.label ? `按方案 [${plan.label}] 自动分成 ${plan.percent}%` : `自动分成 ${plan.percent}%`,
+            note: plan.label ? `Tự động chia theo phương án [${plan.label}] ${plan.percent}%` : `Tự động chia ${plan.percent}%`,
             recordedById: session.user.id
           }
         });
       }
     }
 
-    // 实收事件入时间线
+    // Sự kiện thu tiền thực tế ghi vào dòng thời gian
     if (data.type === "RECEIVED") {
       await tx.timelineEvent.create({
         data: {
           matterId: data.matterId,
           eventType: "FEE_RECEIVED",
-          title: `实收 ¥${data.amount.toLocaleString("zh-CN")}`,
+          title: `Đã thu ¥${data.amount.toLocaleString("vi-VN")}`,
           content: data.note ?? undefined,
           occurredAt: data.occurredAt
         }
@@ -188,7 +188,7 @@ export async function createFeeEntry(input: FeeEntryCreateInput) {
 export async function deleteFeeEntry(id: string) {
   const session = await requireSession();
   if (!isManager(session.user.role) && session.user.role !== "FINANCE") {
-    throw new Error("仅管理员、主办律师或财务可删除收付记录");
+    throw new Error("Chỉ quản trị, luật sư chủ trì hoặc Tài chính mới được xóa bản ghi thu chi");
   }
   const entry = await prisma.feeEntry.findUnique({
     where: { id },
@@ -197,7 +197,7 @@ export async function deleteFeeEntry(id: string) {
   if (!entry) return { ok: false };
   await assertMatterWritable(entry.matterId, { allowFinanceRole: true });
 
-  // 删父条目时同时删除自动派生的分成
+  // Khi xóa dòng cha thì xóa luôn các khoản chia hoa hồng tự động sinh ra
   await prisma.$transaction(async (tx) => {
     if (entry.commissionChildren.length > 0) {
       await tx.feeEntry.deleteMany({
@@ -225,14 +225,14 @@ export async function deleteFeeEntry(id: string) {
 // ============ CommissionPlan ============
 
 /**
- * 整体替换案件的分成方案。
- * 简单策略：删除所有现有 plan，按 items 创建新的。
+ * Thay thế toàn bộ phương án chia hoa hồng của vụ.
+ * Cách đơn giản: xóa mọi plan hiện có, tạo mới theo items.
  */
 export async function setCommissionPlan(input: CommissionPlanSetInput) {
   const session = await requireSession();
   const data = commissionPlanSetSchema.parse(input);
   await assertMatterWritable(data.matterId);
-  await assertCanLeadMatter(session.user.id, data.matterId, "仅案件主办/协办可设置分成方案");
+  await assertCanLeadMatter(session.user.id, data.matterId, "Chỉ chủ trì / hợp tác viên của vụ mới được đặt phương án chia hoa hồng");
 
   await prisma.$transaction([
     prisma.commissionPlan.deleteMany({ where: { matterId: data.matterId } }),
@@ -259,7 +259,7 @@ export async function setCommissionPlan(input: CommissionPlanSetInput) {
   return { ok: true };
 }
 
-// ============ 全局财务统计 ============
+// ============ Thống kê tài chính toàn cục ============
 
 export async function getMatterFinance(matterId: string) {
   const session = await requireSession();
@@ -283,7 +283,7 @@ export async function getMatterFinance(matterId: string) {
       include: { user: { select: { id: true, name: true, role: true } } },
       orderBy: { createdAt: "asc" }
     }),
-    // 开票金额：已开具发票合计
+    // Số tiền đã xuất hóa đơn: tổng các hóa đơn đã xuất
     prisma.invoiceRequest.findMany({
       where: { matterId, status: "ISSUED" },
       select: { amount: true }
@@ -307,7 +307,7 @@ export async function getMatterFinance(matterId: string) {
 }
 
 /**
- * v0.11: 列出案件下的申请发票
+ * v0.11: Liệt kê các yêu cầu xuất hóa đơn của vụ
  */
 export async function listMatterInvoiceRequests(matterId: string) {
   const session = await requireSession();
@@ -335,7 +335,7 @@ export async function listMatterInvoiceRequests(matterId: string) {
 }
 
 /**
- * v0.12: 获取案件用于开票的默认信息（客户抬头 + 关联 Intake id）
+ * v0.12: Lấy thông tin mặc định để xuất hóa đơn (tên đơn vị mua khách + id Intake liên quan)
  */
 export async function getMatterInvoiceContext(matterId: string) {
   const session = await requireSession();
@@ -364,9 +364,9 @@ export async function getMatterInvoiceContext(matterId: string) {
       }
     }
   });
-  if (!m) throw new Error("案件不存在");
+  if (!m) throw new Error("Vụ án không tồn tại");
 
-  // v0.42 项3：开票抬头下拉 = 本案关联的全部客户（去重，主要客户置顶）
+  // v0.42 mục 3: dropdown tên đơn vị mua = toàn bộ khách liên kết với vụ (đã loại trùng, khách chính lên đầu)
   const clientMap = new Map<
     string,
     { id: string; name: string; taxNo: string | null; isPrimary: boolean }
@@ -416,10 +416,10 @@ export async function getMatterInvoiceContext(matterId: string) {
 }
 
 /**
- * v0.12: 创建开票申请（带类型/名目/抬头/依据）
+ * v0.12: Tạo yêu cầu xuất hóa đơn (kèm loại/danh mục/tên đơn vị mua/căn cứ)
  */
 export async function createInvoiceRequest(input: {
-  // v0.43 项5：matterId 可空——无关联案件开票须填 noMatterReason
+  // v0.43 mục 5: matterId có thể null — xuất hóa đơn không liên kết vụ án bắt buộc điền noMatterReason
   matterId: string | null;
   noMatterReason?: string | null;
   amount: number;
@@ -427,7 +427,7 @@ export async function createInvoiceRequest(input: {
   invoiceItem: "LAWYER_FEE" | "CONSULTING_FEE" | "AGENCY_FEE" | "OTHER";
   buyerName: string;
   buyerTaxNo?: string | null;
-  // v0.42 项4：增值税专用发票购方六要素（专票必填）
+  // v0.42 mục 4: 6 yếu tố bên mua của hóa đơn GTGT đặc biệt (bắt buộc với hóa đơn đặc biệt)
   buyerAddress?: string | null;
   buyerPhone?: string | null;
   buyerBank?: string | null;
@@ -439,31 +439,31 @@ export async function createInvoiceRequest(input: {
   if (input.matterId) {
     await assertCanAssociateMatter(session.user.id, input.matterId);
   } else {
-    // 无关联案件开票仅财务 / 管理员 / 主任可发起，且必须说明原因
+    // Xuất hóa đơn không liên kết vụ án chỉ Tài chính / quản trị / chủ nhiệm được tạo, và bắt buộc phải nêu lý do
     if (!isManager(session.user.role) && session.user.role !== "FINANCE") {
-      throw new Error("无关联案件开票仅财务 / 管理员 / 主任律师可发起");
+      throw new Error("Chỉ Tài chính / quản trị / luật sư chủ trì mới được tạo hóa đơn không liên kết vụ án");
     }
     if (!input.noMatterReason?.trim()) {
-      throw new Error("无关联案件时必须填写原因说明");
+      throw new Error("Khi không liên kết vụ án bắt buộc phải nhập lý do");
     }
   }
 
-  if (input.amount <= 0) throw new Error("金额必须大于 0");
+  if (input.amount <= 0) throw new Error("Số tiền phải lớn hơn 0");
   if (input.invoiceType !== "PLAIN" && input.invoiceType !== "SPECIAL") {
-    throw new Error("请选择开票类型");
+    throw new Error("Vui lòng chọn loại hóa đơn");
   }
-  if (!input.buyerName.trim()) throw new Error("请填写开票抬头");
-  // 专票合规校验（《增值税专用发票使用与管理通知》第一条 + 购方六要素）
+  if (!input.buyerName.trim()) throw new Error("Vui lòng nhập tên đơn vị mua");
+  // Kiểm tra tuân thủ hóa đơn đặc biệt (điều 1 Thông báo về sử dụng và quản lý hóa đơn GTGT đặc biệt + 6 yếu tố bên mua)
   if (input.invoiceType === "SPECIAL") {
-    if (!input.buyerTaxNo?.trim()) throw new Error("增值税专用发票必须填写纳税人识别号");
-    if (!input.buyerAddress?.trim()) throw new Error("增值税专用发票必须填写购方地址");
-    if (!input.buyerPhone?.trim()) throw new Error("增值税专用发票必须填写购方电话");
-    if (!input.buyerBank?.trim()) throw new Error("增值税专用发票必须填写开户银行");
-    if (!input.buyerBankAccount?.trim()) throw new Error("增值税专用发票必须填写银行账号");
+    if (!input.buyerTaxNo?.trim()) throw new Error("Hóa đơn GTGT đặc biệt bắt buộc phải có mã số thuế người nộp thuế");
+    if (!input.buyerAddress?.trim()) throw new Error("Hóa đơn GTGT đặc biệt bắt buộc phải có địa chỉ bên mua");
+    if (!input.buyerPhone?.trim()) throw new Error("Hóa đơn GTGT đặc biệt bắt buộc phải có điện thoại bên mua");
+    if (!input.buyerBank?.trim()) throw new Error("Hóa đơn GTGT đặc biệt bắt buộc phải có ngân hàng mở tài khoản");
+    if (!input.buyerBankAccount?.trim()) throw new Error("Hóa đơn GTGT đặc biệt bắt buộc phải có số tài khoản ngân hàng");
   }
-  // 关联案件时必须上传开票依据（委托合同等）；无关联案件以原因说明替代，依据可选
+  // Khi có liên kết vụ án bắt buộc phải tải lên căn cứ xuất hóa đơn (hợp đồng ủy quyền...); khi không liên kết vụ án thì thay bằng lý do, căn cứ là tùy chọn
   if (input.matterId && input.evidenceDocIds.length === 0) {
-    throw new Error("请上传至少一份开票依据（扫描版委托合同等）");
+    throw new Error("Vui lòng tải lên ít nhất một căn cứ xuất hóa đơn (hợp đồng ủy quyền bản scan...)");
   }
 
   const isSpecial = input.invoiceType === "SPECIAL";
@@ -498,10 +498,10 @@ export async function createInvoiceRequest(input: {
   await notifyRoleApprovers({
     roles: ["ADMIN", "PRINCIPAL_LAWYER", "FINANCE"],
     excludeUserId: session.user.id,
-    title: "新的发票审批待处理",
-    content: `${session.user.name ?? "有用户"} 提交了开票申请：${
-      matter ? `${matter.internalCode} ${matter.title}` : input.noMatterReason?.trim() || "无关联案件"
-    }，金额 ${input.amount.toLocaleString("zh-CN")} 元`,
+    title: "Có yêu cầu xuất hóa đơn mới cần duyệt",
+    content: `${session.user.name ?? "Người dùng"} đã gửi yêu cầu xuất hóa đơn: ${
+      matter ? `${matter.internalCode} ${matter.title}` : input.noMatterReason?.trim() || "Không liên kết vụ án"
+    }, số tiền ${input.amount.toLocaleString("vi-VN")} đồng`,
     href: "/finance",
     refType: "InvoiceRequest",
     refId: created.id,
@@ -513,7 +513,7 @@ export async function createInvoiceRequest(input: {
   return created;
 }
 
-/** v0.43 项5：财务页开票弹窗用——搜索当前用户可关联案件（轻量，返回编号+标题） */
+/** v0.43 mục 5: dùng cho popup xuất hóa đơn ở trang Tài chính — tìm vụ án hiện người dùng được liên kết (nhẹ, trả về mã + tiêu đề) */
 export async function searchMattersForInvoice(q?: string) {
   const session = await requireSession();
   return prisma.matter.findMany({
@@ -564,7 +564,7 @@ export async function getMonthlyRevenue(months = 6) {
   for (let i = 0; i < months; i++) {
     const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
     buckets.push({
-      month: `${d.getMonth() + 1}月`,
+      month: `Tháng ${d.getMonth() + 1}`,
       received: 0,
       receivable: 0
     });
@@ -584,7 +584,7 @@ export async function getMonthlyRevenue(months = 6) {
 export async function getPersonalRevenue(userId: string) {
   const session = await requireSession();
   if (!isManager(session.user.role) && session.user.id !== userId) {
-    throw new Error("只能查看自己的收入数据");
+    throw new Error("Chỉ được xem dữ liệu thu nhập của chính mình");
   }
   const monthStart = new Date();
   monthStart.setDate(1);

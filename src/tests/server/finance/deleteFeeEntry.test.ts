@@ -107,7 +107,7 @@ describe("deleteFeeEntry", () => {
     };
     mockPrisma.feeEntry.findUnique.mockResolvedValue(entry as any);
     await expect(deleteFeeEntry(feeId)).rejects.toThrow(
-      "仅管理员、主办律师或财务可删除收付记录"
+      "Chỉ quản trị, luật sư chủ trì hoặc Tài chính mới được xóa bản ghi thu chi"
     );
   });
 });

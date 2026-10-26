@@ -34,13 +34,13 @@ import { renderArchiveCover, renderArchiveCatalog } from "./render";
 import { archiveSubmitSchema, type ArchiveSubmitInput, CLOSED_REASON_CN } from "./schemas";
 
 /**
- * v0.9.4 归档：完整流程
- *   1. 权限：本案主办 / 协办提交，ADMIN 审批
- *   2. 校验 checklist 缺必填项 → 若有且未 forceWithMissing 则拒绝
- *   3. 生成 archiveNo
- *   4. 渲染卷宗封皮 → 入 ARCHIVE 卷宗
- *   5. 渲染卷宗目录（含已生成的封皮自身可选不入目录）
- *   6. 创建 ArchiveRecord
+ // v0.9.4 Lưu trữ: toàn bộ quy trình
+ // 1. Phân quyền: chủ trì / hợp tác viên của vụ nộp đơn, ADMIN duyệt
+ // 2. Kiểm tra checklist thiếu hạng mục bắt buộc → nếu có và không forceWithMissing thì từ chối
+ // 3. Sinh archiveNo
+ // 4. Render bìa hồ sơ vụ → vào thư mục hồ sơ ARCHIVE
+ // 5. Render mục lục hồ sơ (bìa vừa sinh có thể chọn không đưa vào mục lục)
+ // 6. Tạo ArchiveRecord
  *   7. Matter status=ARCHIVED + archivedAt + closedAt
  *   8. TimelineEvent + audit
  */
@@ -48,7 +48,7 @@ async function getArchiveSessionAndValidate(input: ArchiveSubmitInput) {
   const session = await requireSession();
   const data = archiveSubmitSchema.parse(input);
   await assertMatterWritable(data.matterId);
-  await assertCanLeadMatter(session.user.id, data.matterId, "仅案件主办/协办可以提交归档申请");
+  await assertCanLeadMatter(session.user.id, data.matterId, "Chỉ chủ trì / hợp tác viên của vụ mới được gửi yêu cầu lưu trữ");
   return { session, data };
 }
 
@@ -57,8 +57,8 @@ async function getMatterForArchive(matterId: string) {
     where: { id: matterId },
     select: { id: true, status: true, category: true, internalCode: true, title: true }
   }) as { id: string; status: string; category: MatterCategory; internalCode: string; title: string } | null;
-  if (!matter) throw new Error("案件不存在");
-  if (matter.status === "ARCHIVED") throw new Error("案件已归档");
+  if (!matter) throw new Error("Vụ án không tồn tại");
+  if (matter.status === "ARCHIVED") throw new Error("Vụ án đã được lưu trữ");
   return matter;
 }
 
@@ -67,7 +67,7 @@ function computeMissingItems(matterCategory: MatterCategory, checklistData: Reco
   const { missingRequired } = evaluateChecklist(checklist, checklistData);
   if (missingRequired.length > 0 && !forceWithMissing) {
     throw new Error(
-      `归档清单缺必填项 ${missingRequired.length} 项：${missingRequired.map((x) => x.label).join("、")}。如确认强制归档，请勾选"强制归档"。`
+      `Danh mục lưu trữ thiếu ${missingRequired.length} hạng mục bắt buộc: ${missingRequired.map((x) => x.label).join(", ")}. Nếu xác nhận ép buộc lưu trữ, vui lòng tick ô "Ép buộc lưu trữ".`
     );
   }
   return missingRequired.map((x) => x.id);
@@ -97,7 +97,7 @@ async function renderArchiveDocuments(matterId: string, userId: string, extras: 
     });
   } catch (err) {
     await prisma.document.update({ where: { id: coverDocId }, data: { deletedAt: new Date() } }).catch(() => null);
-    throw new Error(`渲染卷宗目录失败：${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(`Render mục lục hồ sơ thất bại: ${err instanceof Error ? err.message : String(err)}`);
   }
   return { coverDocId, catalogDocId };
 }
@@ -126,8 +126,8 @@ function buildTimelineEventData(matterId: string, extras: ArchiveExtras) {
   return {
     matterId,
     eventType: "MATTER_ARCHIVE_REQUESTED" as const,
-    title: `归档申请已提交（${extras.archiveNo}，待审批）`,
-    content: `结案方式：${CLOSED_REASON_CN[extras.closedReason]}。${extras.summary}`,
+    title: `Đã gửi yêu cầu lưu trữ (${extras.archiveNo}, chờ duyệt)`,
+    content: `Hình thức kết thúc: ${CLOSED_REASON_CN[extras.closedReason]}. ${extras.summary}`,
     occurredAt: extras.archivedAt
   };
 }
@@ -166,16 +166,16 @@ export async function archiveMatter(input: ArchiveSubmitInput) {
 }
 
 /**
- * v0.16: 管理员审批通过归档申请（PENDING_REVIEW → APPROVED）
+ // v0.16: Quản trị duyệt qua yêu cầu lưu trữ (PENDING_REVIEW → APPROVED)
  */
 async function findArchiveRecord(archiveId: string, sessionUserId: string) {
   const record = await prisma.archiveRecord.findUnique({
     where: { id: archiveId },
     select: { id: true, matterId: true, status: true, completedAt: true, archiveNo: true, archivedById: true }
   });
-  if (!record) throw new Error("归档记录不存在");
-  if (record.status !== "PENDING_REVIEW") throw new Error("此归档申请已审批");
-  if (record.archivedById === sessionUserId) throw new Error("你不能审批自己的申请");
+  if (!record) throw new Error("Bản ghi lưu trữ không tồn tại");
+  if (record.status !== "PENDING_REVIEW") throw new Error("Yêu cầu lưu trữ này đã được duyệt");
+  if (record.archivedById === sessionUserId) throw new Error("Bạn không thể duyệt yêu cầu của chính mình");
   return record;
 }
 
@@ -191,8 +191,8 @@ function buildApprovalTimelineEvent(matterId: string, archiveNo: string, note?: 
   return {
     matterId,
     eventType: "MATTER_ARCHIVED" as const,
-    title: `案件已归档（${archiveNo}）`,
-    content: note?.trim() ? `管理员审批：${note.trim()}` : "管理员审批通过",
+    title: `Vụ án đã lưu trữ (${archiveNo})`,
+    content: note?.trim() ? `Quản trị duyệt: ${note.trim()}` : "Quản trị duyệt qua",
     occurredAt
   };
 }
@@ -203,8 +203,8 @@ async function notifyApplicant(record: any, matter: { title?: string; internalCo
     userId: record.archivedById,
     type: "ARCHIVE_APPROVED",
     priority: "NORMAL",
-    title: `归档申请已通过（${record.archiveNo}）`,
-    content: `案件 ${matter?.internalCode ?? record.matterId}·${matter?.title ?? ""} 的归档申请已获管理员批准。`,
+    title: `Yêu cầu lưu trữ đã được duyệt (${record.archiveNo})`,
+    content: `Yêu cầu lưu trữ của vụ ${matter?.internalCode ?? record.matterId}·${matter?.title ?? ""} đã được quản trị phê duyệt.`,
     href: `/matters/${record.matterId}`,
     refType: "ArchiveRecord",
     refId: record.id
@@ -213,7 +213,7 @@ async function notifyApplicant(record: any, matter: { title?: string; internalCo
 
 export async function approveArchiveRecord(input: { archiveId: string; note?: string }) {
   const session = await requireSession();
-  if (session.user.role !== "ADMIN") throw new Error("只有管理员可以审批归档申请");
+  if (session.user.role !== "ADMIN") throw new Error("Chỉ quản trị mới được duyệt yêu cầu lưu trữ");
   const record = await findArchiveRecord(input.archiveId, session.user.id);
   const now = new Date();
   await prisma.$transaction(async (tx) => {
@@ -235,8 +235,8 @@ async function findRejectRecord(archiveId: string, sessionUserId: string) {
     where: { id: archiveId },
     select: { id: true, matterId: true, status: true, archiveNo: true, archivedById: true }
   });
-  if (!record) throw new Error("归档记录不存在");
-  if (record.status !== "PENDING_REVIEW") throw new Error("此归档申请已审批");
+  if (!record) throw new Error("Bản ghi lưu trữ không tồn tại");
+  if (record.status !== "PENDING_REVIEW") throw new Error("Yêu cầu lưu trữ này đã được duyệt");
   return record;
 }
 
@@ -250,8 +250,8 @@ async function notifyRejection(record: any, matter: { title?: string; internalCo
     userId: record.archivedById,
     type: "ARCHIVE_REJECTED",
     priority: "HIGH",
-    title: `归档申请被驳回（${record.archiveNo}）`,
-    content: `案件 ${matter?.internalCode ?? record.matterId}·${matter?.title ?? ""} 的归档申请被驳回。原因：${note}`,
+    title: `Yêu cầu lưu trữ bị từ chối (${record.archiveNo})`,
+    content: `Yêu cầu lưu trữ của vụ ${matter?.internalCode ?? record.matterId}·${matter?.title ?? ""} đã bị từ chối. Lý do: ${note}`,
     href: `/matters/${record.matterId}`,
     refType: "ArchiveRecord",
     refId: record.id
@@ -260,8 +260,8 @@ async function notifyRejection(record: any, matter: { title?: string; internalCo
 
 export async function rejectArchiveRecord(input: { archiveId: string; note: string }) {
   const session = await requireSession();
-  if (session.user.role !== "ADMIN") throw new Error("只有管理员可以驳回归档申请");
-  if (!input.note.trim()) throw new Error("请填写驳回原因");
+  if (session.user.role !== "ADMIN") throw new Error("Chỉ quản trị mới được từ chối yêu cầu lưu trữ");
+  if (!input.note.trim()) throw new Error("Vui lòng nhập lý do từ chối");
   const record = await findRejectRecord(input.archiveId, session.user.id);
   await prisma.archiveRecord.update({ where: { id: record.id }, data: buildRejectUpdateData(session.user.id, input.note) });
   const matter = await prisma.matter.findUnique({ where: { id: record.matterId }, select: { title: true, internalCode: true } });
@@ -273,11 +273,11 @@ export async function rejectArchiveRecord(input: { archiveId: string; note: stri
 }
 
 /**
- * 获取案件的归档准备数据：当前 checklist 模板 + 已有 ArchiveRecord（若有）
+ // Lấy dữ liệu chuẩn bị lưu trữ của vụ: mẫu checklist hiện tại + ArchiveRecord đã có (nếu có)
  */
 export async function getArchivePrepData(matterId: string) {
   const session = await requireSession();
-  await assertCanLeadMatter(session.user.id, matterId, "仅案件主办/协办可以准备归档");
+  await assertCanLeadMatter(session.user.id, matterId, "Chỉ chủ trì / hợp tác viên của vụ mới được chuẩn bị lưu trữ");
   const matter = await prisma.matter.findUnique({
     where: { id: matterId },
     select: {
@@ -307,18 +307,18 @@ export async function getArchivePrepData(matterId: string) {
       }
     }
   });
-  if (!matter) throw new Error("案件不存在");
+  if (!matter) throw new Error("Vụ án không tồn tại");
 
   const checklist = checklistForCategory(matter.category);
 
-  // v0.11: 取最近一次结案事件的 content 作为预填小结
+  // v0.11: Lấy content của sự kiện kết thúc gần nhất để điền sẵn phần tóm tắt
   const lastCloseEvent = await prisma.timelineEvent.findFirst({
     where: { matterId, eventType: "MATTER_CLOSED" },
     orderBy: { occurredAt: "desc" },
     select: { content: true }
   });
 
-  // v0.17: 已上传并关联到 checklist item 的材料（用于向导自动勾选）
+  // v0.17: Tài liệu đã tải lên và liên kết tới checklist item (dùng để trình hướng dẫn tự tích chọn)
   const linkedDocs = await prisma.document.findMany({
     where: {
       matterId,
@@ -334,7 +334,7 @@ export async function getArchivePrepData(matterId: string) {
     orderBy: { createdAt: "desc" }
   });
 
-  // itemId → 关联材料列表（保留全部，UI 展示首条 + 余数）
+  // itemId → danh sách tài liệu liên kết (giữ toàn bộ; UI hiện bản đầu tiên + số còn lại)
   const docsByItem: Record<string, { id: string; name: string }[]> = {};
   for (const d of linkedDocs) {
     const key = d.archiveChecklistItemId!;
@@ -350,7 +350,7 @@ export async function getArchivePrepData(matterId: string) {
 }
 
 /**
- * 已归档案件列表（/archive 总览页）—— 仅 status=APPROVED
+ // Danh sách vụ đã lưu trữ (trang tổng quan /archive) —— chỉ status=APPROVED
  */
 export async function listArchivedMatters() {
   await requireSession();
@@ -382,13 +382,13 @@ export async function listArchivedMatters() {
 }
 
 /**
- * v0.17: 待审批归档申请列表（仅 ADMIN）
- * /archive 待审批 tab 使用
+ // v0.17: Danh sách yêu cầu lưu trữ chờ duyệt (chỉ ADMIN)
+ // Dùng cho tab "Chờ duyệt" ở /archive
  */
 export async function listPendingArchiveRecords() {
   const session = await requireSession();
   if (session.user.role !== "ADMIN") {
-    throw new Error("仅管理员可查看待审批归档");
+    throw new Error("Chỉ quản trị mới xem được danh sách lưu trữ chờ duyệt");
   }
   return prisma.archiveRecord.findMany({
     where: { status: "PENDING_REVIEW" },
@@ -420,8 +420,8 @@ export async function listPendingArchiveRecords() {
 }
 
 /**
- * v0.18: 律师端查询自己的已驳回归档申请
- * 用于"我的已驳回归档"入口或案件详情页 banner
+ // v0.18: Luật sư tra cứu các yêu cầu lưu trữ của mình đã bị từ chối
+ // Dùng cho lối vào "Lưu trữ của tôi đã bị từ chối" hoặc banner ở trang chi tiết vụ
  */
 export async function listRejectedArchiveRecords() {
   const session = await requireSession();
@@ -453,8 +453,8 @@ export async function listRejectedArchiveRecords() {
 }
 
 /**
- * v0.18: 获取案件最新一条 ArchiveRecord（无论状态）
- * 案件详情页展示"归档中/已驳回"状态 banner 用
+ // v0.18: Lấy ArchiveRecord mới nhất của vụ (mọi trạng thái)
+ // Dùng để hiện banner trạng thái "Đang lưu trữ / Đã bị từ chối" ở trang chi tiết vụ
  */
 export async function getLatestArchiveRecord(matterId: string) {
   await requireSession();
@@ -475,10 +475,10 @@ export async function getLatestArchiveRecord(matterId: string) {
 }
 
 /**
- * v0.20: 批量审批 —— 通过
+ // v0.20: Duyệt theo lô —— Duyệt qua
  *
- * 单条独立处理（不强求原子），逐条复用 approveArchiveRecord 的事务。
- * 返回 { succeeded, failed }，failed 含失败原因，前端展示部分失败的情况。
+ // Mỗi bản ghi xử lý độc lập (không bắt buộc nguyên tử), lần lượt dùng lại giao dịch của approveArchiveRecord.
+ // Trả về { succeeded, failed }; failed chứa lý do lỗi để hiển thị trường hợp lỗi một phần.
  */
 export async function batchApproveArchiveRecords(input: {
   archiveIds: string[];
@@ -489,10 +489,10 @@ export async function batchApproveArchiveRecords(input: {
 }> {
   const session = await requireSession();
   if (session.user.role !== "ADMIN") {
-    throw new Error("只有管理员可以审批归档申请");
+    throw new Error("Chỉ quản trị mới được duyệt yêu cầu lưu trữ");
   }
-  if (!input.archiveIds.length) throw new Error("未选择任何归档申请");
-  if (input.archiveIds.length > 100) throw new Error("单次批量不超过 100 条");
+  if (!input.archiveIds.length) throw new Error("Chưa chọn yêu cầu lưu trữ nào");
+  if (input.archiveIds.length > 100) throw new Error("Mỗi lần xử lý lô không quá 100 bản ghi");
 
   const succeeded: string[] = [];
   const failed: { id: string; error: string }[] = [];
@@ -501,7 +501,7 @@ export async function batchApproveArchiveRecords(input: {
       await approveArchiveRecord({ archiveId: id, note: input.note });
       succeeded.push(id);
     } catch (err) {
-      failed.push({ id, error: err instanceof Error ? err.message : "未知错误" });
+      failed.push({ id, error: err instanceof Error ? err.message : "Lỗi không xác định" });
     }
   }
   await audit({
@@ -519,7 +519,7 @@ export async function batchApproveArchiveRecords(input: {
 }
 
 /**
- * v0.20: 批量审批 —— 驳回（统一原因）
+ // v0.20: Duyệt theo lô —— Từ chối (dùng chung một lý do)
  */
 export async function batchRejectArchiveRecords(input: {
   archiveIds: string[];
@@ -530,11 +530,11 @@ export async function batchRejectArchiveRecords(input: {
 }> {
   const session = await requireSession();
   if (session.user.role !== "ADMIN") {
-    throw new Error("只有管理员可以驳回归档申请");
+    throw new Error("Chỉ quản trị mới được từ chối yêu cầu lưu trữ");
   }
-  if (!input.archiveIds.length) throw new Error("未选择任何归档申请");
-  if (input.archiveIds.length > 100) throw new Error("单次批量不超过 100 条");
-  if (!input.note.trim()) throw new Error("请填写驳回原因");
+  if (!input.archiveIds.length) throw new Error("Chưa chọn yêu cầu lưu trữ nào");
+  if (input.archiveIds.length > 100) throw new Error("Mỗi lần xử lý lô không quá 100 bản ghi");
+  if (!input.note.trim()) throw new Error("Vui lòng nhập lý do từ chối");
 
   const succeeded: string[] = [];
   const failed: { id: string; error: string }[] = [];
@@ -543,7 +543,7 @@ export async function batchRejectArchiveRecords(input: {
       await rejectArchiveRecord({ archiveId: id, note: input.note });
       succeeded.push(id);
     } catch (err) {
-      failed.push({ id, error: err instanceof Error ? err.message : "未知错误" });
+      failed.push({ id, error: err instanceof Error ? err.message : "Lỗi không xác định" });
     }
   }
   await audit({

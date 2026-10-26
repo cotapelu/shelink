@@ -93,8 +93,8 @@ describe("createInvoiceRequest", () => {
     expect(mockNotifyRoleApprovers).toHaveBeenCalledWith({
       roles: ["ADMIN", "PRINCIPAL_LAWYER", "FINANCE"],
       excludeUserId: CUID(1),
-      title: "新的发票审批待处理",
-      content: `Test Lawyer 提交了开票申请：M-2025-001 Test Matter，金额 5,000 元`,
+      title: "Có yêu cầu xuất hóa đơn mới cần duyệt",
+      content: `Test Lawyer đã gửi yêu cầu xuất hóa đơn: M-2025-001 Test Matter, số tiền 5.000 đồng`,
       href: "/finance",
       refType: "InvoiceRequest",
       refId: CUID(100),
@@ -113,7 +113,7 @@ describe("createInvoiceRequest", () => {
       evidenceDocIds: [],
     } as any;
 
-    await expect(createInvoiceRequest(input)).rejects.toThrow("金额必须大于 0");
+    await expect(createInvoiceRequest(input)).rejects.toThrow("Số tiền phải lớn hơn 0");
   });
 
   it("should throw if buyerName is empty", async () => {
@@ -126,7 +126,7 @@ describe("createInvoiceRequest", () => {
       evidenceDocIds: [],
     } as any;
 
-    await expect(createInvoiceRequest(input)).rejects.toThrow("请填写开票抬头");
+    await expect(createInvoiceRequest(input)).rejects.toThrow("Vui lòng nhập tên đơn vị mua");
   });
 
   it("should throw if invoiceType is invalid", async () => {
@@ -140,7 +140,7 @@ describe("createInvoiceRequest", () => {
       evidenceDocIds: [],
     } as any;
 
-    await expect(createInvoiceRequest(input)).rejects.toThrow("请选择开票类型");
+    await expect(createInvoiceRequest(input)).rejects.toThrow("Vui lòng chọn loại hóa đơn");
   });
 
   it("should throw SPECIAL invoice missing required fields", async () => {
@@ -158,7 +158,7 @@ describe("createInvoiceRequest", () => {
       evidenceDocIds: [],
     } as any;
 
-    await expect(createInvoiceRequest(input)).rejects.toThrow("增值税专用发票必须填写纳税人识别号");
+    await expect(createInvoiceRequest(input)).rejects.toThrow("Hóa đơn GTGT đặc biệt bắt buộc phải có mã số thuế người nộp thuế");
   });
 
   it("should allow SPECIAL invoice with all required fields", async () => {
@@ -212,7 +212,7 @@ describe("createInvoiceRequest", () => {
       evidenceDocIds: [],
     } as any;
 
-    await expect(createInvoiceRequest(input)).rejects.toThrow("请上传至少一份开票依据（扫描版委托合同等）");
+    await expect(createInvoiceRequest(input)).rejects.toThrow("Vui lòng tải lên ít nhất một căn cứ xuất hóa đơn (hợp đồng ủy quyền bản scan...)");
   });
 
   it("should throw for noMatterReason without manager role", async () => {
@@ -227,7 +227,7 @@ describe("createInvoiceRequest", () => {
       evidenceDocIds: [],
     } as any;
 
-    await expect(createInvoiceRequest(input)).rejects.toThrow("无关联案件开票仅财务 / 管理员 / 主任律师可发起");
+    await expect(createInvoiceRequest(input)).rejects.toThrow("Chỉ Tài chính / quản trị / luật sư chủ trì mới được tạo hóa đơn không liên kết vụ án");
   });
 
   it("should throw for noMatterReason empty even with manager role", async () => {
@@ -242,7 +242,7 @@ describe("createInvoiceRequest", () => {
       evidenceDocIds: [],
     } as any;
 
-    await expect(createInvoiceRequest(input)).rejects.toThrow("无关联案件时必须填写原因说明");
+    await expect(createInvoiceRequest(input)).rejects.toThrow("Khi không liên kết vụ án bắt buộc phải nhập lý do");
   });
 
 });

@@ -216,7 +216,7 @@ describe("finance/actions", () => {
       const result = await deleteBilling(CUID(1));
 
       expect(mockAssertMatterWritable).toHaveBeenCalledWith(CUID(2));
-      expect(mockAssertCanLeadMatter).toHaveBeenCalledWith(CUID(1), CUID(2), "仅案件主办/协办或财务可删除合同");
+      expect(mockAssertCanLeadMatter).toHaveBeenCalledWith(CUID(1), CUID(2), "Chỉ chủ trì / hợp tác viên của vụ hoặc Tài chính mới được xóa hợp đồng");
       expect(result).toEqual({ ok: true });
     });
 
@@ -391,7 +391,7 @@ describe("finance/actions", () => {
           data: expect.objectContaining({
             matterId: CUID(2),
             eventType: "FEE_RECEIVED",
-            title: expect.stringMatching(/^实收 ¥/),
+            title: expect.stringMatching(/^Đã thu ¥/),
             occurredAt: expect.any(Date),
           }),
         })

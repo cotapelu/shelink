@@ -50,7 +50,7 @@ vi.mock("@/server/archive/render", () => ({
 }));
 vi.mock("@/server/archive/schemas", () => ({
   archiveSubmitSchema: { parse: vi.fn((v) => v) },
-  CLOSED_REASON_CN: { JUDGMENT: "判决", MEDIATION: "调解", WITHDRAWAL: "撤回", SETTLEMENT: "和解", RULING: "裁定", OTHER: "其他" }
+  CLOSED_REASON_CN: { JUDGMENT: "Bản án", MEDIATION: "Hòa giải", WITHDRAWAL: "Rút đơn kiện", SETTLEMENT: "Thỏa thuận dừng kiện", RULING: "Quyết định", OTHER: "Khác" }
 }));
 
 const mockPrisma = vi.mocked(prisma, true);
@@ -85,7 +85,7 @@ describe("server/archive/actions", () => {
 
     it("should reject if matter not found", async () => {
       mockPrisma.matter.findUnique.mockResolvedValue(null);
-      await expect(archiveMatter(validInput)).rejects.toThrow("案件不存在");
+      await expect(archiveMatter(validInput)).rejects.toThrow("Vụ án không tồn tại");
     });
 
     it("should reject if matter already archived", async () => {
@@ -96,7 +96,7 @@ describe("server/archive/actions", () => {
         internalCode: "INT-001",
         title: "Test"
       });
-      await expect(archiveMatter(validInput)).rejects.toThrow("案件已归档");
+      await expect(archiveMatter(validInput)).rejects.toThrow("Vụ án đã được lưu trữ");
     });
 
     it("should reject if checklist missing required and not forced", async () => {
@@ -112,7 +112,7 @@ describe("server/archive/actions", () => {
       ]);
       mockEvaluateChecklist.mockReturnValue({ missingRequired: [{ id: "1", label: "Required Item" }] });
 
-      await expect(archiveMatter(validInput)).rejects.toThrow(/归档清单缺必填项/);
+      await expect(archiveMatter(validInput)).rejects.toThrow(/Danh mục lưu trữ thiếu/);
     });
 
     it("should succeed with forced missing", async () => {
@@ -164,7 +164,7 @@ describe("server/archive/actions", () => {
       expect(mockAssertCanLeadMatter).toHaveBeenCalledWith(
         "user-1",
         "matter-1",
-        "仅案件主办/协办可以提交归档申请"
+        "Chỉ chủ trì / hợp tác viên của vụ mới được gửi yêu cầu lưu trữ"
       );
     });
   });
@@ -198,7 +198,7 @@ describe("server/archive/actions", () => {
         id: "ar-1",
         status: "APPROVED"
       } as any);
-      await expect(approveArchiveRecord({ archiveId: "ar-1" })).rejects.toThrow(/此归档申请已审批/);
+      await expect(approveArchiveRecord({ archiveId: "ar-1" })).rejects.toThrow(/Yêu cầu lưu trữ này đã được duyệt/);
     });
   });
 
@@ -260,18 +260,18 @@ describe("server/archive/actions", () => {
     // Additional error path and validation tests for batchApproveArchiveRecords
     it("rejects non-ADMIN role", async () => {
       mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
-      await expect(batchApproveArchiveRecords({ archiveIds: ["ar-1"] })).rejects.toThrow("只有管理员可以审批归档申请");
+      await expect(batchApproveArchiveRecords({ archiveIds: ["ar-1"] })).rejects.toThrow("Chỉ quản trị mới được duyệt yêu cầu lưu trữ");
     });
 
     it("rejects empty archiveIds", async () => {
       mockRequireSession.mockResolvedValue({ user: { id: "admin", role: "ADMIN" } });
-      await expect(batchApproveArchiveRecords({ archiveIds: [] })).rejects.toThrow("未选择任何归档申请");
+      await expect(batchApproveArchiveRecords({ archiveIds: [] })).rejects.toThrow("Chưa chọn yêu cầu lưu trữ nào");
     });
 
     it("rejects archiveIds > 100", async () => {
       mockRequireSession.mockResolvedValue({ user: { id: "admin", role: "ADMIN" } });
       const many = Array.from({ length: 101 }, (_, i) => `ar-${i}`);
-      await expect(batchApproveArchiveRecords({ archiveIds: many })).rejects.toThrow("单次批量不超过 100 条");
+      await expect(batchApproveArchiveRecords({ archiveIds: many })).rejects.toThrow("Mỗi lần xử lý lô không quá 100 bản ghi");
     });
 
     it("handles partial failures during batch approve", async () => {
@@ -344,20 +344,20 @@ describe("server/archive/actions", () => {
     it("rejects non-ADMIN role", async () => {
       mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
       await expect(batchRejectArchiveRecords({ archiveIds: ["ar-1"], note: "Incomplete" }))
-        .rejects.toThrow("只有管理员可以驳回归档申请");
+        .rejects.toThrow("Chỉ quản trị mới được từ chối yêu cầu lưu trữ");
     });
 
     it("rejects empty archiveIds", async () => {
       mockRequireSession.mockResolvedValue({ user: { id: "admin", role: "ADMIN" } });
       await expect(batchRejectArchiveRecords({ archiveIds: [], note: "Incomplete" }))
-        .rejects.toThrow("未选择任何归档申请");
+        .rejects.toThrow("Chưa chọn yêu cầu lưu trữ nào");
     });
 
     it("rejects archiveIds > 100", async () => {
       mockRequireSession.mockResolvedValue({ user: { id: "admin", role: "ADMIN" } });
       const many = Array.from({ length: 101 }, (_, i) => `ar-${i}`);
       await expect(batchRejectArchiveRecords({ archiveIds: many, note: "Incomplete" }))
-        .rejects.toThrow("单次批量不超过 100 条");
+        .rejects.toThrow("Mỗi lần xử lý lô không quá 100 bản ghi");
     });
 
     it("handles partial failures during batch reject", async () => {

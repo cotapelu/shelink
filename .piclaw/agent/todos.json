@@ -3,37 +3,52 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "GĐ1 hoàn tất (P0)",
+      "name": "P2 - Comment + chuỗi tiếng Trung",
       "tasks": [
         {
           "id": "task-1",
-          "content": "TD-C1 Quỹ: server+UI+nav+test",
+          "content": "prisma/schema.prisma - 294 dong",
           "status": "completed"
         },
         {
           "id": "task-2",
-          "content": "TD-G1 Thuật ngữ UI: action+page+form+nav+test",
+          "content": "src/lib/china-regions.ts - comment (+ giữ nguyên data TQ, co TODO)",
           "status": "completed"
         },
         {
           "id": "task-3",
-          "content": "TD-F1 Email settings UI + template + test",
+          "content": "src/server/archive/actions.ts + schemas.ts - 56 dong",
           "status": "completed"
         },
         {
           "id": "task-4",
-          "content": "TD-C2 Bảng tuổi nợ: helper+action+test+tab UI",
+          "content": "src/app/(app)/matters/_components/party-card.tsx - 46 dong",
           "status": "completed"
         },
         {
           "id": "task-5",
-          "content": "Cổng chất lượng: typecheck+prisma+test(2126)+build+site /login 200",
+          "content": "src/server/reports/queries.ts - 29 dong",
           "status": "completed"
+        },
+        {
+          "id": "task-6",
+          "content": "src/server/finance/actions.ts - 44 dong",
+          "status": "completed"
+        },
+        {
+          "id": "task-7",
+          "content": "16 test files lien quan (giu 198/198 pass)",
+          "status": "completed"
+        },
+        {
+          "id": "task-8",
+          "content": "Con lai: ~180 file comment + 7.500 dong chuoi/chuoi UI + trang /login HTML TQ",
+          "status": "in_progress"
         }
       ]
     }
   ],
-  "nextTaskId": 6,
+  "nextTaskId": 9,
   "nextPhaseId": 2,
-  "updatedAt": "2026-10-24T06:10:50.162Z"
+  "updatedAt": "2026-10-24T08:51:30.494Z"
 }

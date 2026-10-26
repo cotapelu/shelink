@@ -20,17 +20,17 @@
 "use client";
 
 /**
- * 案件当事人表格行（intake-sheet 专用）
+ * Dòng bảng chủ thể tham gia của vụ án (chỉ dùng cho intake-sheet)
  *
- * 参考"案件云"建案表单的当事人表格：一行一当事人，列对齐，次要字段折叠。
- * 列：角色 | 类型 | 姓名/名称 | 诉讼地位 | 证件号/信用代码 | 操作
- * - 角色 / 诉讼地位两列由调用方注入（roleSlot / standingSlot），本组件不关心其取值逻辑
- * - 类型（自然人 / 单位）、证件（身份证号 / 统一社会信用代码 + AI 查找）、展开次要字段、删除由本组件负责
- * - 次要字段（法代 / 电话 / 联系人 / 地址 / 备注）默认折叠，点"更多"在行下方展开
+ * Tham khảo bảng chủ thể trong biểu mẫu tạo hồ sơ kiểu “vụ án điện tử”: mỗi dòng một chủ thể, các cột canh hàng, trường phụ thu gọn.
+ * Cột: vai trò | loại | tên/thương hiệu | tư cách tố tụng | số giấy tờ/mã tin dụng | thao tác
+ * - Hai cột vai trò / tư cách tố tụng do bên gọi truyền vào (roleSlot / standingSlot); component này không quan tâm logic lấy giá trị
+ * - Loại (cá nhân / tổ chức), giấy tờ (số CMND/CCCD / mã số thuế doanh nghiệp + tra cứu AI), mở trường phụ, xóa do component này lo
+ * - Trường phụ (đại diện pháp luật / điện thoại / người liên hệ / địa chỉ / ghi chú) mặc định thu gọn, bấm “Thêm” sẽ mở bên dưới dòng
  *
- * PARTY_GRID 同时给表头与每一行使用，保证列对齐。
+ * PARTY_GRID dùng chung cho header và mỗi dòng, đảm bảo canh cột.
  *
- * 校验落在 zod superRefine（partyInputSchema）；本组件只负责 UI + 字段联动。
+ * Kiểm tra hợp lệ nằm ở zod superRefine (partyInputSchema); component này chỉ lo UI + liên kết trường.
  */
 import { useRef, useState, useTransition, type ReactNode } from "react";
 import { useFormContext, type FieldErrors } from "react-hook-form";
@@ -55,10 +55,10 @@ import {
   type EnterpriseSearchItem
 } from "@/server/yuandian/enterprise";
 
-/** 表头与每一行共用，保证列对齐。诉讼/仲裁类含「诉讼地位」列（置于联系人前）。姓名/证件列较 v0 收窄约 15% */
+/** Dùng chung cho header và mỗi dòng, đảm bảo canh cột. Loại tố tụng/trọng tài có cột “tư cách tố tụng” (đặt trước người liên hệ). Cột tên/giấy tờ thu hẹp ~15% so với v0 */
 export const PARTY_GRID =
   "grid grid-cols-[78px_104px_minmax(150px,1.06fr)_minmax(178px,1.15fr)_116px_104px_126px_40px] items-center gap-2";
-/** 非诉/顾问/专项：无「诉讼地位」列 */
+/** Phi tố tụng / cố vấn / chuyên đề: không có cột “tư cách tố tụng” */
 export const PARTY_GRID_NO_STANDING =
   "grid grid-cols-[78px_104px_minmax(150px,1.06fr)_minmax(178px,1.15fr)_104px_126px_40px] items-center gap-2";
 
@@ -67,15 +67,15 @@ type Props = {
   fieldPrefix: string; // e.g. "parties"
   onRemove: () => void;
   errors?: FieldErrors<Record<string, unknown>>;
-  /** 角色单元格内容（委托方徽标 / 对方·第三人下拉） */
+  /** Nội dung ô vai trò (huy hiệu bên ủy quyền / dropdown đối phương·người thứ ba) */
   roleSlot: ReactNode;
-  /** 诉讼地位单元格内容（showStanding 为 false 时忽略） */
+  /** Nội dung ô tư cách tố tụng (bỏ qua khi showStanding là false) */
   standingSlot?: ReactNode;
-  /** 是否显示「诉讼地位」列。诉讼/仲裁类 true，非诉/顾问/专项 false。默认 true */
+  /** Có hiển thị cột “tư cách tố tụng” không. Tố tụng/trọng tài true, phi tố tụng/cố vấn/chuyên đề false. Mặc định true */
   showStanding?: boolean;
-  /** false 时隐藏删除按钮（如委托方行恒存在）。默认 true */
+  /** false thì ẩn nút xóa (ví dụ dòng bên ủy quyền luôn tồn tại). Mặc định true */
   removable?: boolean;
-  /** 提供时替换内置"姓名/名称"输入框（如委托方行注入客户选择器）。 */
+  /** Khi cung cấp thì thay ô nhập “tên/thương hiệu” mặc định (ví dụ dòng bên ủy quyền chèn bộ chọn khách hàng). */
   nameSlot?: ReactNode;
 };
 
@@ -101,7 +101,7 @@ export function PartyCard({
   const [expanded, setExpanded] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 次要字段是否已有内容（折叠态给个小提示）
+  // Trường phụ đã có nội dung chưa (để hiện gợi ý nhỏ khi thu gọn)
   const secondaryFilled = [
     watch(`${p}.address`),
     watch(`${p}.notes`),
@@ -110,7 +110,7 @@ export function PartyCard({
 
   function changeType(next: PartyType) {
     setValue(`${p}.partyType`, next, { shouldDirty: true, shouldValidate: true });
-    // 切换类型时清空对侧的必填字段，避免提示串台
+    // Khi đổi loại thì xoá các trường bắt buộc bên còn lại, tránh thông báo lẫn nhau
     if (next === "NATURAL_PERSON") {
       setValue(`${p}.enterpriseSocialCode`, "");
       setValue(`${p}.enterpriseName`, "");
@@ -119,7 +119,7 @@ export function PartyCard({
     }
   }
 
-  // v0.43：输入单位名称时自动匹配元典企业（防抖），无需 AI 按钮
+  // v0.43: khi nhập tên tổ chức thì tự khớp doanh nghiệp 元典 (Yuandian) (chống rung), không cần nút AI
   function scheduleSearch(value: string) {
     if (searchTimer.current) clearTimeout(searchTimer.current);
     const q = value.trim();
@@ -131,7 +131,7 @@ export function PartyCard({
       startSearch(async () => {
         try {
           const r = await searchEnterpriseCandidates(q);
-          // 未配置元典 / 无结果 → 静默不打扰（信用代码仍可手填）
+          // Chưa cấu hình 元典 / không có kết quả → im lặng không làm phiền (mã tin dụng vẫn nhập tay được)
           setCandidates(r.configured && r.items.length > 0 ? r.items : null);
         } catch {
           setCandidates(null);
@@ -142,24 +142,24 @@ export function PartyCard({
 
   function handlePickCandidate(item: EnterpriseSearchItem) {
     startFill(async () => {
-      // 先回填 social code + 企业名称（搜索结果已有）
+      // Trước tiên điền lại mã tin dụng xã hội + tên doanh nghiệp (kết quả tìm kiếm đã có)
       setValue(`${p}.enterpriseSocialCode`, item.creditCode, { shouldDirty: true, shouldValidate: true });
       setValue(`${p}.enterpriseName`, item.name, { shouldDirty: true });
       setValue(`${p}.name`, item.name, { shouldDirty: true });
       setCandidates(null);
 
-      // 再调详情接口拿法代 + 地址（10 POINT/次）
+      // Rồi gọi API chi tiết lấy đại diện pháp luật + địa chỉ (10 POINT/lần)
       try {
         const r = await getEnterpriseDetail(item.id);
         if (r.configured && r.info) {
           if (r.info.legalRep) setValue(`${p}.legalRep`, r.info.legalRep, { shouldDirty: true });
           if (r.info.address) setValue(`${p}.address`, r.info.address, { shouldDirty: true });
-          setExpanded(true); // 展开让用户核对回填的法代 / 地址
-          toast.success(`已回填：${item.name}`);
+          setExpanded(true); // Mở ra để người dùng kiểm tra đại diện pháp luật / địa chỉ đã điền
+          toast.success(`Đã điền lại: ${item.name}`);
         }
       } catch (err) {
-        // 详情失败不阻塞，已填的 social code 仍有效
-        toast.warning("法代 / 地址自动填充失败，可手动补充", {
+        // Lỗi ở bước chi tiết không chặn; mã tin dụng xã hội đã nhập vẫn có hiệu lực
+        toast.warning("Tự động điền đại diện pháp luật / địa chỉ thất bại, có thể bổ sung tay", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -175,10 +175,10 @@ export function PartyCard({
   return (
     <div className="rounded-md border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-input">
       <div className={cn(grid, "px-2.5 py-2")}>
-        {/* 角色 */}
+        {/* Vai trò */}
         <div className="min-w-0">{roleSlot}</div>
 
-        {/* 主体类型 */}
+        {/* Loại chủ thể */}
         <Select value={partyType} onValueChange={(v) => changeType(v as PartyType)}>
           <SelectTrigger className="h-9 bg-background px-2.5 text-xs">
             <SelectValue />
@@ -192,13 +192,13 @@ export function PartyCard({
           </SelectContent>
         </Select>
 
-        {/* 姓名 / 名称（单位类型：输入自动匹配元典企业） */}
+        {/* Tên / Thương hiệu (loại tổ chức: nhập vào tự khớp doanh nghiệp 元典) */}
         <div className="min-w-0">
           {nameSlot ?? (
             !isOrg ? (
               <Input
                 className="h-9 text-xs"
-                placeholder="姓名"
+                placeholder="Họ và tên"
                 {...register(`${p}.name`)}
               />
             ) : (
@@ -212,7 +212,7 @@ export function PartyCard({
                   <div className="relative">
                     <Input
                       className="h-9 pr-7 text-xs"
-                      placeholder="单位 / 组织名称（输入自动匹配）"
+                      placeholder="Tên tổ chức / đơn vị (nhập vào tự khớp)"
                       {...nameReg}
                       onChange={(e) => {
                         nameReg.onChange(e);
@@ -231,7 +231,7 @@ export function PartyCard({
                   onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                   <div className="mb-1 flex items-center gap-1 px-1 text-[10px] text-muted-foreground">
-                    <Search className="h-3 w-3" />元典匹配，点击回填名称 + 信用代码
+                    <Search className="h-3 w-3" />Khớp 元典, bấm để điền lại tên + mã tin dụng
                   </div>
                   <ul className="max-h-64 space-y-1 overflow-y-auto">
                     {candidates?.map((c) => (
@@ -254,46 +254,46 @@ export function PartyCard({
           )}
         </div>
 
-        {/* 证件号 / 信用代码（自动匹配后回填，亦可手填） */}
+        {/* Số giấy tờ / mã tin dụng (tự điền sau khi khớp, cũng nhập tay được) */}
         <div className="min-w-0">
           {!isOrg ? (
             <Input
-              placeholder="身份证号（必填）"
+              placeholder="Số CMND/CCCD (bắt buộc)"
               className={cn("h-9 font-mono text-xs", idErr && "border-destructive")}
               {...register(`${p}.idNumber`)}
             />
           ) : (
             <Input
-              placeholder="统一社会信用代码（必填）"
+              placeholder="Mã số thuế doanh nghiệp (bắt buộc)"
               className={cn("h-9 font-mono text-xs", idErr && "border-destructive")}
               {...register(`${p}.enterpriseSocialCode`)}
             />
           )}
         </div>
 
-        {/* 诉讼地位（仅诉讼/仲裁类）—— 移到联系人前 */}
+        {/* Tư cách tố tụng (chỉ loại tố tụng / trọng tài) —— chuyển lên trước người liên hệ */}
         {showStanding && <div className="min-w-0">{standingSlot}</div>}
 
-        {/* 联系人 */}
+        {/* Người liên hệ */}
         <Input
           className="h-9 text-xs"
-          placeholder="联系人"
+          placeholder="Người liên hệ"
           {...register(`${p}.contactName`)}
         />
 
-        {/* 联系电话 */}
+        {/* Điện thoại liên hệ */}
         <Input
           className="h-9 font-mono text-xs"
-          placeholder="联系电话"
+          placeholder="Điện thoại liên hệ"
           {...register(`${p}.phone`)}
         />
 
-        {/* 操作：更多 + 删除 */}
+        {/* Thao tác: Thêm + Xóa */}
         <div className="flex items-center justify-end gap-0.5">
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            title={expanded ? "收起" : "更多（法定代表人 / 地址 / 备注）"}
+            title={expanded ? "Thu gọn" : "Thêm (đại diện pháp luật / địa chỉ / ghi chú)"}
             className={cn(
               "flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
               !expanded && secondaryFilled > 0 && "text-primary"
@@ -315,30 +315,30 @@ export function PartyCard({
         </div>
       </div>
 
-      {/* 必填项错误（折叠态也要可见） */}
+      {/* Lỗi các mục bắt buộc (khi thu gọn vẫn phải thấy) */}
       {idErr && (
         <p className="px-2 pb-1.5 text-[10px] text-destructive">{idErr.message as string}</p>
       )}
 
-      {/* 次要字段（展开） */}
+      {/* Trường phụ (mở rộng) */}
       {expanded && (
         <div className="grid grid-cols-1 gap-2 border-t border-border bg-muted/25 px-2.5 py-2.5 sm:grid-cols-2">
           {isOrg && (
             <Input
               className="h-9 text-sm"
-              placeholder="法定代表人 / 负责人（可选）"
+              placeholder="Đại diện pháp luật / người đứng đầu (tùy chọn)"
               {...register(`${p}.legalRep`)}
             />
           )}
           <div className="sm:col-span-2">
             <Input
               className="h-9 text-sm"
-              placeholder={isOrg ? "注册地址（可选）" : "住址（可选）"}
+              placeholder={isOrg ? "Địa chỉ đăng ký (tùy chọn)" : "Nơi cư trú (tùy chọn)"}
               {...register(`${p}.address`)}
             />
           </div>
           <div className="sm:col-span-2">
-            <Input className="h-9 text-sm" placeholder="备注（可选）" {...register(`${p}.notes`)} />
+            <Input className="h-9 text-sm" placeholder="Ghi chú (tùy chọn)" {...register(`${p}.notes`)} />
           </div>
         </div>
       )}

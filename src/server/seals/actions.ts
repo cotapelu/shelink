@@ -48,12 +48,12 @@ function assertPdfDocument(file: { name?: string | null; type?: string | null; m
   const type = file.type ?? file.mimeType ?? "";
   const name = file.name ?? "";
   if (type !== "application/pdf" && !name.toLowerCase().endsWith(".pdf")) {
-    throw new Error("需上传 pdf 格式文件");
+    throw new Error("Can tai len tep dinh dang PDF");
   }
 }
 
 // ============================================================
-// 流水号 SEAL-YYYY-NNNN
+// Ma thu tu SEAL-YYYY-NNNN
 // ============================================================
 async function generateSealCode(): Promise<string> {
   const year = new Date().getFullYear();
@@ -76,7 +76,7 @@ async function generateSealCode(): Promise<string> {
 }
 
 // ============================================================
-// 权限 - 谁能审批某 sealType
+// Phan quyen - ai duoc duyet sealType nao
 // ============================================================
 async function getFirmLegalRepUserId(): Promise<string | null> {
   const s = await prisma.systemSetting.findUnique({ where: { key: FIRM_LEGAL_REP_KEY } });
@@ -99,7 +99,7 @@ async function canApproveSealType(
 }
 
 // ============================================================
-// 列表
+// Danh sach
 // ============================================================
 /**
  * List seal requests with optional filters (status, type, matterId, date range).
@@ -120,7 +120,7 @@ export async function listSealRequests(input?: z.input<typeof sealListFilterSche
   if (filter.scope === "mine") {
     where.requestedById = session.user.id;
   } else if (filter.scope === "approval") {
-    // 待我审批：根据用户角色拼出可审批的 sealTypes
+    // Cho toi duyet: ghep sealTypes co the duyet duoc dua tren vai tro nguoi dung
     const approvableTypes = await pickApprovableSealTypes(session.user);
     if (approvableTypes.length === 0) {
       return [];
@@ -128,13 +128,13 @@ export async function listSealRequests(input?: z.input<typeof sealListFilterSche
     where.sealType = { in: approvableTypes };
     where.status = "PENDING";
   } else {
-    // 全所流水：FINANCE 只看财务章；LAWYER/ASSISTANT 只看自己
+    // Luong chung toan van phong: FINANCE chi thay dau tai chinh; LAWYER/ASSISTANT chi thay cua minh
     if (session.user.role === "FINANCE") {
       where.sealType = "FINANCE_SEAL";
     } else if (session.user.role === "LAWYER" || session.user.role === "ASSISTANT") {
       where.requestedById = session.user.id;
     }
-    // ADMIN / PRINCIPAL_LAWYER 看全部
+    // ADMIN / PRINCIPAL_LAWYER thay tat ca
   }
 
   return prisma.sealRequest.findMany({
@@ -209,8 +209,8 @@ async function notifySealApprovalRequested(input: {
   await notifyDirectApprovers({
     userIds,
     excludeUserId: input.requesterId,
-    title: "新的用印审批待处理",
-    content: `${input.requesterName ?? "有用户"} 提交了用印申请：${input.code} · ${input.documentTitle} · ${input.purpose}`,
+    title: "Co yeu cau phê duyệt dong dau moi can xu ly",
+    content: `${input.requesterName ?? "Nguoi dung"} da gui yeu cau dong dau: ${input.code} · ${input.documentTitle} · ${input.purpose}`,
     href: `/approvals/seals?id=${input.sealRequestId}`,
     refType: "SealRequest",
     refId: input.sealRequestId,
@@ -289,7 +289,7 @@ export async function getSealStats() {
 }
 
 // ============================================================
-// 新建申请 - FormData（含 draftDoc 文件）
+// Tao yeu cau moi - FormData (kem tep draftDoc)
 // ============================================================
 /**
  * Create a new seal request (upload PDF, generate seal code).
@@ -302,7 +302,7 @@ export async function getSealStats() {
 export async function createSealRequest(formData: FormData) {
   const session = await requireSession();
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER" && session.user.role !== "LAWYER") {
-    throw new Error("仅律师、主任、管理员可申请用章");
+    throw new Error("Chi luat su, chu nhiem, quan tri moi duoc xin dong dau");
   }
 
   const raw = {
@@ -319,15 +319,15 @@ export async function createSealRequest(formData: FormData) {
   };
   const data = sealCreateSchema.parse(raw);
 
-  // "同时加盖法定代表人章"：主章不是法人章时附带创建一个 LEGAL_REP_SEAL 子请求，
-  // 共用同一份文件副本，便于两条审批线分别走（公章/合同章走对应审批人，法人章走法定代表人）
+  // "Dong thoi dong dau dai dien phap luat": khi dau chinh khong phai dau phap nhan thi tao kem mot yeu cau con LEGAL_REP_SEAL,
+  // dung chung mot ban sao van ban, de hai tuyen duyet di rieng (dau tron/dau hop dong di voi nguoi duyet tuong ung, dau phap nhan di voi dai dien phap luat)
   const alsoLegalRep =
     formData.get("alsoLegalRep") === "true" && data.sealType !== "LEGAL_REP_SEAL";
 
   const existingDraftDocId = formData.get("existingDraftDocId");
   const draftFile = formData.get("draftDoc");
 
-  // 若有 matterId 校验存在
+  // Neu co matterId thi kiem tra ton tai
   if (data.matterId) {
     await assertCanAssociateMatter(session.user.id, data.matterId);
     await assertMatterWritable(data.matterId);
@@ -335,11 +335,11 @@ export async function createSealRequest(formData: FormData) {
       where: { id: data.matterId },
       select: { id: true }
     });
-    if (!m) throw new Error("关联案件不存在");
+    if (!m) throw new Error("Vụ án lien ket khong ton tai");
   }
 
-  // 准备 draftDocId：要么复制现有文档（卷宗联动），要么上传新文件
-  // plainBuf 保留明文，便于"同时加盖法人章"时复制副本
+  // Chuan bi draftDocId: hoac sao chep van ban hien co (lien ket ho so vu), hoac tai len tep moi
+  // plainBuf giu ban ro, de sao chep khi "dong thoi dong dau phap nhan"
   let plainBuf: Buffer;
   let draftDocPrepare: {
     name: string;
@@ -353,11 +353,11 @@ export async function createSealRequest(formData: FormData) {
   };
 
   if (typeof existingDraftDocId === "string" && existingDraftDocId) {
-    // 联动：从卷宗带来的现有文档 → 复制一份独立副本（SealRequest.draftDocId 是 unique）
+    // Lien ket: van ban hien co tu ho so vu → sao chep mot ban sao doc lap (SealRequest.draftDocId la unique)
     const src = await prisma.document.findUnique({
       where: { id: existingDraftDocId }
     });
-    if (!src) throw new Error("待盖章文档不存在");
+    if (!src) throw new Error("Van ban cho dong dau khong ton tai");
     assertPdfDocument(src);
     const srcCt = await storage.readFile(src.path);
     plainBuf =
@@ -399,14 +399,14 @@ export async function createSealRequest(formData: FormData) {
       authTag: enc.authTag.toString("base64")
     };
   } else {
-    throw new Error("请上传待盖章稿");
+    throw new Error("Vui long tai len ban nhap cho dong dau");
   }
 
   const code = await generateSealCode();
-  // 子请求（法人章）也要预生成 code，否则不能在事务内调用 generateSealCode（嵌套事务）
+  // Yeu cau con (dau phap nhan) cung phai sinh truoc code, neu khong se khong goi duoc generateSealCode ben trong giao dich (giao dich long nhau)
   const legalRepCode = alsoLegalRep ? await generateSealCode() : null;
 
-  // 子请求复制一份独立加密副本（draftDocId 是 unique）
+  // Yeu cau con sao chep mot ban ma hoa doc lap (draftDocId la unique)
   let legalRepDocPrepare: typeof draftDocPrepare | null = null;
   if (alsoLegalRep) {
     const enc2 = encryptBuffer(plainBuf);
@@ -440,7 +440,7 @@ export async function createSealRequest(formData: FormData) {
         algorithm: draftDocPrepare.algorithm,
         iv: draftDocPrepare.iv,
         authTag: draftDocPrepare.authTag,
-        tags: ["用章申请", "待盖章稿"],
+        tags: ["Yeu cau dong dau", "Ban nhap cho dong dau"],
         uploadedById: session.user.id
       }
     });
@@ -479,7 +479,7 @@ export async function createSealRequest(formData: FormData) {
           algorithm: legalRepDocPrepare.algorithm,
           iv: legalRepDocPrepare.iv,
           authTag: legalRepDocPrepare.authTag,
-          tags: ["用章申请", "待盖章稿", "法人章副本"],
+          tags: ["Yeu cau dong dau", "Ban nhap cho dong dau", "Ban sao dau dai dien phap luat"],
           uploadedById: session.user.id
         }
       });
@@ -488,7 +488,7 @@ export async function createSealRequest(formData: FormData) {
           code: legalRepCode,
           sealType: "LEGAL_REP_SEAL",
           matterId: data.matterId ?? undefined,
-          purpose: `${data.purpose.trim()}（与 ${code} 同时加盖）`,
+          purpose: `${data.purpose.trim()} (dong thoi voi ${code})`,
           documentTitle: data.documentTitle.trim(),
           pageCount: data.pageCount,
           requireCrossPageSeal: data.requireCrossPageSeal,
@@ -551,7 +551,7 @@ export async function createSealRequest(formData: FormData) {
       code: legalRepCode,
       sealType: "LEGAL_REP_SEAL",
       documentTitle: data.documentTitle.trim(),
-      purpose: `${data.purpose.trim()}（与 ${code} 同时加盖）`,
+      purpose: `${data.purpose.trim()} (dong thoi voi ${code})`,
       requesterId: session.user.id,
       requesterName: session.user.name,
       urgency: data.urgency
@@ -564,7 +564,7 @@ export async function createSealRequest(formData: FormData) {
 }
 
 // ============================================================
-// 审批通过
+// Duyyet qua
 // ============================================================
 /**
  * Approve a seal request (by authorized approvers).
@@ -582,11 +582,11 @@ export async function approveSealRequest(input: z.infer<typeof sealApproveSchema
     where: { id: data.id },
     select: { id: true, status: true, sealType: true, matterId: true, requestedById: true }
   });
-  if (!seal) throw new Error("申请不存在");
-  if (seal.status !== "PENDING") throw new Error("此申请已处理");
+  if (!seal) throw new Error("Yeu cau khong ton tai");
+  if (seal.status !== "PENDING") throw new Error("Yeu cau nay da duoc xu ly");
 
   const ok = await canApproveSealType(seal.sealType, session.user);
-  if (!ok) throw new Error("无权审批该用章类型");
+  if (!ok) throw new Error("Khong co quyen duyet loai dong dau nay");
 
   await prisma.sealRequest.update({
     where: { id: data.id },
@@ -609,8 +609,8 @@ export async function approveSealRequest(input: z.infer<typeof sealApproveSchema
   await createNotification({
     userId: seal.requestedById,
     type: "SEAL_STATUS_CHANGE",
-    title: "用章申请已通过",
-    content: `您的用章申请（${seal.sealType}）已审批通过`,
+    title: "Yeu cau dong dau da duoc duyet",
+    content: `Yeu cau dong dau cua ban (${seal.sealType}) da duoc phe duyet qua`,
     href: "/approvals/seals",
     refType: "SealRequest",
     refId: data.id
@@ -622,7 +622,7 @@ export async function approveSealRequest(input: z.infer<typeof sealApproveSchema
 }
 
 // ============================================================
-// 驳回
+// Tu choi
 // ============================================================
 /**
  * Reject a seal request with a reason.
@@ -640,11 +640,11 @@ export async function rejectSealRequest(input: z.infer<typeof sealRejectSchema>)
     where: { id: data.id },
     select: { id: true, status: true, sealType: true, matterId: true, requestedById: true }
   });
-  if (!seal) throw new Error("申请不存在");
-  if (seal.status !== "PENDING") throw new Error("此申请已处理");
+  if (!seal) throw new Error("Yeu cau khong ton tai");
+  if (seal.status !== "PENDING") throw new Error("Yeu cau nay da duoc xu ly");
 
   const ok = await canApproveSealType(seal.sealType, session.user);
-  if (!ok) throw new Error("无权驳回该用章类型");
+  if (!ok) throw new Error("Khong co quyen tu choi loai dong dau nay");
 
   await prisma.sealRequest.update({
     where: { id: data.id },
@@ -668,8 +668,8 @@ export async function rejectSealRequest(input: z.infer<typeof sealRejectSchema>)
   await createNotification({
     userId: seal.requestedById,
     type: "SEAL_STATUS_CHANGE",
-    title: "用章申请已驳回",
-    content: `您的用章申请（${seal.sealType}）已被驳回，原因：${data.reason}`,
+    title: "Yeu cau dong dau da bi tu choi",
+    content: `Yeu cau dong dau cua ban (${seal.sealType}) da bi tu choi, ly do: ${data.reason}`,
     href: "/approvals/seals",
     refType: "SealRequest",
     refId: data.id
@@ -681,29 +681,29 @@ export async function rejectSealRequest(input: z.infer<typeof sealRejectSchema>)
 }
 
 // ============================================================
-// 盖章回填（FormData：stampedDoc 必传）
+// Dien lai ban dong dau (FormData: stampedDoc bat buoc)
 // ============================================================
 export async function stampSealRequest(formData: FormData) {
   const session = await requireSession();
 
   const id = formData.get("id");
-  if (typeof id !== "string" || !id) throw new Error("id 缺失");
+  if (typeof id !== "string" || !id) throw new Error("thieu id");
 
   const seal = await prisma.sealRequest.findUnique({
     where: { id },
     select: { id: true, status: true, sealType: true, matterId: true, requestedById: true }
   });
-  if (!seal) throw new Error("申请不存在");
-  if (seal.status !== "APPROVED") throw new Error("仅已批准的申请可回填盖章件");
+  if (!seal) throw new Error("Yeu cau khong ton tai");
+  if (seal.status !== "APPROVED") throw new Error("Chi yeu cau da duyet moi dien lai duoc ban dong dau");
 
-  // 权限：申请人可回填；审批人 / ADMIN 可回填；财务章额外允许 FINANCE
+  // Phan quyen: nguoi yeu cau dien lai duoc; nguoi duyet / ADMIN dien lai duoc; dau tai chinh cho phep them FINANCE
   const okApprover = await canApproveSealType(seal.sealType, session.user);
   const okRequester = seal.requestedById === session.user.id;
-  if (!okRequester && !okApprover) throw new Error("无权回填盖章件");
+  if (!okRequester && !okApprover) throw new Error("Khong co quyen dien lai ban dong dau");
 
   const stampedFile = formData.get("stampedDoc");
   if (!(stampedFile instanceof File) || stampedFile.size === 0) {
-    throw new Error("请上传盖章后扫描件");
+    throw new Error("Vui long tai len ban scan sau khi dong dau");
   }
   assertPdfDocument(stampedFile);
   validateUploadedFile(stampedFile, { purpose: "stamp", maxBytes: MAX_FILE_SIZE });
@@ -729,7 +729,7 @@ export async function stampSealRequest(formData: FormData) {
         algorithm: enc.algorithm,
         iv: enc.iv.toString("base64"),
         authTag: enc.authTag.toString("base64"),
-        tags: ["用章申请", "盖章后扫描件"],
+        tags: ["Yeu cau dong dau", "Ban scan sau khi dong dau"],
         uploadedById: session.user.id
       }
     });
@@ -758,7 +758,7 @@ export async function stampSealRequest(formData: FormData) {
 }
 
 // ============================================================
-// 撤销（仅未审批 + 仅申请人/管理员）
+// Rut lai (chi khi chua duyet + chi nguoi yeu cau/quan tri)
 // ============================================================
 /**
  * Cancel a seal request (by requestor or admin) before finalization.
@@ -776,13 +776,13 @@ export async function cancelSealRequest(input: z.infer<typeof sealCancelSchema>)
     where: { id: data.id },
     select: { id: true, status: true, requestedById: true, matterId: true }
   });
-  if (!seal) throw new Error("申请不存在");
-  if (seal.status !== "PENDING") throw new Error("仅未审批的申请可撤销");
+  if (!seal) throw new Error("Yeu cau khong ton tai");
+  if (seal.status !== "PENDING") throw new Error("Chi yeu cau chua duyet moi rut lai duoc");
 
   const isOwner = seal.requestedById === session.user.id;
   const isAdmin =
     session.user.role === "ADMIN" || session.user.role === "PRINCIPAL_LAWYER";
-  if (!isOwner && !isAdmin) throw new Error("仅申请人或管理员可撤销");
+  if (!isOwner && !isAdmin) throw new Error("Chi nguoi yeu cau hoac quan tri moi rut lai duoc");
 
   await prisma.sealRequest.update({
     where: { id: data.id },

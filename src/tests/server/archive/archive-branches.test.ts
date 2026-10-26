@@ -44,7 +44,7 @@ vi.mock("@/server/archive/render", () => ({
 }));
 vi.mock("@/server/archive/schemas", () => ({
   archiveSubmitSchema: { parse: vi.fn((v) => v) },
-  CLOSED_REASON_CN: { JUDGMENT: "判决", MEDIATION: "调解", WITHDRAWAL: "撤回", SETTLEMENT: "和解", RULING: "裁定", OTHER: "其他" }
+  CLOSED_REASON_CN: { JUDGMENT: "Bản án", MEDIATION: "Hòa giải", WITHDRAWAL: "Rút đơn kiện", SETTLEMENT: "Thỏa thuận dừng kiện", RULING: "Quyết định", OTHER: "Khác" }
 }));
 
 const mockPrisma = vi.mocked(prisma);
@@ -118,14 +118,14 @@ describe("archiveMatter branches", () => {
     expect(mockPrisma.archiveRecord.create.mock.calls[0][0].data.archivedBy).toBe("u9");
   });
 
-  it("rejects when matter missing (案件不存在)", async () => {
+  it("rejects when matter missing (Vụ án không tồn tại)", async () => {
     mockPrisma.matter.findUnique.mockResolvedValue(null);
-    await expect(archiveMatter(archiveInput())).rejects.toThrow("案件不存在");
+    await expect(archiveMatter(archiveInput())).rejects.toThrow("Vụ án không tồn tại");
   });
 
-  it("rejects when matter already archived (案件已归档)", async () => {
+  it("rejects when matter already archived (Vụ án đã được lưu trữ)", async () => {
     mockPrisma.matter.findUnique.mockResolvedValue({ ...MATTER, status: "ARCHIVED" });
-    await expect(archiveMatter(archiveInput())).rejects.toThrow("案件已归档");
+    await expect(archiveMatter(archiveInput())).rejects.toThrow("Vụ án đã được lưu trữ");
   });
 
   it("cleans up cover doc and rethrows when catalog render fails (Error)", async () => {
@@ -133,7 +133,7 @@ describe("archiveMatter branches", () => {
     mockRenderArchiveCatalog.mockRejectedValue(new Error("boom"));
     mockPrisma.document.update.mockResolvedValue({ id: "cover-id" });
 
-    await expect(archiveMatter(archiveInput())).rejects.toThrow("渲染卷宗目录失败：boom");
+    await expect(archiveMatter(archiveInput())).rejects.toThrow("Render mục lục hồ sơ thất bại: boom");
     expect(mockPrisma.document.update).toHaveBeenCalledWith({
       where: { id: "cover-id" },
       data: { deletedAt: expect.any(Date) }
@@ -144,7 +144,7 @@ describe("archiveMatter branches", () => {
     mockPrisma.matter.findUnique.mockResolvedValue(MATTER);
     mockRenderArchiveCatalog.mockRejectedValue("plain");
     mockPrisma.document.update.mockResolvedValue({ id: "cover-id" });
-    await expect(archiveMatter(archiveInput())).rejects.toThrow("渲染卷宗目录失败：plain");
+    await expect(archiveMatter(archiveInput())).rejects.toThrow("Render mục lục hồ sơ thất bại: plain");
   });
 });
 
@@ -169,7 +169,7 @@ describe("approveArchiveRecord branches", () => {
     expect(res).toEqual({ ok: true });
     // note branch in timeline content + reviewNote trimmed
     const tl = mockPrisma.timelineEvent.create.mock.calls[0][0];
-    expect(tl.data.content).toBe("管理员审批：ok");
+    expect(tl.data.content).toBe("Quản trị duyệt: ok");
     const upd = mockPrisma.archiveRecord.update.mock.calls[0][0];
     expect(upd.data.reviewNote).toBe("ok");
     expect(mockCreateNotification).toHaveBeenCalledOnce();
@@ -183,17 +183,17 @@ describe("approveArchiveRecord branches", () => {
     const upd = mockPrisma.archiveRecord.update.mock.calls[0][0];
     expect(upd.data.reviewNote).toBeNull();
     const tl = mockPrisma.timelineEvent.create.mock.calls[0][0];
-    expect(tl.data.content).toBe("管理员审批通过");
+    expect(tl.data.content).toBe("Quản trị duyệt qua");
     const matterUpd = mockPrisma.matter.update.mock.calls[0][0];
     expect(matterUpd.data.closedAt).toBe(matterUpd.data.archivedAt); // closedAt ?? archivedAt
     // notifyApplicant runs with matter null → falls back to record.matterId
     expect(mockCreateNotification.mock.calls[0][0].content).toContain("m1");
   });
 
-  it("rejects if record not found (归档记录不存在)", async () => {
+  it("rejects if record not found (Bản ghi lưu trữ không tồn tại)", async () => {
     mockRequireSession.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
     mockPrisma.archiveRecord.findUnique.mockResolvedValue(null);
-    await expect(approveArchiveRecord({ archiveId: "a1" })).rejects.toThrow("归档记录不存在");
+    await expect(approveArchiveRecord({ archiveId: "a1" })).rejects.toThrow("Bản ghi lưu trữ không tồn tại");
   });
 });
 
@@ -230,8 +230,8 @@ describe("rejectArchiveRecord branches", () => {
   it("rejects if record not found / not pending", async () => {
     mockRequireSession.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
     mockPrisma.archiveRecord.findUnique.mockResolvedValue(null);
-    await expect(rejectArchiveRecord({ archiveId: "a1", note: "x" })).rejects.toThrow("归档记录不存在");
+    await expect(rejectArchiveRecord({ archiveId: "a1", note: "x" })).rejects.toThrow("Bản ghi lưu trữ không tồn tại");
     mockPrisma.archiveRecord.findUnique.mockResolvedValue({ id: "a1", status: "APPROVED", archivedById: "app1", archiveNo: "A", matterId: "m1" });
-    await expect(rejectArchiveRecord({ archiveId: "a1", note: "x" })).rejects.toThrow("此归档申请已审批");
+    await expect(rejectArchiveRecord({ archiveId: "a1", note: "x" })).rejects.toThrow("Yêu cầu lưu trữ này đã được duyệt");
   });
 });

@@ -17,9 +17,16 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
-// v0.30 管辖地数据 + 争议解决机构匹配
-// 数据来自 china-division（全国省/市/区县），法院/仲裁机构名称按命名规则生成。
-import pca from "china-division/dist/pca.json";
+// v0.30 Dữ liệu địa bàn + khớp cơ quan giải quyết tranh chấp
+// Dữ liệu lấy từ gói `china-division` (tỉnh / thành phố / quận huyện toàn quốc Trung Quốc);
+// tên Tòa án và Ủy ban Trọng tài sinh theo quy tắc đặt tên của hệ thống này.
+//
+// TODO(vn-data): Nguồn dữ liệu hiện tại là hành chính Trung Quốc. Khi chuyển sang
+// cơ cấu hành chính Việt Nam cần thay `china-division` bằng danh mục
+// tỉnh/thành → quận/huyện → phường/xã, và đổi quy tắc sinh tên cơ quan
+// (Tòa án Nhân dân / Tòa án cấp tỉnh / Trung tâm Trọng tài) trong file này.
+
+import pca from "china-division/dist/pca.json"
 
 type Pca = Record<string, Record<string, string[]>>;
 const DATA = pca as Pca;
@@ -34,7 +41,7 @@ export function areasOf(province: string, city: string): string[] {
   return province && city && DATA[province]?.[city] ? DATA[province][city] : [];
 }
 
-/** 管辖地序列化：省/市/区县（区县可缺）。空串表示未选。 */
+/** Chuỗi hóa địa bàn: tỉnh / thành phố / quận huyện (quận huyện có thể thiếu). Chuỗi rỗng nghĩa là chưa chọn. */
 export function joinJurisdiction(province?: string, city?: string, area?: string): string {
   return [province, city, area].filter(Boolean).join("/");
 }
@@ -48,22 +55,25 @@ export function parseJurisdiction(value?: string | null): {
   return { province, city, area };
 }
 
-// 直辖市 / 地级市占位项「市辖区」「县」不作为机构名，回退到省级名称
+// Hai giá trị đại diện "thành phố trực thuộc" và "địa cấp thị" ("市辖区", "县")
+// không được dùng làm tên cơ quan — nếu gặp thì quay về dùng tên cấp tỉnh.
 function effectiveCityName(province: string, city: string): string {
   if (!city || city === "市辖区" || city === "县") return province;
   return city;
 }
 
-// 仲裁委员会一般用城市名去掉「市」后缀：广州市 → 广州仲裁委员会
+// Ủy ban Trọng tài thường lấy tên thành phố rồi bỏ hậu tố "市" (ví dụ 广州市 → 广州仲裁委员会).
 function arbitrationCityName(cityName: string): string {
   return cityName.replace(/(市|地区|自治州|盟)$/, "");
 }
 
 /**
- * 根据管辖地生成可选「争议解决机构」：
- * - 选到区县：本区县基层法院 + 本市中院 + 本省高院 + 本市仲裁委
- * - 只选到市：本市中院 + 本市各区县基层法院 + 本省高院 + 本市仲裁委
- * 返回去重后的字符串列表。
+ * Từ địa bàn đã chọn, sinh danh sách "Cơ quan giải quyết tranh chấp" có thể chọn:
+ * - Khi chọn tới quận/huyện: Tòa án sơ thẩm quận/huyện + Tòa án cấp trung của thành phố
+ *   + Tòa án cấp cao của tỉnh + Ủy ban Trọng tài của thành phố.
+ * - Khi chỉ chọn tới thành phố: Tòa án cấp trung của thành phố + các Tòa án sơ thẩm
+ *   quận/huyện thuộc thành phố + Tòa án cấp cao của tỉnh + Ủy ban Trọng tài của thành phố.
+ * Trả về danh sách chuỗi đã loại trùng lặp.
  */
 export function agencyOptions(value?: string | null): string[] {
   const { province, city, area } = parseJurisdiction(value);
@@ -81,6 +91,6 @@ export function agencyOptions(value?: string | null): string[] {
   out.push(`${province}高级人民法院`);
   out.push(`${arbitrationCityName(cityName)}仲裁委员会`);
 
-  // 去重保序
+  // Loại trùng lặp, giữ nguyên thứ tự xuất hiện
   return Array.from(new Set(out.filter(Boolean)));
 }
