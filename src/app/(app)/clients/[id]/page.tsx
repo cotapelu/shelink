@@ -22,7 +22,7 @@ import Link from "next/link";
 import {
   ArrowLeft
 } from "lucide-react";
-import { getClientById, getClientFinanceSummary, getClientCommercialSummary } from "@/server/clients/actions";
+import { getClientById, getClientFinanceSummary, getClientCommercialSummary, getClientTimeline } from "@/server/clients/actions";
 
 
 
@@ -32,6 +32,7 @@ import { ClientInfoSection } from "./_components/client-info-section";
 import { ContactsSection } from "./_components/contacts-section";
 import { MattersSection } from "./_components/matters-section";
 import { CommercialSection } from "./_components/commercial-section";
+import { TimelineSection } from "./_components/timeline-section";
 
 
 
@@ -42,9 +43,10 @@ import { CommercialSection } from "./_components/commercial-section";
 export default async function ClientDetailPage({ params }: { params: { id: string } }) {
   const client = await getClientById(params.id);
   if (!client) notFound();
-  const [finance, commercial] = await Promise.all([
+  const [finance, commercial, timeline] = await Promise.all([
     getClientFinanceSummary(params.id),
-    getClientCommercialSummary(params.id)
+    getClientCommercialSummary(params.id),
+    getClientTimeline(params.id)
   ]);
 
   // 按案件分组合同，关联案件与签约合同合并展示（左案件 / 右合同）
@@ -70,6 +72,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
       <ContactsSection contacts={client.contacts} />
       <MattersSection matters={client.matters} billingsMap={billingsByMatter} />
       <CommercialSection quotes={commercial.quotes} contracts={commercial.contracts} />
+      <TimelineSection events={timeline.events} />
     </div>
   );
 }

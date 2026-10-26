@@ -26,6 +26,7 @@ import { requireSession } from "@/lib/auth/session";
 import { audit } from "@/server/audit";
 import { clientVisibilityFilter, isManager } from "@/lib/permissions";
 import { generateClientCode } from "./code-generator";
+import { buildClientTimeline, type ClientTimelineInput } from "./timeline";
 import {
   clientCreateSchema,
   clientUpdateSchema,
@@ -249,6 +250,114 @@ export async function getClientCommercialSummary(clientId: string) {
     quotes: quotes.map((q) => ({ ...q, total: Number(q.total) })),
     contracts: contracts.map((c) => ({ ...c, amount: Number(c.amount) }))
   };
+}
+
+// ============================================================
+// TD-A5: Dòng thời gian tương tác khách hàng (đọc-quan)
+// ============================================================
+
+type TimelineNote = ClientTimelineInput["notes"][number];
+type TimelinePayment = ClientTimelineInput["payments"][number];
+type ClientQuoteRow = Awaited<ReturnType<typeof listClientQuotes>>[number];
+type ClientContractRow = Awaited<ReturnType<typeof listClientContracts>>[number];
+
+/** Dự án của khách (làm chính hoặc được liên kết) + dữ liệu vòng đời. */
+async function listClientMattersForTimeline(clientId: string) {
+  return prisma.matter.findMany({
+    where: {
+      deletedAt: null,
+      OR: [{ primaryClientId: clientId }, { clientLinks: { some: { clientId } } }]
+    },
+    orderBy: { createdAt: "desc" },
+    take: 60,
+    select: {
+      id: true,
+      internalCode: true,
+      title: true,
+      createdAt: true,
+      firstAcceptedAt: true,
+      closedAt: true,
+      archivedAt: true
+    }
+  });
+}
+
+async function listClientIntakesForTimeline(clientId: string) {
+  return prisma.intake.findMany({
+    where: { clientId },
+    orderBy: { receivedAt: "desc" },
+    take: 40,
+    select: { id: true, title: true, status: true, receivedAt: true, declinedReason: true }
+  });
+}
+
+async function listClientNotesForTimeline(matterIds: string[]): Promise<TimelineNote[]> {
+  if (matterIds.length === 0) return [];
+  const rows = await prisma.note.findMany({
+    where: { matterId: { in: matterIds }, deletedAt: null },
+    orderBy: { occurredAt: "desc" }, take: 60,
+    select: { id: true, matterId: true, channel: true, withWhom: true, content: true, occurredAt: true, author: { select: { name: true } } }
+  });
+  return rows.map((n) => ({ id: n.id, matterId: n.matterId, channel: n.channel, withWhom: n.withWhom, content: n.content, occurredAt: n.occurredAt, authorName: n.author?.name ?? null }));
+}
+
+async function listClientPaymentsForTimeline(matterIds: string[]): Promise<TimelinePayment[]> {
+  if (matterIds.length === 0) return [];
+  const rows = await prisma.feeEntry.findMany({
+    where: { matterId: { in: matterIds }, type: "RECEIVED" },
+    orderBy: { occurredAt: "desc" },
+    take: 60,
+    select: { id: true, matterId: true, amount: true, occurredAt: true }
+  });
+  return rows.map((p) => ({
+    id: p.id,
+    matterId: p.matterId,
+    amount: Number(p.amount),
+    occurredAt: p.occurredAt,
+    currency: "VND"
+  }));
+}
+
+function toTimelineQuote(q: ClientQuoteRow): ClientTimelineInput["quotes"][number] {
+  return { id: q.id, code: q.code, title: q.title, status: q.status, issuedAt: q.issuedAt, createdAt: q.createdAt, total: Number(q.total), currency: q.currency };
+}
+
+function toTimelineContract(c: ClientContractRow): ClientTimelineInput["contracts"][number] {
+  return { id: c.id, code: c.code, title: c.title, status: c.status, signedAt: c.signedAt, createdAt: c.createdAt, amount: Number(c.amount), currency: c.currency };
+}
+
+/** Gom dữ liệu timeline khách trong 2 chặng (matters trước, notes/payments theo matterIds). */
+async function fetchTimelineSources(clientId: string) {
+  const [matters, intakes, quoteRows, contractRows] = await Promise.all([
+    listClientMattersForTimeline(clientId),
+    listClientIntakesForTimeline(clientId),
+    listClientQuotes(clientId),
+    listClientContracts(clientId)
+  ]);
+  const [notes, payments] = await Promise.all([
+    listClientNotesForTimeline(matters.map((m) => m.id)),
+    listClientPaymentsForTimeline(matters.map((m) => m.id))
+  ]);
+  return { matters, intakes, quoteRows, contractRows, notes, payments };
+}
+
+/**
+ * Vòng đời tương tác của khách (TD-A5, đọc-quan): gộp tiếp nhận/dự án/giao tiếp/
+ * thu tiền/báo giá/hợp đồng. Quyền giống getClientCommercialSummary; chỉ đọc.
+ */
+export async function getClientTimeline(clientId: string) {
+  const session = await requireSession();
+  await assertClientReadable(session, clientId);
+  const s = await fetchTimelineSources(clientId);
+  const events = buildClientTimeline({
+    intakes: s.intakes,
+    matters: s.matters,
+    notes: s.notes,
+    payments: s.payments,
+    quotes: s.quoteRows.map(toTimelineQuote),
+    contracts: s.contractRows.map(toTimelineContract)
+  });
+  return { events };
 }
 
 export async function createClient(input: ClientCreateInput) {

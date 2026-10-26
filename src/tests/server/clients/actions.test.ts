@@ -5,6 +5,7 @@ import {
   getClientById,
   getClientFinanceSummary,
   getClientCommercialSummary,
+  getClientTimeline,
   createClient,
   updateClient,
   softDeleteClient,
@@ -42,7 +43,9 @@ vi.mock("@/lib/prisma", () => ({
     },
     billing: { findMany: vi.fn() },
     feeEntry: { findMany: vi.fn() },
-    matter: { count: vi.fn() },
+    matter: { count: vi.fn(), findMany: vi.fn() },
+    intake: { findMany: vi.fn() },
+    note: { findMany: vi.fn() },
     quote: { findMany: vi.fn() },
     contract: { findMany: vi.fn() },
     $transaction: vi.fn(),
@@ -275,6 +278,68 @@ describe("clients/actions", () => {
 
       await expect(getClientCommercialSummary("c1")).rejects.toThrow("Khách hàng không tồn tại");
       expect(mockPrisma.quote.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("getClientTimeline", () => {
+    it("assembles a merged timeline for managers and links notes/payments via matter code", async () => {
+      mockIsManager.mockReturnValue(true);
+      mockPrisma.matter.findMany.mockResolvedValue([
+        { id: "m1", internalCode: "LL-2026-CC-0001", title: "Dự án A", createdAt: new Date("2026-01-01"), firstAcceptedAt: null, closedAt: null, archivedAt: null }
+      ]);
+      mockPrisma.intake.findMany.mockResolvedValue([
+        { id: "i1", title: "Tư vấn", status: "CONVERTED", receivedAt: new Date("2026-01-05"), declinedReason: null }
+      ]);
+      mockPrisma.quote.findMany.mockResolvedValue([
+        { id: "q1", code: "QT-1", title: "BG", status: "SENT", total: "250000", currency: "VND", issuedAt: new Date("2026-02-01"), createdAt: new Date("2026-01-15") }
+      ]);
+      mockPrisma.contract.findMany.mockResolvedValue([]);
+      mockPrisma.note.findMany.mockResolvedValue([
+        { id: "n1", matterId: "m1", channel: "PHONE", withWhom: "Anh B", content: "Trao đổi phí", occurredAt: new Date("2026-02-10"), author: { name: "Chi" } }
+      ]);
+      mockPrisma.feeEntry.findMany.mockResolvedValue([
+        { id: "p1", matterId: "m1", amount: "250000", occurredAt: new Date("2026-02-20") }
+      ]);
+
+      const result = await getClientTimeline("c1");
+
+      expect(mockPrisma.client.findFirst).not.toHaveBeenCalled(); // manager bỏ qua visibility
+      expect(result.events.map((e) => e.id)).toEqual([
+        "payment:p1",
+        "note:n1",
+        "quote:q1",
+        "intake:i1",
+        "matter:m1:open"
+      ]);
+      const payment = result.events.find((e) => e.id === "payment:p1");
+      expect(payment.amount).toBe(250000);
+      expect(payment.href).toBe("/matters/m1");
+      expect(payment.detail).toBe("Dự án LL-2026-CC-0001");
+      const note = result.events.find((e) => e.id === "note:n1");
+      expect(note.title).toBe("Gọi điện · Anh B (Chi)");
+    });
+
+    it("skips note/payment queries and returns [] when the client has no matters", async () => {
+      mockIsManager.mockReturnValue(true);
+      mockPrisma.matter.findMany.mockResolvedValue([]);
+      mockPrisma.intake.findMany.mockResolvedValue([]);
+      mockPrisma.quote.findMany.mockResolvedValue([]);
+      mockPrisma.contract.findMany.mockResolvedValue([]);
+
+      const result = await getClientTimeline("c1");
+
+      expect(result.events).toEqual([]);
+      expect(mockPrisma.note.findMany).not.toHaveBeenCalled();
+      expect(mockPrisma.feeEntry.findMany).not.toHaveBeenCalled();
+    });
+
+    it("enforces permission like getClientCommercialSummary for non-managers", async () => {
+      mockIsManager.mockReturnValue(false);
+      mockClientVisibility.mockReturnValue({});
+      mockPrisma.client.findFirst.mockResolvedValue(null);
+
+      await expect(getClientTimeline("c1")).rejects.toThrow("Khách hàng không tồn tại");
+      expect(mockPrisma.matter.findMany).not.toHaveBeenCalled();
     });
   });
 

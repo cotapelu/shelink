@@ -1,8 +1,23 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-26 (AUTO-48).
+Cập nhật lần cuối: 2026-10-26 (AUTO-49).
 
 ## Chu kỳ đã hoàn thành (gần đây)
+
+### [CYCLE-AUTO-49] — 2026-10-26: TD-A5 — Dòng thời gian tương tác khách hàng (hoàn tất Customer 360)
+Loại: Feature (không đổi schema/migration). ~1h30. Kế thừa AUTO-47 (báo giá/hợp đồng trên /clients/[id]).
+
+**Đã hoàn thành** (Data→Types→Server Action thuần→Action→UI→Test):
+- [x] `src/server/clients/timeline.ts` (thuần): `buildClientTimeline` gộp 6 nguồn chạm — tiếp nhận (`IntakeStatus`→nhãn VI), dự án (mở/tiếp nhận/kết thúc/lưu trữ), ghi chép giao tiếp (`NoteChannel`→VI, cắt 140 ký tự), thu tiền (`FeeEntry RECEIVED`), báo giá (`issuedAt ?? createdAt`), hợp đồng (`signedAt ?? createdAt`) — sắp xếp mới nhất trước, giới hạn 60. Nghiệp vụ nằm hết ở hàm thuần (AGENTS §5.3).
+- [x] `server/clients/actions.ts`: `getClientTimeline` (đọc-quan, quyền dùng lại `assertClientReadable`) + helper 2 chặng (`fetchTimelineSources`; notes/payments chỉ query khi có matter). Dự án của khách = `primaryClientId` OR `clientLinks.some`.
+- [x] UI `_components/timeline-section.tsx` (presentational, icon/màu theo nguồn, số tiền `tabular-nums`) + lắp vào `/clients/[id]` (thêm vào Promise.all hiện có).
+- [x] Test: `timeline.test.ts` (7 — merge/sort/cap/fallback/label) + mở rộng `actions.test.ts` (3 — manager, rỗng, phân quyền; thêm `matter.findMany`/`intake`/`note` vào mock) + `timeline-section.test.tsx` (3).
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test toàn bộ **2207 pass /1 skip /0 fail** (2194→+13); build SUCCESS; dev :3000 `/login` 200, `/clients/[id]` 307→login đúng guard, log không lỗi runtime/compile. Query timeline xác thực trực tiếp trên DB dev (khách demo: 1 tiếp nhận → timeline hiển thị). Lint: file mới sạch; 2 hàm timeline ≤20 dòng.
+
+**Phát hiện RỈM (không sửa — đỏ-vạch `.env`, thuộc hạ tầng, chờ chủ sở hữn)**: đăng nhập dev bị **500** vì `src/lib/auth/jwt.ts` kỳ vọng key **PEM** (PKCS#8 private / SPKI public) nhưng `.env` đang để **format SSH** (`ssh-rsa` public / `OPENSSH PRIVATE KEY` private). `importRsaPublicKey` còn ném "SSH public key format not supported". Hệ quả: encode → 500 khi login; decode → null → mọi request có cookie session đều 307. **Hoàn toàn không liên quan thay đổi này.** Nên sinh lại key PEM: `ssh-keygen -t rsa -b 4096 -m PEM -f jwt` rồi cập nhật `JWT_PRIVATE_KEY`/`JWT_PUBLIC_KEY`. Do đó phần "đường vàng" cần session chưa chạy được qua trình duyệt trong môi trường dev hiện tại (đã bù bằng xác thực DB + unit/component test).
+
+**Roadmap TD-A5 còn lại**: ticket/phiếu yêu cầu, CSAT/NPS (cần migration — xin duyệt). Lưu ý: `server/clients/actions.ts` vẫn là God Object có sẵn (file >300 dòng, nhiều hàm >20) — có thể trích riêng module `clients-timeline.server` trong refactor sau.
 - ✅ Chu kỳ 0–75: khôi phục cổng chất lượng, đẩy phủ, refactor 3 lô.
 - ✅ P0: sửa ngoại lệ giới hạn tốc độ (CVE-2025-001).
 - ✅ P1: code JWT RS256 xong (chờ deploy); kiểm tra quyền pass.
