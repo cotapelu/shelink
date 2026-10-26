@@ -34,6 +34,9 @@ vi.mock("@/lib/prisma", () => ({
       update: vi.fn(),
       delete: vi.fn(),
     },
+    stageTemplate: {
+      findUnique: vi.fn()
+    },
     deadline: {
       findUnique: vi.fn(),
       create: vi.fn(),

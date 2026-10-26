@@ -3,52 +3,32 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "P2 - Comment + chuỗi tiếng Trung",
+      "name": "Nút Tạo tiếp nhận trên /intakes (follow-up AUTO-41)",
       "tasks": [
         {
           "id": "task-1",
-          "content": "prisma/schema.prisma - 294 dong",
-          "status": "completed"
+          "content": "Tạo component create-intake-button (fetch options + mở IntakeSheet, tái dùng)",
+          "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "src/lib/china-regions.ts - comment (+ giữ nguyên data TQ, co TODO)",
-          "status": "completed"
+          "content": "Lắp nút vào trang /intakes/page.tsx header",
+          "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "src/server/archive/actions.ts + schemas.ts - 56 dong",
-          "status": "completed"
+          "content": "Viết test component (mở sheet, nạp options 1 lần, onCreated)",
+          "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "src/app/(app)/matters/_components/party-card.tsx - 46 dong",
-          "status": "completed"
-        },
-        {
-          "id": "task-5",
-          "content": "src/server/reports/queries.ts - 29 dong",
-          "status": "completed"
-        },
-        {
-          "id": "task-6",
-          "content": "src/server/finance/actions.ts - 44 dong",
-          "status": "completed"
-        },
-        {
-          "id": "task-7",
-          "content": "16 test files lien quan (giu 198/198 pass)",
-          "status": "completed"
-        },
-        {
-          "id": "task-8",
-          "content": "Con lai: ~180 file comment + 7.500 dong chuoi/chuoi UI + trang /login HTML TQ",
-          "status": "in_progress"
+          "content": "Chạy cổng chất lượng: typecheck, lint file mới, test, build; cập nhật AGENT_TODO",
+          "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 9,
+  "nextTaskId": 5,
   "nextPhaseId": 2,
-  "updatedAt": "2026-10-24T08:51:30.494Z"
+  "updatedAt": "2026-10-26T00:37:48.905Z"
 }

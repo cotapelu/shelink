@@ -21,6 +21,7 @@
 import { prisma } from '@/lib/prisma';
 import { clientTypeToPartyType } from './helpers';
 import { seedDefaultFolders } from '@/lib/default-folders';
+import { seedStagesFromTemplate } from '@/server/procedures/stage-template';
 import type { Intake, Matter, ProcedureType, LitigationStanding, MatterCategory } from '@prisma/client';
 
 export function determineFirstProcedureType(intake: Intake): ProcedureType {
@@ -163,6 +164,8 @@ async function createFirstProcedure(tx: any, matterId: string, firstProcedureTyp
     data: { matterId, type: firstProcedureType, engagement: "ENGAGED", order: 1, status: "IN_PROGRESS", handlingAgency: intake.firstAgency, jurisdiction: intake.jurisdiction, ourStanding: intake.ourStanding },
     select: { id: true }
   });
+  // Giai đoạn mặc định theo loại hình (StageTemplate, DATA-MODEL §4.13 → §4.8); cùng transaction.
+  await seedStagesFromTemplate(tx, procedure.id, firstProcedureType);
   return { id: procedure.id };
 }
 

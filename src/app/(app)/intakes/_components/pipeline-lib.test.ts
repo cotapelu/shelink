@@ -4,7 +4,9 @@ import {
   isOverSla,
   formatPending,
   canMove,
-  INTAKE_STAGES
+  INTAKE_STAGES,
+  buildIntakeStages,
+  DROPPABLE_INTAKE_STAGES
 } from "./pipeline-lib";
 
 const NOW = 1_700_000_000_000;
@@ -53,5 +55,29 @@ describe("canMove", () => {
       "INTAKE",
       "PENDING_CONFIRMATION"
     ]);
+  });
+  it("rejects unknown stages via canMove", () => {
+    expect(canMove("UNKNOWN", "INTAKE")).toBe(false);
+    expect(canMove("INTAKE", "UNKNOWN")).toBe(false);
+  });
+});
+
+describe("buildIntakeStages", () => {
+  it("dùng thuật ngữ cấu hình cho nhãn cột INTAKE, giữ các nhãn khác", () => {
+    const stages = buildIntakeStages("Cơ hội");
+    expect(stages[0]).toEqual({ key: "INTAKE", label: "Cơ hội", droppable: true });
+    expect(stages.map((s) => s.key)).toEqual([
+      "INTAKE",
+      "PENDING_CONFIRMATION",
+      "NEEDS_REVISION",
+      "CONVERTED",
+      "DECLINED"
+    ]);
+    expect(stages.filter((s) => s.droppable).map((s) => s.key)).toEqual(DROPPABLE_INTAKE_STAGES);
+  });
+  it("về mặc định khi thuật ngữ rỗng/khoảng trắng", () => {
+    expect(buildIntakeStages("")[0].label).toBe("Tiếp nhận");
+    expect(buildIntakeStages("   ")[0].label).toBe("Tiếp nhận");
+    expect(INTAKE_STAGES[0].label).toBe("Tiếp nhận");
   });
 });

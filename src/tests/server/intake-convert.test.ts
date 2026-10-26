@@ -31,6 +31,7 @@ const {
     matter: { create: vi.fn() },
     party: { create: vi.fn() },
     matterProcedure: { create: vi.fn() },
+    stageTemplate: { findUnique: vi.fn() },
     procedureParty: { createMany: vi.fn() },
     billing: { create: vi.fn() },
     document: { updateMany: vi.fn() },

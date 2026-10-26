@@ -3,6 +3,8 @@
  * Không DB/React — dễ test.
  */
 
+import { DEFAULT_TERMS } from "@/lib/terminology";
+
 export const SLA_WARN_HOURS = 24;
 
 export type IntakeStage = "INTAKE" | "PENDING_CONFIRMATION" | "NEEDS_REVISION" | "CONVERTED" | "DECLINED";
@@ -14,13 +16,26 @@ export type StageColumn = {
   droppable: boolean;
 };
 
-export const INTAKE_STAGES: StageColumn[] = [
-  { key: "INTAKE", label: "Tiếp nhận", droppable: true },
-  { key: "PENDING_CONFIRMATION", label: "Chờ xác nhận", droppable: true },
-  { key: "NEEDS_REVISION", label: "Cần bổ sung", droppable: false },
-  { key: "CONVERTED", label: "Đã chuyển", droppable: false },
-  { key: "DECLINED", label: "Từ chối", droppable: false }
-];
+/** Cột đang xử lý — ranh giới kéo-thả (server cũng giữ cùng tập này). */
+export const DROPPABLE_INTAKE_STAGES: IntakeStage[] = ["INTAKE", "PENDING_CONFIRMATION"];
+
+/**
+ * Dựng cột pipeline với nhãn "tiếp nhận" theo thuật ngữ cấu hình (TD-G1).
+ * Các nhãn trạng thái còn lại là động từ cố định, chỉ danh từ gốc đổi theo cấu hình.
+ */
+export function buildIntakeStages(intakeTerm: string): StageColumn[] {
+  const noun = intakeTerm?.trim() || DEFAULT_TERMS.intake;
+  return [
+    { key: "INTAKE", label: noun, droppable: true },
+    { key: "PENDING_CONFIRMATION", label: "Chờ xác nhận", droppable: true },
+    { key: "NEEDS_REVISION", label: "Cần bổ sung", droppable: false },
+    { key: "CONVERTED", label: "Đã chuyển", droppable: false },
+    { key: "DECLINED", label: "Từ chối", droppable: false }
+  ];
+}
+
+/** Cột mặc định (giữ tên cũ cho tương thích + test). */
+export const INTAKE_STAGES: StageColumn[] = buildIntakeStages(DEFAULT_TERMS.intake);
 
 export type PipelineItem = {
   id: string;
@@ -58,6 +73,5 @@ export function formatPending(hours: number | null): string {
 
 /** Được kéo nếu cả từ-đến thuộc cột droppable và khác nhau. */
 export function canMove(from: string, to: string): boolean {
-  const isDroppable = (k: string) => INTAKE_STAGES.some((s) => s.key === k && s.droppable);
-  return from !== to && isDroppable(from) && isDroppable(to);
+  return from !== to && DROPPABLE_INTAKE_STAGES.includes(from as IntakeStage) && DROPPABLE_INTAKE_STAGES.includes(to as IntakeStage);
 }

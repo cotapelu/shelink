@@ -19,9 +19,12 @@
  */
 import { AppShell } from "@/components/layout/app-shell";
 import { AnnouncementBanner } from "@/components/layout/announcement-banner";
+import { TerminologyProvider } from "@/components/layout/terminology-provider";
 import { listActiveBanners } from "@/server/announcements/actions";
 import { getSession } from "@/lib/auth/session";
 import { getFirmProfile } from "@/server/settings/firm-profile";
+import { readTerms } from "@/server/settings/terminology";
+import { DEFAULT_TERMS } from "@/lib/terminology";
 import { prisma } from "@/lib/prisma";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -30,6 +33,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const banners = session?.user ? await listActiveBanners() : [];
 
   // v0.42 项1：侧栏品牌（律所名 / 副标题 / Logo）可在设置页配置
+  // v0.48 (TD-G1): thuật ngữ hiển thị cấu hình được — đọc 1 lần/layout, cho mọi trang con.
+  const terms = session?.user ? await readTerms() : DEFAULT_TERMS;
+
   const profile = await getFirmProfile();
   const firm = {
     name: profile.firmName,
@@ -51,7 +57,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       userAvatar={me?.avatar ?? null}
       banner={banners.length > 0 ? <AnnouncementBanner banners={banners} /> : null}
     >
-      {children}
+      <TerminologyProvider terms={terms}>{children}</TerminologyProvider>
     </AppShell>
   );
 }

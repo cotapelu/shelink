@@ -1,6 +1,6 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-24 (AUTO-41).
+Cập nhật lần cuối: 2026-10-24 (AUTO-45).
 
 ## Chu kỳ đã hoàn thành (gần đây)
 - ✅ Chu kỳ 0–75: khôi phục cổng chất lượng, đẩy phủ, refactor 3 lô.
@@ -57,6 +57,41 @@ Cập nhật lần cuối: 2026-10-24 (AUTO-41).
 - Rollback: `git revert`.
 
 ## Nhật ký chu kỳ gần nhất
+
+### [CYCLE-AUTO-43] — 2026-10-24: Nút "Tạo tiếp nhận" trên pipeline /intakes (follow-up AUTO-41)
+Loại: Feature (tái dùng, không đổi schema/migration). ~40 phút. ✅.
+
+**Đã hoàn thành**:
+- [x] Nút "Tạo tiếp nhận" trên `/intakes`: component mới `intakes/_components/intake-create-button.tsx` — lazy nạp `clientOptions` (`listClients`) + `colleagues` (`listActiveColleagues`) **một lần** khi mở; mở lại không gọi lại (cache theo phiên dialog); lỗi nạp options không chặn mở form; đóng sheet → `onCreated` làm mới pipeline.
+- [x] Tái dùng `IntakeSheet` sẵn có (không nhân bản form; tránh phình `intake-sheet.tsx`). Lắp vào header trang `/intakes/page.tsx` (flex, nút bên phải, `onCreated={load}`).
+- [x] 5 test component (`intake-create-button.test.tsx`): render nút, nạp options 1 lần + mở sheet, không nạp lại khi mở lại, `onCreated`, và degrade khi options lỗi.
+
+**Cổng chất lượng**: typecheck PASS (`tsc --noEmit`=0); lint sạch 3 file đổi; test file mới 5/5; build SUCCESS; dev server cổng 3000: `/login` 200, `/intakes` 307→`/login?callbackUrl` (guard đúng, route compile). **Ghi chú**: `next start` production hiện 500 do instrumentation hook lỗi module `server/cron/scheduler` trong bundle build — **lỗi có sẵn, không do thay đổi này** (DEV chạy bình thường; profile từng ghi "tắt instrumentationHook").
+
+### [CYCLE-AUTO-44] — 2026-10-24: Wire thuật ngữ cấu hình vào pipeline Tiếp nhận (TD-G1 consumption)
+Loại: Feature (hoàn tất follow-up AUTO-43; không đổi schema/migration). ~45 phút. ✅.
+
+**Việc đã làm**:
+- [x] `TerminologyProvider` (client, `components/layout/terminology-provider.tsx`) + context; `useTerminology()` nâng cấp: ưu tiên `stored` > context > `DEFAULT_TERMS`. Hook trước đó **chưa ai dùng** → an toàn đổi hành vi.
+- [x] `(app)/layout.tsx` đọc `readTerms()` (SystemSetting) 1 lần/layout, bọc `<TerminologyProvider>`; `saveTerminologyAction` đã `revalidatePath("/","layout")` nên lưu ở /settings/terminology là áp nhãn ngay toàn app.
+- [x] Pipeline theo thuật ngữ: `pipeline-lib.ts` thêm `buildIntakeStages(intakeTerm)` + `DROPPABLE_INTAKE_STAGES` (hằng số kéo, `canMove` dùng lại); `IntakePipeline` nhận prop `stages`; trang `/intakes` dùng `terms.intake` cho tiêu đề + cột đầu. Rename "Tiếp nhận"→"Cơ hội" ở settings sẽ đổi cả H1 lẫn cột kanban.
+- [x] Test: +`use-terminology.test.tsx` (4: default, provider, stored override, null→provider) + mở rộng `pipeline-lib.test.ts` (builder dùng thuật ngữ, fallback rỗng, canMove chặn stage lạ).
+
+**Cổng chất lượng**: typecheck PASS; lint sạch; test toàn bộ **2167 pass /1 skip /0 fail** (2155→+12); build SUCCESS; dev :3000 `/login`200, `/intakes` và `/settings/terminology` 307→login đúng guard.
+
+### [CYCLE-AUTO-45] — 2026-10-24: Sinh giai đoạn mặc định theo loại hình (StageTemplate → MatterStage)
+Loại: Feature (dùng model sẵn có, **không đổi schema/migration**). ~1 giờ. ✅.
+
+**Bối cảnh**: `StageTemplate` (DATA-MODEL §4.13) chỉ đọc/ghi ở `/settings/templates`, **chưa từng được áp dụng**; UI settings ghi "chỉ ảnh hưởng thủ tục mới tạo" nhưng chưa đúng. Đây là phần áp dụng còn thiếu.
+
+**Đã hoàn thành**:
+- [x] `src/server/procedures/stage-template.ts`: `normalizeStageSteps(Json)` thuần + bền vững (bỏ item hỏng/thiếu tên, cắt tên, ghép `order`, sắp xếp, chặn 50); `seedStagesFromTemplate(client, procedureId, procedureType)` đọc mẫu `default-{procedureType}` → `matterStage.createMany`; không có mẫu/mẫu rỗng → trả 0 (không chặn tạo thủ tục).
+- [x] Wire 2 điểm tạo thủ tục: `addProcedure` (chỉ ENGAGED, bỏ qua INFORMATIONAL) và `createFirstProcedure` trong conversion (**cùng transaction**, nên intake→matter cũng sinh giai đoạn).
+- [x] Test: `stage-template.test.ts` (9 — parse edge cases + seed: no-template/empty/count). Sửa 4 file test cũ để mock bổ sung `stageTemplate.findUnique` (hợp đồng mới: tạo thủ tục nay đọc thêm mẫu).
+
+**Cổng chất lượng**: typecheck PASS; lint — file mới sạch, không phát sinh lỗi mới (9 lỗi `procedures/actions.ts` là nợ **có sẵn** từ HEAD: God function/file >300 dòng; `addProcedure` gọn 1 dòng để giảm footprint); test toàn bộ **2176 pass /1 skip /0 fail** (2167→+9); build SUCCESS; dev :3000 (1 lệnh tự chứa) `/login`200, `/intakes`+`/settings/templates`+`/settings/terminology` 307→login đúng guard, không lỗi runtime.
+
+**Còn lại**: cân nhắc sửa dynamic import `server/cron/scheduler` để `next start` production hết 500 (lỗi có sẵn, instrumentation — DEV chạy bình thường).
 
 ### [CYCLE-AUTO-39] — 2026-10-24: Giai đoạn 1 thương mại (P0)
 Loại: Feature (docs-first → schema → migrate dev local → server → UI → test). ~4 giờ. ✅.

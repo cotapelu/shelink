@@ -40,6 +40,7 @@ vi.mock("@/lib/prisma", () => ({
     contact: { create: vi.fn(), findFirst: vi.fn() },
     causeOfAction: { findUnique: vi.fn() },
     matterProcedure: { create: vi.fn() },
+    stageTemplate: { findUnique: vi.fn() },
     $transaction: vi.fn()
   }
 }));
@@ -94,7 +95,8 @@ beforeEach(() => {
       client: mockPrisma.client,
       contact: mockPrisma.contact,
       causeOfAction: mockPrisma.causeOfAction,
-      matterProcedure: mockPrisma.matterProcedure
+      matterProcedure: mockPrisma.matterProcedure,
+      stageTemplate: mockPrisma.stageTemplate
     };
     return await cb(tx as any);
   });

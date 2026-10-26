@@ -35,6 +35,7 @@ import {
   type DeadlineCreateInput,
   type HearingCreateInput
 } from "./schemas";
+import { seedStagesFromTemplate } from "./stage-template";
 
 function emptyToNull<T extends Record<string, unknown>>(obj: T): T {
   const out: Record<string, unknown> = {};
@@ -95,6 +96,9 @@ export async function addProcedure(input: ProcedureCreateInput) {
     targetId: created.id,
     detail: { matterId: data.matterId, type: data.type }
   });
+
+  // Giai đoạn mặc định theo loại hình (StageTemplate); giai đoạn tham khảo không sinh.
+  if (data.engagement !== "INFORMATIONAL") await seedStagesFromTemplate(prisma, created.id, data.type);
 
   revalidatePath(`/matters/${data.matterId}`);
   return { ok: true, id: created.id };

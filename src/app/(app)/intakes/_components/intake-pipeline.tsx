@@ -36,7 +36,15 @@ import { formatCurrency } from "@/lib/utils";
 
 const WORKING: IntakeStage[] = ["INTAKE", "PENDING_CONFIRMATION"];
 
-export function IntakePipeline({ items, onMoved }: { items: PipelineItem[]; onMoved: () => void }) {
+export function IntakePipeline({
+  items,
+  onMoved,
+  stages = INTAKE_STAGES
+}: {
+  items: PipelineItem[];
+  onMoved: () => void;
+  stages?: StageColumn[];
+}) {
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [pending, startTransition] = useTransition();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -61,7 +69,7 @@ export function IntakePipeline({ items, onMoved }: { items: PipelineItem[]; onMo
       {view === "kanban" ? (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3 xl:grid-cols-5">
-            {INTAKE_STAGES.map((col) => (
+            {stages.map((col) => (
               <PipelineColumn
                 key={col.key}
                 column={col}
@@ -72,7 +80,7 @@ export function IntakePipeline({ items, onMoved }: { items: PipelineItem[]; onMo
           </div>
         </DndContext>
       ) : (
-        <IntakeList items={items} />
+        <IntakeList items={items} stages={stages} />
       )}
     </div>
   );
@@ -194,7 +202,7 @@ function SlaBadge({ hours, over }: { hours: number | null; over: boolean }) {
   );
 }
 
-function IntakeList({ items }: { items: PipelineItem[] }) {
+function IntakeList({ items, stages }: { items: PipelineItem[]; stages: StageColumn[] }) {
   if (items.length === 0) {
     return <p className="rounded-xl border border-border bg-card py-12 text-center text-xs text-muted-foreground">Không có tiếp nhận.</p>;
   }
@@ -220,7 +228,7 @@ function IntakeList({ items }: { items: PipelineItem[] }) {
                 </td>
                 <td className="px-3 py-3 text-muted-foreground">{item.clientName ?? item.contactName ?? "—"}</td>
                 <td className="px-3 py-3 text-[12px] text-muted-foreground">
-                  {INTAKE_STAGES.find((s) => s.key === item.status)?.label}
+                  {stages.find((s) => s.key === item.status)?.label}
                 </td>
                 <td className="px-3 py-3 text-right font-mono tabular-nums text-muted-foreground">
                   {item.claimAmount ? formatCurrency(item.claimAmount) : "—"}
