@@ -1,8 +1,20 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-26 (AUTO-51).
+Cập nhật lần cuối: 2026-10-26 (AUTO-52).
 
 ## Chu kỳ đã hoàn thành (gần đây)
+
+### [CYCLE-AUTO-52] — 2026-10-26: TD-B4 (hoàn thiện) — Nhập/sửa nhiệm vụ mặc định + Việt hoá /settings/templates
+Loại: Feature + refactor UI (không đổi schema/migration). Owner đã duyệt. ~1h. Nối AUTO-51.
+
+**Đã hoàn thành**:
+- [x] Editor nhiệm vụ mặc định: mỗi giai đoạn có thể thêm/xoá `defaultTasks` (Enter hoặc phẩy, cap 20, cắt 120 ký tự) — chip bấm để xoá. Trước đó dialog chỉ hiển thị, không sửa được task.
+- [x] Việt hoá toàn bộ màn /settings/templates (trước đó còn chuỗi tiếng Trung — nợ i18n).
+- [x] Tách `template-editor-parts.tsx` (Step type, StageList, StepsEditor, StepEditor, StepTaskEditor, NameField, DialogActions) → gỡ nợ lint: `TemplatesView` 81→~20 dòng, `EditTemplateDialog` 122→~45, file ≤300. Cả 2 file **0 lỗi lint**.
+
+**Cổng chất lượng**: typecheck PASS; build SUCCESS; test **2219 pass /1 skip /0 fail** (không đổi — thuần UI); lint 2 file sạch; /settings/templates 307→login (compile). Không đổi schema/migration.
+
+**Kết quả TD-B4**: mẫu giai đoạn giờ quản lý được cả (giai đoạn + nhiệm vụ mặc định), tạo chương trình/dự án tự sinh giai đoạn + nhiệm vụ theo mẫu (AUTO-51). Tiếp theo (GĐ2, không migration): TD-D4 sơ đồ tổ chức (dùng Team/TeamMember), TD-H3 trung tâm trợ giúp, TD-B2/B6 (một phần). Cần migration: TD-A5 ticket/CSAT, TD-B2 budget (1 phần), TD-G3 2FA, TD-D1/D5/D6, TD-C3/C4, TD-E1.
 
 ### [CYCLE-AUTO-51] — 2026-10-26: TD-B4 — Sinh nhiệm vụ mặc định theo giai đoạn từ mẫu (StageTemplate.defaultTasks → LegalTask)
 Loại: Feature (không đổi schema/migration). Owner đã duyệt. ~1h30.
