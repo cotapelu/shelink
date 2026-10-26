@@ -153,6 +153,12 @@ Không cạnh tranh với các hệ ERP lớn về "đủ mọi thứ", mà cạ
 | **Email giao dịch** | `settings/email` + `lib/email` | SMTP gửi mail: xác thực tài khoản, mời user, nhắc hạn, reset mật khẩu; biến môi trường cấu hình | TD-F1 |
 | **Thuật ngữ cấu hình** | `settings/terminology` | Đổi nhãn hiển thị (Matter→Dự án/Vụ/Đơn hàng…) theo triển khai, nền schema giữ nguyên | TD-G1 |
 
+### Các module mới — Giai đoạn 2 (P1) — bắt đầu 2026-10
+
+| Module | Đường dẫn | Mô tả | Task |
+|---|---|---|---|
+| **Nghỉ phép** | `(app)/leave` | Xin phép→duyệt; loại phép, số ngày, ngưỡng phép năm trong `SystemSetting.leave`; số dư phép tính tại chỗ | TD-D2 |
+
 ---
 
 ## 五、Lộ trình V1.5 (sau khi lên V1 2–3 tháng)
@@ -268,6 +274,17 @@ Không cạnh tranh với các hệ ERP lớn về "đủ mọi thứ", mà cạ
 Kiểm tra quyền ở server action (ADMIN/OWNER/MANAGER tạo-duyệt; STAFF tạo nháp).
 
 ---
+
+### 10.5 Luồng nghỉ phép (mới, GĐ2)
+```
+[STAFF/…] Tạo đơn nghỉ phép (/leave) → status = SUBMITTED (hoặc DRAFT rồi gửi)
+[OWNER / ADMIN / MANAGER] trang “Chờ duyệt”
+  ├─ Từ chối → status = REJECTED + lý do
+  └─ Duyệt  → status = APPROVED (ghi approver + decidedAt)
+[Người xin] Rút đơn khi còn SUBMITTED → status = CANCELLED
+```
+- Số dư phép = ngưỡng năm (`SystemSetting.leave`) − Σ ngày APPROVED/đang SUBMITTED trong năm; không lưu số dư (DATA-MODEL §4.33).
+- Kiểm tra quyền ở **server action**, không chỉ ẩn UI.
 
 ## 十一、Lưu ý khi khái quát hóa
 

@@ -279,7 +279,16 @@ User ──(member of)── Dự án (Matter) ──┬── CauseOfAction (th
 ### 4.32 Cấu hình thuật ngữ & email (không thêm model) — mới GĐ1
 
 - **Thuật ngữ**: lưu `SystemSetting(key="terminology", value Json)` — map `matter|client|party|cause|procedure|quote|contract|timesheet|expense → label hiển thị`. Đọc qua `src/lib/terminology.ts` (defaults tiếng Việt) + hook client `useTerminology`. Schema/model giữ nguyên tên gốc (PRD quyết định #22).
-- **Email**: không có model riêng. Cấu hình qua biến môi trường (`SMTP_HOST/PORT/USER/PASS/FROM`); gửi qua `src/server/email/mailer.ts` (nodemailer, lazy transport); mẫu mail ở `src/server/email/templates.ts` (message key i18n-ready theo GOAL §4.5).
+- **Email**: không có model riệng. Cấu hình qua biến môi trường (`SMTP_HOST/PORT/USER/PASS/FROM`); gửi qua `src/server/email/mailer.ts` (nodemailer, lazy transport); mẫu mail ở `src/server/email/templates.ts` (message key i18n-ready theo GOAL §4.5).
+
+### 4.33 Nghỉ phép (LeaveRequest) — mới GĐ2 (TD-D2)
+
+- `LeaveRequest`: `userId` (người xin), `leaveType (LeaveType)`, `startDate`, `endDate`, `days Decimal(4,2)` (tính khi ghi; bước 0.5), `reason?`, `status (LeaveStatus)`, `approverId?`(+`decidedAt?`, `decisionNote?`), `deletedAt?`.
+- `LeaveType`: `ANNUAL / SICK / UNPAID / MARITAL / MATERNITY / PATERNITY / COMPENSATORY / OTHER` (khái quát, không ràng ngành).
+- `LeaveStatus`: `DRAFT / SUBMITTED / APPROVED / REJECTED / CANCELLED`. Duyệt: ADMIN/OWNER/MANAGER; người xin chỉ huỷ/rút khi còn `SUBMITTED`.
+- **Số dư phép**: không tạo bảng lưu số dư — tính tại chỗ `src/server/leave/balance.ts` (thuần): `entitled = SystemSetting.leave.annualEntitlementDays` (+ `carryOverDays`); `used = Σ days APPROVED/đang SUBMITTED trùng năm`; còn lại = entitled − used. Tránh bảng số dư phải đồng bộ (nguyên tắc đảo ngược §二.6).
+- Trùng lịch: chỉ chặn **cùng một người, ngày giao nhau, trạng thái SUBMITTED/APPROVED** (>0 highlight cảnh báo ở UI, không rollback cứng phép đã duyệt).
+- Không sinh bảng con; liên kết `User` (2 quan hệ: người xin + người duyệt).
 
 ## 五、Quy tắc sinh mã nội bộ
 
@@ -311,6 +320,7 @@ Ví dụ: `LL-2026-CC-0001`. Bộ đếm theo `{NĂM+MÃ}` dùng `SystemSetting`
 | `Contract(status, expiresAt)`, `Contract(clientId)` | Hợp đồng sắp hết hạn |
 | `TimesheetEntry(userId, date)`, `TimesheetEntry(matterId, date)` | Lưới ghi giờ |
 | `ExpenseClaim(status, createdAt)`, `ExpenseClaim(claimantUserId, occurredAt)` | Duyệt chi phí |
+| `LeaveRequest(userId, status, startDate)`, `LeaveRequest(approverId, status)` | Xin phép/duyệt, số dư phép |
 | `AuditLog(userId, createdAt)` | Truy vết thao tác |
 
 ---
@@ -347,6 +357,7 @@ Ví dụ: `LL-2026-CC-0001`. Bộ đếm theo `{NĂM+MÃ}` dùng `SystemSetting`
 16. Tính tiền báo giá (subtotal/chiết khấu/thuế/total) chỉ được cài đặt một lần, ở hàm thuần dùng chung.
 17. Timesheet: `billable` mặc định `true`; duyệt theo tuần (SUBMITTED→APPROVED).
 18. Chi phí khi `PAID` sinh `FeeEntry{type: COST}` trong cùng transaction; thu/chi gắn `CashAccount` (tuỳ chọn).
+19. Nghỉ phép: một model `LeaveRequest`, số dư phép **tính tại chỗ** (không lưu), ngưỡng phép năm lấy từ `SystemSetting.leave`.
 
 ---
 

@@ -34,6 +34,7 @@ import {
   Receipt,
   UsersRound,
   Kanban,
+  Plane,
 } from "lucide-react";
 
 export type NavItem = {
@@ -56,6 +57,7 @@ export const primaryNav: NavItem[] = [
   { label: "Hợp đồng", href: "/contracts", icon: FileSignature },
   { label: "Ghi giờ", href: "/time-tracking", icon: Timer },
   { label: "Chi phí", href: "/expenses", icon: Receipt },
+  { label: "Nghỉ phép", href: "/leave", icon: Plane },
   { label: "客户", href: "/clients", icon: Users },
   { label: "财务", href: "/finance", icon: Wallet },
   { label: "日程", href: "/schedule", icon: Calendar },

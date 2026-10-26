@@ -3,32 +3,92 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Nút Tạo tiếp nhận trên /intakes (follow-up AUTO-41)",
+      "name": "GĐ2 execution (ưu tiên P1 → P2)",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Tạo component create-intake-button (fetch options + mở IntakeSheet, tái dùng)",
+          "content": "TD-D2 Nghỉ phép: docs→schema→migrate→server→UI→test→gate→commit",
           "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Lắp nút vào trang /intakes/page.tsx header",
+          "content": "TD-A5 timeline tương tác hợp nhất (+ticket) trên /clients",
           "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Viết test component (mở sheet, nạp options 1 lần, onCreated)",
+          "content": "TD-B6 engine duyệt đa cấp (config workflow)",
           "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Chạy cổng chất lượng: typecheck, lint file mới, test, build; cập nhật AGENT_TODO",
+          "content": "TD-D1 Hồ sơ nhân viên (migration)",
+          "status": "pending"
+        },
+        {
+          "id": "task-5",
+          "content": "TD-D5 Mua sắm (đề nghị→duyệt→đặt→nhận→tt) (migration)",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
+          "content": "TD-D6 Tài sản & Subscription (khấu hao, nhắc hạn) (migration)",
+          "status": "pending"
+        },
+        {
+          "id": "task-7",
+          "content": "TD-C3 Hệ thống tài khoản + bút toán kép (migration)",
+          "status": "pending"
+        },
+        {
+          "id": "task-8",
+          "content": "TD-C4 Báo cáo tài chính VAS (migration)",
+          "status": "pending"
+        },
+        {
+          "id": "task-9",
+          "content": "TD-G3 2FA/TOTP + quản lý phiên (migration)",
+          "status": "pending"
+        },
+        {
+          "id": "task-10",
+          "content": "TD-G6 Xuất/sao lưu dữ liệu tự phục vụ",
+          "status": "pending"
+        },
+        {
+          "id": "task-11",
+          "content": "TD-G7 Import CSV/XLSX wizard",
+          "status": "pending"
+        },
+        {
+          "id": "task-12",
+          "content": "TD-A8 Email hai chiều (IMAP) + gắn khách/dự án",
+          "status": "pending"
+        },
+        {
+          "id": "task-13",
+          "content": "TD-F2 Zalo OA thông báo/nhắc hạn",
+          "status": "pending"
+        },
+        {
+          "id": "task-14",
+          "content": "TD-G9 PWA + TD-G10 observability + TD-C2 nhắc nợ",
+          "status": "pending"
+        },
+        {
+          "id": "task-15",
+          "content": "TD-G12 perf/N+1 + TD-G13 E2E + TD-G14 CI + TD-G15 backup/restore",
+          "status": "pending"
+        },
+        {
+          "id": "task-16",
+          "content": "TD-H1 tách vertical plugin + TD-H2 onboarding wizard",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 5,
+  "nextTaskId": 17,
   "nextPhaseId": 2,
-  "updatedAt": "2026-10-26T00:37:48.905Z"
+  "updatedAt": "2026-10-26T02:39:51.079Z"
 }

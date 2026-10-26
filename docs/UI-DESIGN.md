@@ -305,6 +305,14 @@ Nhập tên/mã định danh; kết quả phân cấp `LOW/…/BLOCKING`; nút "
 - Tạo mới bằng Sheet (UI-DESIGN §6.3): tiêu đề, dự án (tuỳ chọn), loại, số tiền, ngày, nhà cung cấp, chứng từ (upload qua storage có sẵn).
 - Duyệt: hàng loạt trong toolbar (giống archive hiện có).
 
+### 7.11 Nghỉ phép `/leave` (mới, GĐ2)
+
+- **Chế độ xem**: "Của tôi" / "Chờ duyệt" (người duyệt) / "Lịch nghỉ chung" (theo tháng).
+- **Danh sách đơn**: bảng + lọc loại phép/trạng thái/kỳ; badge trạng thái; cột ngày, số ngày (bước 0.5).
+- **Tạo đơn**: `Sheet` phải (`max-w-2xl`) — loại phép, ngày bắt đầu/kết thúc, lý do; hiện số dư phép năm hiện tại (`tabular-nums`).
+- **Duyệt/Từ chối**: người duyệt duyệt theo dòng (popover) hoặc hàng loạt; từ chối bắt buộc lý do (lỗi gắn trường, không toast chung).
+- **Thẻ số dư phép** đầu trang: ngưỡng năm / đã dùng / còn lại.
+
 ## 十、Quyết định đã khóa
 
 | # | Quyết định | Thực thi |

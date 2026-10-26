@@ -1,6 +1,6 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-24 (AUTO-47).
+Cập nhật lần cuối: 2026-10-26 (AUTO-48).
 
 ## Chu kỳ đã hoàn thành (gần đây)
 - ✅ Chu kỳ 0–75: khôi phục cổng chất lượng, đẩy phủ, refactor 3 lô.
@@ -113,6 +113,23 @@ Loại: Feature (không đổi schema/migration). Owner đã duyệt commit. ~1h
 **Cổng chất lượng**: typecheck PASS; lint **không phát sinh lỗi mới** (7 lỗi `clients/actions.ts` là nợ có sẵn từ HEAD — hàm >20 dòng/file >300; hàm mới ≤20); test toàn bộ **2178 pass /1 skip /0 fail** (2176→+2); build SUCCESS; dev `/login`200, `/clients/[id]` 307→login đúng guard.
 
 **Roadmap TD-A5 còn lại**: timeline tương tác hợp nhất (call/email/họp/phiếu), ticket, CSAT/NPS; và các module GĐ2 khác (TD-A8 email 2 chiều, TD-B2 ngân sách dự án [cần migration], TD-B6 workflow duyệt, TD-G3 2FA [cần migration], TD-D1/D2/D6…). Lưu ý: task cần **schema migration** phải xin chủ sở hữn duyệt trước (AGENTS.md đỏ-vạch).
+
+### [CYCLE-AUTO-48] — 2026-10-26: TD-D2 Nghỉ phép (docs-first → migrate → server → UI → test → gate)
+Loại: Feature (owner đã duyệt **và** duyệt migration). ~2h. ✅.
+
+**Docs-first (§5.1)**: PRD (bảng module GĐ2 "Nghỉ phép" + luồng §10.5), DATA-MODEL §4.33 + quyết định #19 + index, UI-DESIGN §7.11.
+
+**Schema/migration**: `LeaveRequest` + 2 enum (`LeaveType`, `LeaveStatus`) — SQL additive sạch; `migrate dev --create-only` → xem SQL → `migrate deploy` (local). **Sản xuất cần chạy `prisma migrate deploy`**.
+
+**Server `src/server/leave/`**: `schemas.ts` (zod, cross-field end≥start, reject bắt buộc lý do), `balance.ts` thuần (ngày inclusive, parse setting, usedDays = Σ ACTIVE cùng năm, remaining floor 0), `actions.ts` (create/list/decide/cancel; quyền: duyệt = isManager, rút = chủ đơn/manager khi còn SUBMITTED/DRAFT; audit + revalidate; hàm ≤20).
+
+**UI `/leave`**: trang server + `leave-view` (tab Của tôi/Của đội nhóm/Tất cả, thẻ số dư, hook `useLeaveMutations`), `leave-request-sheet` (Sheet, live tính số ngày, Lưu nháp/Gửi duyệt), `leave-table`, `leave-reject-dialog`, labels. Thêm nav "Nghỉ phép".
+
+**Test**: balance.test.ts (5) + actions.test.ts (10). Lưu ý: id test phải là **cuid** hợp lệ (`.cuid()`), không phải "lv1".
+
+**Cổng chất lượng**: typecheck PASS; lint PASS (module leave 0 lỗi — tách nhỏ hàm ≤20/≤50); test toàn bộ **2194 pass/1 skip/0 fail** (2178→+16); build SUCCESS; dev `/login`200, `/leave` 307→login đúng guard.
+
+**Roadmap còn lại (GĐ2)**: TD-A5 timeline/ticket, TD-B6 workflow duyệt, TD-D1/D5/D6 (migration), TD-C3/C4 kế toán (migration), TD-G3 2FA (migration), TD-G6 export/backup, TD-G7 import, TD-A8/Zalo tích hợp, TD-G9/10/12/13/14/15, TD-H1/H2. Làm tiếp tuần tự, commit từng module.
 
 ### [CYCLE-AUTO-39] — 2026-10-24: Giai đoạn 1 thương mại (P0)
 Loại: Feature (docs-first → schema → migrate dev local → server → UI → test). ~4 giờ. ✅.

@@ -494,6 +494,8 @@ model User {
   expenseClaims            ExpenseClaim[]                @relation("ExpenseClaimant")
   expensesSubmitted        ExpenseClaim[]                @relation("ExpenseSubmitter")
   expensesApproved         ExpenseClaim[]                @relation("ExpenseApprover")
+  leaveRequests            LeaveRequest[]                @relation("LeaveRequester")
+  leaveApprovals           LeaveRequest[]                @relation("LeaveApprover")
   createdAt                DateTime                      @default(now())
   updatedAt                DateTime                      @updatedAt
 }
@@ -2733,4 +2735,53 @@ model ExpenseClaim {
   @@index([status, createdAt])
   @@index([claimantUserId, occurredAt])
   @@index([matterId])
+}
+
+// ============================================================
+// Giai đoạn 2 (TD-D2): Nghỉ phép
+// ============================================================
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  UNPAID
+  MARITAL
+  MATERNITY
+  PATERNITY
+  COMPENSATORY
+  OTHER
+}
+
+enum LeaveStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model LeaveRequest {
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation("LeaveRequester", fields: [userId], references: [id])
+  leaveType  LeaveType
+  startDate  DateTime    @db.Date
+  endDate    DateTime    @db.Date
+  // Số ngày nghỉ (bước 0.5), tính khi ghi từ khoảng ngày.
+  days       Decimal     @db.Decimal(4, 2)
+  reason     String?
+  status     LeaveStatus @default(SUBMITTED)
+
+  approverId String?
+  approver   User?       @relation("LeaveApprover", fields: [approverId], references: [id])
+  decidedAt  DateTime?
+  decisionNote String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId, status, startDate])
+  @@index([status, startDate])
+  @@index([approverId, status])
 }
