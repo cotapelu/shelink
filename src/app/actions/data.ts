@@ -19,13 +19,10 @@
  */
 'use server';
 
-export async function exportData(type: string) {
-  // Stub – in production, generate JSON and return a downloadable URL
-  return { ok: true, message: `Export stub for ${type}` };
-}
+// Xuất sao lưu JSON đã chuyển sang route thật: GET /api/data-backup/export?scope=all|genealogy|erp
 
+// Phục hồi/nhập dữ liệu từ bản sao lưu (TD-G7) — dự kiến triển khai sau.
 export async function importData(formData: FormData) {
-  // Stub – in production, parse and import data
   const count = formData ? 'with data' : 'empty';
-  return { ok: true, message: `Import stub ${count}` };
+  return { ok: false, message: `Nhập dữ liệu chưa hỗ trợ (${count})` };
 }

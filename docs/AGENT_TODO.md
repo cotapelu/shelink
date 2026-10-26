@@ -1,8 +1,22 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-26 (AUTO-49).
+Cập nhật lần cuối: 2026-10-26 (AUTO-50).
 
 ## Chu kỳ đã hoàn thành (gần đây)
+
+### [CYCLE-AUTO-50] — 2026-10-26: TD-G6 — Sao lưu toàn bộ dữ liệu (JSON) tự phục vụ (thay stub)
+Loại: Feature (không đổi schema/migration). Owner đã duyệt commit. ~1h30.
+
+**Đã hoàn thành** (cấu hình thuần → server function → route → UI → test):
+- [x] `server/backup/snapshot.ts` (thuần): 3 phạm vi `genealogy`/`erp`/`all` (all = business-core ∪ genealogy ∪ erp, khử trùng), `BACKUP_SPECIAL_SELECTS` **loại secret** (`user.passwordHash`, `document.path/iv/authTag`), `buildBackupMeta` (đếm model/bản ghi, cờ `truncatedModels` khi chạm trần 20k), `buildBackupFilename`, `isBackupScope` guard.
+- [x] `server/backup/collect.ts`: đọc song song từng model (giới hạn `take`), bỏ qua delegate thiếu (phòng vệ), trả `sections`+`counts`.
+- [x] Route `GET /api/backup/export?scope=…`: chỉ `isManager` (ADMIN/PRINCIPAL_LAWYER), ghi `AuditLog DATA_BACKUP_EXPORT`, trả JSON tải về (`Content-Disposition`).
+- [x] UI `/settings/data`: 3 nút xuất đổi sang tải thật `<a href=/api/backup/export download>` qua `BackupExportCard`; tách `BackupExportCard`+`BackupImportCard` để trang <50 dòng (sửa luôn lỗi lint có sẵn). Bỏ stub `exportData` (mồ côi); `importData` trung thực báo "chưa hỗ trợ" (TD-G7 sau).
+- [x] Test: `snapshot.test.ts` (6) + `collect.test.ts` (2 — gồm nhánh bỏ qua delegate thiếu).
+
+**Cổng chất lượng**: typecheck PASS; lint sạch các file đổi (0 lỗi/0 warning); test toàn bộ **2215 pass /1 skip/0 fail** (2207→+8); build SUCCESS. Xác thực DB thật bằng tsx: `all`=51 model, `erp`=12, `genealogy`=4 — không delegate thiếu, không lỗi query. Dev :3000 `/api/backup/export` 307 (guard), `/settings/data` 307→login (compiled).
+
+**Roadmap GĐ2 còn lại**: TD-G7 nhập/phục hồi (parse JSON backup), TD-A5 ticket/CSAT (migration), TD-B4 template dự án, TD-D1/D5/D6, TD-C3/C4 kế toán, TD-G3 2FA (migration), TD-G9/10/12/13/14/15, TD-H1/H2. Vẫn còn nợ: auth dev 500 do key SSH (xem AUTO-49); God Object `clients/actions.ts`.
 
 ### [CYCLE-AUTO-49] — 2026-10-26: TD-A5 — Dòng thời gian tương tác khách hàng (hoàn tất Customer 360)
 Loại: Feature (không đổi schema/migration). ~1h30. Kế thừa AUTO-47 (báo giá/hợp đồng trên /clients/[id]).
