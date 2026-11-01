@@ -61,7 +61,7 @@ import { uploadDocument, deleteDocument } from "@/server/documents/actions";
 import { cn } from "@/lib/utils";
 import { DocumentReviewDialog } from "./document-review-dialog";
 
-// AI 审查支持的 mime（前端判断是否亮按钮）
+// Kiểm tra mime AI hỗ trợ (frontend quyết định có sáng nút)
 const AI_REVIEW_MIMES = new Set([
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -81,12 +81,12 @@ export type DocumentPayload = Document & {
 };
 
 const categoryLabel: Record<DocumentCategory, string> = {
-  EVIDENCE: "证据材料",
-  PLEADING: "诉讼文书",
-  PROCEDURE: "程序性材料",
-  JUDGMENT: "裁判文书",
-  CONTRACT: "合同",
-  OTHER: "其他"
+  EVIDENCE: "Tài liệu chứng cứ",
+  PLEADING: "Văn bản tố tụng",
+  PROCEDURE: "Tài liệu thủ tục",
+  JUDGMENT: "Văn bản quyết định",
+  CONTRACT: "Hợp đồng",
+  OTHER: "Khác"
 };
 
 const categoryColor: Record<DocumentCategory, string> = {
@@ -145,7 +145,7 @@ export function DocumentsPanel({
       ? documents
       : documents.filter((d) => d.category === activeCategory);
 
-  // 按 category 分组统计
+  // Thống kê theo category
   const counts = CATEGORIES.reduce<Record<DocumentCategory, number>>(
     (acc, c) => {
       acc[c] = documents.filter((d) => d.category === c).length;
@@ -155,13 +155,13 @@ export function DocumentsPanel({
   );
 
   function handleDelete(id: string, name: string) {
-    if (!confirm(`删除材料"${name}"？`)) return;
+    if (!confirm(`Xóa tài liệu "${name}"?`)) return;
     startTransition(async () => {
       try {
         await deleteDocument(id);
-        toast.success("已删除（保留在审计中）");
+        toast.success("Đã xóa (vẫn giữ trong kiểm toán)");
       } catch (err) {
-        toast.error("删除失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Xóa thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -170,7 +170,7 @@ export function DocumentsPanel({
     <div className="space-y-4">
       <header className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          共 {documents.length} 份材料 · 单文件 ≤ 20MB · 加密为可选
+          Tổng {documents.length} tài liệu · mỗi tệp ≤ 20MB · mã hóa tuỳ chọn
         </p>
         <Button
           onClick={() => setSheetOpen(true)}
@@ -178,14 +178,14 @@ export function DocumentsPanel({
           className="gap-1.5 "
         >
           <Plus className="h-4 w-4" />
-          上传材料
+          Tải lên tài liệu
         </Button>
       </header>
 
-      {/* 分类筛选 */}
+      {/* Lọc theo loại */}
       <div className="flex flex-wrap gap-1.5">
         <CategoryChip
-          label="全部"
+          label="Tất cả"
           color="#5B8DEF"
           count={documents.length}
           active={activeCategory === "ALL"}
@@ -207,7 +207,7 @@ export function DocumentsPanel({
         <div className="rounded-xl border border-dashed border-border bg-card py-16 text-center">
           <FileBox className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
           <p className="text-sm text-muted-foreground">
-            {activeCategory === "ALL" ? "还没有材料" : `没有「${categoryLabel[activeCategory]}」分类材料`}
+            {activeCategory === "ALL" ? "Chưa có tài liệu" : `Không có tài liệu loại 「${categoryLabel[activeCategory]}」`}
           </p>
         </div>
       ) : (
@@ -232,10 +232,10 @@ export function DocumentsPanel({
                     {d.encrypted && (
                       <span
                         className="inline-flex items-center gap-0.5 rounded-md border border-[#9B7BF7]/40 px-1 py-0.5 text-[9px] text-[#9B7BF7]"
-                        title="AES-256-GCM 加密存储"
+                        title="Lưu trữ mã hóa AES-256-GCM"
                       >
                         <Lock className="h-2.5 w-2.5" />
-                        加密
+                        Mã hóa
                       </span>
                     )}
                   </div>
@@ -264,7 +264,7 @@ export function DocumentsPanel({
                       type="button"
                       onClick={() => setReviewDocId(d.id)}
                       className="rounded-md p-1.5 text-muted-foreground hover:bg-popover hover:text-violet-600"
-                      title="AI 审查"
+                      title="Kiểm tra AI"
                     >
                       <Sparkles className="h-3.5 w-3.5" />
                     </button>
@@ -272,7 +272,7 @@ export function DocumentsPanel({
                   <a
                     href={`/api/documents/${d.id}/download`}
                     className="rounded-md p-1.5 text-muted-foreground hover:bg-popover hover:text-primary"
-                    title="下载"
+                    title="Tải về"
                   >
                     <Download className="h-3.5 w-3.5" />
                   </a>
@@ -281,7 +281,7 @@ export function DocumentsPanel({
                     onClick={() => handleDelete(d.id, d.name)}
                     disabled={isPending}
                     className="rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-popover hover:text-destructive group-hover:opacity-100"
-                    title="删除"
+                    title="Xóa"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -343,7 +343,7 @@ function CategoryChip({
   );
 }
 
-const ARCHIVE_FOLDER_NAMES = new Set(["结案", "归档"]);
+const ARCHIVE_FOLDER_NAMES = new Set(["Kết thúc", "Lưu trữ"]);
 
 function UploadSheet({
   matterId,
@@ -390,7 +390,7 @@ function UploadSheet({
     const f = e.target.files?.[0] ?? null;
     setFile(f);
     if (f && !name) {
-      // 默认用文件名（去后缀）填到 name
+      // Mặc định lấy tên tệp (bỏ đuôi) điền vào name
       const stem = f.name.replace(/\.[^.]+$/, "");
       setName(stem);
     }
@@ -398,15 +398,15 @@ function UploadSheet({
 
   function handleSubmit() {
     if (!file) {
-      toast.warning("请选择文件");
+      toast.warning("Vui lòng chọn tệp");
       return;
     }
     if (!name.trim()) {
-      toast.warning("请填写材料名称");
+      toast.warning("Vui lòng nhập tên tài liệu");
       return;
     }
     if (isArchived && folderId === "none") {
-      toast.warning("案件已归档，需选择「结案」或「归档」卷宗");
+      toast.warning("Vụ án đã lưu trữ, cần chọn hồ sơ 「Kết thúc」 hoặc 「Lưu trữ」");
       return;
     }
     const fd = new FormData();
@@ -421,11 +421,11 @@ function UploadSheet({
     startTransition(async () => {
       try {
         await uploadDocument(fd);
-        toast.success("已上传");
+        toast.success("Đã tải lên");
         reset();
         onOpenChange(false);
       } catch (err) {
-        toast.error("上传失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Tải lên thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -440,16 +440,16 @@ function UploadSheet({
     >
       <SheetContent side="right" className="flex w-full max-w-md flex-col gap-0 p-0">
         <SheetHeader className="border-b border-border bg-background px-6 py-4">
-          <SheetTitle>上传材料</SheetTitle>
+          <SheetTitle>Tải lên tài liệu</SheetTitle>
           <SheetDescription className="text-xs">
-            单文件最大 20MB · 加密后下载需经鉴权解密
+            Mỗi tệp tối đa 20MB · sau khi mã hóa, tải về cần xác thực giải mã
           </SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
-          {/* 文件选择 */}
+          {/* Chọn tệp */}
           <div className="space-y-1.5">
-            <Label className="text-xs">文件 *</Label>
+            <Label className="text-xs">Tệp *</Label>
             <div
               className={cn(
                 "flex items-center gap-3 rounded-md border border-dashed p-4",
@@ -476,7 +476,7 @@ function UploadSheet({
                     </div>
                   </div>
                 ) : (
-                  <span className="text-sm text-muted-foreground">点击选择文件</span>
+                  <span className="text-sm text-muted-foreground">Bấm để chọn tệp</span>
                 )}
               </label>
               {file && (
@@ -489,21 +489,21 @@ function UploadSheet({
                   }}
                   className="h-7 text-xs"
                 >
-                  清除
+                  Xoá
                 </Button>
               )}
             </div>
           </div>
 
-          <Field label="材料名称" required>
+          <Field label="Tên tài liệu" required>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="如：证据 1 - 工程承包合同"
+              placeholder="vd: Chứng cứ 1 - Hợp đồng thi công"
             />
           </Field>
 
-          <Field label="分类">
+          <Field label="Loại">
             <Select value={category} onValueChange={(v) => setCategory(v as DocumentCategory)}>
               <SelectTrigger>
                 <SelectValue />
@@ -518,36 +518,36 @@ function UploadSheet({
             </Select>
           </Field>
 
-          <Field label={isArchived ? "归档卷宗 *" : "归属卷宗"}>
+          <Field label={isArchived ? "Hồ sơ lưu trữ *" : "Hồ sơ chứa"}>
             <Select value={folderId} onValueChange={setFolderId}>
               <SelectTrigger>
-                <SelectValue placeholder={isArchived ? "请选择归档卷宗" : "可选"} />
+                <SelectValue placeholder={isArchived ? "Chọn hồ sơ lưu trữ" : "Tuỳ chọn"} />
               </SelectTrigger>
               <SelectContent>
-                {!isArchived && <SelectItem value="none">不归属卷宗（散件）</SelectItem>}
+                {!isArchived && <SelectItem value="none">Không thuộc hồ sơ nào (tài liệu rời)</SelectItem>}
                 {visibleFolders.map((f) => (
                   <SelectItem key={f.id} value={f.id}>
                     {f.name}
-                    {ARCHIVE_FOLDER_NAMES.has(f.name) ? " · 归档" : ""}
+                    {ARCHIVE_FOLDER_NAMES.has(f.name) ? " · Lưu trữ" : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {isArchived && (
               <p className="text-[11px] text-[#9B7BF7]">
-                案件已归档，仅允许补传到「结案」或「归档」卷宗
+                Vụ án đã lưu trữ, chỉ cho bù tài liệu vào hồ sơ 「Kết thúc」 hoặc 「Lưu trữ」
               </p>
             )}
           </Field>
 
           {procedures.length > 0 && (
-            <Field label="归属程序">
+            <Field label="Thủ tục chứa">
               <Select value={procedureId} onValueChange={setProcedureId}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">不归属特定程序</SelectItem>
+                  <SelectItem value="none">Không thuộc thủ tục nào</SelectItem>
                   {procedures.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.label}
@@ -562,11 +562,11 @@ function UploadSheet({
             <div className="flex-1">
               <div className="flex items-center gap-1.5 text-sm">
                 <Lock className="h-3.5 w-3.5 text-[#9B7BF7]" />
-                加密存储
+                Mã hóa lưu trữ
               </div>
               <p className="mt-0.5 text-[11px] text-muted-foreground">
-                敏感材料建议开启。下载时自动解密；STORAGE_ENCRYPTION_KEY 丢失则
-                此材料不可恢复
+                Với tài liệu nhạy cảm nên bật. Tải về tự giải mã; nếu mất STORAGE_ENCRYPTION_KEY thì
+                tài liệu này không khôi phục được
               </p>
             </div>
             <Switch checked={encrypted} onCheckedChange={setEncrypted} />
@@ -580,11 +580,11 @@ function UploadSheet({
             onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            取消
+            Huỷ
           </Button>
           <Button onClick={handleSubmit} disabled={isPending || !file} className="gap-1.5">
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            上传
+            Tải lên
           </Button>
         </SheetFooter>
       </SheetContent>

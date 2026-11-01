@@ -168,3 +168,15 @@ Batch script lại rơi vào bẫy "件" (ngắn) thay trước "案件管理" (
 | 顺丰/中通/圆通... (tên thương hiệu) | Giữ tên thương hiệu: ShunFeng / ZTO / YTO... |
 
 **Quyết định thiết kế**: khi key/giá trị là **hợp đồng với hệ thống ngoài** (API response enum), ta giữ giá trị gốc + comment, KHÔNG dịch. Dịch chỉ áp dụng cho dữ liệu do app tự sinh (label/message).
+
+## Bổ sung I18N-11/12 (2026-10-31)
+
+| Tiếng Trung | Tiếng Việt |
+|---|---|
+| 阻塞/高/中/低 (mức độ) | Chặn / Cao / Trung bình / Thấp |
+| 待结论/有冲突/可承接/信息不足 | Chờ kết luận / Có xung đột / Có thể tiếp nhận / Thông tin chưa đủ |
+| 冲突命中/客户库同名 | Khớp xung đột / Cùng tên trong kho khách |
+| 证据材料/诉讼文书/程序性材料/裁判文书/合同 | Tài liệu chứng cứ / Văn bản tố tụng / Tài liệu thủ tục / Văn bản quyết định / Hợp đồng |
+| 归属卷宗/散件/结案/归档 | Hồ sơ chứa / Tài liệu rời / Kết thúc / Lưu trữ |
+| 材料名称/上传材料/加密 | Tên tài liệu / Tải lên tài liệu / Mã hóa |
+| 点击选择文件 | Bấm để chọn tệp |

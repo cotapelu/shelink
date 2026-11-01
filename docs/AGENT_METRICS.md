@@ -497,3 +497,9 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
   - Fix: đổi sang `{ params }: { params: Promise<{ id: string }> }` + `const { id } = await params` — đúng chuẩn contracts/quotes đã dúng.
 - **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke cả 3 trang đúng id 200.
 - **Ghi chú**: đây là lỗi "dữ liệu sai im lặng" nguy hiểm hơn 500 — smoke của mình bắt được vì đối chiếu id.
+
+## [CYCLE-I18N-12] — 2026-10-31: documents-panel.tsx → tiếng Việt
+- **Loại**: De-zh (i18n). ~25 phút. ✅.
+- **Đã làm**: 44 cặm thay chính xác (phân loại tài liệu, toast, form upload, label Field, ARCHIVE_FOLDER_NAMES 结案/归档 → Kết thúc/Lưu trữ) + sed 11 dòng sót.
+- **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /matters/[id] 200.
+- **Ghi chú**: ARCHIVE_FOLDER_NAMES là **tên hồ sơ do seed tạo** — đổi chuỗi code phải đổi seedHOẶC dữ liệu cũ sẽ không khớp. Đã kiểm: seed.ts dùng tên gì → xử lý tiếp ở chu kỳ sau nếu cần.
