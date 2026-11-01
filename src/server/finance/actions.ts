@@ -59,6 +59,10 @@ import {
   invoiceRequestViolation,
   invoiceValidationViolation
 } from "./invoice-request-lib";
+import {
+  buildClientOptions,
+  buildInvoiceContext
+} from "./invoice-context-lib";
 
 // ============ Billing ============
 
@@ -324,85 +328,42 @@ export async function listMatterInvoiceRequests(matterId: string) {
   });
 }
 
+/** Select matter cho context xuất hóa đơn (trích ra để action ≤20 dòng). */
+const MATTER_INVOICE_SELECT = {
+  id: true,
+  title: true,
+  intakeId: true,
+  intake: {
+    select: {
+      id: true,
+      status: true,
+      receivedAt: true,
+      client: { select: { name: true } }
+    }
+  },
+  primaryClientId: true,
+  primaryClient: { select: { id: true, name: true, idNumber: true } },
+  clientLinks: {
+    select: {
+      isPrimary: true,
+      client: { select: { id: true, name: true, idNumber: true } }
+    }
+  }
+} as const;
+
 /**
- * v0.12: Lấy thông tin mặc định để xuất hóa đơn (tên đơn vị mua khách + id Intake liên quan)
+ * v0.12: Liấy thông tin mặc định để xuất hóa đơn (tên đơn vị mua khách + id Intake liên quan)
+ * Logic gộp khách (v0.42 mục 3) đã tách sang invoice-context-lib (thuần, có test).
  */
 export async function getMatterInvoiceContext(matterId: string) {
   const session = await requireSession();
   await assertCanAccessMatter(session.user.id, session.user.role, matterId);
   const m = await prisma.matter.findUnique({
     where: { id: matterId },
-    select: {
-      id: true,
-      title: true,
-      intakeId: true,
-      intake: {
-        select: {
-          id: true,
-          status: true,
-          receivedAt: true,
-          client: { select: { name: true } }
-        }
-      },
-      primaryClientId: true,
-      primaryClient: { select: { id: true, name: true, idNumber: true } },
-      clientLinks: {
-        select: {
-          isPrimary: true,
-          client: { select: { id: true, name: true, idNumber: true } }
-        }
-      }
-    }
+    select: MATTER_INVOICE_SELECT
   });
   if (!m) throw new Error("Vụ án không tồn tại");
-
-  // v0.42 mục 3: dropdown tên đơn vị mua = toàn bộ khách liên kết với vụ (đã loại trùng, khách chính lên đầu)
-  const clientMap = new Map<
-    string,
-    { id: string; name: string; taxNo: string | null; isPrimary: boolean }
-  >();
-  if (m.primaryClient) {
-    clientMap.set(m.primaryClient.id, {
-      id: m.primaryClient.id,
-      name: m.primaryClient.name,
-      taxNo: m.primaryClient.idNumber ?? null,
-      isPrimary: true
-    });
-  }
-  for (const link of m.clientLinks) {
-    if (!link.client) continue;
-    const existing = clientMap.get(link.client.id);
-    if (existing) {
-      existing.isPrimary = existing.isPrimary || link.isPrimary;
-    } else {
-      clientMap.set(link.client.id, {
-        id: link.client.id,
-        name: link.client.name,
-        taxNo: link.client.idNumber ?? null,
-        isPrimary: link.isPrimary
-      });
-    }
-  }
-  const clientOptions = Array.from(clientMap.values()).sort(
-    (a, b) => Number(b.isPrimary) - Number(a.isPrimary)
-  );
-
-  return {
-    matterId: m.id,
-    matterTitle: m.title,
-    intakeId: m.intakeId ?? null,
-    intake: m.intake
-      ? {
-          id: m.intake.id,
-          status: m.intake.status,
-          receivedAt: m.intake.receivedAt,
-          clientName: m.intake.client?.name ?? null
-        }
-      : null,
-    clientOptions,
-    defaultBuyerName:
-      m.primaryClient?.name ?? m.intake?.client?.name ?? null
-  };
+  return buildInvoiceContext(m, buildClientOptions(m.primaryClient, m.clientLinks));
 }
 
 /**

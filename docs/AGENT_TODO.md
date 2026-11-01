@@ -1,8 +1,20 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-31 (AUTO-59).
+Cập nhật lần cuối: 2026-10-31 (AUTO-60).
 
 ## Chu kỳ đã hoàn thành (gần đây)
+
+### [CYCLE-AUTO-60] — 2026-10-31: [R/T] getMatterInvoiceContext (77 dòng, cx 18) → invoice-context-lib
+Loại: Refactor [R] + Tests [T] — ưu tiên MEDIUM. Không đổi hành vi. ~35 phút.
+
+**Đã hoàn thành**:
+- [x] Trích `src/server/finance/invoice-context-lib.ts` (thuần): `buildClientOptions` (gộp khách chính + liên kết, loại trùng, OR isPrimary, primary lên đầu — sắp ổn định), `buildInvoiceContext` (mapping + fallback defaultBuyerName), type `InvoiceContext`/`ClientOption`.
+- [x] Rewire action: 77→~10 dòng, **mất cả 2 lỗi** (lines + cx 18); trích thêm `MATTER_INVOICE_SELECT` thành hằng (pattern đã dùng cho PERSON_LIST_SELECT).
+- [x] Test mới `invoice-context-lib.test.ts` **12 test**: rỗng, chỉ chính, chỉ link, trùng id OR-primary, link isPrimary, bỏ link null, **thứ tự sắp** (primary trước, ổn định), mapping intake, fallback defaultBuyerName 3 cấp.
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test **2325 pass / 1 skip / 0 fail** (2313→2325, +12); full lint **923 (771 lỗi)** — giảm 2; `finance/actions.ts` 14→12 lỗi; **cả 4 lib finance (fee-entry/invoice-request/invoice-context)** 0 lỗi; 106 test finance pass.
+
+**Còn lại `finance/actions.ts`** (12 lỗi): `createFeeEntry` (51 + arrow 33), `deleteFeeEntry` (36), `getMatterFinance` (44), `getMonthlyRevenue/getPersonalRevenue` (35+35), `createBilling/deleteBilling/setCommissionPlan/listMatterInvoiceRequests`, file 600>300 → AUTO-61.
 
 ### [CYCLE-AUTO-59] — 2026-10-31: [R/T] createInvoiceRequest (94 dòng, complexity 48) → invoice-request-lib
 Loại: Refactor [R] + Tests [T] — ưu tiên MEDIUM. Không đổi hành vi (message/thứ tự giữ nguyên). ~45 phút.

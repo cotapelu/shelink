@@ -376,3 +376,11 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Lint**: 925 problems (773 lỗi / 152 warning) — giảm 1 so với đầu chu kỳ (926/774/152); finance/actions.ts 15→14.
 - **Bảo mật**: logic phân quyền hóa đơn không liên kết vụ án giữ nguyên (test khóa); table-driven 5 yếu tố HĐĐB có test từng message.
 - **Ghi chú**: isManager = ADMIN + PRINCIPAL_LAWYER duy nhất (lệch AGENTS §6 đã ghi PROFILE).
+
+## [CYCLE-AUTO-60] — 2026-10-31: [R/T] getMatterInvoiceContext cx 18 → invoice-context-lib (+12 test)
+- **Loại**: Refactor [R] + Tests [T]. ~35 phút. ✅.
+- **Test delta**: +12 (2313→2325 pass / 1 skip / 0 fail).
+- **Phủ**: buildClientOptions + buildInvoiceContext 100% nhánh chính (dedupe/OR-primary/sort/fallback).
+- **Lint**: 923 problems (771 lỗi / 152 warning) — giảm 2 so với đầu chu kỳ (925/773/152); finance/actions.ts 14→12.
+- **Bảo mật**: quyền truy cập giữ nguyên (assertCanAccessMatter trước query); không rò dữ liệu.
+- **Ghi chú**: sort ổn định cho phần không-primary (giữ thứ tự insert Map) — đã có test khóa.

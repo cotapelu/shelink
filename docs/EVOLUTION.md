@@ -175,3 +175,7 @@
 **Phiên 2026-10-31 (AUTO-59)**:
 - [R/T] `createInvoiceRequest` (cx 48 → 0 trong action): tách `invoice-request-lib.ts` (violation table-driven, payload, notification content); +18 test; message/thứ tự giữ y nguyên.
 - Test: 2313 pass / 1 skip / 0 fail. Lint: 926→925 (774→773 lỗi).
+
+**Phiên 2026-10-31 (AUTO-60)**:
+- [R/T] `getMatterInvoiceContext` (cx 18, 77 dòng): tách `invoice-context-lib.ts` (buildClientOptions/buildInvoiceContext) + `MATTER_INVOICE_SELECT`; action 77→10 dòng; +12 test.
+- Test: 2325 pass / 1 skip / 0 fail. Lint: 925→923 (773→771 lỗi). `finance/actions.ts`: 16→12 lỗi, 4 lib finance 0 lỗi.
