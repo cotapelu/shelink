@@ -148,3 +148,23 @@ Batch script lại rơi vào bẫy "件" (ngắn) thay trước "案件管理" (
 | 扫描已结超 30 天未归档 | Quét vụ đã kết thúc quá 30 ngày chưa lưu trữ |
 | 推送周报 | Đẩy báo cáo tuần |
 | 起始（含）/结束（含）/最大跨度 | Bắt đầu (gồm) / Kết thúc (gồm) / Khoảng cách tối đa |
+
+## Bổ sung I18N-10 (2026-10-31) — express (phân tầng ràng buộc API)
+
+| Giữ nguyên (hợp đồng API) | Giải thích |
+|---|---|
+| STATE_TONE keys 已签收/在途/派件中/疑难件/退签... | Trạng thái THÔ trả về từ API 快递鸟/快递100 — dịch = mất khả năng khớp. Đã thêm comment trong file. |
+| COMPANY_CODES keys (lib/express/companies.ts) | Tên hãng gửi cho API — giữ. |
+
+| Tiếng Trung | Tiếng Việt |
+|---|---|
+| 快递追踪/新建追踪 | Theo dõi chuyển phát / Tạo theo dõi |
+| 快递公司/快递单号 | Hãng chuyển phát / Mã đơn chuyển phát |
+| 寄件人/收件人 | Người gửi / Người nhận |
+| 寄出/收到 | Gửi đi / Nhận về |
+| 物流轨迹/上次刷新 | Lộ trình vận chuyển / Cập nhật lần cuối |
+| 自动识别 / 未知 | Tự nhận diện / Không rõ |
+| 创建中/创建并查询 | Đang tạo... / Tạo và tra cứu |
+| 顺丰/中通/圆通... (tên thương hiệu) | Giữ tên thương hiệu: ShunFeng / ZTO / YTO... |
+
+**Quyết định thiết kế**: khi key/giá trị là **hợp đồng với hệ thống ngoài** (API response enum), ta giữ giá trị gốc + comment, KHÔNG dịch. Dịch chỉ áp dụng cho dữ liệu do app tự sinh (label/message).

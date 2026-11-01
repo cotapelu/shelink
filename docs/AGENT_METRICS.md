@@ -482,3 +482,8 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Loại**: De-zh (i18n). ~25 phút. ✅.
 - **Đã làm**: 69 cặm thay chính xác (KPI, biểu đồ, bảng laporan, AI issues labels, phân loại severity) + sed 5 dòng sót do bẫy thứ tự (đã lặp lại lần 3 — quy trình 2 bước hoạt động tốt).
 - **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /reports 200.
+
+## [CYCLE-I18N-10] — 2026-10-31: express-view.tsx → tiếng Việt (giữ STATE_TONE)
+- **Loại**: De-zh (i18n). ~30 phút. ✅.
+- **Đã làm**: 53 cặm thay chính xác (label/toast/placeholder/comment/locale vi-VN) + sed xử lý lai; **GIỮ STATE_TONE + COMPANY_CODES** (hợp đồng API hãng xe) + comment cảnh báo trong code.
+- **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /express 200.

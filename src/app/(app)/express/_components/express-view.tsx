@@ -63,6 +63,8 @@ type Row = Prisma.ExpressTrackingGetPayload<{
 type MatterOption = { id: string; internalCode: string; title: string };
 type DirectionFilter = ExpressDirection | "ALL";
 
+// LƯU Ý: key STATE_TONE là giá trị trạng thái THÔ từ API hãng xe (KuaidiNiao/Kuaidi100) —
+// KHÔNG dịch, dịch sẽ mất khả năng khớp. chỉ map màu badge.
 const STATE_TONE: Record<string, "danger" | "ok" | "warn" | "muted"> = {
   已签收: "ok",
   在途: "muted",
@@ -118,16 +120,16 @@ export function ExpressView({
           <div>
             <h1 className="flex items-center gap-2 text-2xl">
               <Package className="h-5 w-5 text-primary" />
-              快递追踪
+              Theo dõi chuyển phát
             </h1>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
-              寄出 / 收到的法院文书、当事人材料统一登记 + 自动刷新物流
+              Đăng ký thống nhất văn bản toà án / tài liệu khách gửi đi & nhận về + tự cập nhật vận chuyển
             </p>
           </div>
         )}
         <Button onClick={() => setNewOpen(true)} className="gap-1.5">
           <Plus className="h-3.5 w-3.5" />
-          新建追踪
+          Tạo theo dõi
         </Button>
       </div>
 
@@ -135,9 +137,9 @@ export function ExpressView({
         <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-[12px] text-amber-800">
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <div>
-            未配置任何快递接入。记录可创建但物流状态拉不到。
+            Chưa cấu hình tích hợp chuyển phát nào. Vẫn tạo bản ghi được nhưng không lấy được trạng thái vận chuyển.
             <Link href="/settings/express" className="ml-1 font-medium underline">
-              去配置 快递鸟 / 快递100 →
+              Đi cấu hình KuaidiNiao / Kuaidi100 →
             </Link>
           </div>
         </div>
@@ -152,16 +154,16 @@ export function ExpressView({
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="搜索单号 / 用途 / 收件人 / 案件"
+            placeholder="Tìm mã đơn / mục đích / người nhận / vụ án"
             className="h-9 border-border bg-card pl-9"
           />
         </div>
         <RadioChips
           size="sm"
           items={[
-            { value: "ALL", label: "全部" },
-            { value: "OUTBOUND", label: "寄出" },
-            { value: "INBOUND", label: "收到" }
+            { value: "ALL", label: "Tất cả" },
+            { value: "OUTBOUND", label: "Gửi đi" },
+            { value: "INBOUND", label: "Nhận về" }
           ]}
           value={direction}
           onChange={(v) => setDirection(v as DirectionFilter)}
@@ -177,8 +179,8 @@ export function ExpressView({
           <div className="ll-surface rounded-lg border border-border p-12 text-center text-sm text-muted-foreground">
             <Package className="mx-auto mb-2 h-6 w-6 opacity-40" />
             {items.length === 0
-              ? "暂无快递追踪记录，点上方「新建追踪」开始"
-              : "没有匹配的记录"}
+              ? "Chưa có bản ghi theo dõi chuyển phát, bấm 「Tạo theo dõi」 ở trên để bắt đầu"
+              : "Không có bản ghi nào khớp"}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -209,37 +211,37 @@ function Card({ e }: { e: Row }) {
     startTransition(async () => {
       try {
         const r = await refreshExpress({ id: e.id });
-        toast.success(`已更新：${r.state}（${r.provider}）`);
+        toast.success(`Đã cập nhật: ${r.state} (${r.provider})`);
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "刷新失败");
+        toast.error(err instanceof Error ? err.message : "Cập nhật thất bại");
       }
     });
 
   const onDelete = () => {
-    if (!confirm(`确认删除单号 ${e.trackingNo}？`)) return;
+    if (!confirm(`Xác nhận xóa mã đơn ${e.trackingNo}?`)) return;
     startTransition(async () => {
       try {
         await deleteExpress({ id: e.id });
-        toast.success("已删除");
+        toast.success("Đã xóa");
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "失败");
+        toast.error(err instanceof Error ? err.message : "Thất bại");
       }
     });
   };
 
   return (
     <div className="ll-surface flex flex-col gap-2 rounded-lg border border-border p-4">
-      {/* 行 1：方向 + 公司 + 状态 */}
+      {/* Dòng 1: Hướng + Hãng + Trạng thái */}
       <div className="flex flex-wrap items-center gap-2 text-[11px]">
         {e.direction === "OUTBOUND" ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2 py-0.5 text-sky-700">
             <ArrowUpFromLine className="h-3 w-3" />
-            寄出
+            Gửi đi
           </span>
         ) : (
           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-emerald-700">
             <ArrowDownToLine className="h-3 w-3" />
-            收到
+            Nhận về
           </span>
         )}
         {e.companyCode && (
@@ -261,7 +263,7 @@ function Card({ e }: { e: Row }) {
         )}
       </div>
 
-      {/* 行 2：单号 + 用途 */}
+      {/* Dòng 2: Mã đơn + Mục đích */}
       <div>
         <div className="font-mono text-[13px] font-medium text-foreground">
           {e.trackingNo}
@@ -269,11 +271,11 @@ function Card({ e }: { e: Row }) {
         <p className="mt-1 line-clamp-2 text-[12px] text-foreground/85">{e.purpose}</p>
       </div>
 
-      {/* 行 3：收件人 + 案件 */}
+      {/* Dòng 3: Người nhận + Vụ án */}
       <div className="space-y-1 text-[11px] text-muted-foreground">
         {(e.recipient || e.recipientPhone) && (
           <div>
-            收件人：{e.recipient ?? "—"}
+            Người nhận：{e.recipient ?? "—"}
             {e.recipientPhone && (
               <span className="ml-1 font-mono text-[10px]">{e.recipientPhone}</span>
             )}
@@ -291,7 +293,7 @@ function Card({ e }: { e: Row }) {
         )}
         {e.lastUpdateAt && (
           <div className="font-mono text-[10px]">
-            上次刷新：{new Date(e.lastUpdateAt).toLocaleString("zh-CN")}
+            Cập nhật lần cuối: {new Date(e.lastUpdateAt).toLocaleString("vi-VN")}
           </div>
         )}
       </div>
@@ -305,7 +307,7 @@ function Card({ e }: { e: Row }) {
             className="h-7 gap-1 px-2 text-[11px]"
           >
             <ExternalLink className="h-3 w-3" />
-            轨迹 {traces.length}
+            Lộ trình {traces.length}
           </Button>
         )}
         <Button
@@ -316,14 +318,14 @@ function Card({ e }: { e: Row }) {
           className="h-7 gap-1 px-2 text-[11px] text-primary"
         >
           <RefreshCw className={cn("h-3 w-3", pending && "animate-spin")} />
-          刷新
+          Cập nhật
         </Button>
         <button
           type="button"
           onClick={onDelete}
           disabled={pending}
           className="rounded p-1 text-muted-foreground hover:text-destructive"
-          title="删除"
+          title="Xóa"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
@@ -333,10 +335,10 @@ function Card({ e }: { e: Row }) {
         <DialogContent className="max-h-[80vh] w-[92vw] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              <span className="font-mono">{e.trackingNo}</span> · 物流轨迹
+              <span className="font-mono">{e.trackingNo}</span> · Lộ trình vận chuyển
             </DialogTitle>
             <DialogDescription className="text-xs">
-              {e.companyCode} · {traces.length} 条
+              {e.companyCode} · {traces.length} đơn
             </DialogDescription>
           </DialogHeader>
           <ol className="space-y-2 border-l border-border pl-4">
@@ -383,7 +385,7 @@ function NewExpressDialog({
   const [recipientPhone, setRecipientPhone] = useState("");
   const [pending, startTransition] = useTransition();
 
-  // 单号变化时自动识别公司
+  // Mã đơn thay đổi thì tự nhận diện hãng
   const onTrackingChange = (v: string) => {
     setTrackingNo(v);
     if (v && !companyCode) {
@@ -404,11 +406,11 @@ function NewExpressDialog({
 
   const submit = () => {
     if (!trackingNo.trim()) {
-      toast.error("快递单号必填");
+      toast.error("Mã đơn chuyển phát bắt buộc");
       return;
     }
     if (!purpose.trim()) {
-      toast.error("用途必填");
+      toast.error("Mục đích bắt buộc");
       return;
     }
     startTransition(async () => {
@@ -423,14 +425,14 @@ function NewExpressDialog({
           recipientPhone: recipientPhone.trim()
         });
         if (res.firstState) {
-          toast.success(`已创建并查询：${res.firstState}`);
+          toast.success(`Đã tạo và tra cứu：${res.firstState}`);
         } else {
-          toast.success(configured ? "已创建（首次查询失败，可稍后刷新）" : "已创建（未配置 API，状态稍后手动查）");
+          toast.success(configured ? "Đã tạo (tra cứu đầu thất bại, cập nhật sau cũng được)" : "Đã tạo (chưa cấu hình API, tra trạng thái thủ công sau)");
         }
         reset();
         onOpenChange(false);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "失败");
+        toast.error(e instanceof Error ? e.message : "Thất bại");
       }
     });
   };
@@ -445,21 +447,21 @@ function NewExpressDialog({
     >
       <DialogContent className="max-h-[88vh] w-[92vw] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>新建快递追踪</DialogTitle>
+          <DialogTitle>Tạo theo dõi chuyển phát</DialogTitle>
           <DialogDescription className="text-xs">
-            支持自动识别 顺丰 / 中通 / 圆通 / 韵达 / 申通 / EMS / 京东 / 极兔 等
+            Hỗ trợ tự nhận diện: ShunFeng / ZTO / YTO / Yunda / STO / EMS / JD / J&T... (tên thương hiệu giữ nguyên)
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div>
-            <Label className="text-[11px]">方向 *</Label>
+            <Label className="text-[11px]">Hướng *</Label>
             <RadioChips
               size="sm"
               className="mt-2"
               items={[
-                { value: "OUTBOUND", label: "寄出" },
-                { value: "INBOUND", label: "收到" }
+                { value: "OUTBOUND", label: "Gửi đi" },
+                { value: "INBOUND", label: "Nhận về" }
               ]}
               value={direction}
               onChange={(v) => setDirection(v as ExpressDirection)}
@@ -468,7 +470,7 @@ function NewExpressDialog({
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <Label className="text-[11px]">快递单号 *</Label>
+              <Label className="text-[11px]">Mã đơn chuyển phát *</Label>
               <Input
                 value={trackingNo}
                 onChange={(e) => onTrackingChange(e.target.value)}
@@ -477,13 +479,13 @@ function NewExpressDialog({
               />
             </div>
             <div>
-              <Label className="text-[11px]">快递公司</Label>
+              <Label className="text-[11px]">Hãng chuyển phát</Label>
               <select
                 value={companyCode}
                 onChange={(e) => setCompanyCode(e.target.value)}
                 className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                <option value="">自动识别 / 未知</option>
+                <option value="">Tự nhận diện / Không rõ</option>
                 {SUPPORTED_COMPANIES.map((c) => (
                   <option key={c} value={c}>
                     {c}
@@ -494,43 +496,43 @@ function NewExpressDialog({
           </div>
 
           <div>
-            <Label className="text-[11px]">用途 *</Label>
+            <Label className="text-[11px]">Mục đích *</Label>
             <Input
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               placeholder={
                 direction === "OUTBOUND"
-                  ? "如：起诉状寄朝阳区法院立案庭"
-                  : "如：法院送达判决书"
+                  ? "vd: đơn khởi kiện gửi Toà án quận..."
+                  : "vd: Toà án tống đạt bản án"
               }
               className="mt-1"
             />
           </div>
 
           <div>
-            <Label className="text-[11px]">关联案件（可选）</Label>
+            <Label className="text-[11px]">Vụ án liên quan (tuỳ chọn)</Label>
             <div className="mt-1">
               <MatterCombobox
                 matters={matters}
                 value={matterId}
                 onChange={setMatterId}
-                placeholder="搜索案件编号 / 名称"
+                placeholder="Tìm mã / tên vụ án"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <Label className="text-[11px]">{direction === "OUTBOUND" ? "收件人" : "寄件人"}</Label>
+              <Label className="text-[11px]">{direction === "OUTBOUND" ? "Người nhận" : "Người gửi"}</Label>
               <Input
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
-                placeholder="姓名或单位"
+                placeholder="Tên hoặc đơn vị"
                 className="mt-1"
               />
             </div>
             <div>
-              <Label className="text-[11px]">联系电话</Label>
+              <Label className="text-[11px]">Điện thoại</Label>
               <Input
                 value={recipientPhone}
                 onChange={(e) => setRecipientPhone(e.target.value)}
@@ -542,10 +544,10 @@ function NewExpressDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={pending}>
-            {pending ? "创建中..." : "创建并查询"}
+            {pending ? "Đang tạo..." : "Tạo và tra cứu"}
           </Button>
         </DialogFooter>
       </DialogContent>
