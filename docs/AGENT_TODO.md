@@ -1,6 +1,19 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-31 (AUTO-64).
+Cập nhật lần cuối: 2026-10-31 (AUTO-65).
+
+### [CYCLE-AUTO-65] — 2026-10-31: [R/T] seals/actions.ts: quái vật createSealRequest (263 dòng, cx 34) → tách hết
+Loại: Refactor [R] + Tests [T]. Không đổi hành vi. ~50 phút.
+
+**Đã hoàn thành**:
+- [x] Lib thuần mới `src/server/seals/seal-create-lib.ts`: `buildSealFormRaw` (map FormData→raw), `deriveAlsoLegalRep`, `toSealDocumentData` (payload Document + tag), `toSealRequestData` + `toLegalRepSealRequestData` (payload SealRequest, trim/fallback như gốc).
+- [x] Test trước `seal-create-lib.test.ts` **14 test**: defaults form, matterId/parent rỗng→null, cờ true, tag bản sao, trim purpose/title, requestNote rỗng→null, matterId null→undefined, purpose con `(dong thoi voi {parentCode})`.
+- [x] Rewire `createSealRequest` 263→22 dòng, **mất cả 3 lỗi** (lines/statements/cx34) + arrow 80 dòng (2 lỗi). Hệ io helper: `assertSealMatterLink`, `writeEncryptedSealCopy`, `prepareDraftFromExisting/Upload`, `resolveSealDraft`, `prepareLegalRepIfNeeded`, `runSealCreateTx`, `createLegalRepSealPair`, `auditSealCreated`, `notifySealPairRequested`, `revalidateSealPaths`.
+- [x] **Bẫy tự bắt được khi review**: audit gốc dùng `targetId: created.seal.id` — lần viết đầu ghi `targetId: code` (sai!). Đã sửa + xác minh lại toàn bộ khối trước khi gate.
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test **2352 pass / 1 skip / 0 fail** (2338→2352, +14); full lint **906 (754 lỗi)** — **giảm 5**; `seals/actions.ts` 16→11 lỗi (còn: listSealRequests, getSealApprovalRecipientIds, notifySealApprovalRequested, getSealStats, approve/reject/stamp/cancel, file 560>300). Smoke `/approvals/seals`: anon 307, auth **200**.
+
+**Còn lại `seals/actions.ts` (AUTO-66)**: `stampSealRequest` (73/cx11), `approveSealRequest` (46), `rejectSealRequest` (47), `cancelSealRequest` (32), `getSealStats` (28), `listSealRequests` (41) + file>300 → tách module (consumer-direct imports).
 
 ### [CYCLE-AUTO-63] — 2026-10-31: [R] tách finance/actions.ts → BLOCKED và revert ❌
 Thử tách + **re-export named** từ module `"use server"` → Turbopack (Next 16) không hỗ trợ → `/finance` 500. Đã `git checkout` phục hồi sạch, gate về 912/760/152. Ghi nhận docs-only commit `df20566`. **Bài học: tách module server-action = sửa import consumer trực tiếp, KHÔNG re-export.**

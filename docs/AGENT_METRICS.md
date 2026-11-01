@@ -413,3 +413,11 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Lint**: 911 problems (759 lỗi / 152 warning) — giảm 1; finance/actions.ts **0 lỗi** (bớt lỗi file>300).
 - **Bảo mật**: không đổi bề mặt; smoke runtime /finance 200 + /matters/[id] 200.
 - **Ghi chú**: áp dụng đúng bài học AUTO-63 (không re-export).
+
+## [CYCLE-AUTO-65] — 2026-10-31: [R/T] createSealRequest 263 dòng/cx 34 → tách hết (+14 test)
+- **Loại**: Refactor [R] + Tests [T]. ~50 phút. ✅.
+- **Test delta**: +14 (2338→2352 pass / 1 skip / 0 fail).
+- **Phủ**: seal-create-lib 100% nhánh chính (form defaults, flags, payload, fallback).
+- **Lint**: 906 problems (754 lỗi / 152 warning) — giảm 5 so với đầu chu kỳ (911/759/152); seals/actions.ts 16→11.
+- **Bảo mật**: quyền tạo (3 vai trò) giữ nguyên; luồng mã hóa/ghi file không đổi; audit targetId đã xác minh đúng (bẫy tự bắt).
+- **Ghi chú**: zod type làm field optional/nullable — lib chấp nhận optional + cast enum (SealType/Urgency) ở biên.

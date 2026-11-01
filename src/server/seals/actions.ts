@@ -40,6 +40,15 @@ import {
   sealCancelSchema,
   sealListFilterSchema
 } from "./schemas";
+import {
+  LEGAL_REP_EXTRA_TAGS,
+  buildSealFormRaw,
+  deriveAlsoLegalRep,
+  toLegalRepSealRequestData,
+  toSealDocumentData,
+  toSealRequestData,
+  type DocPrepare
+} from "./seal-create-lib";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const FIRM_LEGAL_REP_KEY = "firmLegalRepUserId";
@@ -299,270 +308,196 @@ export async function getSealStats() {
  * @access Requires authenticated session; user must be matter member.
  * @audit Logs seal request creation.
  */
-export async function createSealRequest(formData: FormData) {
-  const session = await requireSession();
-  if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER" && session.user.role !== "LAWYER") {
-    throw new Error("Chi luat su, chu nhiem, quan tri moi duoc xin dong dau");
-  }
+// ── io helpers cho createSealRequest (tách AUTO-65; payload thuần ở seal-create-lib) ──
 
-  const raw = {
-    sealType: formData.get("sealType"),
-    matterId: formData.get("matterId") || null,
-    purpose: formData.get("purpose"),
-    documentTitle: formData.get("documentTitle"),
-    pageCount: formData.get("pageCount") ?? "1",
-    requireCrossPageSeal: formData.get("requireCrossPageSeal") === "true",
-    copies: formData.get("copies") ?? "1",
-    urgency: formData.get("urgency") ?? "NORMAL",
-    requestNote: formData.get("requestNote") || "",
-    parentSealRequestId: formData.get("parentSealRequestId") || null
-  };
-  const data = sealCreateSchema.parse(raw);
+/** Kiểm tra quyền liên kết + tồn tại của vụ (nếu có matterId). */
+async function assertSealMatterLink(userId: string, matterId: string | null | undefined): Promise<void> {
+  if (!matterId) return;
+  await assertCanAssociateMatter(userId, matterId);
+  await assertMatterWritable(matterId);
+  const m = await prisma.matter.findUnique({ where: { id: matterId }, select: { id: true } });
+  if (!m) throw new Error("Vụ án lien ket khong ton tai");
+}
 
-  // "Dong thoi dong dau dai dien phap luat": khi dau chinh khong phai dau phap nhan thi tao kem mot yeu cau con LEGAL_REP_SEAL,
-  // dung chung mot ban sao van ban, de hai tuyen duyet di rieng (dau tron/dau hop dong di voi nguoi duyet tuong ung, dau phap nhan di voi dai dien phap luat)
-  const alsoLegalRep =
-    formData.get("alsoLegalRep") === "true" && data.sealType !== "LEGAL_REP_SEAL";
+/** Mã hóa buffer + ghi bản sao độc lập → phần enc của DocPrepare. */
+async function writeEncryptedSealCopy(plainBuf: Buffer, matterId: string | null | undefined) {
+  const enc = encryptBuffer(plainBuf);
+  const path = await storage.writeFile(matterId ? `m_${matterId}` : "seals", enc.ciphertext);
+  return { path, algorithm: enc.algorithm, iv: enc.iv.toString("base64"), authTag: enc.authTag.toString("base64") };
+}
 
-  const existingDraftDocId = formData.get("existingDraftDocId");
-  const draftFile = formData.get("draftDoc");
-
-  // Neu co matterId thi kiem tra ton tai
-  if (data.matterId) {
-    await assertCanAssociateMatter(session.user.id, data.matterId);
-    await assertMatterWritable(data.matterId);
-    const m = await prisma.matter.findUnique({
-      where: { id: data.matterId },
-      select: { id: true }
-    });
-    if (!m) throw new Error("Vụ án lien ket khong ton tai");
-  }
-
-  // Chuan bi draftDocId: hoac sao chep van ban hien co (lien ket ho so vu), hoac tai len tep moi
-  // plainBuf giu ban ro, de sao chep khi "dong thoi dong dau phap nhan"
-  let plainBuf: Buffer;
-  let draftDocPrepare: {
-    name: string;
-    mimeType: string;
-    size: number;
-    sha: string;
-    path: string;
-    algorithm: string;
-    iv: string;
-    authTag: string;
-  };
-
-  if (typeof existingDraftDocId === "string" && existingDraftDocId) {
-    // Lien ket: van ban hien co tu ho so vu → sao chep mot ban sao doc lap (SealRequest.draftDocId la unique)
-    const src = await prisma.document.findUnique({
-      where: { id: existingDraftDocId }
-    });
-    if (!src) throw new Error("Van ban cho dong dau khong ton tai");
-    assertPdfDocument(src);
-    const srcCt = await storage.readFile(src.path);
-    plainBuf =
-      src.encrypted && src.iv && src.authTag
-        ? decryptBuffer(srcCt, src.iv, src.authTag)
-        : srcCt;
-    const enc = encryptBuffer(plainBuf);
-    const newPath = await storage.writeFile(
-      data.matterId ? `m_${data.matterId}` : "seals",
-      enc.ciphertext
-    );
-    draftDocPrepare = {
+/** Bản nháp từ văn bản hiện có: đọc → giải mã (nếu có) → mã hóa lại → ghi bản sao. */
+async function prepareDraftFromExisting(existingDraftDocId: string, matterId: string | null | undefined) {
+  const src = await prisma.document.findUnique({ where: { id: existingDraftDocId } });
+  if (!src) throw new Error("Van ban cho dong dau khong ton tai");
+  assertPdfDocument(src);
+  const srcCt = await storage.readFile(src.path);
+  const plainBuf = src.encrypted && src.iv && src.authTag ? decryptBuffer(srcCt, src.iv, src.authTag) : srcCt;
+  const enc = await writeEncryptedSealCopy(plainBuf, matterId);
+  return {
+    prepare: {
       name: src.name,
       mimeType: src.mimeType ?? "application/octet-stream",
       size: src.size ?? plainBuf.length,
       sha: sha256(plainBuf),
-      path: newPath,
-      algorithm: enc.algorithm,
-      iv: enc.iv.toString("base64"),
-      authTag: enc.authTag.toString("base64")
-    };
-  } else if (draftFile instanceof File && draftFile.size > 0) {
-    assertPdfDocument(draftFile);
-    validateUploadedFile(draftFile, { purpose: "seal", maxBytes: MAX_FILE_SIZE });
-    plainBuf = Buffer.from(await draftFile.arrayBuffer());
-    const enc = encryptBuffer(plainBuf);
-    const newPath = await storage.writeFile(
-      data.matterId ? `m_${data.matterId}` : "seals",
-      enc.ciphertext
-    );
-    draftDocPrepare = {
-      name: normalizeUploadedFilename(draftFile.name),
-      mimeType: draftFile.type || "application/octet-stream",
-      size: draftFile.size,
-      sha: sha256(plainBuf),
-      path: newPath,
-      algorithm: enc.algorithm,
-      iv: enc.iv.toString("base64"),
-      authTag: enc.authTag.toString("base64")
-    };
-  } else {
-    throw new Error("Vui long tai len ban nhap cho dong dau");
-  }
-
-  const code = await generateSealCode();
-  // Yeu cau con (dau phap nhan) cung phai sinh truoc code, neu khong se khong goi duoc generateSealCode ben trong giao dich (giao dich long nhau)
-  const legalRepCode = alsoLegalRep ? await generateSealCode() : null;
-
-  // Yeu cau con sao chep mot ban ma hoa doc lap (draftDocId la unique)
-  let legalRepDocPrepare: typeof draftDocPrepare | null = null;
-  if (alsoLegalRep) {
-    const enc2 = encryptBuffer(plainBuf);
-    const path2 = await storage.writeFile(
-      data.matterId ? `m_${data.matterId}` : "seals",
-      enc2.ciphertext
-    );
-    legalRepDocPrepare = {
-      name: draftDocPrepare.name,
-      mimeType: draftDocPrepare.mimeType,
-      size: draftDocPrepare.size,
-      sha: draftDocPrepare.sha,
-      path: path2,
-      algorithm: enc2.algorithm,
-      iv: enc2.iv.toString("base64"),
-      authTag: enc2.authTag.toString("base64")
-    };
-  }
-
-  const created = await prisma.$transaction(async (tx) => {
-    const draftDoc = await tx.document.create({
-      data: {
-        matterId: data.matterId ?? undefined,
-        name: draftDocPrepare.name,
-        category: "OTHER",
-        path: draftDocPrepare.path,
-        mimeType: draftDocPrepare.mimeType,
-        size: draftDocPrepare.size,
-        sha256: draftDocPrepare.sha,
-        encrypted: true,
-        algorithm: draftDocPrepare.algorithm,
-        iv: draftDocPrepare.iv,
-        authTag: draftDocPrepare.authTag,
-        tags: ["Yeu cau dong dau", "Ban nhap cho dong dau"],
-        uploadedById: session.user.id
-      }
-    });
-
-    const seal = await tx.sealRequest.create({
-      data: {
-        code,
-        sealType: data.sealType,
-        matterId: data.matterId ?? undefined,
-        purpose: data.purpose.trim(),
-        documentTitle: data.documentTitle.trim(),
-        pageCount: data.pageCount,
-        requireCrossPageSeal: data.requireCrossPageSeal,
-        copies: data.copies,
-        urgency: data.urgency,
-        requestNote: (data.requestNote || "").trim() || null,
-        draftDocId: draftDoc.id,
-        requestedById: session.user.id,
-        status: "PENDING",
-        parentSealRequestId: data.parentSealRequestId ?? undefined
-      }
-    });
-
-    let legalRepSealId: string | null = null;
-    if (legalRepDocPrepare && legalRepCode) {
-      const legalRepDoc = await tx.document.create({
-        data: {
-          matterId: data.matterId ?? undefined,
-          name: legalRepDocPrepare.name,
-          category: "OTHER",
-          path: legalRepDocPrepare.path,
-          mimeType: legalRepDocPrepare.mimeType,
-          size: legalRepDocPrepare.size,
-          sha256: legalRepDocPrepare.sha,
-          encrypted: true,
-          algorithm: legalRepDocPrepare.algorithm,
-          iv: legalRepDocPrepare.iv,
-          authTag: legalRepDocPrepare.authTag,
-          tags: ["Yeu cau dong dau", "Ban nhap cho dong dau", "Ban sao dau dai dien phap luat"],
-          uploadedById: session.user.id
-        }
-      });
-      const legalRepSeal = await tx.sealRequest.create({
-        data: {
-          code: legalRepCode,
-          sealType: "LEGAL_REP_SEAL",
-          matterId: data.matterId ?? undefined,
-          purpose: `${data.purpose.trim()} (dong thoi voi ${code})`,
-          documentTitle: data.documentTitle.trim(),
-          pageCount: data.pageCount,
-          requireCrossPageSeal: data.requireCrossPageSeal,
-          copies: data.copies,
-          urgency: data.urgency,
-          requestNote: (data.requestNote || "").trim() || null,
-          draftDocId: legalRepDoc.id,
-          requestedById: session.user.id,
-          status: "PENDING",
-          parentSealRequestId: seal.id
-        }
-      });
-      legalRepSealId = legalRepSeal.id;
-    }
-
-    return { seal, legalRepSealId };
-  });
-
-  await audit({
-    userId: session.user.id,
-    action: "SEAL_REQUEST_CREATE",
-    targetType: "SealRequest",
-    targetId: created.seal.id,
-    detail: {
-      code,
-      sealType: data.sealType,
-      matterId: data.matterId,
-      alsoLegalRep: !!created.legalRepSealId
-    }
-  });
-  if (created.legalRepSealId && legalRepCode) {
-    await audit({
-      userId: session.user.id,
-      action: "SEAL_REQUEST_CREATE",
-      targetType: "SealRequest",
-      targetId: created.legalRepSealId,
-      detail: {
-        code: legalRepCode,
-        sealType: "LEGAL_REP_SEAL",
-        matterId: data.matterId,
-        parentCode: code
-      }
-    });
-  }
-
-  await notifySealApprovalRequested({
-    sealRequestId: created.seal.id,
-    code,
-    sealType: data.sealType,
-    documentTitle: data.documentTitle.trim(),
-    purpose: data.purpose.trim(),
-    requesterId: session.user.id,
-    requesterName: session.user.name,
-    urgency: data.urgency
-  });
-
-  if (created.legalRepSealId && legalRepCode) {
-    await notifySealApprovalRequested({
-      sealRequestId: created.legalRepSealId,
-      code: legalRepCode,
-      sealType: "LEGAL_REP_SEAL",
-      documentTitle: data.documentTitle.trim(),
-      purpose: `${data.purpose.trim()} (dong thoi voi ${code})`,
-      requesterId: session.user.id,
-      requesterName: session.user.name,
-      urgency: data.urgency
-    });
-  }
-
-  revalidatePath("/approvals/seals");
-  if (data.matterId) revalidatePath(`/matters/${data.matterId}`);
-  return { ok: true, id: created.seal.id, code };
+      ...enc
+    } satisfies DocPrepare,
+    plainBuf
+  };
 }
 
+/** Bản nháp từ file upload: validate → đọc → mã hóa → ghi. */
+async function prepareDraftFromUpload(file: File, matterId: string | null | undefined) {
+  assertPdfDocument(file);
+  validateUploadedFile(file, { purpose: "seal", maxBytes: MAX_FILE_SIZE });
+  const plainBuf = Buffer.from(await file.arrayBuffer());
+  const enc = await writeEncryptedSealCopy(plainBuf, matterId);
+  return {
+    prepare: {
+      name: normalizeUploadedFilename(file.name),
+      mimeType: file.type || "application/octet-stream",
+      size: file.size,
+      sha: sha256(plainBuf),
+      ...enc
+    } satisfies DocPrepare,
+    plainBuf
+  };
+}
+
+/** Chọn nguồn bản nháp: văn bản hiện có → file upload → throw nếu không có. */
+async function resolveSealDraft(formData: FormData, matterId: string | null | undefined) {
+  const existingDraftDocId = formData.get("existingDraftDocId");
+  if (typeof existingDraftDocId === "string" && existingDraftDocId) {
+    return prepareDraftFromExisting(existingDraftDocId, matterId);
+  }
+  const draftFile = formData.get("draftDoc");
+  if (draftFile instanceof File && draftFile.size > 0) {
+    return prepareDraftFromUpload(draftFile, matterId);
+  }
+  throw new Error("Vui long tai len ban nhap cho dong dau");
+}
+
+/** Revalidate các trang bị ảnh hưởng sau khi tạo yêu cầu đóng dấu. */
+function revalidateSealPaths(matterId: string | null | undefined): void {
+  revalidatePath("/approvals/seals");
+  if (matterId) revalidatePath(`/matters/${matterId}`);
+}
+
+type SealCreateTxData = z.infer<typeof sealCreateSchema>;
+
+/** Bản sao + code cho yêu cầu con LEGAL_REP (draftDocId unique). */
+async function prepareLegalRepIfNeeded(
+  alsoLegalRep: boolean,
+  draft: { prepare: DocPrepare; plainBuf: Buffer },
+  matterId: string | null | undefined
+): Promise<{ prepare: DocPrepare; code: string } | null> {
+  if (!alsoLegalRep) return null;
+  const code = await generateSealCode();
+  const enc = await writeEncryptedSealCopy(draft.plainBuf, matterId);
+  return { prepare: { ...draft.prepare, ...enc }, code };
+}
+
+/** Tạo cặp (document + sealRequest) cho yêu cầu con đại diện pháp luật; trả id seal. */
+async function createLegalRepSealPair(tx: Prisma.TransactionClient, args: {
+  prepare: DocPrepare;
+  code: string;
+  data: SealCreateTxData;
+  userId: string;
+  matterId: string | null | undefined;
+  parentSealId: string;
+  parentCode: string;
+}): Promise<string> {
+  const doc = await tx.document.create({
+    data: toSealDocumentData(args.prepare, { uploadedById: args.userId, matterId: args.matterId, extraTags: LEGAL_REP_EXTRA_TAGS })
+  });
+  const seal = await tx.sealRequest.create({
+    data: toLegalRepSealRequestData(args.data, { draftDocId: doc.id, requestedById: args.userId, code: args.code, parentSealId: args.parentSealId, parentCode: args.parentCode })
+  });
+  return seal.id;
+}
+
+/** Thân transaction: bản nháp → seal chính → (tuỳ chọn) cặp LEGAL_REP. */
+async function runSealCreateTx(tx: Prisma.TransactionClient, args: {
+  data: SealCreateTxData;
+  code: string;
+  userId: string;
+  matterId: string | null | undefined;
+  draftPrepare: DocPrepare;
+  legalRep: { prepare: DocPrepare; code: string } | null;
+}): Promise<{ sealId: string; legalRepSealId: string | null }> {
+  const draftDoc = await tx.document.create({
+    data: toSealDocumentData(args.draftPrepare, { uploadedById: args.userId, matterId: args.matterId })
+  });
+  const seal = await tx.sealRequest.create({
+    data: toSealRequestData(args.data, { draftDocId: draftDoc.id, requestedById: args.userId, code: args.code })
+  });
+  const legalRepSealId = args.legalRep
+    ? await createLegalRepSealPair(tx, { prepare: args.legalRep.prepare, code: args.legalRep.code, data: args.data, userId: args.userId, matterId: args.matterId, parentSealId: seal.id, parentCode: args.code })
+    : null;
+  return { sealId: seal.id, legalRepSealId };
+}
+
+/** Audit cả yêu cầu chính và yêu cầu con (nếu có). */
+async function auditSealCreated(userId: string, data: SealCreateTxData, ctx: {
+  sealId: string;
+  code: string;
+  legalRepCode: string | null;
+  legalRepSealId: string | null;
+}): Promise<void> {
+  const entry = (targetId: string, code: string, detail: Record<string, unknown>) =>
+    audit({ userId, action: "SEAL_REQUEST_CREATE", targetType: "SealRequest", targetId, detail });
+  await entry(ctx.sealId, ctx.code, { code: ctx.code, sealType: data.sealType, matterId: data.matterId, alsoLegalRep: !!ctx.legalRepSealId });
+  if (ctx.legalRepSealId && ctx.legalRepCode) {
+    await entry(ctx.legalRepSealId, ctx.legalRepCode, { code: ctx.legalRepCode, sealType: "LEGAL_REP_SEAL", matterId: data.matterId, parentCode: ctx.code });
+  }
+}
+
+/** Thông báo duyệt cho cả yêu cầu chính và yêu cầu con (nếu có). */
+async function notifySealPairRequested(args: {
+  user: { id: string; name?: string | null };
+  data: SealCreateTxData;
+  code: string;
+  sealId: string;
+  legalRepCode: string | null;
+  legalRepSealId: string | null;
+}): Promise<void> {
+  const base = {
+    sealRequestId: args.sealId, code: args.code, sealType: args.data.sealType,
+    documentTitle: args.data.documentTitle.trim(), purpose: args.data.purpose.trim(),
+    requesterId: args.user.id, requesterName: args.user.name ?? null, urgency: args.data.urgency
+  };
+  await notifySealApprovalRequested(base);
+  if (args.legalRepSealId && args.legalRepCode) {
+    await notifySealApprovalRequested({ ...base, sealRequestId: args.legalRepSealId, code: args.legalRepCode, sealType: "LEGAL_REP_SEAL", purpose: `${args.data.purpose.trim()} (dong thoi voi ${args.code})` });
+  }
+}
+
+/**
+ * Tạo yêu cầu đóng dấu (AUTO-65 refactor: parse/assert/prepare/tx đã tách;
+ * payload map nằm ở seal-create-lib — đã test).
+ * "Đồng thời đóng dấu đại diện pháp luật": khi yêu cầu chính không phải LEGAL_REP_SEAL
+ * và form bật cờ alsoLegalRep → sinh thêm yêu cầu con dùng chung 1 bản sao văn bản.
+ */
+export async function createSealRequest(formData: FormData) {
+  const session = await requireSession();
+  if (!["ADMIN", "PRINCIPAL_LAWYER", "LAWYER"].includes(session.user.role)) throw new Error("Chi luat su, chu nhiem, quan tri moi duoc xin dong dau");
+  const data = sealCreateSchema.parse(buildSealFormRaw(formData));
+  const alsoLegalRep = deriveAlsoLegalRep(formData, data.sealType);
+
+  await assertSealMatterLink(session.user.id, data.matterId);
+  const draft = await resolveSealDraft(formData, data.matterId);
+
+  // Code sinh TRƯỚC giao dịch (tránh transaction lồng nhau khi gọi generateSealCode)
+  const code = await generateSealCode();
+  const legalRep = await prepareLegalRepIfNeeded(alsoLegalRep, draft, data.matterId);
+  const created = await prisma.$transaction((tx) => runSealCreateTx(tx, { data, code, userId: session.user.id, matterId: data.matterId, draftPrepare: draft.prepare, legalRep }));
+  const ctx = { sealId: created.sealId, code, legalRepCode: legalRep?.code ?? null, legalRepSealId: created.legalRepSealId };
+
+  await auditSealCreated(session.user.id, data, ctx);
+  await notifySealPairRequested({ user: session.user, data, ...ctx });
+  revalidateSealPaths(data.matterId);
+  return { ok: true, id: created.sealId, code };
+}
 // ============================================================
 // Duyyet qua
 // ============================================================

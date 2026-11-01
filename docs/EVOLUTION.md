@@ -196,3 +196,8 @@
 **Phiên 2026-10-31 (AUTO-64)**:
 - [R] Tách `finance/actions.ts` (558 dòng) → `billing-actions.ts` (240 dòng) + `actions.ts` (331 dòng, 0 lỗi lint). Consumer import trực tiếp (3 file).
 - Test: 2338 pass / 1 skip / 0 fail. Lint: 912→911 (760→759 lỗi).
+
+**Phiên 2026-10-31 (AUTO-65)**:
+- [R/T] `seals/actions.ts`: createSealRequest 263 dòng/cx 34 → 22 dòng + `seal-create-lib.ts` (thuần, 14 test); mất 5 lỗi lint.
+- Test: 2352 pass / 1 skip / 0 fail. Lint: 911→906 (759→754 lỗi).
+- Rút bài học: sau khi tách hàm lớn, **đối chiếu từng field với bản gốc** (audit targetId suýt sai).
