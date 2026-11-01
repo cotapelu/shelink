@@ -205,3 +205,7 @@
 **Phiên 2026-10-31 (AUTO-66)**:
 - [R/T] `seals/actions.ts`: helper dùng chung (load/assert/audit/notify/revalidate) + `seal-flow-lib.ts` (16 test) + tách stamp/list/stats/recipients → 16→1 lỗi.
 - Test: 2368 pass / 1 skip / 0 fail. Lint: 906→896 (754→744 lỗi).
+
+**Phiên 2026-10-31 (I18N-2)**:
+- De-zh: `invoice-create-dialog.tsx` (54 dòng) + comment `lib/enums.ts`. Vùng finance đã sạch chuỗi Hán (trừ license + ràng buộc ngoài).
+- Tiếp (I18N-3): server messages `invoices/actions.ts` + `finance/actions.ts` còn sót; rồi UI lớn (procedure-content 97, reports-view 74).

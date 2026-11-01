@@ -436,3 +436,9 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Pilot**: invoice-management.tsx 93→0 dòng Hán (trừ license); 62 chuỗi + 2 locale.
 - **Test delta**: 0 mới (2368 pass / 1 skip / 0 fail — không hồi quy; pilot không cần test mới vì không có logic thuần).
 - **Ghi chú**: companies.ts/STATE_TONE giữ tiếng Trung CÓ CHỦ ĐÍCH (hợp đồng API hãng xe); glossary chốt 30+ thuật ngữ dùng lại.
+
+## [CYCLE-I18N-2] — 2026-10-31: invoice-create-dialog + enums comments → tiếng Việt
+- **Loại**: De-zh (i18n). ~20 phút. ✅.
+- **Pilot**: invoice-create-dialog.tsx 54→0 dòng Hán (trừ license): 54 chuỗi (label/toast/placeholder/comment) + `tags` document "Căn cứ xuất hóa đơn"; lib/enums.ts 11 dòng comment còn lại → tiếng Việt.
+- **Gates**: typecheck PASS; test 159 (app+finance) + 57 (enums) pass; smoke /finance 200 + /matters/[id] 200.
+- **Ghi chú**: test `finance-invoice-create-dialog.test.tsx` chỉ assert hàm search (chuỗi "二审" là input mẫu) → không coupling, giữ nguyên.

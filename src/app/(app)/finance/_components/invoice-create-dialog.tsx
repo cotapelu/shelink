@@ -57,10 +57,10 @@ type MatterRef = { id: string; internalCode: string; title: string };
 type ClientOption = { id: string; name: string; taxNo: string | null; isPrimary: boolean };
 
 const INVOICE_ITEM_OPTIONS: { value: InvoiceItem; label: string }[] = [
-  { value: "LAWYER_FEE", label: "律师服务费" },
-  { value: "CONSULTING_FEE", label: "法律咨询费" },
-  { value: "AGENCY_FEE", label: "代理费" },
-  { value: "OTHER", label: "其他法律服务" }
+  { value: "LAWYER_FEE", label: "Phí luật sư" },
+  { value: "CONSULTING_FEE", label: "Phí tư vấn" },
+  { value: "AGENCY_FEE", label: "Phí đại diện" },
+  { value: "OTHER", label: "Dịch vụ pháp lý khác" }
 ];
 
 export function InvoiceCreateDialog({
@@ -75,7 +75,7 @@ export function InvoiceCreateDialog({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  // 关联模式
+  // Chế độ liên kết vụ án
   const [noMatter, setNoMatter] = useState(false);
   const [noMatterReason, setNoMatterReason] = useState("");
   const [matterQuery, setMatterQuery] = useState("");
@@ -84,7 +84,7 @@ export function InvoiceCreateDialog({
   const [matterLoading, setMatterLoading] = useState(false);
   const [clientOptions, setClientOptions] = useState<ClientOption[]>([]);
 
-  // 开票字段
+  // Trường hóa đơn
   const [amount, setAmount] = useState("");
   const [invoiceType, setInvoiceType] = useState<InvoiceType | null>(null);
   const [invoiceItem, setInvoiceItem] = useState<InvoiceItem>("LAWYER_FEE");
@@ -179,34 +179,34 @@ export function InvoiceCreateDialog({
   function handleFiles(list: FileList | null) {
     if (!list) return;
     const arr = Array.from(list).filter((f) => f.size <= 20 * 1024 * 1024);
-    if (arr.length < list.length) toast.warning("跳过了超过 20MB 的文件");
+    if (arr.length < list.length) toast.warning("Đã bỏ qua tệp vượt 20MB");
     setEvidenceFiles((prev) => [...prev, ...arr]);
     if (fileRef.current) fileRef.current.value = "";
   }
 
   function submit() {
     const amt = Number(amount);
-    if (!amt || amt <= 0) return toast.warning("请填写金额");
-    if (!noMatter && !selectedMatter) return toast.warning("请选择关联案件，或勾选「无关联案件」");
-    if (noMatter && !noMatterReason.trim()) return toast.warning("无关联案件时请说明原因");
-    if (!invoiceType) return toast.warning("请选择开票类型");
-    if (!buyerName.trim()) return toast.warning("请填写开票抬头");
+    if (!amt || amt <= 0) return toast.warning("Vui lòng nhập số tiền");
+    if (!noMatter && !selectedMatter) return toast.warning("Vui lòng chọn vụ án liên quan hoặc tick 「Không liên kết vụ án」");
+    if (noMatter && !noMatterReason.trim()) return toast.warning("Vui lòng nêu lý do khi không liên kết vụ án");
+    if (!invoiceType) return toast.warning("Vui lòng chọn loại hóa đơn");
+    if (!buyerName.trim()) return toast.warning("Vui lòng nhập đơn vị mua");
     if (invoiceType === "SPECIAL") {
-      if (!buyerTaxNo.trim()) return toast.warning("专票必须填写纳税人识别号");
-      if (!buyerAddress.trim()) return toast.warning("专票必须填写购方地址");
-      if (!buyerPhone.trim()) return toast.warning("专票必须填写购方电话");
-      if (!buyerBank.trim()) return toast.warning("专票必须填写开户银行");
-      if (!buyerBankAccount.trim()) return toast.warning("专票必须填写银行账号");
+      if (!buyerTaxNo.trim()) return toast.warning("Hóa đơn GTGT bắt buộc nhập mã số thuế");
+      if (!buyerAddress.trim()) return toast.warning("Hóa đơn GTGT bắt buộc nhập địa chỉ bên mua");
+      if (!buyerPhone.trim()) return toast.warning("Hóa đơn GTGT bắt buộc nhập điện thoại bên mua");
+      if (!buyerBank.trim()) return toast.warning("Hóa đơn GTGT bắt buộc nhập ngân hàng mở tài khoản");
+      if (!buyerBankAccount.trim()) return toast.warning("Hóa đơn GTGT bắt buộc nhập số tài khoản");
     }
     if (!noMatter && evidenceFiles.length === 0) {
-      return toast.warning("请上传开票依据（扫描版委托合同等）");
+      return toast.warning("Vui lòng tải căn cứ xuất hóa đơn (bản scan hợp đồng...)");
     }
 
     startTransition(async () => {
       try {
         const isSpecial = invoiceType === "SPECIAL";
         const docIds: string[] = [];
-        // 仅关联案件时上传依据（依据须绑定案件）
+        // Chỉ tải căn cứ khi có vụ án (căn cứ phải gắn vụ)
         if (!noMatter && selectedMatter) {
           for (const file of evidenceFiles) {
             const fd = new FormData();
@@ -214,7 +214,7 @@ export function InvoiceCreateDialog({
             fd.set("name", file.name);
             fd.set("category", "OTHER");
             fd.set("encrypted", "true");
-            fd.set("tags", "开票依据");
+            fd.set("tags", "Căn cứ xuất hóa đơn");
             fd.set("file", file);
             const doc = await uploadDocument(fd);
             docIds.push(doc.id);
@@ -235,11 +235,11 @@ export function InvoiceCreateDialog({
           evidenceDocIds: docIds,
           requestNote
         });
-        toast.success("开票申请已提交");
+        toast.success("Đã gửi yêu cầu xuất hóa đơn");
         onOpenChange(false);
         router.refresh();
       } catch (err) {
-        toast.error("提交失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Gửi thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -250,18 +250,18 @@ export function InvoiceCreateDialog({
         <DialogHeader className="border-b border-border px-5 py-3">
           <DialogTitle className="flex items-center gap-2">
             <Receipt className="h-4 w-4 text-primary" />
-            申请开具发票
+            Yêu cầu xuất hóa đơn
           </DialogTitle>
           <DialogDescription className="text-xs">
             {canCreateUnlinkedInvoice
-              ? "选择本人可关联的案件，或对无关联案件开票（须说明原因）"
-              : "选择本人可关联的案件后提交开票申请"}
+              ? "Chọn vụ án bạn được liên kết, hoặc xuất cho hóa đơn không liên kết vụ án (phải nêu lý do)"
+              : "Chọn vụ án bạn được liên kết rồi gửi yêu cầu xuất hóa đơn"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
-          {/* 关联案件 */}
-          <Field label="关联案件" required>
+          {/* Vụ án liên quan */}
+          <Field label="Vụ án liên quan" required>
             <div className="space-y-2">
               {canCreateUnlinkedInvoice && (
                 <label className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
@@ -277,14 +277,14 @@ export function InvoiceCreateDialog({
                       }
                     }}
                   />
-                  无关联案件（如所务、咨询等非案件收入）
+                  Không liên kết vụ án (doanh thu phi vụ án: tư vấn, dịch vụ...)
                 </label>
               )}
 
               {canCreateUnlinkedInvoice && noMatter ? (
                 <Textarea
                   rows={2}
-                  placeholder="请说明无关联案件的具体原因（必填）"
+                  placeholder="Nêu lý do cụ thể không liên kết vụ án (bắt buộc)"
                   value={noMatterReason}
                   onChange={(e) => setNoMatterReason(e.target.value)}
                 />
@@ -310,7 +310,7 @@ export function InvoiceCreateDialog({
                     <Input
                       value={matterQuery}
                       onChange={(e) => runSearch(e.target.value)}
-                      placeholder="搜索案件名称 / 系统编号 / 所内案号"
+                      placeholder="Tìm tên vụ / mã hệ thống / mã nội bộ"
                       className="h-8 pl-7 text-xs"
                     />
                   </div>
@@ -321,7 +321,7 @@ export function InvoiceCreateDialog({
                       </div>
                     ) : matterResults.length === 0 ? (
                       <p className="rounded-md border border-dashed border-border bg-background py-4 text-center text-xs text-muted-foreground">
-                        {matterQuery.trim() ? "无匹配案件" : "暂无可关联案件"}
+                        {matterQuery.trim() ? "Không có vụ nào khớp" : "Chưa có vụ nào liên kết được"}
                       </p>
                     ) : (
                       matterResults.map((m) => (
@@ -342,9 +342,9 @@ export function InvoiceCreateDialog({
             </div>
           </Field>
 
-          {/* 金额 + 类型 */}
+          {/* Số tiền + loại */}
           <div className="grid grid-cols-2 gap-3">
-            <Field label="开票金额（元）" required>
+            <Field label="Số tiền" required>
               <Input
                 type="number"
                 step="0.01"
@@ -355,90 +355,90 @@ export function InvoiceCreateDialog({
                 onChange={(e) => setAmount(e.target.value)}
               />
             </Field>
-            <Field label="开票类型" required>
+            <Field label="Loại hóa đơn" required>
               <Select value={invoiceType ?? undefined} onValueChange={(v) => setInvoiceType(v as InvoiceType)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="请选择" />
+                  <SelectValue placeholder="Chọn" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PLAIN">普通发票</SelectItem>
-                  <SelectItem value="SPECIAL">增值税专用发票</SelectItem>
+                  <SelectItem value="PLAIN">Hóa đơn thường</SelectItem>
+                  <SelectItem value="SPECIAL">Hóa đơn GTGT</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
           </div>
 
-          <Field label="开票名目" required>
+          <Field label="Khoản mục" required>
             <RadioChips items={INVOICE_ITEM_OPTIONS} value={invoiceItem} onChange={(v) => setInvoiceItem(v as InvoiceItem)} />
           </Field>
 
-          {/* 抬头 */}
-          <Field label="开票抬头（客户）" required hint={clientOptions.length > 0 ? "选项为所选案件的关联客户" : undefined}>
+          {/* Đơn vị mua */}
+          <Field label="Đơn vị mua (khách hàng)" required hint={clientOptions.length > 0 ? "Các lựa chọn là khách hàng liên kết của vụ đã chọn" : undefined}>
             {!noMatter && clientOptions.length > 0 ? (
               <Select onValueChange={pickClient}>
                 <SelectTrigger>
-                  <SelectValue placeholder="请选择开票抬头" />
+                  <SelectValue placeholder="Chọn đơn vị mua" />
                 </SelectTrigger>
                 <SelectContent>
                   {clientOptions.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
-                      {c.isPrimary ? "（主要客户）" : ""}
+                      {c.isPrimary ? " (khách chính)" : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             ) : (
               <Input
-                placeholder="如：上海某某科技有限公司 / 张三"
+                placeholder="vd: Công ty ABC / Nguyễn Văn A"
                 value={buyerName}
                 onChange={(e) => setBuyerName(e.target.value)}
               />
             )}
           </Field>
 
-          {/* 专票六要素 */}
+          {/* 6 yếu tố hóa đơn GTGT */}
           {invoiceType === "SPECIAL" && (
             <div className="space-y-3 rounded-md border border-primary/30 bg-primary/5 p-3">
-              <Field label="纳税人识别号" required>
+              <Field label="Mã số thuế" required>
                 <Input className="font-mono" value={buyerTaxNo} onChange={(e) => setBuyerTaxNo(e.target.value)} />
               </Field>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="开户银行" required>
+                <Field label="Ngân hàng mở TK" required>
                   <Input value={buyerBank} onChange={(e) => setBuyerBank(e.target.value)} />
                 </Field>
-                <Field label="银行账号" required>
+                <Field label="Số tài khoản" required>
                   <Input className="font-mono" value={buyerBankAccount} onChange={(e) => setBuyerBankAccount(e.target.value)} />
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="购方地址" required>
+                <Field label="Địa chỉ bên mua" required>
                   <Input value={buyerAddress} onChange={(e) => setBuyerAddress(e.target.value)} />
                 </Field>
-                <Field label="购方电话" required>
+                <Field label="Điện thoại bên mua" required>
                   <Input className="font-mono" value={buyerPhone} onChange={(e) => setBuyerPhone(e.target.value)} />
                 </Field>
               </div>
             </div>
           )}
 
-          {/* 依据：仅关联案件时必传 */}
+          {/* Căn cứ: bắt buộc khi có vụ án */}
           {!noMatter && (
             <Field
-              label="开票依据"
+              label="Căn cứ xuất hóa đơn"
               required
-              hint="扫描版委托合同等，单文件 ≤ 20MB"
+              hint="Bản scan hợp đồng..., mỗi tệp ≤ 20MB"
               action={
                 <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} className="h-7 gap-1.5 px-2 text-[11px]">
                   <Paperclip className="h-3.5 w-3.5" />
-                  添加文件
+                  Thêm tệp
                 </Button>
               }
             >
               <div className="space-y-2">
                 <input ref={fileRef} type="file" multiple accept="image/*,application/pdf" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
                 {evidenceFiles.length === 0 ? (
-                  <p className="rounded-md border border-dashed border-border bg-background py-3 text-center text-xs text-muted-foreground">未选择任何文件</p>
+                  <p className="rounded-md border border-dashed border-border bg-background py-3 text-center text-xs text-muted-foreground">Chưa chọn tệp nào</p>
                 ) : (
                   <ul className="space-y-1.5">
                     {evidenceFiles.map((f, i) => (
@@ -456,18 +456,18 @@ export function InvoiceCreateDialog({
             </Field>
           )}
 
-          <Field label="申请备注（可选）">
+          <Field label="Ghi chú yêu cầu (tuỳ chọn)">
             <Textarea rows={2} value={requestNote} onChange={(e) => setRequestNote(e.target.value)} />
           </Field>
         </div>
 
         <DialogFooter className="border-t border-border px-5 py-3">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={isPending} className="gap-1.5">
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            提交申请
+            Gửi yêu cầu
           </Button>
         </DialogFooter>
       </DialogContent>

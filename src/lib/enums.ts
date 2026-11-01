@@ -42,7 +42,7 @@ export const clientTypeLabel: Record<ClientType, string> = {
   ORGANIZATION: "Tổ chức khác"
 };
 
-// v0.39: 客户合作状态
+// v0.39: Trạng thái hợp tác của khách hàng
 export const cooperationStatusLabel: Record<ClientCooperationStatus, string> = {
   POTENTIAL: "Tiềm năng",
   NEGOTIATING: "Đang đàm phán",
@@ -57,7 +57,7 @@ export const COOPERATION_STATUS_OPTIONS: ClientCooperationStatus[] = [
   "TERMINATED"
 ];
 
-// v0.39: 客户性别（个人客户）
+// v0.39: Giới tính khách hàng (khách cá nhân)
 export const genderLabel: Record<ClientGender, string> = {
   MALE: "Nam",
   FEMALE: "Nữ"
@@ -65,7 +65,7 @@ export const genderLabel: Record<ClientGender, string> = {
 
 export const GENDER_OPTIONS: ClientGender[] = ["MALE", "FEMALE"];
 
-// v0.30: 当事人主体类型。自然人填身份证号，其余主体填统一社会信用代码。
+// v0.30: Loại chủ thể của các bên. Cá nhân điền số CMND, các chủ thể khác điền mã số thuế.
 export const partyTypeLabel: Record<PartyType, string> = {
   NATURAL_PERSON: "Cá nhân",
   COMPANY: "Công ty",
@@ -78,7 +78,7 @@ export const partyTypeLabel: Record<PartyType, string> = {
   ORGANIZATION: "Tổ chức khác" // Compatible với dữ liệu cũ
 };
 
-// 录入下拉的主体类型顺序（不含旧的 ORGANIZATION）
+// Thứ tự loại chủ thể cho dropdown nhập (không gồm ORGANIZATION cũ)
 export const PARTY_TYPE_OPTIONS: PartyType[] = [
   "NATURAL_PERSON",
   "COMPANY",
@@ -90,7 +90,7 @@ export const PARTY_TYPE_OPTIONS: PartyType[] = [
   "OTHER_ORG"
 ];
 
-// v0.30: 需向律协备案与否
+// v0.30: Có cần ghi nhận với Hiệp hội luật sư không
 export const barFilingLabel: Record<BarFilingType, string> = {
   NONE: "Không",
   COLLECTIVE: "Cần, liên quan tập thể",
@@ -107,14 +107,14 @@ export const BAR_FILING_OPTIONS: BarFilingType[] = [
   "OTHER"
 ];
 
-// v0.31: 案件类别按业务性质分三类——决定收案表单结构
-// litigation 诉讼/仲裁（民商事/刑事/行政）；project 非诉/专项；counsel 顾问
+// v0.31: Loại vụ án chia 3 nhóm theo tính chất nghiệp vụ — quyết định cấu trúc form tiếp nhận
+// litigation tố tụng/trọng tài (dân sự-thương mại/hình sự/hành chính); project phi tố tụng/chuyên đề; counsel tư vấn
 export type CategoryKind = "litigation" | "project" | "counsel";
 
 export function matterCategoryKind(c: MatterCategory): CategoryKind {
   if (c === "LEGAL_COUNSEL") return "counsel";
   if (c === "NON_LITIGATION" || c === "SPECIAL_PROJECT") return "project";
-  // 民商诉讼 / 劳动仲裁 / 商事仲裁 / 刑事 / 行政 → 诉讼/仲裁类
+  // Dân sự-thương mại / Lao động / Thương mại / Hình sự / Hành chính → nhóm tố tụng/trọng tài
   return "litigation";
 }
 
@@ -161,7 +161,7 @@ export const matterCategoryColor: Record<MatterCategory, string> = {
   SPECIAL_PROJECT: "#60A5FA"
 };
 
-// v0.17: 案件类别单字图标（用于列表卡片标题前）
+// v0.17: Icon 1 chữ cho loại vụ án (hiển thị trước tiêu đề thẻ danh sách)
 export const matterCategoryShort: Record<MatterCategory, string> = {
   CIVIL_COMMERCIAL: "D",
   LABOR_ARBITRATION: "L",
@@ -270,8 +270,8 @@ export const invoiceRequestStatusColor: Record<InvoiceRequestStatus, string> = {
 };
 
 /**
- * 按程序类型 + 立场（我方 or 对方）返回可选诉讼地位枚举。
- * 用于收案表单 / 案件详情中的当事人录入联动。
+ * Theo loại thủ tục + lập trường (phía ta hoặc phía đối phương) trả về enum lập trường tố tụng.
+ * Dùng cho liên động nhập các bên trong form tiếp nhận / chi tiết vụ án.
  */
 export function procedureToStandingOptions(
   proc: ProcedureType | null | undefined,
