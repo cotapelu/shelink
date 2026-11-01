@@ -171,3 +171,7 @@
 - [R/T] `createFeeEntry`: tách payload thuần sang `fee-entry-lib.ts` (+12 test); arrow transaction 55→29 dòng, mất lỗi complexity 14.
 - Test: 2295 pass / 1 skip / 0 fail. Lint: 927→926 (775→774 lỗi).
 - Tiếp theo (AUTO-59): `createInvoiceRequest` cx 48 → tách validate/allocation; `getMatterInvoiceContext` cx 18; rồi tách `finance/actions.ts` (>300 dòng) thành module.
+
+**Phiên 2026-10-31 (AUTO-59)**:
+- [R/T] `createInvoiceRequest` (cx 48 → 0 trong action): tách `invoice-request-lib.ts` (violation table-driven, payload, notification content); +18 test; message/thứ tự giữ y nguyên.
+- Test: 2313 pass / 1 skip / 0 fail. Lint: 926→925 (774→773 lỗi).

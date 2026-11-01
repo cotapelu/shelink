@@ -53,6 +53,12 @@ import {
   feeReceivedTimelineData,
   shouldSplitCommission
 } from "./fee-entry-lib";
+import {
+  buildInvoiceRequestData,
+  invoiceNotificationContent,
+  invoiceRequestViolation,
+  invoiceValidationViolation
+} from "./invoice-request-lib";
 
 // ============ Billing ============
 
@@ -420,55 +426,17 @@ export async function createInvoiceRequest(input: {
   requestNote?: string | null;
 }) {
   const session = await requireSession();
+  // Validation thuần (giữ đúng thứ tự message của bản gốc — xem invoice-request-lib.test.ts)
+  const roleViolation = invoiceRequestViolation(session.user.role, input);
+  if (roleViolation) throw new Error(roleViolation);
   if (input.matterId) {
     await assertCanAssociateMatter(session.user.id, input.matterId);
-  } else {
-    // Xuất hóa đơn không liên kết vụ án chỉ Tài chính / quản trị / chủ nhiệm được tạo, và bắt buộc phải nêu lý do
-    if (!isManager(session.user.role) && session.user.role !== "FINANCE") {
-      throw new Error("Chỉ Tài chính / quản trị / luật sư chủ trì mới được tạo hóa đơn không liên kết vụ án");
-    }
-    if (!input.noMatterReason?.trim()) {
-      throw new Error("Khi không liên kết vụ án bắt buộc phải nhập lý do");
-    }
   }
+  const violation = invoiceValidationViolation(input);
+  if (violation) throw new Error(violation);
 
-  if (input.amount <= 0) throw new Error("Số tiền phải lớn hơn 0");
-  if (input.invoiceType !== "PLAIN" && input.invoiceType !== "SPECIAL") {
-    throw new Error("Vui lòng chọn loại hóa đơn");
-  }
-  if (!input.buyerName.trim()) throw new Error("Vui lòng nhập tên đơn vị mua");
-  // Kiểm tra tuân thủ hóa đơn đặc biệt (điều 1 Thông báo về sử dụng và quản lý hóa đơn GTGT đặc biệt + 6 yếu tố bên mua)
-  if (input.invoiceType === "SPECIAL") {
-    if (!input.buyerTaxNo?.trim()) throw new Error("Hóa đơn GTGT đặc biệt bắt buộc phải có mã số thuế người nộp thuế");
-    if (!input.buyerAddress?.trim()) throw new Error("Hóa đơn GTGT đặc biệt bắt buộc phải có địa chỉ bên mua");
-    if (!input.buyerPhone?.trim()) throw new Error("Hóa đơn GTGT đặc biệt bắt buộc phải có điện thoại bên mua");
-    if (!input.buyerBank?.trim()) throw new Error("Hóa đơn GTGT đặc biệt bắt buộc phải có ngân hàng mở tài khoản");
-    if (!input.buyerBankAccount?.trim()) throw new Error("Hóa đơn GTGT đặc biệt bắt buộc phải có số tài khoản ngân hàng");
-  }
-  // Khi có liên kết vụ án bắt buộc phải tải lên căn cứ xuất hóa đơn (hợp đồng ủy quyền...); khi không liên kết vụ án thì thay bằng lý do, căn cứ là tùy chọn
-  if (input.matterId && input.evidenceDocIds.length === 0) {
-    throw new Error("Vui lòng tải lên ít nhất một căn cứ xuất hóa đơn (hợp đồng ủy quyền bản scan...)");
-  }
-
-  const isSpecial = input.invoiceType === "SPECIAL";
   const created = await prisma.invoiceRequest.create({
-    data: {
-      matterId: input.matterId,
-      noMatterReason: input.matterId ? null : input.noMatterReason?.trim() || null,
-      amount: input.amount,
-      invoiceType: input.invoiceType,
-      invoiceItem: input.invoiceItem,
-      buyerName: input.buyerName.trim(),
-      buyerTaxNo: input.buyerTaxNo?.trim() || null,
-      buyerAddress: isSpecial ? input.buyerAddress?.trim() || null : null,
-      buyerPhone: isSpecial ? input.buyerPhone?.trim() || null : null,
-      buyerBank: isSpecial ? input.buyerBank?.trim() || null : null,
-      buyerBankAccount: isSpecial ? input.buyerBankAccount?.trim() || null : null,
-      evidenceDocIds: input.evidenceDocIds,
-      title: input.buyerName.trim(),
-      requestNote: input.requestNote?.trim() || null,
-      requestedById: session.user.id
-    },
+    data: buildInvoiceRequestData(input, session.user.id),
     select: { id: true }
   });
 
@@ -483,9 +451,7 @@ export async function createInvoiceRequest(input: {
     roles: ["ADMIN", "PRINCIPAL_LAWYER", "FINANCE"],
     excludeUserId: session.user.id,
     title: "Có yêu cầu xuất hóa đơn mới cần duyệt",
-    content: `${session.user.name ?? "Người dùng"} đã gửi yêu cầu xuất hóa đơn: ${
-      matter ? `${matter.internalCode} ${matter.title}` : input.noMatterReason?.trim() || "Không liên kết vụ án"
-    }, số tiền ${input.amount.toLocaleString("vi-VN")} đồng`,
+    content: invoiceNotificationContent(session.user.name, matter, input),
     href: "/finance",
     refType: "InvoiceRequest",
     refId: created.id,

@@ -368,3 +368,11 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Lint**: 926 problems (774 lỗi / 152 warning) — giảm 1 so với đầu chu kỳ (927/775/152); finance/actions.ts 16→15.
 - **Bảo mật**: không đổi đường tiền; số học hoa hồng đã có test khóa (Decimal-safe, ≤0 bỏ qua).
 - **Ghi chú**: bẫy Decimal — Prisma trả `percent: Decimal`; gốc ép `Number(...)`; lib giữ đúng ép kiểu ở biên.
+
+## [CYCLE-AUTO-59] — 2026-10-31: [R/T] createInvoiceRequest cx 48 → validator thuần (+18 test)
+- **Loại**: Refactor [R] + Tests [T]. ~45 phút. ✅.
+- **Test delta**: +18 (2295→2313 pass / 1 skip / 0 fail).
+- **Phủ**: validator + payload + notification 100% nhánh chính (message theo thứ tự gốc).
+- **Lint**: 925 problems (773 lỗi / 152 warning) — giảm 1 so với đầu chu kỳ (926/774/152); finance/actions.ts 15→14.
+- **Bảo mật**: logic phân quyền hóa đơn không liên kết vụ án giữ nguyên (test khóa); table-driven 5 yếu tố HĐĐB có test từng message.
+- **Ghi chú**: isManager = ADMIN + PRINCIPAL_LAWYER duy nhất (lệch AGENTS §6 đã ghi PROFILE).

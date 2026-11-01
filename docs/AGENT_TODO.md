@@ -1,8 +1,22 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-31 (AUTO-58).
+Cập nhật lần cuối: 2026-10-31 (AUTO-59).
 
 ## Chu kỳ đã hoàn thành (gần đây)
+
+### [CYCLE-AUTO-59] — 2026-10-31: [R/T] createInvoiceRequest (94 dòng, complexity 48) → invoice-request-lib
+Loại: Refactor [R] + Tests [T] — ưu tiên MEDIUM. Không đổi hành vi (message/thứ tự giữ nguyên). ~45 phút.
+
+**Đã hoàn thành**:
+- [x] Trích `src/server/finance/invoice-request-lib.ts` (thuần): `invoiceRequestViolation` (phân quyền theo matterId), `invoiceValidationViolation` + `specialInvoiceViolation` (table-driven 5 yếu tố HĐĐB — giữ đúng thứ tự & message gốc), `buildInvoiceRequestData` (specialOnly giữ field mua hàng chỉ với SPECIAL), `invoiceNotificationContent`.
+- [x] Rewire `createInvoiceRequest`: 94→~54 dòng, **complexity 48 biến mất khỏi action** (chuyển thành validator thuần có test).
+- [x] Test mới `invoice-request-lib.test.ts` **18 test**: 4 nhóm phân quyền, thứ tự message SPECIAL (5 ca), evidence theo matterId, payload PLAIN vs SPECIAL vs không-matter, notification content 3 nhánh.
+
+**Phát hiện khi test (ghi PROFILE)**: `isManager` thực chất chỉ `ADMIN || PRINCIPAL_LAWYER` — OWNER/MANAGER không tồn tại trong schema (UserRole = ADMIN/PRINCIPAL_LAWYER/LAWYER/ASSISTANT/FINANCE). Lib giữ đúng hành vi `isManager`, test ghi rõ để tránh "sửa cho đúng docs".
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test **2313 pass / 1 skip / 0 fail** (2295→2313, +18); full lint **925 (773 lỗi)** — giảm 1; `finance/actions.ts` 15→14 lỗi; cả 3 lib finance 0 lỗi; 94 test finance pass (rewire không hồi quy).
+
+**Còn lại `finance/actions.ts`** (14 lỗi): `getMatterInvoiceContext` (77/cx 18), `createFeeEntry` (51 + arrow 33), `deleteFeeEntry` (36), `getMatterFinance` (44), `getMonthlyRevenue/getPersonalRevenue` (35+35), file 530>300 dòng → AUTO-60.
 
 ### [CYCLE-AUTO-58] — 2026-10-31: [R/T] createFeeEntry (73 dòng, cx 14) → fee-entry-lib
 Loại: Refactor [R] + Tests [T] — ưu tiên MEDIUM. Không đổi hành vi. ~35 phút.
