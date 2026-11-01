@@ -57,7 +57,8 @@ import {
   buildInvoiceRequestData,
   invoiceNotificationContent,
   invoiceRequestViolation,
-  invoiceValidationViolation
+  invoiceValidationViolation,
+  type InvoiceRequestInput
 } from "./invoice-request-lib";
 import {
   buildClientOptions,
@@ -70,25 +71,27 @@ import {
   revenueWindowStart,
   yearStartOf
 } from "./finance-stats-lib";
+import { fetchMatterFinanceData } from "./queries";
 
 // ============ Billing ============
+
+/** Payload tạo Billing từ input đã validate. */
+function toBillingCreateData(data: BillingCreateInput) {
+  return {
+    matterId: data.matterId,
+    title: data.title,
+    contractAmount: new Prisma.Decimal(data.contractAmount),
+    schedule: data.schedule || null,
+    status: data.status,
+    signedAt: data.signedAt
+  };
+}
 
 export async function createBilling(input: BillingCreateInput) {
   const session = await requireSession();
   const data = billingCreateSchema.parse(input);
   await assertMatterWritable(data.matterId, { allowFinanceRole: true });
-
-  const created = await prisma.billing.create({
-    data: {
-      matterId: data.matterId,
-      title: data.title,
-      contractAmount: new Prisma.Decimal(data.contractAmount),
-      schedule: data.schedule || null,
-      status: data.status,
-      signedAt: data.signedAt
-    }
-  });
-
+  const created = await prisma.billing.create({ data: toBillingCreateData(data) });
   await audit({
     userId: session.user.id,
     action: "BILLING_CREATE",
@@ -96,7 +99,6 @@ export async function createBilling(input: BillingCreateInput) {
     targetId: created.id,
     detail: { matterId: data.matterId }
   });
-
   revalidatePath(`/matters/${data.matterId}`);
   return { ok: true, id: created.id };
 }
@@ -117,14 +119,41 @@ export async function deleteBilling(id: string) {
   }
 
   await prisma.billing.delete({ where: { id } });
-  await audit({
-    userId: session.user.id,
-    action: "BILLING_DELETE",
-    targetType: "Billing",
-    targetId: id
-  });
+  await audit({ userId: session.user.id, action: "BILLING_DELETE", targetType: "Billing", targetId: id });
   revalidatePath(`/matters/${billing.matterId}`);
   return { ok: true };
+}
+
+/** Tạo các dòng COMMISSION con theo plan (bỏ qua plan có phần chia ≤0). */
+async function createCommissionChildren(
+  tx: Prisma.TransactionClient,
+  plans: Array<{ id: string; userId: string; percent: Prisma.Decimal; label: string | null }>,
+  ctx: { amount: number; parentId: string; recordedById: string; matterId: string; billingId: string | null; occurredAt: Date }
+): Promise<void> {
+  for (const plan of plans) {
+    const row = buildCommissionData({ plan, amount: ctx.amount, parentId: ctx.parentId, recordedById: ctx.recordedById, matterId: ctx.matterId, billingId: ctx.billingId, occurredAt: ctx.occurredAt });
+    if (!row) continue;
+    await tx.feeEntry.create({ data: { ...row, amount: new Prisma.Decimal(row.amount) } });
+  }
+}
+
+/** Thân transaction tạo thu chi: dòng chính + hoa hồng tự động + sự kiện dòng thời gian. */
+async function runFeeEntryCreation(tx: Prisma.TransactionClient, data: FeeEntryCreateInput, recordedById: string) {
+  const entryData = buildFeeEntryData(data, recordedById);
+  const entry = await tx.feeEntry.create({ data: { ...entryData, amount: new Prisma.Decimal(entryData.amount) } });
+
+  // Tự động chia hoa hồng khi thu tiền (pure logic đã tách sang fee-entry-lib)
+  if (shouldSplitCommission(data.type, data.amount)) {
+    const plans = await tx.commissionPlan.findMany({ where: { matterId: data.matterId, active: true } });
+    const ctx = { amount: data.amount, parentId: entry.id, recordedById, matterId: data.matterId, billingId: data.billingId || null, occurredAt: data.occurredAt };
+    await createCommissionChildren(tx, plans, ctx);
+  }
+
+  // Sự kiện thu tiền thực tế ghi vào dòng thời gian
+  if (data.type === "RECEIVED") {
+    await tx.timelineEvent.create({ data: feeReceivedTimelineData(data) });
+  }
+  return entry;
 }
 
 // ============ FeeEntry + tự động chia hoa hồng ============
@@ -139,39 +168,7 @@ export async function createFeeEntry(input: FeeEntryCreateInput) {
   const data = feeEntryCreateSchema.parse(input);
   await assertMatterWritable(data.matterId, { allowFinanceRole: true });
 
-  const created = await prisma.$transaction(async (tx) => {
-    const entryData = buildFeeEntryData(data, session.user.id);
-    const entry = await tx.feeEntry.create({
-      data: { ...entryData, amount: new Prisma.Decimal(entryData.amount) }
-    });
-
-    // Tự động chia hoa hồng (pure logic đã tách sang fee-entry-lib)
-    if (shouldSplitCommission(data.type, data.amount)) {
-      const plans = await tx.commissionPlan.findMany({
-        where: { matterId: data.matterId, active: true }
-      });
-      for (const plan of plans) {
-        const row = buildCommissionData({
-          plan,
-          amount: data.amount,
-          parentId: entry.id,
-          recordedById: session.user.id,
-          matterId: data.matterId,
-          billingId: data.billingId || null,
-          occurredAt: data.occurredAt
-        });
-        if (!row) continue;
-        await tx.feeEntry.create({ data: { ...row, amount: new Prisma.Decimal(row.amount) } });
-      }
-    }
-
-    // Sự kiện thu tiền thực tế ghi vào dòng thời gian
-    if (data.type === "RECEIVED") {
-      await tx.timelineEvent.create({ data: feeReceivedTimelineData(data) });
-    }
-
-    return entry;
-  });
+  const created = await prisma.$transaction((tx) => runFeeEntryCreation(tx, data, session.user.id));
 
   await audit({
     userId: session.user.id,
@@ -186,55 +183,80 @@ export async function createFeeEntry(input: FeeEntryCreateInput) {
   return { ok: true, id: created.id };
 }
 
+/** Xóa dòng cha + dòng con hoa hồng tự sinh (cùng transaction). */
+async function deleteFeeEntryCascade(
+  tx: Prisma.TransactionClient,
+  id: string,
+  childIds: string[]
+): Promise<void> {
+  if (childIds.length > 0) {
+    await tx.feeEntry.deleteMany({ where: { id: { in: childIds } } });
+  }
+  await tx.feeEntry.delete({ where: { id } });
+}
+
+/** Ghi audit + revalidate sau khi xóa bản ghi thu chi. */
+async function recordFeeEntryDeletion(
+  userId: string,
+  id: string,
+  entry: { matterId: string; commissionChildren: unknown[] }
+): Promise<void> {
+  await audit({
+    userId,
+    action: "FEE_ENTRY_DELETE",
+    targetType: "FeeEntry",
+    targetId: id,
+    detail: { matterId: entry.matterId, cascadedChildren: entry.commissionChildren.length }
+  });
+  revalidatePath(`/matters/${entry.matterId}`);
+  revalidatePath("/finance");
+}
+
+/**
+ * Xóa bản ghi thu chi: kéo theo các dòng hoa hồng tự sinh + audit + revalidate.
+ * Tách khỏi action để action chỉ còn phân quyền (R-refactor AUTO-62).
+ */
+async function runFeeEntryDeletion(userId: string, id: string): Promise<boolean> {
+  const entry = await prisma.feeEntry.findUnique({
+    where: { id },
+    include: { commissionChildren: { select: { id: true } } }
+  });
+  if (!entry) return false;
+  await assertMatterWritable(entry.matterId, { allowFinanceRole: true });
+  await prisma.$transaction((tx) =>
+    deleteFeeEntryCascade(tx, id, entry.commissionChildren.map((c) => c.id))
+  );
+  await recordFeeEntryDeletion(userId, id, entry);
+  return true;
+}
+
 export async function deleteFeeEntry(id: string) {
   const session = await requireSession();
   if (!isManager(session.user.role) && session.user.role !== "FINANCE") {
     throw new Error("Chỉ quản trị, luật sư chủ trì hoặc Tài chính mới được xóa bản ghi thu chi");
   }
-  const entry = await prisma.feeEntry.findUnique({
-    where: { id },
-    include: { commissionChildren: { select: { id: true } } }
-  });
-  if (!entry) return { ok: false };
-  await assertMatterWritable(entry.matterId, { allowFinanceRole: true });
-
-  // Khi xóa dòng cha thì xóa luôn các khoản chia hoa hồng tự động sinh ra
-  await prisma.$transaction(async (tx) => {
-    if (entry.commissionChildren.length > 0) {
-      await tx.feeEntry.deleteMany({
-        where: { id: { in: entry.commissionChildren.map((c) => c.id) } }
-      });
-    }
-    await tx.feeEntry.delete({ where: { id } });
-  });
-
-  await audit({
-    userId: session.user.id,
-    action: "FEE_ENTRY_DELETE",
-    targetType: "FeeEntry",
-    targetId: id,
-    detail: {
-      matterId: entry.matterId,
-      cascadedChildren: entry.commissionChildren.length
-    }
-  });
-  revalidatePath(`/matters/${entry.matterId}`);
-  revalidatePath("/finance");
-  return { ok: true };
+  const ok = await runFeeEntryDeletion(session.user.id, id);
+  return { ok };
 }
 
 // ============ CommissionPlan ============
 
-/**
- * Thay thế toàn bộ phương án chia hoa hồng của vụ.
- * Cách đơn giản: xóa mọi plan hiện có, tạo mới theo items.
- */
-export async function setCommissionPlan(input: CommissionPlanSetInput) {
-  const session = await requireSession();
-  const data = commissionPlanSetSchema.parse(input);
-  await assertMatterWritable(data.matterId);
-  await assertCanLeadMatter(session.user.id, data.matterId, "Chỉ chủ trì / hợp tác viên của vụ mới được đặt phương án chia hoa hồng");
+/** Ghi audit + revalidate sau khi thay thế phương án hoa hồng. */
+async function recordCommissionPlanAudit(userId: string, matterId: string, itemCount: number): Promise<void> {
+  await audit({
+    userId,
+    action: "COMMISSION_PLAN_SET",
+    targetType: "Matter",
+    targetId: matterId,
+    detail: { itemCount }
+  });
+  revalidatePath(`/matters/${matterId}`);
+}
 
+/** Thay thế toàn bộ phương án chia hoa hồng của vụ (xóa hết → tạo mới). */
+async function runCommissionPlanReplace(userId: string, data: CommissionPlanSetInput): Promise<void> {
+  await assertMatterWritable(data.matterId);
+  await assertCanLeadMatter(userId, data.matterId, "Chỉ chủ trì / hợp tác viên của vụ mới được đặt phương án chia hoa hồng");
   await prisma.$transaction([
     prisma.commissionPlan.deleteMany({ where: { matterId: data.matterId } }),
     prisma.commissionPlan.createMany({
@@ -247,16 +269,17 @@ export async function setCommissionPlan(input: CommissionPlanSetInput) {
       }))
     })
   ]);
+  await recordCommissionPlanAudit(userId, data.matterId, data.items.length);
+}
 
-  await audit({
-    userId: session.user.id,
-    action: "COMMISSION_PLAN_SET",
-    targetType: "Matter",
-    targetId: data.matterId,
-    detail: { itemCount: data.items.length }
-  });
-
-  revalidatePath(`/matters/${data.matterId}`);
+/**
+ * Thay thế toàn bộ phương án chia hoa hồng của vụ.
+ * Cách đơn giản: xóa mọi plan hiện có, tạo mới theo items.
+ */
+export async function setCommissionPlan(input: CommissionPlanSetInput) {
+  const session = await requireSession();
+  const data = commissionPlanSetSchema.parse(input);
+  await runCommissionPlanReplace(session.user.id, data);
   return { ok: true };
 }
 
@@ -266,32 +289,8 @@ export async function getMatterFinance(matterId: string) {
   const session = await requireSession();
   await assertCanAccessMatter(session.user.id, session.user.role, matterId);
 
-  const [billings, entries, plans, issuedInvoices] = await Promise.all([
-    prisma.billing.findMany({
-      where: { matterId },
-      orderBy: { createdAt: "desc" }
-    }),
-    prisma.feeEntry.findMany({
-      where: { matterId },
-      orderBy: { occurredAt: "desc" },
-      include: {
-        beneficiaryUser: { select: { id: true, name: true } },
-        parentFeeEntry: { select: { id: true, type: true } }
-      }
-    }),
-    prisma.commissionPlan.findMany({
-      where: { matterId },
-      include: { user: { select: { id: true, name: true, role: true } } },
-      orderBy: { createdAt: "asc" }
-    }),
-    // Số tiền đã xuất hóa đơn: tổng các hóa đơn đã xuất
-    prisma.invoiceRequest.findMany({
-      where: { matterId, status: "ISSUED" },
-      select: { amount: true }
-    })
-  ]);
-
-  // Tổng hợp số liệu (thuần, đã test — finance-stats-lib)
+  // 4 query song song (io, đã tách sang queries.ts)
+  const { billings, entries, plans, issuedInvoices } = await fetchMatterFinanceData(matterId);
   const stats = computeMatterFinanceStats({ billings, entries, issuedInvoices });
 
   return { billings, entries, plans, stats };
@@ -300,28 +299,31 @@ export async function getMatterFinance(matterId: string) {
 /**
  * v0.11: Liệt kê các yêu cầu xuất hóa đơn của vụ
  */
+/** Select danh sách yêu cầu hóa đơn của vụ (trích để action ≤20 dòng). */
+const INVOICE_REQUEST_LIST_SELECT = {
+  id: true,
+  amount: true,
+  title: true,
+  status: true,
+  processNote: true,
+  requestedAt: true,
+  processedAt: true,
+  invoiceType: true,
+  invoiceItem: true,
+  buyerName: true,
+  buyerTaxNo: true,
+  evidenceDocIds: true,
+  invoiceNo: true,
+  issuedAt: true
+} as const;
+
 export async function listMatterInvoiceRequests(matterId: string) {
   const session = await requireSession();
   await assertCanAccessMatter(session.user.id, session.user.role, matterId);
   return prisma.invoiceRequest.findMany({
     where: { matterId },
     orderBy: { requestedAt: "desc" },
-    select: {
-      id: true,
-      amount: true,
-      title: true,
-      status: true,
-      processNote: true,
-      requestedAt: true,
-      processedAt: true,
-      invoiceType: true,
-      invoiceItem: true,
-      buyerName: true,
-      buyerTaxNo: true,
-      evidenceDocIds: true,
-      invoiceNo: true,
-      issuedAt: true
-    }
+    select: INVOICE_REQUEST_LIST_SELECT
   });
 }
 
@@ -366,30 +368,36 @@ export async function getMatterInvoiceContext(matterId: string) {
 /**
  * v0.12: Tạo yêu cầu xuất hóa đơn (kèm loại/danh mục/tên đơn vị mua/căn cứ)
  */
-export async function createInvoiceRequest(input: {
-  // v0.43 mục 5: matterId có thể null — xuất hóa đơn không liên kết vụ án bắt buộc điền noMatterReason
-  matterId: string | null;
-  noMatterReason?: string | null;
-  amount: number;
-  invoiceType: "PLAIN" | "SPECIAL";
-  invoiceItem: "LAWYER_FEE" | "CONSULTING_FEE" | "AGENCY_FEE" | "OTHER";
-  buyerName: string;
-  buyerTaxNo?: string | null;
-  // v0.42 mục 4: 6 yếu tố bên mua của hóa đơn GTGT đặc biệt (bắt buộc với hóa đơn đặc biệt)
-  buyerAddress?: string | null;
-  buyerPhone?: string | null;
-  buyerBank?: string | null;
-  buyerBankAccount?: string | null;
-  evidenceDocIds: string[];
-  requestNote?: string | null;
-}) {
+/** Thông báo cho vai trò duyệt sau khi tạo yêu cầu xuất hóa đơn (kèm tên vụ nếu có). */
+/** Lấy nhãn vụ (mã + tiêu đề) cho thông báo; null nếu hóa đơn không liên kết vụ. */
+async function findMatterLabel(matterId: string) {
+  return prisma.matter.findUnique({
+    where: { id: matterId },
+    select: { internalCode: true, title: true }
+  });
+}
+
+async function notifyInvoiceRequestCreated(
+  actor: { id: string; name?: string | null },
+  createdId: string,
+  input: InvoiceRequestInput
+): Promise<void> {
+  const matter = input.matterId ? await findMatterLabel(input.matterId) : null;
+  await notifyRoleApprovers({
+    roles: ["ADMIN", "PRINCIPAL_LAWYER", "FINANCE"],
+    excludeUserId: actor.id,
+    title: "Có yêu cầu xuất hóa đơn mới cần duyệt",
+    content: invoiceNotificationContent(actor.name, matter, input),
+    href: "/finance", refType: "InvoiceRequest", refId: createdId, priority: "HIGH"
+  });
+}
+
+export async function createInvoiceRequest(input: InvoiceRequestInput) {
   const session = await requireSession();
   // Validation thuần (giữ đúng thứ tự message của bản gốc — xem invoice-request-lib.test.ts)
   const roleViolation = invoiceRequestViolation(session.user.role, input);
   if (roleViolation) throw new Error(roleViolation);
-  if (input.matterId) {
-    await assertCanAssociateMatter(session.user.id, input.matterId);
-  }
+  if (input.matterId) await assertCanAssociateMatter(session.user.id, input.matterId);
   const violation = invoiceValidationViolation(input);
   if (violation) throw new Error(violation);
 
@@ -398,23 +406,7 @@ export async function createInvoiceRequest(input: {
     select: { id: true }
   });
 
-  const matter = input.matterId
-    ? await prisma.matter.findUnique({
-        where: { id: input.matterId },
-        select: { internalCode: true, title: true }
-      })
-    : null;
-
-  await notifyRoleApprovers({
-    roles: ["ADMIN", "PRINCIPAL_LAWYER", "FINANCE"],
-    excludeUserId: session.user.id,
-    title: "Có yêu cầu xuất hóa đơn mới cần duyệt",
-    content: invoiceNotificationContent(session.user.name, matter, input),
-    href: "/finance",
-    refType: "InvoiceRequest",
-    refId: created.id,
-    priority: "HIGH"
-  });
+  await notifyInvoiceRequestCreated(session.user, created.id, input);
 
   revalidatePath("/finance");
   if (input.matterId) revalidatePath(`/matters/${input.matterId}`);

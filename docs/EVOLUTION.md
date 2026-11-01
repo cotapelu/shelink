@@ -183,3 +183,8 @@
 **Phiên 2026-10-31 (AUTO-61)**:
 - [R/T] `finance-stats-lib.ts` mới: computeMatterFinanceStats/buckets/revenue windows; rewire 3 action thống kê; +13 test.
 - Test: 2338 pass / 1 skip / 0 fail. Lint: 923→921 (771→769 lỗi). `finance/actions.ts`: 16→10 lỗi; 5/5 lib finance 0 lỗi.
+
+**Phiên 2026-10-31 (AUTO-62)**:
+- [R] `finance/actions.ts`: 10 lỗi → 1 (còn file>300). Tách 7 hàm: run*/createCommissionChildren/toBillingCreateData/INVOICE_REQUEST_LIST_SELECT/findMatterLabel/queries.ts (fetchMatterFinanceData).
+- Test: 2338 pass / 1 skip / 0 fail. Lint: 921→912 (769→760 lỗi).
+- Chu kỳ minh họa rõ đạo lý: **edit atomic** — verify file sau mỗi edit báo lỗi trước khi làm tiếp.

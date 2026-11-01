@@ -1,8 +1,23 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-31 (AUTO-61).
+Cập nhật lần cuối: 2026-10-31 (AUTO-62).
 
 ## Chu kỳ đã hoàn thành (gần đây)
+
+### [CYCLE-AUTO-62] — 2026-10-31: [R] finance/actions.ts: 10 lỗi → 1 (chỉ còn file>300)
+Loại: Refactor [R] — ưu tiên MEDIUM. Không đổi hành vi. ~50 phút.
+
+**Đã hoàn thành**:
+- [x] `deleteFeeEntry`/`setCommissionPlan`: tách `runFeeEntryDeletion`/`runCommissionPlanReplace` (+ cascade & audit helpers) → action chỉ còn phân quyền.
+- [x] `createBilling`/`deleteBilling`: `toBillingCreateData` + nén audit tail.
+- [x] `listMatterInvoiceRequests`: trích `INVOICE_REQUEST_LIST_SELECT`.
+- [x] `createInvoiceRequest`: dùng lại type `InvoiceRequestInput` từ lib (bỏ 25 dòng khai báo inline) + `findMatterLabel` + `notifyInvoiceRequestCreated`.
+- [x] `getMatterFinance`: 4 query song song → `queries.ts` (`fetchMatterFinanceData`), action còn ~15 dòng.
+- [x] `createFeeEntry`: thân transaction → `runFeeEntryCreation` + `createCommissionChildren` (arrow 33 dòng biến mất), action 51→19 dòng.
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test **2338 pass / 1 skip / 0 fail** (không đổi — chu kỳ thuần io-wrapper, **119 test finance hiện có khóa hành vi**, đây là lý do không sinh test mới); full lint **912 (760 lỗi)** — **giảm 9**; `finance/actions.ts` 10→1 lỗi (chỉ còn "File > 300": 440 dòng).
+
+**Còn lại (AUTO-63)**: tách `finance/actions.ts` (440 dòng) thành module (vd `billing-actions.ts` chứa Billing/FeeEntry/CommissionPlan, `actions.ts` giữ hóa đơn/queries/stats, re-export để import consumer không đổi). Sau đó: `server/seals/actions.ts` (16 lỗi), `matters/export-xlsx.ts` (13).
 
 ### [CYCLE-AUTO-61] — 2026-10-31: [R/T] finance-stats-lib: getMatterFinance/getMonthlyRevenue/getPersonalRevenue
 Loại: Refactor [R] + Tests [T] — ưu tiên MEDIUM. Không đổi hành vi. ~40 phút.

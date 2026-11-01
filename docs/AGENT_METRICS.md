@@ -392,3 +392,10 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Lint**: 921 problems (769 lỗi / 152 warning) — giảm 2 so với đầu chu kỳ (923/771/152); finance/actions.ts 12→10.
 - **Bảo mật**: visFilter & phân quyền getPersonalRevenue giữ nguyên (rewire không đổi điều kiện).
 - **Ghi chú**: `toAmount` ép Decimal-like an toàn (string → Number||0) — test khóa.
+
+## [CYCLE-AUTO-62] — 2026-10-31: [R] finance/actions.ts 10 lỗi → 1
+- **Loại**: Refactor [R]. ~50 phút. ✅.
+- **Test delta**: 0 mới (2338 pass / 1 skip / 0 fail) — chu kỳ thuần io-wrapper; 119 test finance hiện có khóa hành vi (không regression).
+- **Lint**: 912 problems (760 lỗi / 152 warning) — giảm 9 so với đầu chu kỳ (921/769/152); finance/actions.ts 10→1 (chỉ còn file >300 dòng).
+- **Bảo mật**: thứ tự phân quyền trong createInvoiceRequest giữ nguyên (roleViolation → assertCanAssociateMatter → data validation); deleteFeeEntry cascade transaction nguyên vẹn.
+- **Ghi chú**: để ý atomic — 1 edit call lỗi thì KHÔNG edit nào apply; luôn kiểm tra file sau mỗi lần edit báo lỗi.
