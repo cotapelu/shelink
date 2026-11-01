@@ -1,6 +1,20 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-31 (AUTO-65).
+Cập nhật lần cuối: 2026-10-31 (AUTO-66).
+
+### [CYCLE-AUTO-66] — 2026-10-31: [R/T] seals/actions.ts: 16 → 1 lỗi (helper dùng chung + 2 lib)
+Loại: Refactor [R] + Tests [T]. Không đổi hành vi. ~55 phút.
+
+**Đã hoàn thành**:
+- [x] Helper dùng chung cho 4 hàm quyết định: `loadSealForDecision` (load + check tồn tại + đúng trạng thái), `assertSealApprover`, `auditSealAction`, `notifySealStatusChange` (+ `revalidateSealPaths` từ AUTO-65) → `approveSealRequest`/`rejectSealRequest`/`cancelSealRequest` mỗi hàm ~14 dòng.
+- [x] Lib thuần mới `seal-flow-lib.ts` + **16 test**: `canCancelSeal` (owner/admin), `canStampSeal` (requester/approver), `buildSealListWhere` (mine/approval/FINANCE/LAWYER/ASSISTANT/admin), `sealApprovalContent`, `monthStampedScope`.
+- [x] `stampSealRequest` 73→29 dòng, mất cả 2 lỗi (lines+cx11): `writeStampedDoc` (validate/encrypt/write) + `runStampTx` + `canStampSeal`.
+- [x] `listSealRequests` 41→~14 dòng: `buildSealListWhere` + `SEAL_LIST_INCLUDE` const; `getSealStats` 28→~13 (`countPendingApproval` + `monthStampedScope`); `getSealApprovalRecipientIds` 29→~13 (`configRecipientIds`); `notifySealApprovalRequested` 22→~15 (`sealApprovalContent`).
+- [x] `seal-create-lib.ts`: `toSealDocumentData` + tuỳ chọn `baseTags` + `STAMP_DOC_TAGS` (tái dùng cho bản scan) — test thêm 1.
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test **2368 pass / 1 skip / 0 fail** (2352→2368, +16); full lint **896 (744 lỗi)** — **giảm 10**; `seals/actions.ts` 16→**1** lỗi (chỉ còn file 505>300). Smoke `/approvals/seals`: auth 200.
+
+**Còn lại `seals/actions.ts` (AUTO-67)**: file 505>300 dòng → tách module theo hướng consumer-direct import (đã chứng minh ở finance AUTO-64): ghép actions quyết định + list/stats sang `seal-flow-actions.ts`.
 
 ### [CYCLE-AUTO-65] — 2026-10-31: [R/T] seals/actions.ts: quái vật createSealRequest (263 dòng, cx 34) → tách hết
 Loại: Refactor [R] + Tests [T]. Không đổi hành vi. ~50 phút.

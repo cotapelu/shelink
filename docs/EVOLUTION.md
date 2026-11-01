@@ -201,3 +201,7 @@
 - [R/T] `seals/actions.ts`: createSealRequest 263 dòng/cx 34 → 22 dòng + `seal-create-lib.ts` (thuần, 14 test); mất 5 lỗi lint.
 - Test: 2352 pass / 1 skip / 0 fail. Lint: 911→906 (759→754 lỗi).
 - Rút bài học: sau khi tách hàm lớn, **đối chiếu từng field với bản gốc** (audit targetId suýt sai).
+
+**Phiên 2026-10-31 (AUTO-66)**:
+- [R/T] `seals/actions.ts`: helper dùng chung (load/assert/audit/notify/revalidate) + `seal-flow-lib.ts` (16 test) + tách stamp/list/stats/recipients → 16→1 lỗi.
+- Test: 2368 pass / 1 skip / 0 fail. Lint: 906→896 (754→744 lỗi).

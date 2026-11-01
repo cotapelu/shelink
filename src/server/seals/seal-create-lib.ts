@@ -41,24 +41,26 @@ export function deriveAlsoLegalRep(formData: FormData, sealType: string): boolea
 const DRAFT_DOC_TAGS = ["Yeu cau dong dau", "Ban nhap cho dong dau"];
 const LEGAL_REP_COPY_TAG = "Ban sao dau dai dien phap luat";
 
-/** Payload Document cho bản nháp/bản sao (mã hóa, category OTHER). */
+/** Tag bản scan sau khi đóng dấu. */
+export const STAMP_DOC_TAGS = ["Yeu cau dong dau", "Ban scan sau khi dong dau"];
+
+/** Payload Document cho bản nháp/bản sao/bản scan (mã hóa, category OTHER). */
 export function toSealDocumentData(
   prepare: DocPrepare,
-  opts: { uploadedById: string; matterId: string | null | undefined; extraTags?: string[] }
+  opts: {
+    uploadedById: string;
+    matterId: string | null | undefined;
+    extraTags?: string[];
+    baseTags?: string[];
+  }
 ) {
+  const base = opts.baseTags ?? DRAFT_DOC_TAGS;
   return {
     matterId: opts.matterId ?? undefined,
-    name: prepare.name,
-    category: "OTHER" as const,
-    path: prepare.path,
-    mimeType: prepare.mimeType,
-    size: prepare.size,
-    sha256: prepare.sha,
-    encrypted: true,
-    algorithm: prepare.algorithm,
-    iv: prepare.iv,
-    authTag: prepare.authTag,
-    tags: opts.extraTags ? [...DRAFT_DOC_TAGS, ...opts.extraTags] : DRAFT_DOC_TAGS,
+    name: prepare.name, category: "OTHER" as const, path: prepare.path,
+    mimeType: prepare.mimeType, size: prepare.size, sha256: prepare.sha,
+    encrypted: true, algorithm: prepare.algorithm, iv: prepare.iv, authTag: prepare.authTag,
+    tags: opts.extraTags ? [...base, ...opts.extraTags] : base,
     uploadedById: opts.uploadedById
   };
 }

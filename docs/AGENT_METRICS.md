@@ -421,3 +421,11 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Lint**: 906 problems (754 lỗi / 152 warning) — giảm 5 so với đầu chu kỳ (911/759/152); seals/actions.ts 16→11.
 - **Bảo mật**: quyền tạo (3 vai trò) giữ nguyên; luồng mã hóa/ghi file không đổi; audit targetId đã xác minh đúng (bẫy tự bắt).
 - **Ghi chú**: zod type làm field optional/nullable — lib chấp nhận optional + cast enum (SealType/Urgency) ở biên.
+
+## [CYCLE-AUTO-66] — 2026-10-31: [R/T] seals/actions.ts 16 → 1 lỗi (+16 test)
+- **Loại**: Refactor [R] + Tests [T]. ~55 phút. ✅.
+- **Test delta**: +16 (2352→2368 pass / 1 skip / 0 fail).
+- **Phủ**: seal-flow-lib 100% nhánh chính (quyền rút/điền, where theo scope, content, scope tháng).
+- **Lint**: 896 problems (744 lỗi / 152 warning) — giảm 10 so với đầu chu kỳ (906/754/152); seals/actions.ts 16→1 (chỉ file>300).
+- **Bảo mật**: message lỗi + thứ tự kiểm tra (load→trạng thái→quyền) giữ nguyên; `auditSealAction`/`notifySealStatusChange` bọc đúng field gốc (đã đối chiếu).
+- **Ghi chú**: Prisma cần `SealType[]` (không phải string[]) — param helper đã fix kiểu.

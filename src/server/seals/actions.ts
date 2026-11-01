@@ -42,6 +42,7 @@ import {
 } from "./schemas";
 import {
   LEGAL_REP_EXTRA_TAGS,
+  STAMP_DOC_TAGS,
   buildSealFormRaw,
   deriveAlsoLegalRep,
   toLegalRepSealRequestData,
@@ -49,6 +50,13 @@ import {
   toSealRequestData,
   type DocPrepare
 } from "./seal-create-lib";
+import {
+  buildSealListWhere,
+  canCancelSeal,
+  canStampSeal,
+  monthStampedScope,
+  sealApprovalContent
+} from "./seal-flow-lib";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const FIRM_LEGAL_REP_KEY = "firmLegalRepUserId";
@@ -121,44 +129,30 @@ async function canApproveSealType(
 export async function listSealRequests(input?: z.input<typeof sealListFilterSchema>) {
   const session = await requireSession();
   const filter = sealListFilterSchema.parse(input ?? {});
-  const where: Prisma.SealRequestWhereInput = {};
-
-  if (filter.status) where.status = filter.status;
-  if (filter.sealType) where.sealType = filter.sealType;
-
-  if (filter.scope === "mine") {
-    where.requestedById = session.user.id;
-  } else if (filter.scope === "approval") {
-    // Cho toi duyet: ghep sealTypes co the duyet duoc dua tren vai tro nguoi dung
-    const approvableTypes = await pickApprovableSealTypes(session.user);
-    if (approvableTypes.length === 0) {
-      return [];
-    }
-    where.sealType = { in: approvableTypes };
-    where.status = "PENDING";
-  } else {
-    // Luong chung toan van phong: FINANCE chi thay dau tai chinh; LAWYER/ASSISTANT chi thay cua minh
-    if (session.user.role === "FINANCE") {
-      where.sealType = "FINANCE_SEAL";
-    } else if (session.user.role === "LAWYER" || session.user.role === "ASSISTANT") {
-      where.requestedById = session.user.id;
-    }
-    // ADMIN / PRINCIPAL_LAWYER thay tat ca
+  // Cho toi duyet: ghep sealTypes co the duyet duoc dua tren vai tro nguoi dung
+  const approvableTypes =
+    filter.scope === "approval" ? await pickApprovableSealTypes(session.user) : [];
+  if (filter.scope === "approval" && approvableTypes.length === 0) {
+    return [];
   }
 
+  const where = buildSealListWhere(filter, session.user, approvableTypes) as Prisma.SealRequestWhereInput;
   return prisma.sealRequest.findMany({
     where,
     orderBy: [{ status: "asc" }, { requestedAt: "desc" }],
-    include: {
-      matter: { select: { id: true, internalCode: true, title: true } },
-      requestedBy: { select: { id: true, name: true } },
-      approvedBy: { select: { id: true, name: true } },
-      stampedByUser: { select: { id: true, name: true } },
-      draftDoc: { select: { id: true, name: true, size: true } },
-      stampedDoc: { select: { id: true, name: true, size: true } }
-    }
+    include: SEAL_LIST_INCLUDE
   });
 }
+
+/** Include chuẩn cho danh sách seal (trích để action ≤20 dòng). */
+const SEAL_LIST_INCLUDE = {
+  matter: { select: { id: true, internalCode: true, title: true } },
+  requestedBy: { select: { id: true, name: true } },
+  approvedBy: { select: { id: true, name: true } },
+  stampedByUser: { select: { id: true, name: true } },
+  draftDoc: { select: { id: true, name: true, size: true } },
+  stampedDoc: { select: { id: true, name: true, size: true } }
+} as const;
 
 async function pickApprovableSealTypes(user: { id: string; role: string }): Promise<SealType[]> {
   if (user.role === "ADMIN") {
@@ -174,6 +168,24 @@ async function pickApprovableSealTypes(user: { id: string; role: string }): Prom
     .map((c) => c.type);
 }
 
+/** ID người nhận thông báo theo cấu hình loại dấu (đại diện pháp luật hoặc vai trò duyệt). */
+async function configRecipientIds(cfg: {
+  enabled: boolean;
+  requiresLegalRep: boolean;
+  approverRoles: string[];
+}): Promise<string[]> {
+  if (cfg.requiresLegalRep) {
+    const repId = await getFirmLegalRepUserId();
+    return repId ? [repId] : [];
+  }
+  if (cfg.approverRoles.length === 0) return [];
+  const roleApprovers = await prisma.user.findMany({
+    where: { active: true, role: { in: cfg.approverRoles as UserRole[] } },
+    select: { id: true }
+  });
+  return roleApprovers.map((user) => user.id);
+}
+
 async function getSealApprovalRecipientIds(sealType: SealType): Promise<string[]> {
   const admins = await prisma.user.findMany({
     where: { active: true, role: "ADMIN" },
@@ -183,24 +195,7 @@ async function getSealApprovalRecipientIds(sealType: SealType): Promise<string[]
 
   const cfg = await prisma.sealTypeConfig.findUnique({ where: { type: sealType } });
   if (!cfg || !cfg.enabled) return ids;
-
-  if (cfg.requiresLegalRep) {
-    const repId = await getFirmLegalRepUserId();
-    if (repId) ids.push(repId);
-    return ids;
-  }
-
-  if (cfg.approverRoles.length > 0) {
-    const roleApprovers = await prisma.user.findMany({
-      where: {
-        active: true,
-        role: { in: cfg.approverRoles as UserRole[] }
-      },
-      select: { id: true }
-    });
-    ids.push(...roleApprovers.map((user) => user.id));
-  }
-
+  ids.push(...(await configRecipientIds(cfg)));
   return ids;
 }
 
@@ -219,10 +214,8 @@ async function notifySealApprovalRequested(input: {
     userIds,
     excludeUserId: input.requesterId,
     title: "Co yeu cau phê duyệt dong dau moi can xu ly",
-    content: `${input.requesterName ?? "Nguoi dung"} da gui yeu cau dong dau: ${input.code} · ${input.documentTitle} · ${input.purpose}`,
-    href: `/approvals/seals?id=${input.sealRequestId}`,
-    refType: "SealRequest",
-    refId: input.sealRequestId,
+    content: sealApprovalContent(input),
+    href: `/approvals/seals?id=${input.sealRequestId}`, refType: "SealRequest", refId: input.sealRequestId,
     priority: input.urgency === "URGENT" ? "URGENT" : "HIGH"
   });
 }
@@ -268,33 +261,25 @@ export async function listSealTypeConfigs() {
   return prisma.sealTypeConfig.findMany({ orderBy: { type: "asc" } });
 }
 
+/** Đếm yêu cầu chờ duyệt theo loại dấu được phép (0 nếu không có loại nào). */
+async function countPendingApproval(approvableTypes: SealType[]): Promise<number> {
+  if (approvableTypes.length === 0) return 0;
+  return prisma.sealRequest.count({ where: { status: "PENDING", sealType: { in: approvableTypes } } });
+}
+
 export async function getSealStats() {
   const session = await requireSession();
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
-  const monthStampedScope: Prisma.SealRequestWhereInput =
-    session.user.role === "FINANCE"
-      ? { status: "STAMPED", stampedAt: { gte: monthStart }, sealType: "FINANCE_SEAL" }
-      : { status: "STAMPED", stampedAt: { gte: monthStart } };
-
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const scope = monthStampedScope(session.user.role, monthStart) as Prisma.SealRequestWhereInput;
   const approvableTypes = await pickApprovableSealTypes(session.user);
 
   const [monthStamped, pendingApprovalCount, waitingStampCount] = await Promise.all([
-    prisma.sealRequest.count({ where: monthStampedScope }),
-    approvableTypes.length > 0
-      ? prisma.sealRequest.count({
-          where: { status: "PENDING", sealType: { in: approvableTypes } }
-        })
-      : 0,
+    prisma.sealRequest.count({ where: scope }),
+    countPendingApproval(approvableTypes),
     prisma.sealRequest.count({ where: { status: "APPROVED" } })
   ]);
 
-  return {
-    monthStamped,
-    pendingApprovalCount,
-    waitingStampCount
-  };
+  return { monthStamped, pendingApprovalCount, waitingStampCount };
 }
 
 // ============================================================
@@ -381,6 +366,62 @@ async function resolveSealDraft(formData: FormData, matterId: string | null | un
 function revalidateSealPaths(matterId: string | null | undefined): void {
   revalidatePath("/approvals/seals");
   if (matterId) revalidatePath(`/matters/${matterId}`);
+}
+
+// ── helper dùng chung cho các quyết định (duyệt/từ chối/rút/điền) ──
+
+/** Load seal + kiểm tra tồn tại + đúng trạng thái chờ xử lý. */
+async function loadSealForDecision(
+  id: string,
+  expectedStatus: string,
+  notFoundMessage: string,
+  wrongStatusMessage: string
+) {
+  const seal = await prisma.sealRequest.findUnique({
+    where: { id },
+    select: { id: true, status: true, sealType: true, matterId: true, requestedById: true }
+  });
+  if (!seal) throw new Error(notFoundMessage);
+  if (seal.status !== expectedStatus) throw new Error(wrongStatusMessage);
+  return seal;
+}
+
+/** Kiểm tra quyền theo loại dấu (throw nếu không đủ quyền). */
+async function assertSealApprover(
+  sealType: SealType,
+  user: { id: string; role: string },
+  message: string
+): Promise<void> {
+  const ok = await canApproveSealType(sealType, user);
+  if (!ok) throw new Error(message);
+}
+
+/** Audit một hành động trên seal. */
+async function auditSealAction(
+  userId: string,
+  action: string,
+  sealId: string,
+  detail?: Record<string, unknown>
+): Promise<void> {
+  await audit({ userId, action, targetType: "SealRequest", targetId: sealId, ...(detail ? { detail } : {}) });
+}
+
+/** Thông báo đổi trạng thái cho người yêu cầu. */
+async function notifySealStatusChange(args: {
+  userId: string;
+  title: string;
+  content: string;
+  sealId: string;
+}): Promise<void> {
+  await createNotification({
+    userId: args.userId,
+    type: "SEAL_STATUS_CHANGE",
+    title: args.title,
+    content: args.content,
+    href: "/approvals/seals",
+    refType: "SealRequest",
+    refId: args.sealId
+  });
 }
 
 type SealCreateTxData = z.infer<typeof sealCreateSchema>;
@@ -513,46 +554,18 @@ export async function approveSealRequest(input: z.infer<typeof sealApproveSchema
   const session = await requireSession();
   const data = sealApproveSchema.parse(input);
 
-  const seal = await prisma.sealRequest.findUnique({
-    where: { id: data.id },
-    select: { id: true, status: true, sealType: true, matterId: true, requestedById: true }
-  });
-  if (!seal) throw new Error("Yeu cau khong ton tai");
-  if (seal.status !== "PENDING") throw new Error("Yeu cau nay da duoc xu ly");
-
-  const ok = await canApproveSealType(seal.sealType, session.user);
-  if (!ok) throw new Error("Khong co quyen duyet loai dong dau nay");
+  const seal = await loadSealForDecision(data.id, "PENDING", "Yeu cau khong ton tai", "Yeu cau nay da duoc xu ly");
+  await assertSealApprover(seal.sealType, session.user, "Khong co quyen duyet loai dong dau nay");
 
   await prisma.sealRequest.update({
     where: { id: data.id },
-    data: {
-      status: "APPROVED",
-      approveNote: (data.note || "").trim() || null,
-      approvedById: session.user.id,
-      approvedAt: new Date()
-    }
+    data: { status: "APPROVED", approveNote: (data.note || "").trim() || null, approvedById: session.user.id, approvedAt: new Date() }
   });
 
-  await audit({
-    userId: session.user.id,
-    action: "SEAL_APPROVED",
-    targetType: "SealRequest",
-    targetId: data.id,
-    detail: { sealType: seal.sealType }
-  });
+  await auditSealAction(session.user.id, "SEAL_APPROVED", data.id, { sealType: seal.sealType });
+  await notifySealStatusChange({ userId: seal.requestedById, title: "Yeu cau dong dau da duoc duyet", content: `Yeu cau dong dau cua ban (${seal.sealType}) da duoc phe duyet qua`, sealId: data.id });
 
-  await createNotification({
-    userId: seal.requestedById,
-    type: "SEAL_STATUS_CHANGE",
-    title: "Yeu cau dong dau da duoc duyet",
-    content: `Yeu cau dong dau cua ban (${seal.sealType}) da duoc phe duyet qua`,
-    href: "/approvals/seals",
-    refType: "SealRequest",
-    refId: data.id
-  });
-
-  revalidatePath("/approvals/seals");
-  if (seal.matterId) revalidatePath(`/matters/${seal.matterId}`);
+  revalidateSealPaths(seal.matterId);
   return { ok: true };
 }
 
@@ -571,124 +584,81 @@ export async function rejectSealRequest(input: z.infer<typeof sealRejectSchema>)
   const session = await requireSession();
   const data = sealRejectSchema.parse(input);
 
-  const seal = await prisma.sealRequest.findUnique({
-    where: { id: data.id },
-    select: { id: true, status: true, sealType: true, matterId: true, requestedById: true }
-  });
-  if (!seal) throw new Error("Yeu cau khong ton tai");
-  if (seal.status !== "PENDING") throw new Error("Yeu cau nay da duoc xu ly");
-
-  const ok = await canApproveSealType(seal.sealType, session.user);
-  if (!ok) throw new Error("Khong co quyen tu choi loai dong dau nay");
+  const seal = await loadSealForDecision(data.id, "PENDING", "Yeu cau khong ton tai", "Yeu cau nay da duoc xu ly");
+  await assertSealApprover(seal.sealType, session.user, "Khong co quyen tu choi loai dong dau nay");
 
   await prisma.sealRequest.update({
     where: { id: data.id },
-    data: {
-      status: "REJECTED",
-      approveNote: data.reason,
-      approvedById: session.user.id,
-      approvedAt: new Date(),
-      rejectedAt: new Date()
-    }
+    data: { status: "REJECTED", approveNote: data.reason, approvedById: session.user.id, approvedAt: new Date(), rejectedAt: new Date() }
   });
 
-  await audit({
-    userId: session.user.id,
-    action: "SEAL_REJECTED",
-    targetType: "SealRequest",
-    targetId: data.id,
-    detail: { reason: data.reason }
-  });
+  await auditSealAction(session.user.id, "SEAL_REJECTED", data.id, { reason: data.reason });
+  await notifySealStatusChange({ userId: seal.requestedById, title: "Yeu cau dong dau da bi tu choi", content: `Yeu cau dong dau cua ban (${seal.sealType}) da bi tu choi, ly do: ${data.reason}`, sealId: data.id });
 
-  await createNotification({
-    userId: seal.requestedById,
-    type: "SEAL_STATUS_CHANGE",
-    title: "Yeu cau dong dau da bi tu choi",
-    content: `Yeu cau dong dau cua ban (${seal.sealType}) da bi tu choi, ly do: ${data.reason}`,
-    href: "/approvals/seals",
-    refType: "SealRequest",
-    refId: data.id
-  });
-
-  revalidatePath("/approvals/seals");
-  if (seal.matterId) revalidatePath(`/matters/${seal.matterId}`);
+  revalidateSealPaths(seal.matterId);
   return { ok: true };
 }
 
 // ============================================================
 // Dien lai ban dong dau (FormData: stampedDoc bat buoc)
 // ============================================================
+/** Validate + mã hóa + ghi bản scan sau khi đóng dấu → DocPrepare. */
+async function writeStampedDoc(file: File, matterId: string | null | undefined) {
+  assertPdfDocument(file);
+  validateUploadedFile(file, { purpose: "stamp", maxBytes: MAX_FILE_SIZE });
+  const buf = Buffer.from(await file.arrayBuffer());
+  const enc = encryptBuffer(buf);
+  const path = await storage.writeFile(matterId ? `m_${matterId}` : "seals", enc.ciphertext);
+  return {
+    prepare: {
+      name: normalizeUploadedFilename(file.name),
+      mimeType: file.type || "application/octet-stream",
+      size: file.size,
+      sha: sha256(buf),
+      path,
+      algorithm: enc.algorithm,
+      iv: enc.iv.toString("base64"),
+      authTag: enc.authTag.toString("base64")
+    } satisfies DocPrepare,
+    buf
+  };
+}
+
+/** Thân transaction điền dấu: tạo document bản scan → cập nhật seal STAMPED. */
+async function runStampTx(
+  tx: Prisma.TransactionClient,
+  id: string,
+  prepare: DocPrepare,
+  matterId: string | null | undefined,
+  userId: string
+): Promise<void> {
+  const stampedDoc = await tx.document.create({
+    data: toSealDocumentData(prepare, { uploadedById: userId, matterId, baseTags: STAMP_DOC_TAGS })
+  });
+  await tx.sealRequest.update({
+    where: { id },
+    data: { status: "STAMPED", stampedDocId: stampedDoc.id, stampedById: userId, stampedAt: new Date() }
+  });
+}
+
 export async function stampSealRequest(formData: FormData) {
   const session = await requireSession();
-
   const id = formData.get("id");
   if (typeof id !== "string" || !id) throw new Error("thieu id");
 
-  const seal = await prisma.sealRequest.findUnique({
-    where: { id },
-    select: { id: true, status: true, sealType: true, matterId: true, requestedById: true }
-  });
-  if (!seal) throw new Error("Yeu cau khong ton tai");
-  if (seal.status !== "APPROVED") throw new Error("Chi yeu cau da duyet moi dien lai duoc ban dong dau");
-
-  // Phan quyen: nguoi yeu cau dien lai duoc; nguoi duyet / ADMIN dien lai duoc; dau tai chinh cho phep them FINANCE
+  const seal = await loadSealForDecision(id, "APPROVED", "Yeu cau khong ton tai", "Chi yeu cau da duyet moi dien lai duoc ban dong dau");
+  // Phan quyen: nguoi yeu cau dien lai duoc; nguoi duyet / ADMIN dien lai duoc
   const okApprover = await canApproveSealType(seal.sealType, session.user);
-  const okRequester = seal.requestedById === session.user.id;
-  if (!okRequester && !okApprover) throw new Error("Khong co quyen dien lai ban dong dau");
+  if (!canStampSeal(seal, session.user, okApprover)) throw new Error("Khong co quyen dien lai ban dong dau");
 
   const stampedFile = formData.get("stampedDoc");
-  if (!(stampedFile instanceof File) || stampedFile.size === 0) {
-    throw new Error("Vui long tai len ban scan sau khi dong dau");
-  }
-  assertPdfDocument(stampedFile);
-  validateUploadedFile(stampedFile, { purpose: "stamp", maxBytes: MAX_FILE_SIZE });
+  if (!(stampedFile instanceof File) || stampedFile.size === 0) throw new Error("Vui long tai len ban scan sau khi dong dau");
 
-  const buf = Buffer.from(await stampedFile.arrayBuffer());
-  const enc = encryptBuffer(buf);
-  const path = await storage.writeFile(
-    seal.matterId ? `m_${seal.matterId}` : "seals",
-    enc.ciphertext
-  );
+  const { prepare } = await writeStampedDoc(stampedFile, seal.matterId);
+  await prisma.$transaction((tx) => runStampTx(tx, id, prepare, seal.matterId, session.user.id));
 
-  await prisma.$transaction(async (tx) => {
-    const stampedDoc = await tx.document.create({
-      data: {
-        matterId: seal.matterId ?? undefined,
-        name: normalizeUploadedFilename(stampedFile.name),
-        category: "OTHER",
-        path,
-        mimeType: stampedFile.type || "application/octet-stream",
-        size: stampedFile.size,
-        sha256: sha256(buf),
-        encrypted: true,
-        algorithm: enc.algorithm,
-        iv: enc.iv.toString("base64"),
-        authTag: enc.authTag.toString("base64"),
-        tags: ["Yeu cau dong dau", "Ban scan sau khi dong dau"],
-        uploadedById: session.user.id
-      }
-    });
-    await tx.sealRequest.update({
-      where: { id },
-      data: {
-        status: "STAMPED",
-        stampedDocId: stampedDoc.id,
-        stampedById: session.user.id,
-        stampedAt: new Date()
-      }
-    });
-  });
-
-  await audit({
-    userId: session.user.id,
-    action: "SEAL_STAMPED",
-    targetType: "SealRequest",
-    targetId: id,
-    detail: { sealType: seal.sealType }
-  });
-
-  revalidatePath("/approvals/seals");
-  if (seal.matterId) revalidatePath(`/matters/${seal.matterId}`);
+  await auditSealAction(session.user.id, "SEAL_STAMPED", id, { sealType: seal.sealType });
+  revalidateSealPaths(seal.matterId);
   return { ok: true };
 }
 
@@ -707,31 +677,14 @@ export async function cancelSealRequest(input: z.infer<typeof sealCancelSchema>)
   const session = await requireSession();
   const data = sealCancelSchema.parse(input);
 
-  const seal = await prisma.sealRequest.findUnique({
-    where: { id: data.id },
-    select: { id: true, status: true, requestedById: true, matterId: true }
-  });
-  if (!seal) throw new Error("Yeu cau khong ton tai");
-  if (seal.status !== "PENDING") throw new Error("Chi yeu cau chua duyet moi rut lai duoc");
+  const seal = await loadSealForDecision(data.id, "PENDING", "Yeu cau khong ton tai", "Chi yeu cau chua duyet moi rut lai duoc");
+  if (!canCancelSeal(seal.requestedById, session.user)) {
+    throw new Error("Chi nguoi yeu cau hoac quan tri moi rut lai duoc");
+  }
 
-  const isOwner = seal.requestedById === session.user.id;
-  const isAdmin =
-    session.user.role === "ADMIN" || session.user.role === "PRINCIPAL_LAWYER";
-  if (!isOwner && !isAdmin) throw new Error("Chi nguoi yeu cau hoac quan tri moi rut lai duoc");
+  await prisma.sealRequest.update({ where: { id: data.id }, data: { status: "CANCELLED" } });
+  await auditSealAction(session.user.id, "SEAL_CANCELLED", data.id);
 
-  await prisma.sealRequest.update({
-    where: { id: data.id },
-    data: { status: "CANCELLED" }
-  });
-
-  await audit({
-    userId: session.user.id,
-    action: "SEAL_CANCELLED",
-    targetType: "SealRequest",
-    targetId: data.id
-  });
-
-  revalidatePath("/approvals/seals");
-  if (seal.matterId) revalidatePath(`/matters/${seal.matterId}`);
+  revalidateSealPaths(seal.matterId);
   return { ok: true };
 }
