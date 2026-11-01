@@ -31,11 +31,11 @@ import type { HeroData } from "@/server/dashboard/actions";
 import { ConflictDialog } from "@/components/conflict-dialog";
 
 function getGreeting(hour: number) {
-  if (hour < 6) return "夜深了";
-  if (hour < 11) return "早安";
-  if (hour < 13) return "中午好";
-  if (hour < 18) return "下午好";
-  return "晚上好";
+  if (hour < 6) return "Đêm khuya rồi";
+  if (hour < 11) return "Chào buổi sáng";
+  if (hour < 13) return "Chào buổi trưa";
+  if (hour < 18) return "Chào buổi chiều";
+  return "Chào buổi tối";
 }
 
 export function HeroBlock({ data }: { data: HeroData }) {
@@ -72,10 +72,10 @@ export function HeroBlock({ data }: { data: HeroData }) {
             </h1>
 
             <div className="mt-2 max-w-xl text-[0.875rem] leading-relaxed text-muted-foreground">
-              您今天有{" "}
-              <SummaryNum>{data.todayDeadlineCount}</SummaryNum> 件事需处理；本周开庭{" "}
-              <SummaryNum>{data.weekHearingCount}</SummaryNum> 场；近期期限{" "}
-              <SummaryNum>{data.nearTermCount}</SummaryNum> 项。
+              Hôm nay bạn có{" "}
+              <SummaryNum>{data.todayDeadlineCount}</SummaryNum> việc cần xử lý；phiên tòa tuần này{" "}
+              <SummaryNum>{data.weekHearingCount}</SummaryNum> phiên；thời hạn sắp tới{" "}
+              <SummaryNum>{data.nearTermCount}</SummaryNum> mục.
             </div>
           </div>
 
@@ -86,7 +86,7 @@ export function HeroBlock({ data }: { data: HeroData }) {
               className="h-9 gap-1.5 px-4 shadow-sm"
             >
               <Plus className="h-4 w-4" strokeWidth={2} />
-              新建收案
+              Tạo tiếp nhận
             </Button>
             <button
               type="button"
@@ -98,7 +98,7 @@ export function HeroBlock({ data }: { data: HeroData }) {
               )}
             >
               <ShieldCheck className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} />
-              利益冲突预检
+              Kiểm tra sơ bộ xung đột lợi ích
             </button>
           </div>
         </div>
@@ -115,7 +115,7 @@ export function HeroBlock({ data }: { data: HeroData }) {
         >
           <div className="flex items-center justify-between">
             <span className="text-[0.65rem] font-medium uppercase tracking-widest text-primary/85">
-              今日焦点
+              Tiêu điểm hôm nay
             </span>
             <ArrowUpRight
               className="h-3.5 w-3.5 text-primary/60 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -125,13 +125,13 @@ export function HeroBlock({ data }: { data: HeroData }) {
 
           <div className="my-2">
             <div className="text-[0.65rem] font-medium uppercase tracking-widest text-muted-foreground">
-              距 {data.focus.title}
+              Còn {data.focus.title}
             </div>
             <div className="mt-1 flex items-baseline gap-2">
               <span className="font-mono text-[2.75rem] leading-none font-medium tabular text-foreground/95" style={{ letterSpacing: "-0.02em" }}>
                 {data.focus.daysLeft}
               </span>
-              <span className="text-[11px] text-muted-foreground">天</span>
+              <span className="text-[11px] text-muted-foreground">ngày</span>
             </div>
           </div>
 
@@ -153,12 +153,12 @@ export function HeroBlock({ data }: { data: HeroData }) {
         >
           <div className="flex items-center justify-between">
             <span className="text-[0.65rem] font-medium uppercase tracking-widest text-primary/85">
-              今日焦点
+              Tiêu điểm hôm nay
             </span>
           </div>
 
           <div className="my-2 flex flex-1 items-center justify-center">
-            <span className="text-sm text-muted-foreground">暂无近期期限</span>
+            <span className="text-sm text-muted-foreground">Chưa có thời hạn sắp tới</span>
           </div>
         </div>
       )}

@@ -278,7 +278,7 @@ describe("IntakeSheet", () => {
     it("renders dialog when open is true", () => {
       render(<IntakeSheet {...defaultProps} />);
       expect(screen.getByTestId("dialog")).toBeInTheDocument();
-      expect(screen.getByText("新建收案")).toBeInTheDocument();
+      expect(screen.getByText("Tạo tiếp nhận mới")).toBeInTheDocument();
     });
 
     it("does not render when open is false", () => {

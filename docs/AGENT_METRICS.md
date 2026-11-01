@@ -471,3 +471,9 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Đã làm**: 66 cặm thay chính xác (form thêm thủ tục/thời hạn/phiên tòa, phân loại thời hạn, upload OCR, comment) + sed xử lý sót (thứ tự thay khiến "选择Luật sư chủ trì" dở dang — đã sửa).
 - **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /matters/[id] 200.
 - **Ghi chú**: bẫy thứ tự — "主办律师" thay trước "选择主办律师" để lại chuỗi lai; cách phòng: xử lý chuỗi dài (có chứa chuỗi ngắn) TRƯỚC. Đã bổ sung vào glossary.
+
+## [CYCLE-I18N-8] — 2026-10-31: intake-sheet.tsx + chrome app (dashboard/topbar/matters) → tiếng Việt
+- **Loại**: De-zh (i18n). ~50 phút. ✅.
+- **Đã làm**: `intake-sheet.tsx` (100 dòng → 0) + 4 file chrome cùng chuỗi (dashboard-greeting, hero-block, topbar, matters-view, intakes-table) + assertion test `intake-sheet.test.tsx` (2 lần: chuỗi + loại matcher getByText).
+- **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke `/`, `/intakes`, `/matters` đều 200.
+- **Ghi chú**: full suite bắt đúng coupling test co-located (mình grep pattern tên file nhưng test nằm cùng thư mục _components); bẫy thứ tự lặp lại lần 2 — đã ghi glossary + quy trình sửa 2 bước.

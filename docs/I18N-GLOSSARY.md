@@ -114,3 +114,21 @@
 
 ### ⚠️ Bẫy thứ tự thay (I18N-7)
 Khi bảng thay có cả chuỗi ngắn ("主办律师") và chuỗi dài chứa nó ("选择主办律师"), thay chuỗi ngắn trước sẽ để lại chuỗi lai ("选择Luật sư chủ trì"). **Nguyên tắc: sắp xếp bảng thay theo độ dài GIẢM DẦN** (chuỗi dài trước), hoặc grep lại sau mỗi lần thay.
+
+## Bổ sung I18N-8 (2026-10-31) — intake-sheet + chrome app
+
+| Tiếng Trung | Tiếng Việt |
+|---|---|
+| 新建收案 (nút) / 新建收案 (dialog) | Tạo tiếp nhận / Tạo tiếp nhận mới |
+| 待审批 / 待补正 | Chờ duyệt / Chờ bổ sung |
+| 夜深了/早安/中午好/下午好/晚上好 | Đêm khuya rồi / Chào buổi sáng / trưa / chiều / tối |
+| 今日焦点 / 近期日程 / 近期期限 | Tiêu điểm hôm nay / Lịch sắp tới / Thời hạn sắp tới |
+| 利益冲突预检 | Kiểm tra sơ bộ xung đột lợi ích |
+| 主办/协办律师 | Luật sư chủ trì / Cộng tác viên |
+| 系统管理员/经办律师/助理/财务 | Quản trị viên / Luật sư phụ trách / Trợ lý / Tài chính |
+| 实务工具/快递跟踪/律所文书/法律导航/公告指引/制度规范/通讯录 | Công cụ / Theo dõi chuyển phát / Văn bản văn phòng / Điều hướng pháp lý / Thông báo / Quy chế / Danh bạ |
+| 案件管理 | Quản lý vụ án |
+| 搜索/筛选/排序/导出/清除 | Tìm / Lọc / Sắp xếp / Xuất / Xoá lọc |
+
+### ⚠️ Bẫy thứ tự lặp lại LẦN 2 (I18N-8) — đã xử lý
+Batch script lại rơi vào bẫy "件" (ngắn) thay trước "案件管理" (dài) → "案vụ管理". **Cách xử lý đã dùng**: chạy batch → script phát hiện remaining → script thứ 2 sửa chuỗi lai chính xác. **Nguyên tắc bất biến: sắp cặm thay theo độ dài GIẢM DẦN**; khi phát sinh lai, xử lý bằng cặm chính xác, KHÔNG regex.

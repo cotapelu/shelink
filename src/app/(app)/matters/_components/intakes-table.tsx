@@ -44,7 +44,7 @@ export type IntakeRow = {
 };
 
 /**
- * v0.17: 待审批 / 待补正 收案列表 — 复用 MattersTable 的 CaseListCard 保证视觉一致
+ * v0.17: Danh sách tiếp nhận Chờ duyệt / Chờ bổ sung — dùng lại CaseListCard của MattersTable để đảm bảo đồng nhất hình ảnh
  */
 export function IntakesTable({
   items,
@@ -57,14 +57,14 @@ export function IntakesTable({
     return (
       <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-card py-20 text-center">
         <div className="text-base text-muted-foreground">
-          {kind === "revision" ? "暂无待补正收案" : "暂无待审批收案"}
+          {kind === "revision" ? "Chưa có tiếp nhận chờ bổ sung" : "Chưa có tiếp nhận chờ duyệt"}
         </div>
         <div className="text-xs text-muted-foreground/70">
           {kind === "revision"
-            ? "在 待审批 中拒绝的收案，可补正材料后重新提交，会出现在这里"
+            ? "Tiếp nhận bị từ chối khi Chờ duyệt, có thể bổ sung tài liệu rồi gửi lại, sẽ hiện ở đây"
             : (
               <>
-                点击右上角 <span className="text-foreground/80">新建收案</span> 开始
+                Bấm góc trên bên phải <span className="text-foreground/80">Tạo tiếp nhận</span> để bắt đầu
               </>
             )}
         </div>
@@ -78,7 +78,7 @@ export function IntakesTable({
       <ul>
         {items.map((it) => {
           const statusLabel =
-            kind === "revision" ? "待补正" : intakeStatusLabel[it.status] ?? it.status;
+            kind === "revision" ? "Chờ bổ sung" : intakeStatusLabel[it.status] ?? it.status;
           const dot =
             kind === "revision"
               ? "#f97316" // orange

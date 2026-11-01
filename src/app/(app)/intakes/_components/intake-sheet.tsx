@@ -119,7 +119,7 @@ const CATEGORIES: MatterCategory[] = [
 
 
 
-// 我方为被动方时，可上传起诉状/申请书 OCR 识别对方
+// Khi phía ta là bên bị động, có thể tải đơn khởi kiện/đơn yêu cầu để OCR nhận diện bên đối phương
 const RECEIVING_STANDINGS = new Set<LitigationStanding>([
   "DEFENDANT",
   "JOINT_DEFENDANT",
@@ -268,10 +268,10 @@ export function IntakeSheet({
     causeId: watchedCauseId,
   } = useIntakeFormStates(control);
 
-  // 争议解决机构按管辖地匹配
+  // Cơ quan giải quyết tranh chấp khớp theo địa giới
   const agencyOpts = useMemo(() => agencyOptions(jurisdiction), [jurisdiction]);
 
-  // v0.31: 案件类别决定表单结构（诉讼/仲裁 vs 非诉/专项 vs 顾问）
+  // v0.31: Loại vụ quyết định cấu trúc form (tố tụng/trọng tài vs phi tố tụng/chuyên đề vs tư vấn)
   const kind: CategoryKind = matterCategoryKind(category);
   const nameLabel =
     kind === "counsel" ? "Tên vấn đề tư vấn" : kind === "project" ? "Tên dự án" : "Tên vụ án";
@@ -288,24 +288,24 @@ export function IntakeSheet({
     setValue: methods.setValue
   });
 
-  // 当前类别下可选程序
+  // Các thủ tục có thể chọn của loại hiện tại
   const procedureOptions: ProcedureType[] = useMemo(
     () => proceduresByCategory[category] ?? [],
     [category]
   );
 
-  // 当前程序下可选诉讼地位
+  // Lập trường tố tụng có thể chọn của thủ tục hiện tại
   const ourStandingOptions: LitigationStanding[] = useMemo(
     () => procedureToStandingOptions(firstProcedureType, "ours"),
     [firstProcedureType]
   );
-  // 相对方 / 第三人 诉讼地位也随当前程序联动
+  // Lập trường của bên đối phương / người thứ ba cũng thay đổi theo thủ tục hiện tại
   const oppositeStandingOptions: LitigationStanding[] = useMemo(
     () => procedureToStandingOptions(firstProcedureType, "opposite"),
     [firstProcedureType]
   );
 
-  // 切类别时如果当前程序不在新类别列表里，清掉
+  // Khi đổi loại, nếu thủ tục hiện tại không có trong danh sách loại mới thì xóa
   useEffect(() => {
     if (firstProcedureType && !procedureOptions.includes(firstProcedureType)) {
       setValue("firstProcedureType", undefined);
@@ -313,9 +313,9 @@ export function IntakeSheet({
     }
   }, [category, firstProcedureType, procedureOptions, setValue]);
 
-  // v0.31: 切类别时同步当事人行
-  // 顾问 / 非诉 / 专项：默认只留委托方一行（相对方按需添加）
-  // 诉讼/仲裁：确保至少有一个相对方行
+  // v0.31: Khi đổi loại thì đồng bộ dòng các bên
+  // Tư vấn / phi tố tụng / chuyên đề: mặc định chỉ giữ một dòng bên ủy quyền (bên đối phương thêm khi cần)
+  // Tố tụng/Trọng tài: đảm bảo ít nhất một dòng bên đối phương
   useEffect(() => {
     const cur = (watchedParties ?? []) as { role?: string }[];
     if (kind === "counsel" || kind === "project") {
@@ -340,14 +340,14 @@ export function IntakeSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kind]);
 
-  // 设默认 owner
+  // Đặt owner mặc định
   useEffect(() => {
     if (!ownerUserId && session?.user?.id) {
       setValue("ownerUserId", session.user.id);
     }
   }, [ownerUserId, session, setValue]);
 
-  // 切程序时自动填充建议机构（仅在为空时）
+  // Khi đổi thủ tục thì tự điền cơ quan gợi ý (chỉ khi rỗng)
   function handleProcedureChange(p: ProcedureType) {
     setValue("firstProcedureType", p, { shouldDirty: true });
     setValue("ourStanding", undefined);
@@ -373,8 +373,8 @@ export function IntakeSheet({
       }
       toast.success(
         contracts.length > 0
-          ? `收案已提交审批，上传 ${contracts.length} 份合同`
-          : "收案已提交审批"
+          ? `Đã gửi tiếp nhận chờ duyệt, tải lên ${contracts.length} hợp đồng`
+          : "Đã gửi tiếp nhận chờ duyệt"
       );
       reset({ ...defaults, ownerUserId: session?.user?.id ?? "" });
       setTitleTouched(false);
@@ -383,19 +383,19 @@ export function IntakeSheet({
       onOpenChange(false);
       if (res.id) router.push(`/intakes/${res.id}`);
     } catch (err) {
-      toast.error("创建失败", {
+      toast.error("Tạo thất bại", {
         description: err instanceof Error ? err.message : ""
       });
     }
   }
 
   function onSubmit(values: IntakeCreateInput) {
-    // 委托方恒为 parties[0]（role=CLIENT_PARTY）：拆回顶层 client* 字段，其余进 parties。
-    // 名称 + 证件号必填由 zodResolver(partyInputSchema) 对每行统一校验。
+    // Bên ủy quyền luôn là parties[0] (role=CLIENT_PARTY): tách về trường client* tầng cao, phần còn lại vào parties.
+    // Tên + số giấy tờ bắt buộc do zodResolver(partyInputSchema) kiểm tra thống nhất mỗi dòng.
     const all = values.parties ?? [];
     const client = all.find((p) => p.role === "CLIENT_PARTY");
     if (!client || !client.name?.trim()) {
-      toast.warning("请填写客户", { description: "客户名称为必填" });
+      toast.warning("Vui lòng nhập khách hàng", { description: "Tên khách hàng bắt buộc" });
       return;
     }
     const isOrg = client.partyType === "ORGANIZATION";
@@ -416,7 +416,7 @@ export function IntakeSheet({
   function handleFiles(list: FileList | null) {
     if (!list) return;
     const arr = Array.from(list).filter((f) => f.size <= 20 * 1024 * 1024);
-    if (arr.length < list.length) toast.warning("跳过了超过 20MB 的文件");
+    if (arr.length < list.length) toast.warning("Đã bỏ qua tệp vượt 20MB");
     setContracts((prev) => [...prev, ...arr]);
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -429,7 +429,7 @@ export function IntakeSheet({
       const res = await parsePleading(fd);
       let added = 0;
       for (const p of res.plaintiffs) {
-        // OCR 时按 idNumber 长度/legalRep 是否存在猜主体类型：18 位含字母通常是社会信用代码 → 公司
+        // Khi OCR, đoán loại chủ thể theo độ dài idNumber / việc có người đại diện: 18 ký tự có chữ thường là mã số thuế → công ty
         const guessed: "NATURAL_PERSON" | "ORGANIZATION" =
           (p.legalRep && p.legalRep.trim()) || (p.idNumber && p.idNumber.length === 18 && /[A-Z]/.test(p.idNumber))
             ? "ORGANIZATION"
@@ -487,23 +487,23 @@ export function IntakeSheet({
         setValue("firstAgency", res.court, { shouldDirty: true });
       }
       toast.success(
-        `已识别 ${res.plaintiffs.length} 个起诉方 / ${res.thirdParties.length} 个第三人`,
-        { description: "请人工核对字段是否准确" }
+        `Đã nhận diện ${res.plaintiffs.length} nguyên đơn / ${res.thirdParties.length} người thứ ba`,
+        { description: "Vui lòng kiểm tra lại các trường có chính xác" }
       );
 
-      // OCR 后联动 AI 案由推荐（仅当 OCR 抽到 cause / claimDescription 时触发）
+      // Sau OCR thì gọi AI gợi ý nguyên nhân (chỉ khi OCR trích được cause / claimDescription)
       const situationParts: string[] = [];
-      if (res.cause) situationParts.push(`OCR 识别案由：${res.cause}`);
-      if (res.claimDescription) situationParts.push(`诉讼请求：${res.claimDescription}`);
+      if (res.cause) situationParts.push(`Nguyên nhân nhận diện OCR: ${res.cause}`);
+      if (res.claimDescription) situationParts.push(`Yêu cầu khởi kiện: ${res.claimDescription}`);
       const oppPartyNames = res.plaintiffs.map((p) => p.name).filter(Boolean).join("、");
-      if (oppPartyNames) situationParts.push(`对方当事人：${oppPartyNames}`);
-      if (res.court) situationParts.push(`管辖：${res.court}`);
+      if (oppPartyNames) situationParts.push(`Các bên đối phương: ${oppPartyNames}`);
+      if (res.court) situationParts.push(`Địa giới: ${res.court}`);
       const situationText = situationParts.join("\n");
       if (situationText && !watchedCauseId) {
         triggerCauseRecommendation(category, situationText);
       }
     } catch (err) {
-      toast.error("识别失败", {
+      toast.error("Nhận diện thất bại", {
         description: err instanceof Error ? err.message : ""
       });
     } finally {
@@ -525,7 +525,7 @@ export function IntakeSheet({
       const list = await recommendCause({ category: cat, situation });
       setAiRecCandidates(list);
     } catch (err) {
-      setAiRecError(err instanceof Error ? err.message : "AI 推荐失败");
+      setAiRecError(err instanceof Error ? err.message : "Gợi ý AI thất bại");
     } finally {
       setAiRecLoading(false);
     }
@@ -535,7 +535,7 @@ export function IntakeSheet({
     setValue("causeId", causeId, { shouldDirty: true });
     setCauseName(causeNm);
     setAiRecOpen(false);
-    toast.success("已选用 AI 推荐案由", { description: causeNm });
+    toast.success("Đã chọn nguyên nhân do AI gợi ý", { description: causeNm });
   }
 
   function handleAiRecRetry() {
@@ -552,7 +552,7 @@ export function IntakeSheet({
   }
 
   async function handlePickYuandian(candidate: EnterpriseSearchItem) {
-    // 委托方行恒为 parties[0]
+    // Dòng bên ủy quyền luôn là parties[0]
     setValue("clientId", "", { shouldDirty: true });
     setValue("parties.0.partyType", "ORGANIZATION", { shouldDirty: true });
     setValue("parties.0.name", candidate.name, { shouldDirty: true });
@@ -562,7 +562,7 @@ export function IntakeSheet({
       shouldValidate: true
     });
 
-    const tid = toast.loading("正在获取企业详细信息…", { duration: 10_000 });
+    const tid = toast.loading("Đang lấy thông tin chi tiết doanh nghiệp...", { duration: 10_000 });
     try {
       const res = await getEnterpriseDetail(candidate.id);
       if (res.info) {
@@ -573,28 +573,28 @@ export function IntakeSheet({
         }
         toast.success(
           res.info.legalRep
-            ? `已填充：法定代表人 ${res.info.legalRep}`
-            : "已填充企业信息",
+            ? `Đã điền: Người đại diện ${res.info.legalRep}`
+            : "Đã điền thông tin doanh nghiệp",
           { id: tid }
         );
       } else {
-        toast.info("未查到详细信息，已填充基础信息", { id: tid });
+        toast.info("Không tìm thấy thông tin chi tiết, đã điền thông tin cơ bản", { id: tid });
       }
     } catch {
-      toast.error("获取企业详情失败，请手动补充", { id: tid });
+      toast.error("Lấy thông tin doanh nghiệp thất bại, vui lòng bổ sung tay", { id: tid });
     }
   }
 
-  // 主办 / 协办 / 律协备案 / 反诉 字段（多处复用）
+  // Trường Luật sư chủ trì / Cộng tác viên / Ghi nhận Hiệp hội / Phản tố (dùng lại nhiều nơi)
   function leadField() {
     return (
-      <Field label="主办律师" required>
+      <Field label="Luật sư chủ trì" required>
         <Select
           value={ownerUserId ?? ""}
           onValueChange={(v) => setValue("ownerUserId", v, { shouldDirty: true })}
         >
           <SelectTrigger className="h-10 bg-background">
-            <SelectValue placeholder="选择主办律师" />
+            <SelectValue placeholder="Chọn luật sư chủ trì" />
           </SelectTrigger>
           <SelectContent>
             {colleagues.map((u) => (
@@ -610,7 +610,7 @@ export function IntakeSheet({
 
   function coLeadField() {
     return (
-      <Field label="协办人员（可多选）">
+      <Field label="Cộng tác viên (chọn nhiều)">
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -620,7 +620,7 @@ export function IntakeSheet({
             >
               <span className="truncate">
                 {coUserIds.length === 0 ? (
-                  <span className="text-muted-foreground">选择协办人员</span>
+                  <span className="text-muted-foreground">Chọn cộng tác viên</span>
                 ) : (
                   colleagues
                     .filter((u) => coUserIds.includes(u.id))
@@ -638,7 +638,7 @@ export function IntakeSheet({
           >
             <div className="max-h-56 space-y-0.5 overflow-y-auto">
               {colleagues.filter((u) => u.id !== ownerUserId).length === 0 ? (
-                <p className="py-4 text-center text-xs text-muted-foreground">暂无可选协办</p>
+                <p className="py-4 text-center text-xs text-muted-foreground">Chưa có cộng tác viên nào</p>
               ) : (
                 colleagues
                   .filter((u) => u.id !== ownerUserId)
@@ -667,13 +667,13 @@ export function IntakeSheet({
 
   function barFilingField() {
     return (
-      <Field label="是否需向律协备案">
+      <Field label="Có cần ghi nhận với Hiệp hội luật sư">
         <Select
           value={barFiling ?? ""}
           onValueChange={(v) => setValue("barFiling", v as BarFilingType, { shouldDirty: true })}
         >
           <SelectTrigger className="h-10 bg-background">
-            <SelectValue placeholder="选择" />
+            <SelectValue placeholder="Chọn" />
           </SelectTrigger>
           <SelectContent>
             {BAR_FILING_OPTIONS.map((b) => (
@@ -689,7 +689,7 @@ export function IntakeSheet({
 
   function counterclaimField() {
     return (
-      <Field label="是否反诉">
+      <Field label="Có phản tố">
         <Select
           value={counterclaim ? "yes" : "no"}
           onValueChange={(v) => setValue("counterclaim", v === "yes", { shouldDirty: true })}
@@ -698,15 +698,15 @@ export function IntakeSheet({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="no">否</SelectItem>
-            <SelectItem value="yes">是</SelectItem>
+            <SelectItem value="no">Không</SelectItem>
+            <SelectItem value="yes">Có</SelectItem>
           </SelectContent>
         </Select>
       </Field>
     );
   }
 
-  // 当事人/相关方录入表格（按类别复用，诉讼/仲裁含诉讼地位列）
+  // Bảng nhập các bên/liên quan (dùng lại theo loại, tố tụng/trọng tài có cột lập trường)
   function renderParties(mode: CategoryKind) {
     return (
       <PartiesSection
@@ -759,15 +759,15 @@ export function IntakeSheet({
       <DialogContent className="flex max-h-[92vh] w-[92vw] max-w-[780px] flex-col gap-0 overflow-hidden border-border bg-background p-0 shadow-2xl">
         <DialogHeader className="border-b border-border bg-card px-6 py-4">
           <div className="pr-8">
-            {/* 标题与「待审批」同行齐平 */}
+            {/* Tiêu đề căn hàng với 「Chờ duyệt」 */}
             <div className="flex items-center justify-between gap-4">
-              <DialogTitle className="text-xl">新建收案</DialogTitle>
+              <DialogTitle className="text-xl">Tạo tiếp nhận mới</DialogTitle>
               <span className="rounded-sm border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                待审批
+                Chờ duyệt
               </span>
             </div>
             <DialogDescription className="mt-1 text-sm">
-              提交后进入&ldquo;待审批&rdquo;，由管理员/主任律师确认后转为正式案件
+              Sau khi gửi sẽ vào&ldquo;Chờ duyệt&rdquo;, do quản trị / luật sư chủ nhiệm xác nhận rồi chuyển thành vụ án chính thức
             </DialogDescription>
           </div>
         </DialogHeader>
@@ -775,9 +775,9 @@ export function IntakeSheet({
         <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-hidden">
           <div className="flex-1 space-y-4 overflow-y-auto bg-muted/35 px-6 py-5">
-            {/* ① 基本信息（共用：类别 / 名称 / 收案 / 经办）*/}
+            {/* ① Thông tin cơ bản (dùng chung: loại / tên / tiếp nhận / phụ trách)*/}
             <Section title="Thông tin cơ bản" required>
-              {/* 案件类别 | 收案时间（与类别等宽）| 案件名称（剩余）*/}
+              {/* Loại vụ | Thời gian tiếp nhận (bằng loại) | Tên vụ (phần còn lại)*/}
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-[160px_160px_minmax(0,1fr)]">
                 <Field label="Loại vụ án" required>
                   <Select
@@ -816,7 +816,7 @@ export function IntakeSheet({
                     const titleReg = register("title");
                     return (
                       <Input
-                        placeholder="留空时自动生成"
+                        placeholder="Để trống sẽ tự sinh"
                         className="h-10"
                         {...titleReg}
                         onChange={(e) => {
@@ -829,10 +829,10 @@ export function IntakeSheet({
                 </Field>
               </div>
 
-              {/* 诉讼/仲裁：案情信息（并入基本信息）*/}
+              {/* Tố tụng/Trọng tài: thông tin tình huống (gộp vào thông tin cơ bản)*/}
               {kind === "litigation" && (
                 <>
-                {/* 案由 | 当前程序 | 管辖地 | 争议解决机构 */}
+                {/* Nguyên nhân | Thủ tục hiện tại | Địa giới | Cơ quan giải quyết tranh chấp */}
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
                   <Field label="Nguyên nhân vụ án" required>
                     <CauseCombobox
@@ -844,13 +844,13 @@ export function IntakeSheet({
                       }}
                     />
                   </Field>
-                  <Field label="当前程序" required error={errors.firstProcedureType?.message}>
+                  <Field label="Thủ tục hiện tại" required error={errors.firstProcedureType?.message}>
                     <Select
                       value={firstProcedureType ?? ""}
                       onValueChange={(v) => handleProcedureChange(v as ProcedureType)}
                     >
                       <SelectTrigger className="h-10 bg-background">
-                        <SelectValue placeholder="选择当前程序" />
+                        <SelectValue placeholder="Chọn thủ tục hiện tại" />
                       </SelectTrigger>
                       <SelectContent>
                         {procedureOptions.map((p) => (
@@ -861,7 +861,7 @@ export function IntakeSheet({
                       </SelectContent>
                     </Select>
                   </Field>
-                  <Field label="管辖地">
+                  <Field label="Địa giới">
                     <JurisdictionSelect
                       value={jurisdiction}
                       onChange={(v) => {
@@ -873,14 +873,14 @@ export function IntakeSheet({
                       }}
                     />
                   </Field>
-                  <Field label="争议解决机构">
+                  <Field label="Cơ quan giải quyết tranh chấp">
                     <Select
                       value={watchedFirstAgency || ""}
                       onValueChange={(v) => setValue("firstAgency", v, { shouldDirty: true })}
                       disabled={agencyOpts.length === 0}
                     >
                       <SelectTrigger className="h-10 bg-background">
-                        <SelectValue placeholder={jurisdiction ? "选择机构" : "请先选管辖地"} />
+                        <SelectValue placeholder={jurisdiction ? "Chọn cơ quan" : "Chọn địa giới trước"} />
                       </SelectTrigger>
                       <SelectContent>
                         {agencyOpts.map((a) => (
@@ -895,7 +895,7 @@ export function IntakeSheet({
 
                 <ClaimSection register={register} />
 
-                {/* 主办 | 协办 | 是否需向律协备案 | 是否反诉（各 1/4）*/}
+                {/* Luật sư chủ trì | Cộng tác viên | Có cần ghi nhận với Hiệp hội luật sư | Có phản tố(mỗi ô 1/4)*/}
                 <LawyerSection
                   ownerUserId={ownerUserId}
                   coUserIds={coUserIds}
@@ -908,17 +908,17 @@ export function IntakeSheet({
               </>
             )}
 
-            {/* 非诉/专项：项目信息（并入基本信息）*/}
+            {/* Phi tố tụng/Chuyên đề: thông tin dự án (gộp vào thông tin cơ bản)*/}
             {kind === "project" && (
               <>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
-                  <Field label="业务类型">
+                  <Field label="Loại nghiệp vụ">
                     <Select
                       value={businessType || ""}
                       onValueChange={(v) => setValue("businessType", v, { shouldDirty: true })}
                     >
                       <SelectTrigger className="h-10 bg-background">
-                        <SelectValue placeholder="选择业务类型" />
+                        <SelectValue placeholder="Chọn loại nghiệp vụ" />
                       </SelectTrigger>
                       <SelectContent>
                         {PROJECT_BUSINESS_TYPES.map((t) => (
@@ -929,7 +929,7 @@ export function IntakeSheet({
                       </SelectContent>
                     </Select>
                   </Field>
-                  <Field label="项目金额（元）">
+                  <Field label="Số tiền dự án">
                     <Input
                       type="number"
                       inputMode="decimal"
@@ -939,7 +939,7 @@ export function IntakeSheet({
                       {...register("claimAmount", { valueAsNumber: true })}
                     />
                   </Field>
-                  <Field label="起始时间">
+                  <Field label="Thời gian bắt đầu">
                     <Input
                       type="date"
                       value={
@@ -956,7 +956,7 @@ export function IntakeSheet({
                       }
                     />
                   </Field>
-                  <Field label="结束时间">
+                  <Field label="Thời gian kết thúc">
                     <Input
                       type="date"
                       value={
@@ -975,17 +975,17 @@ export function IntakeSheet({
                   </Field>
                 </div>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
-                  <Field label="服务范围 / 内容" className="sm:col-span-3">
+                  <Field label="Phạm vi / Nội dung dịch vụ" className="sm:col-span-3">
                     <Input
-                      placeholder="如：尽职调查范围、合同审查清单、交易结构设计…"
+                      placeholder="vd: phạm vi thẩm định, danh mục rà soát hợp đồng, thiết kế cấu trúc giao dịch..."
                       {...register("serviceScope")}
                     />
                   </Field>
-                  <Field label="交付成果">
-                    <Input placeholder="如：法律意见书 / 尽调报告" {...register("deliverables")} />
+                  <Field label="Sản phẩm bàn giao">
+                    <Input placeholder="vd: ý kiến pháp lý / báo cáo thẩm định" {...register("deliverables")} />
                   </Field>
                 </div>
-                {/* 主办 | 协办（各 1/2）*/}
+                {/* Luật sư chủ trì | Cộng tác viên (mỗi ô 1/2)*/}
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                   {leadField()}
                   {coLeadField()}
@@ -993,17 +993,17 @@ export function IntakeSheet({
               </>
             )}
 
-            {/* 顾问：顾问信息（并入基本信息）*/}
+            {/* Tư vấn: thông tin tư vấn (gộp vào thông tin cơ bản)*/}
             {kind === "counsel" && (
               <>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
-                  <Field label="顾问类型">
+                  <Field label="Loại tư vấn">
                     <Select
                       value={counselType || ""}
                       onValueChange={(v) => setValue("counselType", v, { shouldDirty: true })}
                     >
                       <SelectTrigger className="h-10 bg-background">
-                        <SelectValue placeholder="选择顾问类型" />
+                        <SelectValue placeholder="Chọn loại tư vấn" />
                       </SelectTrigger>
                       <SelectContent>
                         {COUNSEL_TYPES.map((t) => (
@@ -1014,7 +1014,7 @@ export function IntakeSheet({
                       </SelectContent>
                     </Select>
                   </Field>
-                  <Field label="顾问期限 · 起">
+                  <Field label="Hạn tư vấn · từ">
                     <Input
                       type="date"
                       value={
@@ -1031,7 +1031,7 @@ export function IntakeSheet({
                       }
                     />
                   </Field>
-                  <Field label="顾问期限 · 止">
+                  <Field label="Hạn tư vấn · đến">
                     <Input
                       type="date"
                       value={
@@ -1048,17 +1048,17 @@ export function IntakeSheet({
                       }
                     />
                   </Field>
-                  <Field label="对接电话">
-                    <Input className="font-mono" placeholder="对接人电话" {...register("contactPhone")} />
+                  <Field label="Điện thoại đầu mối">
+                    <Input className="font-mono" placeholder="SĐT người đầu mối" {...register("contactPhone")} />
                   </Field>
                 </div>
-                <Field label="服务范围 / 内容">
+                <Field label="Phạm vi / Nội dung dịch vụ">
                   <Input
-                    placeholder="如：日常法律咨询、合同审查、专项法律意见…"
+                    placeholder="vd: tư vấn pháp lý thường xuyên, rà soát hợp đồng, ý kiến pháp lý chuyên đề..."
                     {...register("serviceScope")}
                   />
                 </Field>
-                {/* 主办 | 协办（各 1/2）*/}
+                {/* Luật sư chủ trì | Cộng tác viên (mỗi ô 1/2)*/}
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                   {leadField()}
                   {coLeadField()}
@@ -1067,12 +1067,12 @@ export function IntakeSheet({
             )}
             </Section>
 
-            {/* ③ 当事人 / 相关方（按类别）*/}
+            {/* ③ Các bên / liên quan (theo loại)*/}
             {kind === "litigation" && (
             <Section
               title="Bên liên quan vụ án"
               required
-              headerAction={addPartyBtn("添加当事人")}
+              headerAction={addPartyBtn("Thêm bên tham gia")}
             >
               {ourStanding && RECEIVING_STANDINGS.has(ourStanding!) && (
                 <div className="rounded-md border border-dashed border-primary/40 bg-primary/[0.03] p-3">
@@ -1080,10 +1080,10 @@ export function IntakeSheet({
                     <div className="text-xs text-muted-foreground">
                       <div className="font-medium text-foreground">
                         <ScanLine className="mr-1 inline h-3 w-3 text-primary" />
-                        识别起诉状 / 申请书
+                        Nhận diện đơn khởi kiện / đơn yêu cầu
                       </div>
                       <p className="mt-0.5">
-                        我方为被动方，可上传相对方起诉状 / 申请书（JPG / PNG / WebP / PDF，≤ 20MB），AI 自动抽取相对方主体与诉求
+                        Phía ta là bên bị động, có thể tải đơn khởi kiện/đơn yêu cầu của bên đối phương (JPG / PNG / WebP / PDF, ≤ 20MB), AI tự trích chủ thể và yêu cầu của bên đối phương
                       </p>
                     </div>
                     <input
@@ -1109,7 +1109,7 @@ export function IntakeSheet({
                       ) : (
                         <ScanLine className="h-3 w-3" />
                       )}
-                      上传识别
+                      Tải lên nhận diện
                     </Button>
                   </div>
                 </div>
@@ -1119,21 +1119,21 @@ export function IntakeSheet({
             </Section>
             )}
 
-            {/* ③ 非诉/专项：委托方与相对方（无诉讼地位）*/}
+            {/* ③ Phi tố tụng/Chuyên đề: bên ủy quyền và bên đối phương (không có lập trường)*/}
             {kind === "project" && (
-              <Section title="② 委托方与相对方" headerAction={addPartyBtn("添加相对方")}>
+              <Section title="② Bên ủy quyền và bên đối phương" headerAction={addPartyBtn("Thêm bên đối phương")}>
                 {renderParties("project")}
               </Section>
             )}
 
-            {/* ③ 顾问：顾问单位 */}
+            {/* ③ Tư vấn: Đơn vị tư vấn */}
             {kind === "counsel" && (
-              <Section title="② 顾问单位" required>
+              <Section title="② Đơn vị tư vấn" required>
                 {renderParties("counsel")}
               </Section>
             )}
 
-            {/* 3. 律师费 */}
+            {/* 3. Phí luật sư */}
             <Section title={kind === "counsel" ? "Phí tư vấn" : "Phí luật sư"}>
               <FeeSection
                 kind={kind}
@@ -1186,14 +1186,14 @@ export function IntakeSheet({
         contextHints={(() => {
           const lines: string[] = [];
           const cf = watchedCauseFree;
-          if (cf) lines.push(`OCR 识别案由：${cf}`);
+          if (cf) lines.push(`Nguyên nhân nhận diện OCR: ${cf}`);
           const cd = watchedClaimDescription;
-          if (cd) lines.push(`诉讼请求：${cd}`);
+          if (cd) lines.push(`Yêu cầu khởi kiện: ${cd}`);
           const opp = parties
             .filter((p) => p.role === "OPPOSING_PARTY")
             .map((p) => p.name)
             .filter(Boolean);
-          if (opp.length) lines.push(`对方当事人：${opp.join("、")}`);
+          if (opp.length) lines.push(`Các bên đối phương: ${opp.join("、")}`);
           return lines.join("\n");
         })()}
         onSelect={handleAiRecSelect}
@@ -1213,7 +1213,7 @@ function Section({
   headerAction?: React.ReactNode;
   children: React.ReactNode;
 }) {
-  // 把"① 案件类别"形式拆成 罗马数字 + 标题
+  // Tách dạng "① Loại vụ án" thành số La Mã + tiêu đề
   const match = title.match(/^([①-⑨])\s+(.+)$/);
   const map: Record<string, string> = {
     "①": "I",

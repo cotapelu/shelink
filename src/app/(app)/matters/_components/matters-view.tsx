@@ -55,9 +55,9 @@ type Props = {
   initialFilters: {
     search: string;
     category: MatterCategory | "ALL";
-    status?: string; // all tab 下 status 筛选
-    from?: string; // 收案时间起
-    to?: string; // 收案时间止
+    status?: string; // Lọc status ở tab tất cả
+    from?: string; // Thời gian tiếp nhận từ
+    to?: string; // Thời gian tiếp nhận đến
     sortBy?: SortBy;
     sortDir?: SortDir;
   };
@@ -178,7 +178,7 @@ export function MattersView({
     return `/matters${params.toString() ? `?${params.toString()}` : ""}`;
   }
 
-  // ?new=1 自动打开；关闭弹窗时再清 URL，避免 replace 打断打开状态。
+  // ?new=1 tự mở; khi đóng popup mới xoá URL, tránh replace làm gián đoạn trạng thái mở。
   useEffect(() => {
     if (autoOpenIntake) {
       setSheetOpen(true);
@@ -282,25 +282,25 @@ export function MattersView({
       <header className="space-y-2">
         <div className="flex items-end justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-xl font-medium tracking-tight">案件管理</h1>
+            <h1 className="text-xl font-medium tracking-tight">Quản lý vụ án</h1>
             <p className="text-[13px] text-muted-foreground">
               <span className="text-foreground/80">
                 {TABS.find((t) => t.key === tab)?.label}
               </span>
               <span className="mx-2 text-muted-subtle">·</span>
-              共 <span className="font-mono tabular text-foreground">{total}</span> 件
+              Tổng <span className="font-mono tabular text-foreground">{total}</span> vụ
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Button asChild variant="outline" className="h-9 gap-1.5 bg-background px-3">
               <a href={buildExportUrl()}>
                 <Download className="h-4 w-4" strokeWidth={2} />
-                导出
+                Xuất
               </a>
             </Button>
             <Button onClick={() => setSheetOpen(true)} className="h-9 gap-1.5 px-4 shadow-sm">
               <Plus className="h-4 w-4" strokeWidth={2} />
-              新建收案
+              Tạo tiếp nhận
             </Button>
           </div>
         </div>
@@ -339,7 +339,7 @@ export function MattersView({
         })}
       </div>
 
-      {/* 搜索 */}
+      {/* Tìm */}
       <div className="rounded-md border border-border bg-card px-3 py-2 shadow-sm">
         <form
           onSubmit={(e) => {
@@ -356,21 +356,21 @@ export function MattersView({
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="搜索案件名称 / 客户"
+              placeholder="Tìm tên vụ / khách hàng"
               className="h-9 rounded-md border-input bg-background pl-9 text-[13px]"
             />
           </div>
           <Button type="submit" size="sm" variant="outline" className="h-9 gap-1 bg-background px-3">
             <Search className="h-3.5 w-3.5" />
-            搜索
+            Tìm
           </Button>
         </form>
       </div>
 
-      {/* 筛选 / 排序 */}
+      {/* Lọc / sắp xếp */}
       <div className="flex flex-wrap items-center gap-1.5 rounded-md border border-border bg-muted/60 px-2 py-2">
         <CompactSelect
-          label="类型"
+          label="Loại"
           value={category}
           onValueChange={(v) => {
             const next = v as MatterCategory | "ALL";
@@ -381,14 +381,14 @@ export function MattersView({
         >
           {ALL_CATEGORIES.map((c) => (
             <SelectItem key={c} value={c}>
-              {c === "ALL" ? "全部类型" : matterCategoryLabel[c as MatterCategory]}
+              {c === "ALL" ? "Tất cả loại" : matterCategoryLabel[c as MatterCategory]}
             </SelectItem>
           ))}
         </CompactSelect>
 
         {isAll && (
           <CompactSelect
-            label="状态"
+            label="Trạng thái"
             value={statusFilter}
             onValueChange={(v) => {
               setStatusFilter(v);
@@ -405,29 +405,29 @@ export function MattersView({
         )}
 
         <div className="flex h-8 items-center gap-1 rounded-md border border-border bg-background px-2 shadow-sm">
-          <span className="text-[10px] text-muted-foreground">收案</span>
+          <span className="text-[10px] text-muted-foreground">Tiếp nhận</span>
           <Input
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
             onBlur={applyFilters}
             className="h-7 w-[7.25rem] border-0 bg-transparent px-0 text-[11px] shadow-none focus-visible:ring-0"
-            title="收案时间起"
+            title="Thời gian tiếp nhận từ"
           />
-          <span className="text-[11px] text-muted-foreground">至</span>
+          <span className="text-[11px] text-muted-foreground">đến</span>
           <Input
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
             onBlur={applyFilters}
             className="h-7 w-[7.25rem] border-0 bg-transparent px-0 text-[11px] shadow-none focus-visible:ring-0"
-            title="收案时间止"
+            title="Thời gian tiếp nhận đến"
           />
         </div>
 
         <span className="mx-1 h-5 w-px bg-border" />
         <CompactSelect
-          label="排序"
+          label="Sắp xếp"
           value={sortBy}
           onValueChange={(v) => {
             const next = v as SortBy;
@@ -443,7 +443,7 @@ export function MattersView({
           ))}
         </CompactSelect>
         <CompactSelect
-          label="方向"
+          label="Hướng"
           value={sortDir}
           onValueChange={(v) => {
             const next = v as SortDir;
@@ -462,7 +462,7 @@ export function MattersView({
         {hasFilters && (
           <Button variant="outline" size="sm" onClick={clearFilters} className="h-8 gap-1 bg-background px-2 text-muted-foreground">
             <X className="h-3.5 w-3.5" />
-            清除
+            Xoá lọc
           </Button>
         )}
       </div>

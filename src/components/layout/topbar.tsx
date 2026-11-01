@@ -56,32 +56,32 @@ import { ToolsDialog } from "@/components/layout/tools-dialog";
 import { cn } from "@/lib/utils";
 
 const roleLabels: Record<string, string> = {
-  ADMIN: "系统管理员",
-  PRINCIPAL_LAWYER: "主办律师",
-  LAWYER: "经办律师",
-  ASSISTANT: "助理",
-  FINANCE: "财务"
+  ADMIN: "Quản trị viên",
+  PRINCIPAL_LAWYER: "Luật sư chủ trì",
+  LAWYER: "Luật sư phụ trách",
+  ASSISTANT: "Trợ lý",
+  FINANCE: "Tài chính"
 };
 
-// 应用菜单聚合入口（v0.38：各分类拆回独立页；实务工具=全局弹窗；法律导航=外链）
-// kind: "tools" 触发工具箱弹窗（不跳转）；"external" 新标签外链；其余 Link 跳独立页
+// Cửa ngò gom menu Ứng dụng（v0.38：các nhóm tách về trang riêng; Công cụ = popup toàn cục; Điều hướng pháp lý = liên kết ngoài）
+// kind: "tools" mở popup công cụ (không chuyển trang); "external" mở thẻ mới; còn lại Link tới trang riêng
 const APP_ITEMS = [
-  { label: "实务工具", icon: Calculator, kind: "tools" },
-  { label: "快递跟踪", href: "/express", icon: Package, kind: "link" },
-  { label: "律所文书", href: "/firm-resources", icon: FolderArchive, kind: "link" },
-  { label: "法律导航", href: "https://yesen.cn", icon: Compass, kind: "external" },
-  { label: "公告指引", href: "/announcements", icon: Megaphone, kind: "link" },
-  { label: "制度规范", href: "/policy", icon: BookText, kind: "link" },
-  { label: "通讯录", href: "/contacts", icon: Contact, kind: "link" }
+  { label: "Công cụ", icon: Calculator, kind: "tools" },
+  { label: "Theo dõi chuyển phát", href: "/express", icon: Package, kind: "link" },
+  { label: "Văn bản văn phòng", href: "/firm-resources", icon: FolderArchive, kind: "link" },
+  { label: "Điều hướng pháp lý", href: "https://yesen.cn", icon: Compass, kind: "external" },
+  { label: "Thông báo", href: "/announcements", icon: Megaphone, kind: "link" },
+  { label: "Quy chế", href: "/policy", icon: BookText, kind: "link" },
+  { label: "Danh bạ", href: "/contacts", icon: Contact, kind: "link" }
 ] as const;
 
 function AppMenu({ onToolsOpen }: { onToolsOpen: (open: boolean) => void }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button type="button" className={cn("inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-[13px]", "text-muted-foreground transition-colors hover:bg-muted hover:text-foreground")} title="应用">
+        <button type="button" className={cn("inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-[13px]", "text-muted-foreground transition-colors hover:bg-muted hover:text-foreground")} title="Ứng dụng">
           <LayoutGrid className="h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={1.8} />
-          <span className="hidden sm:inline">应用</span>
+          <span className="hidden sm:inline">Ứng dụng</span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
@@ -127,17 +127,17 @@ function UserMenu({ userAvatar, displayName, roleLabel }: { userAvatar?: string 
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">{displayName ? `${displayName} · ${roleLabel}` : "加载中..."}</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">{displayName ? `${displayName} · ${roleLabel}` : "Đang tải..."}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/settings/profile" className="cursor-pointer"><User className="mr-2 h-4 w-4" />个人信息</Link>
+          <Link href="/settings/profile" className="cursor-pointer"><User className="mr-2 h-4 w-4" />Thông tin cá nhân</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/settings" className="cursor-pointer"><SettingsIcon className="mr-2 h-4 w-4" />偏好设置</Link>
+          <Link href="/settings" className="cursor-pointer"><SettingsIcon className="mr-2 h-4 w-4" />Cài đặt</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={(e) => { e.preventDefault(); signOut({ callbackUrl: "/login" }); }} className="cursor-pointer text-destructive focus:text-destructive">
-          <LogOut className="mr-2 h-4 w-4" />退出登录
+          <LogOut className="mr-2 h-4 w-4" />Đăng xuất
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -161,7 +161,7 @@ function TopbarRight({ setToolsOpen, router, userAvatar, displayName, roleLabel 
           className="h-8 gap-1.5 px-3 text-[13px]"
         >
           <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-          <span className="hidden sm:inline">新建收案</span>
+          <span className="hidden sm:inline">Tạo tiếp nhận</span>
         </Button>
         <div className="mx-0.5 hidden h-4 w-px bg-border sm:block" />
         <NotificationPopover />
@@ -182,27 +182,27 @@ export function Topbar({ onMobileMenuToggle, userAvatar }: { onMobileMenuToggle?
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-2.5 border-b border-border bg-background px-4 sm:px-6">
-      {/* 移动端汉堡菜单 */}
+      {/* Menu hamburger mobile */}
       {onMobileMenuToggle && (
         <button
           onClick={onMobileMenuToggle}
           className="flex h-8 w-8 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
-          aria-label="打开菜单"
+          aria-label="Mở menu"
         >
           <Menu className="h-4 w-4" />
         </button>
       )}
-      {/* 搜索 */}
+      {/* Tìm */}
       <button
         onClick={() => setSearchOpen(true)}
         className={cn(
           "flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md border border-border bg-card px-3 text-left sm:w-48 sm:flex-initial",
           "text-sm text-muted-foreground transition-colors hover:border-input hover:text-foreground"
         )}
-        aria-label="全局搜索 (Cmd+K)"
+        aria-label="Tìm kiếm toàn cục (Cmd+K)"
       >
         <Search className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
-        <span className="flex-1 truncate">搜索案件、客户、材料...</span>
+        <span className="flex-1 truncate">Tìm vụ án, khách hàng, tài liệu...</span>
         <kbd className="hidden h-5 items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium sm:inline-flex">
           ⌘K
         </kbd>
@@ -210,7 +210,7 @@ export function Topbar({ onMobileMenuToggle, userAvatar }: { onMobileMenuToggle?
 
       <div className="flex-1 hidden sm:block" />
 
-      {/* 工具按钮组 */}
+      {/* Nhóm nút công cụ */}
       <TopbarRight setToolsOpen={setToolsOpen} router={router} userAvatar={userAvatar} displayName={displayName} roleLabel={roleLabel} />
 
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />

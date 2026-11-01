@@ -28,19 +28,19 @@ import { ConflictSearchButton } from "./conflict-search-button";
 import type { ScheduleItem } from "@/server/dashboard/actions";
 
 function getGreeting(hour: number) {
-  if (hour < 6) return "夜深了";
-  if (hour < 11) return "早安";
-  if (hour < 13) return "中午好";
-  if (hour < 18) return "下午好";
-  return "晚上好";
+  if (hour < 6) return "Đêm khuya rồi";
+  if (hour < 11) return "Chào buổi sáng";
+  if (hour < 13) return "Chào buổi trưa";
+  if (hour < 18) return "Chào buổi chiều";
+  return "Chào buổi tối";
 }
 
 const typeMeta = {
-  deadline: { icon: AlertTriangle, color: "text-amber-600", label: "期限" },
-  hearing: { icon: Calendar, color: "text-primary", label: "开庭" }
+  deadline: { icon: AlertTriangle, color: "text-amber-600", label: "Thời hạn" },
+  hearing: { icon: Calendar, color: "text-primary", label: "Phiên tòa" }
 };
 
-/** v0.47：工作台顶部问候区 + 右侧近期日程 */
+/** v0.47：Khu lời chào đầu trang + Lịch sắp tới bên phải */
 export function DashboardGreeting({
   name,
   summary,
@@ -67,7 +67,7 @@ export function DashboardGreeting({
       transition={{ duration: 0.5, ease: [0.2, 0.7, 0.3, 1] }}
       className="grid grid-cols-1 gap-4 py-3 lg:grid-cols-5"
     >
-      {/* 左侧：问候 + 统计 + 按钮 */}
+      {/* Bên trái: lời chào + thống kê + nút */}
       <div className="flex flex-col gap-4 lg:col-span-3">
         <span className="text-xs text-muted-foreground">{dateLabel}</span>
 
@@ -78,8 +78,8 @@ export function DashboardGreeting({
             <span className="text-muted-foreground/50">。</span>
           </h1>
           <p className="mt-2 max-w-xl text-[0.875rem] leading-relaxed text-muted-foreground">
-            今天有 <Num>{summary.todayDeadlineCount}</Num> 件事需处理；本周开庭{" "}
-            <Num>{summary.weekHearingCount}</Num> 场；近期期限 <Num>{summary.nearTermCount}</Num> 项。
+            Hôm nay có <Num>{summary.todayDeadlineCount}</Num> việc cần xử lý；phiên tòa tuần này{" "}
+            <Num>{summary.weekHearingCount}</Num> phiên；thời hạn sắp tới <Num>{summary.nearTermCount}</Num> mục.
           </p>
         </div>
 
@@ -89,23 +89,23 @@ export function DashboardGreeting({
             className="h-9 gap-1.5 px-4 shadow-sm"
           >
             <Plus className="h-4 w-4" strokeWidth={2} />
-            新建收案
+            Tạo tiếp nhận
           </Button>
           <ConflictSearchButton />
         </div>
       </div>
 
-      {/* 右侧：近期日程 */}
+      {/* Bên phải: Lịch sắp tới */}
       <div className="ll-surface min-w-0 p-3 lg:col-span-2">
         <div className="mb-2 flex items-start justify-between gap-2">
           <div>
-            <h3 className="text-[12px] font-medium text-foreground">近期日程</h3>
+            <h3 className="text-[12px] font-medium text-foreground">Lịch sắp tới</h3>
           </div>
           <Link
             href="/schedule"
             className="inline-flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
           >
-            日历
+            Lịch
             <ArrowRight className="h-3 w-3" strokeWidth={1.8} />
           </Link>
         </div>
@@ -118,7 +118,7 @@ export function DashboardGreeting({
           </ul>
         ) : (
           <div className="flex h-[150px] items-center justify-center text-[12px] text-muted-foreground">
-            暂无近期事项
+            Chưa có sự kiện sắp tới
           </div>
         )}
       </div>
