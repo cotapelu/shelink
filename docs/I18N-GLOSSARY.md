@@ -111,3 +111,6 @@
 | 诉讼请求/仲裁请求 | Yêu cầu khởi kiện / Yêu cầu trọng tài |
 | 管辖地/管辖机构/立案/裁决 | Địa giới / Cơ quan xử lý / Tiếp nhận / Kết thúc-quyết định |
 | 证件号/统一社会信用代码 | Số giấy tờ / Mã số thuế |
+
+### ⚠️ Bẫy thứ tự thay (I18N-7)
+Khi bảng thay có cả chuỗi ngắn ("主办律师") và chuỗi dài chứa nó ("选择主办律师"), thay chuỗi ngắn trước sẽ để lại chuỗi lai ("选择Luật sư chủ trì"). **Nguyên tắc: sắp xếp bảng thay theo độ dài GIẢM DẦN** (chuỗi dài trước), hoặc grep lại sau mỗi lần thay.

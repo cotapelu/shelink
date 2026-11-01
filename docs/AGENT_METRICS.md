@@ -465,3 +465,9 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Loại**: De-zh (i18n). ~30 phút. ✅.
 - **Đã làm**: 79 cặm thay chính xác (nhãn loại thủ tục, vai trò bên, kết quả vụ, thẩm phán, label Pair, toast, dialog) + 6 dòng sót bằng sed.
 - **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /matters/[id] 200.
+
+## [CYCLE-I18N-7] — 2026-10-31: procedure-forms.tsx → tiếng Việt
+- **Loại**: De-zh (i18n). ~25 phút. ✅.
+- **Đã làm**: 66 cặm thay chính xác (form thêm thủ tục/thời hạn/phiên tòa, phân loại thời hạn, upload OCR, comment) + sed xử lý sót (thứ tự thay khiến "选择Luật sư chủ trì" dở dang — đã sửa).
+- **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /matters/[id] 200.
+- **Ghi chú**: bẫy thứ tự — "主办律师" thay trước "选择主办律师" để lại chuỗi lai; cách phòng: xử lý chuỗi dài (có chứa chuỗi ngắn) TRƯỚC. Đã bổ sung vào glossary.
