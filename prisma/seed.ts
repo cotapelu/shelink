@@ -194,14 +194,14 @@ async function seedV08Templates(prisma: PrismaClient) {
 
   // Seed default folders for this matter
   const folderDefs = [
-    { name: "收案", order: 0, isDefault: true },
-    { name: "立案", order: 1, isDefault: true },
-    { name: "委托手续", order: 2, isDefault: true },
-    { name: "证据", order: 3, isDefault: true },
-    { name: "程序文书", order: 4, isDefault: true },
-    { name: "庭审", order: 5, isDefault: true },
-    { name: "裁判", order: 6, isDefault: true },
-    { name: "结案", order: 7, isDefault: true }
+    { name: "Tiếp nhận", order: 0, isDefault: true },
+    { name: "Thụ lý", order: 1, isDefault: true },
+    { name: "Thủ tục ủy quyền", order: 2, isDefault: true },
+    { name: "Chứng cứ", order: 3, isDefault: true },
+    { name: "Văn bản thủ tục", order: 4, isDefault: true },
+    { name: "Phiên tòa", order: 5, isDefault: true },
+    { name: "Quyết định", order: 6, isDefault: true },
+    { name: "Kết thúc", order: 7, isDefault: true }
   ];
 
   for (const folder of folderDefs) {

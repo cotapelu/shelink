@@ -503,3 +503,10 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Đã làm**: 44 cặm thay chính xác (phân loại tài liệu, toast, form upload, label Field, ARCHIVE_FOLDER_NAMES 结案/归档 → Kết thúc/Lưu trữ) + sed 11 dòng sót.
 - **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /matters/[id] 200.
 - **Ghi chú**: ARCHIVE_FOLDER_NAMES là **tên hồ sơ do seed tạo** — đổi chuỗi code phải đổi seedHOẶC dữ liệu cũ sẽ không khớp. Đã kiểm: seed.ts dùng tên gì → xử lý tiếp ở chu kỳ sau nếu cần.
+
+## [CYCLE-I18N-12b] — 2026-10-31: seed folderDefs + DB DocumentFolder → tiếng Việt
+- **Loại**: De-zh (i18n) + data sync. ✅.
+- **Nguyên nhân**: documents-panel dùng ARCHIVE_FOLDER_NAMES ("Kết thúc") nhưng seed tạo hồ sơ tiếng Trung trong DB → lệch.
+- **Sửa**: seed.ts folderDefs (8 tên) + UPDATE 8 dòng DocumentFolder trong DB dev (收案→Tiếp nhận, 立案→Thụ lý, 委托手续→Thủ tục ủy quyền, 证据→Chứng cứ, 程序文书→Văn bản thủ tục, 庭审→Phiên tòa, 裁判→Quyết định, 结案→Kết thúc).
+- **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744; smoke /matters/[id] 200, hồ sơ hiển thị tiếng Việt.
+- **Ghi chú**: đây là pattern "code-string ↔ seed-data" — phải sửa CẢ HAI, không chỉ một bên.
