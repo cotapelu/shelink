@@ -100,27 +100,27 @@ type Props = {
 };
 
 const severityStyle: Record<ConflictSeverity, { color: string; bg: string; label: string }> = {
-  BLOCKING: { color: "#DC2626", bg: "rgba(220,38,38,0.10)", label: "阻塞" },
-  HIGH: { color: "#EA580C", bg: "rgba(234,88,12,0.10)", label: "高" },
-  MEDIUM: { color: "#D97706", bg: "rgba(217,119,6,0.10)", label: "中" },
-  LOW: { color: "#65A30D", bg: "rgba(101,163,13,0.10)", label: "低" }
+  BLOCKING: { color: "#DC2626", bg: "rgba(220,38,38,0.10)", label: "Chặn" },
+  HIGH: { color: "#EA580C", bg: "rgba(234,88,12,0.10)", label: "Cao" },
+  MEDIUM: { color: "#D97706", bg: "rgba(217,119,6,0.10)", label: "Trung bình" },
+  LOW: { color: "#65A30D", bg: "rgba(101,163,13,0.10)", label: "Thấp" }
 };
 
 const conclusionLabel: Record<ConflictConclusion, string> = {
-  PENDING: "待结论",
-  SAME_SUBJECT: "有冲突",
-  DIFFERENT: "可承接",
-  NEED_INFO: "信息不足"
+  PENDING: "Chờ kết luận",
+  SAME_SUBJECT: "Có xung đột",
+  DIFFERENT: "Có thể tiếp nhận",
+  NEED_INFO: "Thông tin chưa đủ"
 };
 
 const partyRoleLabel: Record<PartyRole, string> = {
-  CLIENT_PARTY: "委托方",
-  OPPOSING_PARTY: "对方",
-  THIRD_PARTY: "第三人",
-  CO_LITIGANT: "共同诉讼人",
-  AGENT: "代理人",
-  WITNESS: "证人",
-  OTHER: "其他"
+  CLIENT_PARTY: "Bên ủy quyền",
+  OPPOSING_PARTY: "Bên đối phương",
+  THIRD_PARTY: "Người thứ ba",
+  CO_LITIGANT: "Đồng khởi kiện",
+  AGENT: "Người đại diện",
+  WITNESS: "Nhân chứng",
+  OTHER: "Khác"
 };
 
 export function ConflictSection({
@@ -157,18 +157,18 @@ export function ConflictSection({
       queries.push({ role: "THIRD_PARTY", name: p.name, idNumber: p.idNumber });
     }
     if (queries.length === 0) {
-      toast.warning("没有可检索的当事人", { description: "请先在收案中添加委托方或对方" });
+      toast.warning("Không có bên tham gia nào để tra cứu", { description: "Vui lòng thêm bên ủy quyền hoặc bên đối phương trong tiếp nhận trước" });
       return;
     }
 
     startTransition(async () => {
       try {
         const res = await runCheckAndSave({ intakeId, queries });
-        toast.success("冲突检索完成", {
-          description: `命中 ${res.hits.length} 条 · 客户库同名 ${res.sameNameClients.length} 个`
+        toast.success("Tra cứu xung đột xong", {
+          description: `Khớp ${res.hits.length} dòng · cùng tên trong kho khách ${res.sameNameClients.length}`
         });
       } catch (err) {
-        toast.error("检索失败", {
+        toast.error("Tra cứu thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -178,8 +178,8 @@ export function ConflictSection({
   function handleSetConclusion(conclusion: ConflictConclusion) {
     if (!latestCheck) return;
     if (conclusion === "DIFFERENT" && needsHighRiskNote && !conclusionNote.trim()) {
-      toast.warning("请先补充承接理由", {
-        description: "存在高风险或阻塞命中时，需要写明排除理由或书面同意留痕"
+      toast.warning("Vui lòng bổ sung lý do tiếp nhận trước", {
+        description: "Khi có rủi ro cao hoặc khớp chặn, cần ghi rõ lý do loại trừ hoặc để lại dấu vết đồng ý bằng văn bản"
       });
       return;
     }
@@ -190,9 +190,9 @@ export function ConflictSection({
           conclusion,
           note: conclusionNote
         });
-        toast.success("结论已保存");
+        toast.success("Đã lưu kết luận");
       } catch (err) {
-        toast.error("保存失败", {
+        toast.error("Lưu thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -205,10 +205,10 @@ export function ConflictSection({
         <div>
           <h2 className="flex items-center gap-2 text-lg">
             <ShieldCheck className="h-4 w-4 text-primary" />
-            利益冲突检索
+            Tra cứu xung đột lợi ích
           </h2>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
-            匹配历史案件当事人；客户库同名仅作提示，不计为冲突
+            Khớp các bên của vụ án lịch sử; cùng tên trong kho khách chỉ là gợi ý, không tính là xung đột
           </p>
         </div>
 
@@ -224,24 +224,24 @@ export function ConflictSection({
           ) : (
             <Search className="h-3.5 w-3.5" />
           )}
-          {latestCheck ? "重新检索" : "运行冲突检索"}
+          {latestCheck ? "Tra cứu lại" : "Chạy tra cứu xung đột"}
         </Button>
       </header>
 
       {!latestCheck ? (
         <div className="rounded-md border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
-          还未运行冲突检索
+          Chưa chạy tra cứu xung đột
         </div>
       ) : (
         <div className="space-y-3">
-          {/* 概览 */}
+          {/* Tổng quan */}
           <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/20 p-2.5 text-[12px]">
             <span className="font-mono text-[11px] text-muted-foreground">
               {new Date(latestCheck.checkedAt).toLocaleString("zh-CN")}
             </span>
             <span className="text-muted-foreground">·</span>
             <span>
-              冲突命中{" "}
+              Khớp xung đột{" "}
               <span className="font-mono text-foreground">{latestCheck.hits.length}</span>
             </span>
             <Badge
@@ -265,12 +265,12 @@ export function ConflictSection({
             )}
           </div>
 
-          {/* 客户库同名提示（非冲突） */}
+          {/* Gợi ý cùng tên kho khách (không phải xung đột) */}
           {latestCheck.sameNameClients.length > 0 && (
             <InfoBar
               icon={<Info className="h-3.5 w-3.5" />}
               tone="info"
-              text={`客户库已有 ${latestCheck.sameNameClients.length} 个同名记录（仅提示，非冲突）`}
+              text={`Kho khách đã có ${latestCheck.sameNameClients.length} bản ghi cùng tên (chỉ gợi ý, không phải xung đột)`}
             >
               <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {latestCheck.sameNameClients.map((c) => (
@@ -287,12 +287,12 @@ export function ConflictSection({
             </InfoBar>
           )}
 
-          {/* 身份证号一致客户提示（强提示） */}
+          {/* Gợi ý khách trùng CMND (gợi ý mạnh) */}
           {latestCheck.idMatchedClients.length > 0 && (
             <InfoBar
               icon={<AlertTriangle className="h-3.5 w-3.5" />}
               tone="warn"
-              text={`身份证 / 信用代码与客户库 ${latestCheck.idMatchedClients.length} 条记录精确匹配，请人工核对是否为同一主体`}
+              text={`CMND / mã số thuế khớp chính xác với ${latestCheck.idMatchedClients.length} bản ghi trong kho khách, vui lòng kiểm tra thủ công có cùng chủ thể`}
             >
               <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {latestCheck.idMatchedClients.map((c) => (
@@ -309,12 +309,12 @@ export function ConflictSection({
             </InfoBar>
           )}
 
-          {/* 冲突命中列表 */}
+          {/* Danh sách khớp xung đột */}
           {latestCheck.hits.length === 0 ? (
             <div className="rounded-md border border-[#65A30D]/30 bg-[#65A30D]/10 p-3 text-sm">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-[#65A30D]" />
-                <span className="text-foreground">未命中历史案件，系统已标记为可承接</span>
+                <span className="text-foreground">Không khớp vụ án lịch sử, hệ thống đã đánh dấu có thể tiếp nhận</span>
               </div>
             </div>
           ) : (
@@ -325,17 +325,17 @@ export function ConflictSection({
             </ul>
           )}
 
-          {/* 结论 */}
+          {/* Kết luận */}
           {canEditConclusion && (
             <div className="rounded-md border border-border bg-background p-3">
               <div className="mb-2 flex items-center gap-2">
                 <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
-                <h3 className="text-[13px] font-medium">标记结论</h3>
+                <h3 className="text-[13px] font-medium">Đánh dấu kết luận</h3>
               </div>
               <Textarea
                 value={conclusionNote}
                 onChange={(e) => setConclusionNote(e.target.value)}
-                placeholder="补充说明（如：经核对确认非同一主体；或已披露风险并取得书面同意）"
+                placeholder="Bổ sung (vd: đã đối chiếu xác nhận khác chủ thể; hoặc đã công bố rủi ro và có đồng ý bằng văn bản)"
                 rows={2}
                 className="mb-2 text-[12px]"
               />
@@ -347,7 +347,7 @@ export function ConflictSection({
                   disabled={isPending}
                   className="text-destructive border-destructive/40 hover:bg-destructive/10"
                 >
-                  有冲突（不承接）
+                  Có xung đột (không tiếp nhận)
                 </Button>
                 <Button
                   variant="outline"
@@ -356,7 +356,7 @@ export function ConflictSection({
                   disabled={isPending}
                   className="border-[#65A30D]/40 text-[#65A30D] hover:bg-[#65A30D]/10"
                 >
-                  可承接
+                  Có thể tiếp nhận
                 </Button>
                 <Button
                   variant="outline"
@@ -364,7 +364,7 @@ export function ConflictSection({
                   onClick={() => handleSetConclusion("NEED_INFO")}
                   disabled={isPending}
                 >
-                  信息不足，待补充
+                  Thông tin chưa đủ, chờ bổ sung
                 </Button>
               </div>
             </div>
@@ -416,18 +416,18 @@ function HitCard({ hit }: { hit: Hit }) {
         )}
       </div>
       <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-        <Field label="系统收案">{formatDate(m.intakeDate)}</Field>
-        <Field label="当前状态">{matterStatusLabel[m.status]}</Field>
-        <Field label="案由/类型">{causeOrCategory}</Field>
-        <Field label="主办律师">{m.ownerName ?? "—"}</Field>
-        <Field label="命中当事人">
+        <Field label="Ngày tiếp nhận hệ thống">{formatDate(m.intakeDate)}</Field>
+        <Field label="Trạng thái hiện tại">{matterStatusLabel[m.status]}</Field>
+        <Field label="Nguyên nhân/loại">{causeOrCategory}</Field>
+        <Field label="Luật sư chủ trì">{m.ownerName ?? "—"}</Field>
+        <Field label="Bên tham gia khớp">
           {hit.matchedName}{" "}
           <span className="text-foreground/70">
             ({m.partyRole ? partyRoleLabel[m.partyRole] : "—"}
             {m.partyStanding ? ` · ${litigationStandingLabel[m.partyStanding]}` : ""})
           </span>
         </Field>
-        <Field label="证件号">
+        <Field label="Số giấy tờ">
           {hit.matchedField === "idNumber" ? (
             <span className="font-mono">{hit.matchedValue}</span>
           ) : (
@@ -445,7 +445,7 @@ function HitCard({ hit }: { hit: Hit }) {
         backgroundColor: style.bg
       }}
     >
-      {/* 头：严重度 + 命中字段 */}
+      {/* Đầu: mức độ + trường khớp */}
       <div className="flex items-center gap-2 text-[11px]">
         <span
           className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium"
@@ -455,7 +455,7 @@ function HitCard({ hit }: { hit: Hit }) {
           {style.label}
         </span>
         <span className="text-muted-foreground">
-          {hit.matchedField === "idNumber" ? "证件号一致" : hit.matchedRatio === 1 ? "姓名一致" : "姓名相似"}
+          {hit.matchedField === "idNumber" ? "Trùng số giấy tờ" : hit.matchedRatio === 1 ? "Trùng tên" : "Tên tương tự"}
         </span>
         {hit.matchedRatio !== null && hit.matchedRatio < 1 && (
           <span className="font-mono text-[10px] text-muted-foreground">
@@ -464,7 +464,7 @@ function HitCard({ hit }: { hit: Hit }) {
         )}
       </div>
 
-      {/* 主：案件信息 */}
+      {/* Thân: thông tin vụ án */}
       {m ? (
         m.canViewMatter ? (
           <Link

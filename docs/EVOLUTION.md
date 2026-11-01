@@ -217,3 +217,8 @@
 **Phiên 2026-10-31 (I18N-4)**:
 - De-zh: server matters/clients + export-xlsx (coupled 13 assertion). Lỗi "grep head" đã ghi glossary.
 - Test: 2368 pass / 1 skip / 0 fail. Lint 896/744. Vùng finance + server matters/clients sạch chuỗi Hán (trừ license).
+
+**Phiên 2026-10-31 (I18N-11)**:
+- De-zh: conflict-section.tsx (52 dòng). 
+- **P0 fix**: 3 trang detail (matters/intakes/clients) dùng params sync trong Next 16 → id undefined → 500 hoặc hiển thị sai bản ghi. Đã await params.
+- Test: 2368 pass / 1 skip / 0 fail. Lint 896/744.

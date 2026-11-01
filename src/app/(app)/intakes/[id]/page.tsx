@@ -34,8 +34,9 @@ import {
 import { ConflictSection } from "./_components/conflict-section";
 import { IntakeActions } from "./_components/intake-actions";
 
-export default async function IntakeDetailPage({ params }: { params: { id: string } }) {
-  const [intake, session] = await Promise.all([getIntakeById(params.id), getSession()]);
+export default async function IntakeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const [intake, session] = await Promise.all([getIntakeById(id), getSession()]);
   if (!intake) notFound();
 
   const opposing = intake.parties.filter((p) => p.role === "OPPOSING_PARTY");

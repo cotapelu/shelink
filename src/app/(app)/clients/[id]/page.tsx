@@ -40,13 +40,14 @@ import { TimelineSection } from "./_components/timeline-section";
 
 
 
-export default async function ClientDetailPage({ params }: { params: { id: string } }) {
-  const client = await getClientById(params.id);
+export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const client = await getClientById(id);
   if (!client) notFound();
   const [finance, commercial, timeline] = await Promise.all([
-    getClientFinanceSummary(params.id),
-    getClientCommercialSummary(params.id),
-    getClientTimeline(params.id)
+    getClientFinanceSummary(id),
+    getClientCommercialSummary(id),
+    getClientTimeline(id)
   ]);
 
   // 按案件分组合同，关联案件与签约合同合并展示（左案件 / 右合同）

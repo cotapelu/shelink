@@ -487,3 +487,13 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Loại**: De-zh (i18n). ~30 phút. ✅.
 - **Đã làm**: 53 cặm thay chính xác (label/toast/placeholder/comment/locale vi-VN) + sed xử lý lai; **GIỮ STATE_TONE + COMPANY_CODES** (hợp đồng API hãng xe) + comment cảnh báo trong code.
 - **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /express 200.
+
+## [CYCLE-I18N-11] — 2026-10-31: conflict-section.tsx → tiếng Việt + FIX Next16 params Promise (3 trang)
+- **Loại**: De-zh (i18n) + Bug fix (P0). ~40 phút. ✅.
+- **I18N**: `conflict-section.tsx` 52 dòng → 0 (mức độ xung đột, kết luận, label Field, toast).
+- **BUG P0 phát hiện khi smoke**: Next 16 `params` là Promise nhưng 3 trang detail vẫn dùng kiểu sync (`params.id`) → id undefined:
+  - `/intakes/[id]` → `findUnique` throw → **500**
+  - `/matters/[id]` + `/clients/[id]` → `findFirst` bỏ qua id undefined → **200 nhưng hiển thị BẢN GHI ĐẦU TIÊN (sai dữ liệu!)**
+  - Fix: đổi sang `{ params }: { params: Promise<{ id: string }> }` + `const { id } = await params` — đúng chuẩn contracts/quotes đã dúng.
+- **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke cả 3 trang đúng id 200.
+- **Ghi chú**: đây là lỗi "dữ liệu sai im lặng" nguy hiểm hơn 500 — smoke của mình bắt được vì đối chiếu id.
