@@ -102,11 +102,11 @@ export function PreservationCaseDialog({
           firstDuration: target ? dur : undefined,
           firstExpiryDate: target ? ed : undefined,
         });
-        toast.success(isEdit ? "已更新" : "保全已创建");
+        toast.success(isEdit ? "Đã cập nhật" : "Đã tạo bảo toàn");
         reset();
         onOpenChange(false);
       } catch (err) {
-        toast.error("操作失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Thao tác thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -115,20 +115,20 @@ export function PreservationCaseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "编辑保全" : "新建保全"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Sửa bảo toàn" : "Tạo bảo toàn"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <Field label="关联案件">
+            <Field label="Vụ án liên quan">
               <Select value={matterId} onValueChange={setMatterId}>
-                <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="选择案件（诉前可空）" /></SelectTrigger>
+                <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="Chọn vụ án (trước khi kiện có thể để trống)" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">不关联</SelectItem>
+                  <SelectItem value="__none__">Không liên kết</SelectItem>
                   {matters.map((m) => <SelectItem key={m.id} value={m.id}>{m.internalCode} {m.title}</SelectItem>)}
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="保全类型 *">
+            <Field label="Loại bảo toàn *">
               <Select value={type} onValueChange={(v) => setType(v as PreservationType)}>
                 <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -136,28 +136,28 @@ export function PreservationCaseDialog({
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="保全法院"><Input value={court} onChange={(e) => setCourt(e.target.value)} className="h-9 text-xs" /></Field>
-            <Field label="裁定书编号"><Input value={rulingNumber} onChange={(e) => setRulingNumber(e.target.value)} className="h-9 text-xs font-mono" /></Field>
-            <Field label="跟进负责人">
+            <Field label="Toà ra quyết định bảo toàn"><Input value={court} onChange={(e) => setCourt(e.target.value)} className="h-9 text-xs" /></Field>
+            <Field label="Số quyết định"><Input value={rulingNumber} onChange={(e) => setRulingNumber(e.target.value)} className="h-9 text-xs font-mono" /></Field>
+            <Field label="Người phụ trách theo dõi">
               <Select value={ownerId} onValueChange={setOwnerId}>
-                <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="选择" /></SelectTrigger>
+                <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="Chọn" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">不指定</SelectItem>
+                  <SelectItem value="__none__">Không chỉ định</SelectItem>
                   {users.map((u) => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </Field>
           </div>
-          <Field label="备注"><Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="text-xs" /></Field>
+          <Field label="Ghi chú"><Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="text-xs" /></Field>
 
           {/* First target + property (create only) */}
           {!isEdit && (
             <div className="rounded-lg border border-dashed border-border p-3 space-y-3">
-              <p className="text-xs font-medium text-muted-foreground">首个被保全人及财产（可后续添加更多）</p>
-              <Field label="被保全人"><Input value={target} onChange={(e) => setTarget(e.target.value)} placeholder="被保全人名称" className="h-9 text-xs" /></Field>
+              <p className="text-xs font-medium text-muted-foreground">Bên bị bảo toàn và tài sản đầu tiên (có thể thêm tiếp sau)</p>
+              <Field label="Bên bị bảo toàn"><Input value={target} onChange={(e) => setTarget(e.target.value)} placeholder="Tên bên bị bảo toàn" className="h-9 text-xs" /></Field>
               {target && (
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="财产类型 *">
+                  <Field label="Loại tài sản *">
                     <Select value={propertyType} onValueChange={(v) => { setPropertyType(v as PropertyType); setDuration(String(PRESERVATION_DURATION_DAYS[v as PropertyType])); }}>
                       <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -165,20 +165,20 @@ export function PreservationCaseDialog({
                       </SelectContent>
                     </Select>
                   </Field>
-                  <Field label="保全金额"><Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="h-9 text-xs font-mono" /></Field>
-                  <Field label="财产详情"><Input value={propertyDetail} onChange={(e) => setPropertyDetail(e.target.value)} placeholder="如：账号/地址/车牌" className="h-9 text-xs" /></Field>
-                  <Field label="生效日期"><Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9 text-xs" /></Field>
-                  <Field label="保全期限（天）"><Input type="number" value={duration || String(PRESERVATION_DURATION_DAYS[propertyType])} onChange={(e) => setDuration(e.target.value)} className="h-9 text-xs font-mono" /></Field>
+                  <Field label="Số tiền bảo toàn"><Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="h-9 text-xs font-mono" /></Field>
+                  <Field label="Chi tiết tài sản"><Input value={propertyDetail} onChange={(e) => setPropertyDetail(e.target.value)} placeholder="vd: số tài khoản / địa chỉ / biển số xe" className="h-9 text-xs" /></Field>
+                  <Field label="Ngày có hiệu lực"><Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9 text-xs" /></Field>
+                  <Field label="Thời hạn bảo toàn (ngày)"><Input type="number" value={duration || String(PRESERVATION_DURATION_DAYS[propertyType])} onChange={(e) => setDuration(e.target.value)} className="h-9 text-xs font-mono" /></Field>
                 </div>
               )}
             </div>
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>取消</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>Huỷ</Button>
           <Button onClick={handleSubmit} disabled={isPending} className="gap-1.5">
             {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            {isEdit ? "保存" : "创建"}
+            {isEdit ? "Lưu" : "Tạo"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -196,11 +196,11 @@ export function AddTargetDialog({ open, onOpenChange, caseId }: { open: boolean;
     startTransition(async () => {
       try {
         await addTarget({ caseId, name });
-        toast.success("被保全人已添加");
+        toast.success("Đã thêm bên bị bảo toàn");
         setName("");
         onOpenChange(false);
       } catch (err) {
-        toast.error("添加失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Thêm thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -208,11 +208,11 @@ export function AddTargetDialog({ open, onOpenChange, caseId }: { open: boolean;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
-        <DialogHeader><DialogTitle>添加被保全人</DialogTitle></DialogHeader>
-        <Field label="被保全人名称 *"><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="名称" className="h-9 text-xs" /></Field>
+        <DialogHeader><DialogTitle>Thêm bên bị bảo toàn</DialogTitle></DialogHeader>
+        <Field label="Tên bên bị bảo toàn *"><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tên" className="h-9 text-xs" /></Field>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
-          <Button onClick={handleSubmit} disabled={isPending || !name.trim()} className="gap-1.5">{isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}添加</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Huỷ</Button>
+          <Button onClick={handleSubmit} disabled={isPending || !name.trim()} className="gap-1.5">{isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}Thêm</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -245,10 +245,10 @@ export function AddPropertyDialog({ open, onOpenChange, targetId }: { open: bool
           duration: dur,
           expiryDate: ed,
         });
-        toast.success("财产已添加");
+        toast.success("Đã thêm tài sản");
         onOpenChange(false);
       } catch (err) {
-        toast.error("添加失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Thêm thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -256,24 +256,24 @@ export function AddPropertyDialog({ open, onOpenChange, targetId }: { open: bool
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
-        <DialogHeader><DialogTitle>添加保全财产</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Thêm tài sản bảo toàn</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <Field label="财产类型 *">
+            <Field label="Loại tài sản *">
               <Select value={propertyType} onValueChange={(v) => { setPropertyType(v as PropertyType); setDuration(String(PRESERVATION_DURATION_DAYS[v as PropertyType])); }}>
                 <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>{Object.entries(PROPERTY_TYPE_CN).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
-            <Field label="保全金额"><Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-9 text-xs font-mono" /></Field>
-            <Field label="财产详情"><Input value={propertyDetail} onChange={(e) => setPropertyDetail(e.target.value)} placeholder="如：账号/地址" className="h-9 text-xs" /></Field>
-            <Field label="生效日期"><Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9 text-xs" /></Field>
-            <Field label="保全期限（天）"><Input type="number" value={duration || String(PRESERVATION_DURATION_DAYS[propertyType])} onChange={(e) => setDuration(e.target.value)} className="h-9 text-xs font-mono" /></Field>
+            <Field label="Số tiền bảo toàn"><Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-9 text-xs font-mono" /></Field>
+            <Field label="Chi tiết tài sản"><Input value={propertyDetail} onChange={(e) => setPropertyDetail(e.target.value)} placeholder="vd: số tài khoản / địa chỉ" className="h-9 text-xs" /></Field>
+            <Field label="Ngày có hiệu lực"><Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9 text-xs" /></Field>
+            <Field label="Thời hạn bảo toàn (ngày)"><Input type="number" value={duration || String(PRESERVATION_DURATION_DAYS[propertyType])} onChange={(e) => setDuration(e.target.value)} className="h-9 text-xs font-mono" /></Field>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
-          <Button onClick={handleSubmit} disabled={isPending} className="gap-1.5">{isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}添加</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Huỷ</Button>
+          <Button onClick={handleSubmit} disabled={isPending} className="gap-1.5">{isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}Thêm</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -293,10 +293,10 @@ export function RenewPropertyDialog({ open, onOpenChange, property }: { open: bo
     startTransition(async () => {
       try {
         await renewProperty({ propertyId: property.id, newExpiryDate: newExpiry, renewalDuration: d, note });
-        toast.success("续保成功");
+        toast.success("Gia hạn bảo toàn thành công");
         onOpenChange(false);
       } catch (err) {
-        toast.error("续保失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Gia hạn bảo toàn thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -304,15 +304,15 @@ export function RenewPropertyDialog({ open, onOpenChange, property }: { open: bo
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
-        <DialogHeader><DialogTitle>续保</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Gia hạn bảo toàn</DialogTitle></DialogHeader>
         <div className="space-y-3">
-          <p className="text-xs text-muted-foreground">当前到期日：{property.expiryDate.toLocaleDateString("zh-CN")}</p>
-          <Field label="续保天数"><Input type="number" value={days} onChange={(e) => setDays(e.target.value)} className="h-9 text-xs font-mono" /></Field>
-          <Field label="备注"><Input value={note} onChange={(e) => setNote(e.target.value)} className="h-9 text-xs" /></Field>
+          <p className="text-xs text-muted-foreground">Ngày hết hạn hiện tại: {property.expiryDate.toLocaleDateString("zh-CN")}</p>
+          <Field label="Số ngày gia hạn bảo toàn"><Input type="number" value={days} onChange={(e) => setDays(e.target.value)} className="h-9 text-xs font-mono" /></Field>
+          <Field label="Ghi chú"><Input value={note} onChange={(e) => setNote(e.target.value)} className="h-9 text-xs" /></Field>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
-          <Button onClick={handleSubmit} disabled={isPending} className="gap-1.5">{isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}确认续保</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Huỷ</Button>
+          <Button onClick={handleSubmit} disabled={isPending} className="gap-1.5">{isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}Xác nhận gia hạn</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

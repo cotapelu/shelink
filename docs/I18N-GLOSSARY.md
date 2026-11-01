@@ -180,3 +180,18 @@ Batch script lại rơi vào bẫy "件" (ngắn) thay trước "案件管理" (
 | 归属卷宗/散件/结案/归档 | Hồ sơ chứa / Tài liệu rời / Kết thúc / Lưu trữ |
 | 材料名称/上传材料/加密 | Tên tài liệu / Tải lên tài liệu / Mã hóa |
 | 点击选择文件 | Bấm để chọn tệp |
+
+## Bổ sung I18N-13/14 (2026-10-31)
+
+| Tiếng Trung | Tiếng Việt |
+|---|---|
+| 开庭/庭审/上诉期/举证期/答辩期 | phiên tòa / xét xử / Thời hiệu kháng cáo / Thời hạn chứng minh / Thời hạn trả lời |
+| 诉讼费缴纳/判决书生效 | Nộp phý tố tụng / Bản án có hiệu lực |
+| 承办法官/法庭 | Thẩm phán chủ trì / Phòng xét xử |
+| 保全/被保全人/续保 | Bảo toàn / Bên bị bảo toàn / Gia hạn bảo toàn |
+| 保全法院/裁定书编号/保全金额 | Toà ra quyết định bảo toàn / Số quyết định / Số tiền bảo toàn |
+| 跟进负责人/生效日期 | Người phụ trách theo dõi / Ngày có hiệu lực |
+| 诉前可空 | Trước khi kiện có thể để trống |
+
+### ⚠️ Code-string ↔ seed-data coupling (I18N-12b)
+`ARCHIVE_FOLDER_NAMES` trong documents-panel khớp với **tên hồ s do seed tạo**. Đổi chuỗi code mà không đổi seed → lệch. **Nguyên tắc: khi đổi chuỗi khớp dữ liệu, phải sửa CẢ HAI + UPDATE DB dev.**

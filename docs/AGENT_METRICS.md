@@ -516,3 +516,8 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Đã làm**: 42 cặm thay chính xác (dialog tạo phiên tòa/thời hạn từ SMS, nhãn loại thời hạn, toast, comment) + sed 10 dòng lai.
 - **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /inbox 200.
 - **Ghi chú**: bẫy thứ tự lặp LẦN 5 (开庭 trước 开庭时间) — quy trình 2 bước vẫn ổn. Đề xuất cải tiến: tạo helper sortPairsByLengthDesc dùng chung.
+
+## [CYCLE-I18N-14] — 2026-10-31: preservation-dialog.tsx → tiếng Việt
+- **Loại**: De-zh (i18n). ~20 phút. ✅.
+- **Đã làm**: 39 cặm thay chính xác (3 dialog: tạo/sửa bảo toàn, thêm bên bị bảo toàn, thêm tài sản, gia hạn) + sed 4 dòng sót + locale vi-VN.
+- **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /preservation + /preservations 200.
