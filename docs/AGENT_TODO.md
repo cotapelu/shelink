@@ -1,8 +1,20 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-31 (AUTO-57).
+Cập nhật lần cuối: 2026-10-31 (AUTO-58).
 
-## Chu kỳ đã hoàn thành (gần đối)
+## Chu kỳ đã hoàn thành (gần đây)
+
+### [CYCLE-AUTO-58] — 2026-10-31: [R/T] createFeeEntry (73 dòng, cx 14) → fee-entry-lib
+Loại: Refactor [R] + Tests [T] — ưu tiên MEDIUM. Không đổi hành vi. ~35 phút.
+
+**Đã hoàn thành**:
+- [x] Trích `src/server/finance/fee-entry-lib.ts` (thuần): `shouldSplitCommission`, `commissionShare` (Decimal-safe, `Number(percent)` như gốc, làm tròn 2, ≤0→null), `commissionNote`, `buildFeeEntryData`, `buildCommissionData` (object-arg), `feeReceivedTimelineData`.
+- [x] Rewire `createFeeEntry`: inner `$transaction` arrow 55→29 dòng, **complexity 14 biến mất**; payload thuần nằm ngoài DB; `new Prisma.Decimal(...)` giữ tại call-site (đúng kiểu lưu trữ như gốc).
+- [x] Test mới `fee-entry-lib.test.ts` **12 test**: guard split, làm tròn Decimal, note có/không label, payload đủ field/optional null, dòng con gắn parent, note phương án, ≤0→null, timeline tiếng Việt + content undefined.
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test **2295 pass / 1 skip / 0 fail** (2283→2295, +12); full lint **926 (774 lỗi)** — giảm 1; `finance/actions.ts` 16→15 lỗi; 76 test finance pass (rewire không hồi quy).
+
+**Còn lại `finance/actions.ts`** (15 lỗi): `createInvoiceRequest` (94 dòng, **cx 48** — mục tiêu AUTO-59), `getMatterInvoiceContext` (77/18), `createFeeEntry` (47 + arrow 29), `deleteFeeEntry` (36), `getMonthlyRevenue/getPersonalRevenue` (35+35), file >300 dòng → tách module.
 
 ### [CYCLE-AUTO-57] — 2026-10-31: [R/T] `lib/template-builder.ts` 9 lỗi lint → 0
 Loại: Refactor [R] + Tests [T] — ưu tiên MEDIUM. Không đổi hành vi (đã chứng minh). ~40 phút.

@@ -166,3 +166,8 @@
 **Phiên 2026-10-31 (AUTO-57)**:
 - [R/T] `lib/template-builder.ts`: 9 lỗi lint → 0 (tách XML parts + 8 body thành hằng; 2 mẫu có ngày dùng `injectSignDate` thuần giữ đúng thời điểm ký); +9 test; byte-equivalence 8/8 mẫu.
 - Test: 2283 pass. Lint: 936→927 (784→775 lỗi). Nợ Quality còn: server (finance/actions 16, seals 16, matters/export-xlsx 13, preservations/actions-v2 12, documents/actions 11) + UI god objects (intake-sheet ~1570, procedure-content 1357, RelationshipManager 3 arrow JSX).
+
+**Phiên 2026-10-31 (AUTO-58)**:
+- [R/T] `createFeeEntry`: tách payload thuần sang `fee-entry-lib.ts` (+12 test); arrow transaction 55→29 dòng, mất lỗi complexity 14.
+- Test: 2295 pass / 1 skip / 0 fail. Lint: 927→926 (775→774 lỗi).
+- Tiếp theo (AUTO-59): `createInvoiceRequest` cx 48 → tách validate/allocation; `getMatterInvoiceContext` cx 18; rồi tách `finance/actions.ts` (>300 dòng) thành module.

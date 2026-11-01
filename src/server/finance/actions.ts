@@ -47,6 +47,12 @@ import {
   invoiceMatterSearchWhere
 } from "./invoice-matter-search";
 import { buildAgingRows, summarizeAging, type AgingBucketKey, type AgingRow, type MatterAgg } from "./aging";
+import {
+  buildCommissionData,
+  buildFeeEntryData,
+  feeReceivedTimelineData,
+  shouldSplitCommission
+} from "./fee-entry-lib";
 
 // ============ Billing ============
 
@@ -117,56 +123,34 @@ export async function createFeeEntry(input: FeeEntryCreateInput) {
   await assertMatterWritable(data.matterId, { allowFinanceRole: true });
 
   const created = await prisma.$transaction(async (tx) => {
+    const entryData = buildFeeEntryData(data, session.user.id);
     const entry = await tx.feeEntry.create({
-      data: {
-        matterId: data.matterId,
-        billingId: data.billingId || null,
-        type: data.type,
-        amount: new Prisma.Decimal(data.amount),
-        occurredAt: data.occurredAt,
-        invoiceNo: data.invoiceNo || null,
-        payerOrPayee: data.payerOrPayee || null,
-        method: data.method || null,
-        note: data.note || null,
-        recordedById: session.user.id
-      }
+      data: { ...entryData, amount: new Prisma.Decimal(entryData.amount) }
     });
 
-    // Tự động chia hoa hồng
-    if (data.type === "RECEIVED" && data.amount > 0) {
+    // Tự động chia hoa hồng (pure logic đã tách sang fee-entry-lib)
+    if (shouldSplitCommission(data.type, data.amount)) {
       const plans = await tx.commissionPlan.findMany({
         where: { matterId: data.matterId, active: true }
       });
       for (const plan of plans) {
-        const share = Number(plan.percent) * data.amount / 100;
-        if (share <= 0) continue;
-        await tx.feeEntry.create({
-          data: {
-            matterId: data.matterId,
-            billingId: data.billingId || null,
-            type: "COMMISSION",
-            amount: new Prisma.Decimal(share.toFixed(2)),
-            occurredAt: data.occurredAt,
-            parentFeeEntryId: entry.id,
-            beneficiaryUserId: plan.userId,
-            note: plan.label ? `Tự động chia theo phương án [${plan.label}] ${plan.percent}%` : `Tự động chia ${plan.percent}%`,
-            recordedById: session.user.id
-          }
+        const row = buildCommissionData({
+          plan,
+          amount: data.amount,
+          parentId: entry.id,
+          recordedById: session.user.id,
+          matterId: data.matterId,
+          billingId: data.billingId || null,
+          occurredAt: data.occurredAt
         });
+        if (!row) continue;
+        await tx.feeEntry.create({ data: { ...row, amount: new Prisma.Decimal(row.amount) } });
       }
     }
 
     // Sự kiện thu tiền thực tế ghi vào dòng thời gian
     if (data.type === "RECEIVED") {
-      await tx.timelineEvent.create({
-        data: {
-          matterId: data.matterId,
-          eventType: "FEE_RECEIVED",
-          title: `Đã thu ¥${data.amount.toLocaleString("vi-VN")}`,
-          content: data.note ?? undefined,
-          occurredAt: data.occurredAt
-        }
-      });
+      await tx.timelineEvent.create({ data: feeReceivedTimelineData(data) });
     }
 
     return entry;

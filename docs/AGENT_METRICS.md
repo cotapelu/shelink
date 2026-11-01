@@ -360,3 +360,11 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Lint**: 927 problems (775 lỗi / 152 warning) — giảm 9 so với đầu chu kỳ (936/784/152).
 - **Bảo mật**: không đổi bề mặt; fix typo Ngảy→Ngày trong comment (không ảnh hưởng runtime).
 - **Ghi chú**: đã chứng minh byte-equivalence với HEAD (8/8 mẫu, chuẩn hóa ngảy động).
+
+## [CYCLE-AUTO-58] — 2026-10-31: [R/T] createFeeEntry → fee-entry-lib (+12 test)
+- **Loại**: Refactor [R] + Tests [T]. ~35 phút. ✅.
+- **Test delta**: +12 (2283→2295 pass / 1 skip / 0 fail).
+- **Phủ**: fee-entry-lib 100% nhánh chính (guard, làm tròn, null, payload).
+- **Lint**: 926 problems (774 lỗi / 152 warning) — giảm 1 so với đầu chu kỳ (927/775/152); finance/actions.ts 16→15.
+- **Bảo mật**: không đổi đường tiền; số học hoa hồng đã có test khóa (Decimal-safe, ≤0 bỏ qua).
+- **Ghi chú**: bẫy Decimal — Prisma trả `percent: Decimal`; gốc ép `Number(...)`; lib giữ đúng ép kiểu ở biên.
