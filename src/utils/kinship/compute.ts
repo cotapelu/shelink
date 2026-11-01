@@ -190,38 +190,30 @@ function transformGenderBased(rules: Array<(t: string, g: string) => string | nu
   return term;
 }
 
+/**
+ * Bảng luật "vợ/chồng của" — dùng CHUNG cho cả hai chiều gọi tên
+ * (tránh Shotgun Surgery: trước đây 2 bản copy giống nhau ở 2 hàm).
+ */
+const SPOUSE_TERM_RULES: Array<(t: string, g: string) => string | null> = [
+  (t, g) => t === "Con" ? (g === "male" ? "Con rể" : "Con dâu") : null,
+  (t, g) => t === "Cháu" ? (g === "male" ? "Cháu rể" : "Cháu dâu") : null,
+  (t, g) => (t.includes("Anh trai") || t.includes("Chị gái")) ? (g === "male" ? "Anh rể" : "Chị dâu") : null,
+  (t, g) => t.includes("Em") ? (g === "male" ? "Em rể" : "Em dâu") : null,
+  (t) => t === "Chị họ" ? "Anh (Chồng của Chị họ)" : null,
+  (t) => t === "Anh họ" ? "Chị (Vợ của Anh họ)" : null,
+  (t) => t === "Chú" ? "Cô" : null,
+  (t) => t === "Cô" ? "Chú" : null,
+  (t) => t === "Cậu" ? "Dì" : null,
+  (t) => t === "Dì" ? "Cậu" : null,
+  (t) => t === "Bà Cô" ? "Ông Dượng" : null,
+];
+
 function transformViaA_bCallsA(term: string, personA: PersonNode): string {
-  const rules: Array<(t: string, g: string) => string | null> = [
-    (t, g) => t === "Con" ? (g === "male" ? "Con rể" : "Con dâu") : null,
-    (t, g) => t === "Cháu" ? (g === "male" ? "Cháu rể" : "Cháu dâu") : null,
-    (t, g) => (t.includes("Anh trai") || t.includes("Chị gái")) ? (g === "male" ? "Anh rể" : "Chị dâu") : null,
-    (t, g) => t.includes("Em") ? (g === "male" ? "Em rể" : "Em dâu") : null,
-    (t) => t === "Chị họ" ? "Anh (Chồng của Chị họ)" : null,
-    (t) => t === "Anh họ" ? "Chị (Vợ của Anh họ)" : null,
-    (t) => t === "Chú" ? "Cô" : null,
-    (t) => t === "Cô" ? "Chú" : null,
-    (t) => t === "Cậu" ? "Dì" : null,
-    (t) => t === "Dì" ? "Cậu" : null,
-    (t) => t === "Bà Cô" ? "Ông Dượng" : null,
-  ];
-  return transformGenderBased(rules, term, personA.gender);
+  return transformGenderBased(SPOUSE_TERM_RULES, term, personA.gender);
 }
 
 function transformViaB_aCallsB(term: string, personB: PersonNode): string {
-  const rules: Array<(t: string, g: string) => string | null> = [
-    (t, g) => t === "Con" ? (g === "male" ? "Con rể" : "Con dâu") : null,
-    (t, g) => t === "Cháu" ? (g === "male" ? "Cháu rể" : "Cháu dâu") : null,
-    (t, g) => (t.includes("Anh trai") || t.includes("Chị gái")) ? (g === "male" ? "Anh rể" : "Chị dâu") : null,
-    (t, g) => t.includes("Em") ? (g === "male" ? "Em rể" : "Em dâu") : null,
-    (t) => t === "Chị họ" ? "Anh (Chồng của Chị họ)" : null,
-    (t) => t === "Anh họ" ? "Chị (Vợ của Anh họ)" : null,
-    (t) => t === "Chú" ? "Cô" : null,
-    (t) => t === "Cô" ? "Chú" : null,
-    (t) => t === "Cậu" ? "Dì" : null,
-    (t) => t === "Dì" ? "Cậu" : null,
-    (t) => t === "Bà Cô" ? "Ông Dượng" : null,
-  ];
-  return transformGenderBased(rules, term, personB.gender);
+  return transformGenderBased(SPOUSE_TERM_RULES, term, personB.gender);
 }
 /**
  * Computes the kinship relationship between two persons.

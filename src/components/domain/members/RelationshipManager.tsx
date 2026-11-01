@@ -29,38 +29,24 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
 import DefaultAvatar from "@/components/ui/Avatar/DefaultAvatar";
+import {
+  buildChildInLawRows,
+  buildPersonPayload,
+  collectChildIds,
+  inferSpouseGender,
+  mapRelationshipRows,
+  resolveRelEndpoints,
+  resolveRelType,
+  validBulkChildren,
+  type EnrichedRelationship,
+  type RelationshipApiResponse
+} from "./relationship-manager-lib";
 
 interface RelationshipManagerProps {
   personId: string;
   isAdmin: boolean;
   canEdit?: boolean;
   personGender: string;
-}
-
-interface EnrichedRelationship {
-  id: string;
-  type: RelationshipType;
-  direction: "parent" | "child" | "spouse" | "child_in_law";
-  targetPerson: Person;
-  note: string | null;
-}
-
-interface RelationshipApiResponse {
-  id: string;
-  type: RelationshipType;
-  person_a: string;
-  person_b: string;
-  person_a_data?: Person;
-  person_b_data?: Person;
-  note: string | null;
-}
-
-interface EnrichedRelationship {
-  id: string;
-  type: RelationshipType;
-  direction: "parent" | "child" | "spouse" | "child_in_law";
-  targetPerson: Person;
-  note: string | null;
 }
 
 export default function RelationshipManager({
@@ -127,78 +113,30 @@ export default function RelationshipManager({
   const [newSpouseBirthYear, setNewSpouseBirthYear] = useState("");
   const [newSpouseNote, setNewSpouseNote] = useState("");
 
-  // Fetch relationships
+  // Fetch relationships (logic enrich đã tách sang ./relationship-manager-lib)
 const fetchRelationships = useCallback(async () => {
     try {
       const relsResult = await api.get<RelationshipApiResponse[]>(
         API_ENDPOINTS.RELATIONSHIPS_LIST,
         { params: { person_id: personId } }
       );
-
       if (relsResult.error) throw new Error(relsResult.error);
 
-      const formattedRels: EnrichedRelationship[] = [];
-
-      relsResult.data?.forEach((r) => {
-        let direction: "parent" | "child" | "spouse" = "spouse";
-        if (r.type === "marriage") direction = "spouse";
-        else if (r.type === "biological_child" || r.type === "adopted_child") {
-          direction = r.person_a === personId ? "child" : "parent";
-        }
-
-        formattedRels.push({
-          id: r.id,
-          type: r.type,
-          direction,
-          targetPerson: r.person_a === personId 
-            ? (r.person_b_data as Person) 
-            : (r.person_a_data as Person),
-          note: r.note,
-        });
-      });
-
-      const childrenIds = formattedRels
-        .filter((r) => r.direction === "child")
-        .map((r) => r.targetPerson.id);
-
-      if (childrenIds.length > 0) {
-        const marriagesResult = await api.get<RelationshipApiResponse[]>(
-          API_ENDPOINTS.RELATIONSHIPS_LIST,
-          {
-            params: {
-              type: "marriage",
-              person_ids: childrenIds.join(","),
-            },
-          }
-        );
-
-        marriagesResult.data?.forEach((m) => {
-          const isAChild = childrenIds.includes(m.person_a);
-          const childPerson = isAChild ? m.person_a_data : m.person_b_data;
-          const spousePerson = isAChild ? m.person_b_data : m.person_a_data;
-
-          if (spousePerson && childPerson) {
-            const spouseGender = spousePerson.gender;
-            let noteLabel = `Vợ/chồng của ${childPerson.full_name}`;
-            if (spouseGender === "female")
-              noteLabel = `Con dâu (vợ của ${childPerson.full_name})`;
-            if (spouseGender === "male")
-              noteLabel = `Con rể (chồng của ${childPerson.full_name})`;
-
-            if (m.note) noteLabel += ` - ${m.note}`;
-
-            formattedRels.push({
-              id: m.id + "_inlaw",
-              type: "marriage",
-              direction: "child_in_law",
-              targetPerson: spousePerson,
-              note: noteLabel,
-            });
-          }
-        });
+      const rows = mapRelationshipRows(relsResult.data ?? [], personId);
+      const childrenIds = collectChildIds(rows);
+      if (childrenIds.length === 0) {
+        setRelationships(rows);
+        return;
       }
 
-      setRelationships(formattedRels);
+      const marriagesResult = await api.get<RelationshipApiResponse[]>(
+        API_ENDPOINTS.RELATIONSHIPS_LIST,
+        { params: { type: "marriage", person_ids: childrenIds.join(",") } }
+      );
+      setRelationships([
+        ...rows,
+        ...buildChildInLawRows(marriagesResult.data ?? [], childrenIds)
+      ]);
     } catch (err) {
       console.error("Error fetching relationships:", err);
     } finally {
@@ -248,25 +186,12 @@ const handleAddRelationship = async () => {
   setError(null);
 
   try {
-    let personA = personId;
-    let personB = selectedTargetId;
-
-    if (newRelDirection === "parent") {
-      personA = selectedTargetId;
-      personB = personId;
-    } else if (newRelDirection === "child") {
-      personA = personId;
-      personB = selectedTargetId;
-    }
-
-    let type: RelationshipType = "biological_child";
-    if (newRelDirection === "spouse") type = "marriage";
-    else if (newRelType === "adopted_child") type = "adopted_child";
+    const { personA, personB } = resolveRelEndpoints(newRelDirection, personId, selectedTargetId);
 
     const result = await api.post(API_ENDPOINTS.RELATIONSHIPS_CREATE, {
       person_a: personA,
       person_b: personB,
-      type,
+      type: resolveRelType(newRelDirection, newRelType),
       note: newRelNote || null,
     });
 
@@ -287,8 +212,8 @@ const handleAddRelationship = async () => {
 };
 
 const handleBulkAdd = async () => {
-  // Filter out rows without a name
-  const validChildren = bulkChildren.filter((c) => c.name.trim() !== "");
+  // Filter out rows without a name (helper đã test)
+  const validChildren = validBulkChildren(bulkChildren);
   if (validChildren.length === 0) {
     setError("Vui lòng nhập ít nhất tên của 1 người con.");
     setTimeout(() => setError(null), 5000);
@@ -304,19 +229,8 @@ const handleBulkAdd = async () => {
     for (let i = 0; i < validChildren.length; i++) {
       const child = validChildren[i];
 
-      // 1. Insert Person
-      const personPayload: {
-        full_name: string;
-        gender: "male" | "female" | "other";
-        birth_year?: number;
-      } = {
-        full_name: child.name.trim(),
-        gender: child.gender,
-      };
-      if (child.birthYear.trim() !== "") {
-        const year = parseInt(child.birthYear);
-        if (!isNaN(year)) personPayload.birth_year = year;
-      }
+      // 1. Insert Person (helper đã test)
+      const personPayload = buildPersonPayload(child);
 
       const personResult = await api.post<{ id: string }>(
         API_ENDPOINTS.PERSONS_CREATE,
@@ -382,27 +296,14 @@ const handleQuickAddSpouse = async () => {
   setProcessing(true);
   setError(null);
   try {
-    // Determine default gender based on current person defined in personGender prop
-    const newSpouseGender =
-      personGender === "male"
-        ? "female"
-        : personGender === "female"
-          ? "male"
-          : "female";
+    // Determine default gender based on current person defined in personGender prop (helper đã test)
+    const newSpouseGender = inferSpouseGender(personGender);
 
-    const personPayload: {
-      full_name: string;
-      gender: "male" | "female" | "other";
-      birth_year?: number;
-    } = {
-      full_name: newSpouseName.trim(),
+    const personPayload = buildPersonPayload({
+      name: newSpouseName,
       gender: newSpouseGender,
-    };
-
-    if (newSpouseBirthYear.trim() !== "") {
-      const year = parseInt(newSpouseBirthYear);
-      if (!isNaN(year)) personPayload.birth_year = year;
-    }
+      birthYear: newSpouseBirthYear
+    });
 
     // 1. Insert Person
     const personResult = await api.post<{ id: string }>(

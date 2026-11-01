@@ -19,8 +19,8 @@
 | Vi phạm phức tạp (>10) | ~200** | 0 | ↘️ |
 | Hàm >20 dòng | ~60*** | 0 | ↘️ |
 | Trùng lặp | 0% (0 clone) | <5% | ✅ |
-| Tốc độ tiến hoá | 6 (ngày hiện tại) | ≥10/tuần | → |
-| Nợ kỹ thuật (lỗi lint) | 944 problems (792 lỗi, 152 warning) | 0 | ↘️ |
+| Tốc độ tiến hoá | 7 (ngày hiện tại) | ≥10/tuần | → |
+| Nợ kỹ thuật (lỗi lint) | 940 problems (788 lỗi, 152 warning) | 0 | ↘️ |
 
 \* Health theo công thức GOAL: (phủ%×0.3)+((1-avgC/20)×0.3)+(tests/1000×0.2)+((1-dup%)×0.2)
 \** Số vi phạm lấy từ ESLint (`max-lines-per-function`, `max-statements`). Số complexity thực chờ audit rà.
@@ -43,6 +43,7 @@ Mục tiêu: ≥90 điểm, tăng ≥0.5%/tuần.
 ```
 Ngày        Health   Phủ      Complexity  Test  Nợ
 2025-06-30  0.00     0%       0           0     N/A
+2026-10-31  ~84      ~78.7%   ~10          2233  940
 ```
 
 *(Tự cập nhật)*
@@ -321,5 +322,33 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 
 ---
 
-**Cập nhật lần cuối**: 2025-07-15
+## [CYCLE-AUTO-53] — 2026-10-31: TD-D4 Sơ đồ tổ chức /org-chart + sửa 2 test fail tiền tồn tại
+- **Loại**: Feature (R/T) — ưu tiên MEDIUM. Không đổi schema/migration.
+- **Thời lượng**: ~60 phút.
+- **Trạng thái**: ✅.
+- **Test delta**: +14 (2219→2233 pass / 1 skip / 0 fail — sửa 2 fail tiền tồn tại của `correlation-id`).
+- **Phủ**: không giảm (module mới có test thuần + action; phủ toàn cục đo ở chu kỳ coverage riêng).
+- **Lint**: 940 problems (788 lỗi) — giảm 2 so với đo thực tế đầu chu kỳ (942→940: sửa root cause 2 test fail + viết lại `proxy.ts` sạch lint; không phát sinh lỗi mới). Bảng nhanh trước đó ghi 944/792 là số cũ từ AUTO-38, đã hiệu chỉnh.
+- **Bảo mật**: `listOrgChart` chỉ đọc + requireSession; không PII rò rỉ log; chỉ select cột cần thiết.
+- **Ghi chú**: xác thực DB thật bằng dữ liệu demo tạm (2 team/3 user/6 thành viên, đủ 4 cấp vai trò) rồi xóa sạch; phát hiện lệch AGENTS §6 vs schema UserRole (không có STAFF/OWNER/MANAGER).
+
+---
+
+**Cập nhật lần cuối**: 2026-10-31
 **Rà kế**: theo chu kỳ / 2 tuần
+
+## [CYCLE-AUTO-55] — 2026-10-31: [R] Tách God-hook useArchiveWizard + phát hiện code chết
+- **Loại**: Refactor [R] — ưu tiên MEDIUM. ~45 phút. ✅.
+- **Test delta**: +17 (2233→2250 pass / 1 skip / 0 fail) — 11 helper thuần + 6 folders-lib.
+- **Phủ**: helper mới có test trực tiếp; phủ toàn cục đo ở chu kỳ coverage riêng.
+- **Lint**: 939 problems (787 lỗi / 152 warning) — giảm 1 lỗi so với đầu chu kỳ (940/788/152); cụm use-archive: 4 lỗi gốc → 3 lỗi, 0 warning; God-hook 135 dòng được tách.
+- **Bảo mật**: không đổi bề mặt tấn công; không log mới; FormData field set y nguyên (có test).
+- **Ghi chú**: `folders-panel.tsx` (452 dòng) là code chết — chỉ báo, không xóa (§5.7.3). Cập nhật AGENT_PROFILE: bẫy useEffect identity khi tách hook.
+
+## [CYCLE-AUTO-56] — 2026-10-31: [R/T] RelationshipManager + [HIGH] fix /genealogy 500
+- **Loại**: Refactor [R] + Violation Fix — ưu tiên MEDIUM (phát sinh HIGH giữa đường). ~60 phút. ✅.
+- **Test delta**: +24 (2250→2274 pass / 1 skip / 0 fail) — 21 lib + 3 regression guard select.
+- **Phủ**: lib mới 100% được test trực tiếp (pure).
+- **Lint**: 936 problems (784 lỗi / 152 warning) — giảm 3 so với đầu chu kỳ (939/787/152); RelationshipManager 13→10 lỗi.
+- **Bảo mật**: không đổi bề mặt; `/genealogy` 500 đã hết (data-integrity fix phía server select).
+- **Ghi chú**: smoke phát hiện 500 → nhảy hàng theo §5.1 (quality gate failure). Bẫy ghi nhận: select Prisma thiếu cột mà mapper frontend bắt buộc → 500 toàn trang; thêm regression test khóa hợp đồng select.

@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import type { Control, UseFormSetValue } from 'react-hook-form';
 import type { IntakeCreateInput } from '@/server/intakes/schemas';
 
 interface UseAutoTitleProps {
-  // No need to pass setValue; hook only sets title
+  /**
+   * Form control/setter có thể truyền trực tiếp. Cần thiết khi component gọi hook
+   * NGOÀI <FormProvider> (vd: IntakeSheet tạo form rồi render provider trong JSX).
+   * Nếu không truyền, fallback về useFormContext (mặc định).
+   */
+  control?: Control<IntakeCreateInput>;
+  setValue?: UseFormSetValue<IntakeCreateInput>;
 }
 
 /**
@@ -41,8 +48,11 @@ function runAutoTitle(
   }
 }
 
-export function useAutoTitleSuggestion({}: UseAutoTitleProps) {
-  const { control, setValue } = useFormContext<IntakeCreateInput>();
+export function useAutoTitleSuggestion(props: UseAutoTitleProps = {}) {
+  const context = useFormContext<IntakeCreateInput>();
+  // Ưu tiên props (component ngoài FormProvider), fallback context
+  const control = props.control ?? context?.control;
+  const setValue = (props.setValue ?? context?.setValue) as UseFormSetValue<IntakeCreateInput> | undefined;
   const watchedParties = useWatch({ control, name: "parties" });
   const watchedTitle = useWatch({ control, name: "title" });
   const watchedCauseFree = useWatch({ control, name: "causeFreeText" });
@@ -51,6 +61,7 @@ export function useAutoTitleSuggestion({}: UseAutoTitleProps) {
   const [causeName, setCauseName] = useState("");
 
   useEffect(() => {
+    if (!setValue) return; // không có form context/props thì bỏ qua auto-title
     runAutoTitle(titleTouched, watchedParties, causeName, watchedCauseFree, watchedTitle, setValue);
   }, [watchedParties, causeName, watchedCauseFree, titleTouched, watchedTitle, setValue]);
 

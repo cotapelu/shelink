@@ -158,6 +158,7 @@ Không cạnh tranh với các hệ ERP lớn về "đủ mọi thứ", mà cạ
 | Module | Đường dẫn | Mô tả | Task |
 |---|---|---|---|
 | **Nghỉ phép** | `(app)/leave` | Xin phép→duyệt; loại phép, số ngày, ngưỡng phép năm trong `SystemSetting.leave`; số dư phép tính tại chỗ | TD-D2 |
+| **Sơ đồ tổ chức** | `(app)/org-chart` | Xem cơ cấu nội bộ: các `Team` + thành viên (`TeamMember`) kèm vai trò nhóm; chỉ đọc, mọi vai trò đăng nhập đều xem được | TD-D4 |
 
 ---
 

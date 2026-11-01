@@ -281,7 +281,12 @@ export function IntakeSheet({
   // Auto-title suggestion
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [causeName, setCauseName] = useState("");
-  const { setTitleTouched } = useAutoTitleSuggestion({});
+  // Truyền control/setValue trực tiếp: hook này gọi ở component body, NGOÀI
+  // <FormProvider> render bên dưới, nên useFormContext trả null
+  const { setTitleTouched } = useAutoTitleSuggestion({
+    control: methods.control,
+    setValue: methods.setValue
+  });
 
   // 当前类别下可选程序
   const procedureOptions: ProcedureType[] = useMemo(

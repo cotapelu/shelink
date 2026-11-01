@@ -1,8 +1,71 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-26 (AUTO-52).
+Cập nhật lần cuối: 2026-10-31 (AUTO-56).
 
 ## Chu kỳ đã hoàn thành (gần đây)
+
+### [CYCLE-AUTO-56] — 2026-10-31: [R/T] RelationshipManager 1041 dòng + [P0-bug] /genealogy 500
+Loại: Refactor [R] + Violation Fix. Không đổi schema/migration, giữ API component. ~1h.
+
+**Task 1 — RelationshipManager (God Object 1041 dòng, 13 lỗi lint)**:
+- [x] Trích `relationship-manager-lib.ts` (thuần): `deriveRelDirection`, `mapRelationshipRow(s)`, `collectChildIds`, `formatChildInLawNote`, `toChildInLawRow`, `buildChildInLawRows`, `buildPersonPayload`, `inferSpouseGender`, `validBulkChildren`, `resolveRelEndpoints`, `resolveRelType` + type `EnrichedRelationship`/`RelationshipApiResponse` (bỏ luôn **interface bị khai báo trùng 2 lần** trong file cũ).
+- [x] Component rewire: `fetchRelationships` 77→~20 dòng; `handleAddRelationship` 55→~25; bulk/spouse dùng `validBulkChildren`/`buildPersonPayload`/`inferSpouseGender`. **Hành vi giữ nguyên** — test 3 ca lệch kỳ vọng đã lật theo đúng ngữ nghĩa gốc (ghi chú trong test).
+- [x] Test: `relationship-manager-lib.test.ts` **21 test** (direction, map/lọc thiếu data, note dâu/rể, payload, giới tính vợ/chồng, endpoints/type).
+- [x] Gỡ `interface EnrichedRelationship` trùng lặp (TS declaration merging từng che lỗi này).
+
+**Task 2 — /genealogy 500 (phát hiện khi smoke, HIGH violation, nhảy hàng)**:
+- [x] Root cause: `getPersons` select **thiếu `createdAt/updatedAt`** nhưng `mapPrismaPerson` (`genealogy/page.tsx:61`) gọi `.toISOString()` → TypeError, toàn trang 500. Không liên quan refactor Task 1.
+- [x] Fix: bổ sung 2 trường vào select, trích `PERSON_LIST_SELECT` (hằng số có comment cảnh báo mapper).
+- [x] Regression test `persons/actions.test.ts` (3): unauthorized, **khóa select có createdAt/updatedAt**, phân trang.
+
+**Cổng chất lượng**: typecheck PASS; test **2274 pass / 1 skip / 0 fail** (2250→2274, +24); full lint **936 (784 lỗi / 152 warning)** — giảm 3 so với đầu chu kỳ (939/787/152); RelationshipManager 13→10 lỗi, 891 dòng → biên giới rõ hơn; genealogy/actions.ts 0 lỗi sau khi trích hằng.
+
+**Xác minh đường vàng**: dev :3000 (session hết hạn 4h → đăng nhập lại đúng chính sách bảo mật) — `/genealogy`, `/genealogy/persons`, `/genealogy/kinship` **200**; anon → 307 đúng guard.
+
+**Còn lại ở file RelationshipManager**: 3 arrow JSX lớn (99/70/65 dòng) + main function 891 dòng/35 câu lệnh/complexity 35 → tách section JSX + state group thành chu kỳ kế tiếp (AUTO-57).
+
+### [CYCLE-AUTO-55] — 2026-10-31: [R] Tách God-hook `useArchiveWizard` (135 dòng) + phát hiện code chết
+Loại: Refactor [R] — ưu tiên MEDIUM (theo checklist treo AUTO-38/AUTO-53). Không đổi schema/migration, không đổi API. ~45 phút.
+
+**Đã hoàn thành**:
+- [x] Tách `use-archive-wizard.ts` (135 dòng) → `use-archive-prep.ts` (nạp + sở hữu state form) + `use-archive-upload.ts` (upload theo mục checklist) + `archive-wizard-helpers.ts` (thuần: `buildAutoChecked`, `applyPrepData`, `computeMissingRequired`, `buildArchiveUploadFormData`, `toDateInput`) + `runArchiveSubmit`/`runChecklistUpload` (tách khỏi hook).
+- [x] API trả về của `useArchiveWizard` **giữ nguyên** → `archive-wizard.tsx` không phải sửa. Đã lưu ý bẫy identity: `refreshPrep` tạo 1 lần (useCallback) rồi truyền cho cả loader — tránh vòng lặp effect vô tận.
+- [x] Test mới: `archive-wizard-helpers.test.ts` **11 test** (red-green: auto-tick, merge state có điều kiện, không mutate, FormData fallback tên, computeMissingRequired 3 nhánh).
+- [x] **Phát hiện**: `matters/[id]/_components/folders-panel.tsx` (452 dòng) **không ai import — code chết** (đã bị `documents-panel.tsx` thay thế). Theo §5.7.3: **không xóa, chỉ báo** — chờ chủ sở hữu quyết định (xóa hoặc khôi phục). Checklist AUTO-38 về folders-panel do đó **bỏ** (sai mục tiêu).
+
+**Cổng chất lượng**: typecheck PASS; test toàn bộ **2250 pass / 1 skip / 0 fail** (2233→2250, +17: 11 helper + 6 folders-lib); full lint **939 (787 lỗi / 152 warning)** — giảm so với đầu chu kỳ (940/788/152) và so với bản gốc của file (4 lỗi → 3 lỗi, 0 warning); file mới tách: hook ≤28 dòng, helper thuần test 100%. prisma:validate PASS.
+
+**Xác minh**: dev :3000 `/matters/[id]` (demo matter) → 200, 65KB, wizard lưu trữ render đúng (có nhãn tiếng Trung trong DOM). Không regression khác.
+
+**Audit nhanh (10 chiều — Mental Testing)**: data flow prep→state→UI giữ nguyên nhờ applyPrepData là reducer thuần (đã test merge có điều kiện completedAt/summary); upload path đổi cách build FormData nhưng cùng field set (đã test từng field); idempotency: `e.target.value=""` giữ nguyên; security: không rò log, input file không đổi rủi ro; concurrency: không thêm shared state.
+
+### [CYCLE-AUTO-54] — 2026-10-31: Gỡ Shotgun Surgery trong `utils/kinship/compute.ts` (mắc xích treo từ AUTO-38)
+Loại: Refactor [R] — ưu tiên MEDIUM. Không đổi hành vi, không đổi schema. ~15 phút.
+
+**Đã hoàn thành**:
+- [x] `transformViaA_bCallsA` và `transformViaB_aCallsB` giữ **2 bản copy giống hệt** 11 luật "vợ/chồng của" (anti-pattern Shotgun Surgery §3.2) → trích `SPOUSE_TERM_RULES` dùng chung; 2 hàm nay chỉ gọi `transformGenderBased(SPOUSE_TERM_RULES, term, gender)`.
+- [x] Hành vi **bất biến**: cả hai hàm vốn nhận đúng `gender` của người tương ứng; test đóng băng không cần sửa.
+
+**Cổng chất lượng**: typecheck PASS; test toàn bộ **2233 pass / 1 skip / 0 fail** (không đổi — thuần refactor, đúng kỳ vọng "tests pass before and after"); lint file 0 lỗi; full lint 940 (788 lỗi) — không phát sinh lỗi mới.
+
+**Còn lại ở AUTO-38 checklist** (chưa làm): refactor `folders-panel.tsx` (410 dòng), `use-archive-wizard.ts` (135 dòng, tách sub-hook), đẩy phủ nhánh/hàm lên gate 80% (điểm nghẽn: `utils/kinship/compute.ts` nhánh, `server/archive/actions.ts`).
+
+### [CYCLE-AUTO-53] — 2026-10-31: TD-D4 Sơ đồ tổ chức /org-chart (chỉ đọc) + sửa 2 test fail tiền tồn tại
+Loại: Feature (không đổi schema/migration — dùng Team/TeamMember sẵn có). ~1h.
+
+**Đã hoàn thành**:
+- [x] Docs-first (§5.1): PRD (bảng module GĐ2 thêm dòng "Sơ đồ tổ chức /org-chart"), UI-DESIGN §7.12 (layout thẻ team + chip thành viên + empty state).
+- [x] `src/server/teams/org-chart.ts` (thuần): `normalizeOrgRole` (vai trò lạ→MEMBER), `sortOrgMembers` (cấp vai trò OWNER→ADMIN→MEMBER→GUEST rồi tên A→Z, không mutate), `dedupeMembers` (cùng userId giữ vai trò mạnh nhất), `buildOrgChart` (team theo tên A→Z, bỏ team/member hỏng, đếm memberCount + totals). Schema không có `parentId` → sơ đồ phẳng theo team, **không cần migration**.
+- [x] `src/server/teams/actions.ts`: `listOrgChart()` — `requireSession` (mọi vai trò đăng nhập xem được), 1 query duy nhất (select lồng members→user, không N+1), `take: 200` chặn trần.
+- [x] UI `(app)/org-chart`: `page.tsx` (server, redirect login nếu chưa auth — đúng pattern `/leave`) + `org-chart-view.tsx` (client: header tổng số, grid thẻ `Card`, `MemberChip` avatar-fallback + `Badge` vai trò VI, empty state hướng dẫn tạo team ở ERP). Nav: thêm "Sơ đồ tổ chức" vào `secondaryNav` (icon `Network`).
+- [x] Test: 11 (thuần: sort/dedupe/fallback/lọc hỏng/tên fallback) + 3 (action: chưa đăng nhập ném lỗi không query DB; select có take; map + sắp tên) = **+14**.
+- [x] Sửa 2 test fail **tiền tồn tại** (`src/lib/telemetry/correlation-id.ts`): jsdom hiện có `window` nhưng không có `localStorage` → guard `typeof localStorage` + try/catch (private mode cũng throw). Đúng root cause, không đụng test.
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test toàn bộ **2233 pass / 1 skip / 0 fail** (2219→2233, +14); lint full 940 problems (788 lỗi / 152 warning) — **không tăng** so với đầu chu kỳ (mọi file mới/mới sửa 0 lỗi lint); build không chạy (không đổi nội dung build được — dev smoke thay thế).
+
+**Xác thực đường vàng** (dev :3000): `/org-chart` chưa đăng nhập → 307 `/login?callbackUrl=%2Forg-chart` ✔; đã đăng nhập → 200 ✔. Empty state đúng khi DB chưa có team. Tạo tạm 2 team demo (3 user, 6 thành viên, đủ 4 cấp vai trò, 1 người thuộc 2 team) → trang render đúng tên team + nhãn vai trò + người xuất hiện ở cả 2 team → **đã xóa sạch** dữ liệu demo (verified: Team=0, TeamMember=0, demo user=0).
+
+**Ghi chú**: (1) `UserRole` thực tế trong schema là ADMIN/PRINCIPAL_LAWYER/LAWYER/ASSISTANT/FINANCE — **không có STAFF/OWNER/MANAGER** như AGENTS §6 mô tả (lệch tài liệu vs schema, nên rà AGENTS §6 + `isManager`). (2) Team phẳng: khi cần sơ đồ phân cấp (team con) thì cần migration `parentId` — xin chủ sở hữn duyệt (đỏ-vạch §5.6/§10). (3) Chưa commit (đỏ-vạch §7).
 
 ### [CYCLE-AUTO-52] — 2026-10-26: TD-B4 (hoàn thiện) — Nhập/sửa nhiệm vụ mặc định + Việt hoá /settings/templates
 Loại: Feature + refactor UI (không đổi schema/migration). Owner đã duyệt. ~1h. Nối AUTO-51.

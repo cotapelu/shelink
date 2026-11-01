@@ -111,7 +111,7 @@
 | TD-D1 | Hồ sơ nhân viên: hợp đồng lao động, chứng chỉ (hết hạn cảnh báo), phụ cấp, hợp đồng scan | P1 | 5d |
 | TD-D2 | Nghỉ phép: đăng ký, duyệt, số dư phép, lịch nghỉ chung | P1 | 5d |
 | TD-D3 | Chấm công: check-in/out (web+geolocation optional), bảng công tháng, xuất Excel | P2 | 5d |
-| TD-D4 | Sơ đồ tổ chức (org chart) | P2 | 2d |
+| TD-D4 | Sơ đồ tổ chức (org chart) ✅ (AUTO-53, 2026-10-31) | P2 | 2d |
 | TD-D5 | Mua sắm: đề nghị mua → duyệt → đặt hàng → nhận → thanh toán, nhà cung cấp | P1 | 6d |
 | TD-D6 | Tài sản & Subscription: sổ tài sản (khấu hao), theo dõi license SaaS/domain/hosting, nhắc gia hạn | P1 | 5d |
 | TD-D7 | KPI/mục tiêu nhân viên lite (OKR/KPI theo kỳ) | P3 | 4d |

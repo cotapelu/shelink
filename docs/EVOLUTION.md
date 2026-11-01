@@ -145,3 +145,20 @@
 **Rà kế tiếp**: Sau chu kỳ đầu hoặc khi quỹ đạo đổi.
 
 ---
+
+**Phiên 2026-10-31 (AUTO-53)**:
+- Phục hồi môi trường chạy: `npm ci` + approve 7 install scripts (Prisma engines/esbuild), tạo `.env` đủ biến (DATABASE_URL, NEXTAUTH_SECRET=public key PEM cho RS256, JWT PKCS#8/SPKI, STORAGE_ENCRYPTION_KEY), `prisma generate`, migrate status 45/45 khớp DB `shelink`. Dev :3000 chạy.
+- Sửa 3 lỗi chặn chạy: key PEM sai format (PKCS#1/ssh-rsa → PKCS#8/SPKI), `NO_SECRET` của next-auth v4 `withAuth` không decode được RS256-JWS (viết lại `src/proxy.ts` kiểm session bằng `getServerSession`, giữ RS256 theo GOAL), `/matters` 500 do `useFormContext` null ngoài `FormProvider` (root-cause: hook nhận props control/setValue).
+- TD-D4 `/org-chart` (chỉ đọc, Team/TeamMember, không migration) + xác thực DB thật bằng data demo rồi dọn sạch.
+- Test: 2233 pass / 1 skip / 0 fail. Lint: 940 (788 lỗi) — giảm 2. Typecheck PASS.
+- Còn lại GĐ2 (không migration): TD-H3 trung tâm trợ giúp, TD-B2/B6 (một phần), God-object refactor (`intake-sheet.tsx` ~1570 dòng, `procedure-content.tsx`). Cần migration (xin duyệt): TD-B2 budget, TD-D1/D5/D6, TD-G3 2FA.
+
+**Phiên 2026-10-31 (AUTO-55)**:
+- [R] Tách God-hook `useArchiveWizard` (135 dòng) → prep/upload/helpers + submit tách khỏi hook; API giữ nguyên; +17 test. Lint 940→939.
+- Phát hiện `folders-panel.tsx` là **code chết** (không ai import, đã bị documents-panel thay thế) — chờ chủ sở hữn quyết định xóa/khôi phục.
+- Bẫy ghi nhận: khi tách hook có effect, callback nạp dữ liệu phải tạo MỘT lần (useCallback) rồi truyền cho cả effect — tạo 2 identity → effect loop vô tạn.
+
+**Phiên 2026-10-31 (AUTO-56)**:
+- [R/T] `RelationshipManager.tsx` (1041 dòng God Object): trích lib thuần `relationship-manager-lib.ts` + rewire component (fetch 77→20 dòng); gỡ 2 interface trùng lặp; +21 test.
+- [HIGH] `/genealogy` 500: `getPersons` thiếu `createdAt/updatedAt` trong select (mapper `.toISOString()`) → trích `PERSON_LIST_SELECT` + 3 regression test. 3 trang genealogy 200.
+- Test: 2274 pass / 1 skip / 0 fail. Lint: 939→936 (787→784 lỗi).

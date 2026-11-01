@@ -307,6 +307,11 @@ Nhập tên/mã định danh; kết quả phân cấp `LOW/…/BLOCKING`; nút "
 
 ### 7.11 Nghỉ phép `/leave` (mới, GĐ2)
 
+### 7.12 Sơ đồ tổ chức `/org-chart` (mới, GĐ2 — TD-D4)
+- Trang **chỉ đọc**: lưới thẻ `Team` (tên + mô tả + số thành viên); mỗi thẻ liệt kê thành viên (`TeamMember`) dạng chip: chữ cái đầu (avatar fallback) + tên + huy hiệu vai trò nhóm (`Trưởng nhóm/Phó nhóm/Thành viên/Khách`, lấy theo `TeamRole`).
+- Sắp xếp: team theo tên A→Z; thành viên theo cấp vai trò (OWNER→ADMIN→MEMBER→GUEST) rồi tới tên. Người thuộc nhiều team xuất hiện ở từng team.
+- Trạng thái rỗng: "Chưa có nhóm nào" + gợi ý tạo team ở khu vực ERP. Không có hành động ghi trên trang này (V1 chỉ xem).
+- Tái dùng: `Card`, `Badge`, pattern thẻ và grid đã dùng ở `/clients`; dark-mode mặc định, không thêm màu ngoài token.
 - **Chế độ xem**: "Của tôi" / "Chờ duyệt" (người duyệt) / "Lịch nghỉ chung" (theo tháng).
 - **Danh sách đơn**: bảng + lọc loại phép/trạng thái/kỳ; badge trạng thái; cột ngày, số ngày (bước 0.5).
 - **Tạo đơn**: `Sheet` phải (`max-w-2xl`) — loại phép, ngày bắt đầu/kết thúc, lý do; hiện số dư phép năm hiện tại (`tabular-nums`).

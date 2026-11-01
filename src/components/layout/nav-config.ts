@@ -35,6 +35,7 @@ import {
   UsersRound,
   Kanban,
   Plane,
+  Network,
 } from "lucide-react";
 
 export type NavItem = {
@@ -65,6 +66,7 @@ export const primaryNav: NavItem[] = [
 ];
 
 export const secondaryNav: NavItem[] = [
+  { label: "Sơ đồ tổ chức", href: "/org-chart", icon: Network },
   { label: "归档", href: "/archive", icon: Archive },
   { label: "报表", href: "/reports", icon: BarChart3 },
   // Genealogy domain

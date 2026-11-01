@@ -123,21 +123,28 @@ function buildPersonWhere(validated: z.infer<typeof GetPersonsQuerySchema>): any
   return where;
 }
 
+/**
+ * Select Person cho danh sách: PHẢI có createdAt/updatedAt —
+ * `genealogy/page.tsx` (mapPrismaPerson) gọi .toISOString() trên 2 trường này,
+ * thiếu là trang /genealogy 500 (đã fix + có test khóa hợp đồng).
+ */
+const PERSON_LIST_SELECT = {
+  id: true, fullName: true, gender: true, birthYear: true,
+  birthMonth: true, birthDay: true, deathYear: true, deathMonth: true,
+  deathDay: true, isDeceased: true, isInLaw: true, birthOrder: true,
+  generation: true, avatarUrl: true, note: true,
+  createdAt: true, updatedAt: true
+} as const;
+
 export async function getPersons(query?: z.infer<typeof GetPersonsQuerySchema>) {
   const validated = GetPersonsQuerySchema.parse(query);
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error('Unauthorized');
 
   const where = buildPersonWhere(validated);
-  const select = {
-    id: true, fullName: true, gender: true, birthYear: true,
-    birthMonth: true, birthDay: true, deathYear: true, deathMonth: true,
-    deathDay: true, isDeceased: true, isInLaw: true, birthOrder: true,
-    generation: true, avatarUrl: true, note: true
-  };
   const skip = (validated.page - 1) * validated.limit;
   const [items, total] = await Promise.all([
-    prisma.person.findMany({ where, select, orderBy: { fullName: 'asc' }, skip, take: validated.limit }),
+    prisma.person.findMany({ where, select: PERSON_LIST_SELECT, orderBy: { fullName: 'asc' }, skip, take: validated.limit }),
     prisma.person.count({ where })
   ]);
   return { persons: items, total, page: validated.page, totalPages: Math.ceil(total / validated.limit) };

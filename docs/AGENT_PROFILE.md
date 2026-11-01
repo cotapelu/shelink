@@ -143,3 +143,18 @@
 **Cập nhật lần cuối**: 2025-07-07 (JWT code xong)
 **Lần rà kế**: 2025-07-10
 **Trạng thái**: ✅ P0 xong; P1 đang làm (JWT chờ deploy, kiểm tra quyền, phủ, transaction)
+
+## Sau AUTO-55 (2026-10-31)
+
+| Vấn đề | Chi tiết | Cách khắc phục |
+|---|---|---|
+| Bẫy hook-splitting | Tách hook có `useEffect` nạp dữ liệu: nếu factory nạp (vd `refreshPrep`) được gọi 2 lần ở 2 vị trí → 2 identity → effect chạy lại vô tận | Tạo callback 1 lần qua `useCallback`, truyền cùng 1 tham chiếu cho effect + return |
+| Code chết | `matters/[id]/_components/folders-panel.tsx` 452 dòng không ai import (thay thế bởi documents-panel) | Chờ chủ sở hữn: xóa hoặc khôi phục — KHÔNG tự ý xóa (§5.7.3) |
+| Lệch docs vs schema | AGENTS §6 vai trò (ADMIN/OWNER/MANAGER/STAFF/FINANCE) ≠ UserRole thật (ADMIN/PRINCIPAL_LAWYER/LAWYER/ASSISTANT/FINANCE) | Sửa AGENTS §6 theo schema trước, rồi mới code liên quan vai trò |
+
+## Sau AUTO-56 (2026-10-31)
+
+| Vấn đề | Chi tiết | Cách khắc phục |
+|---|---|---|
+| Select-vs-mapper drift | `getPersons` thiếu cột mà `mapPrismaPerson` (.toISOString) cần → /genealogy 500 toàn trang | Hằng số select + comment cảnh báo + regression test khóa field; nguyên tắc: mapper dùng `.toISOString()` thì select phải có Date |
+| God Object còn lại | `RelationshipManager.tsx` còn 3 arrow JSX 99/70/65 dòng + main 891 dòng/complexity 35; `procedure-content.tsx` 1357 dòng; `intake-sheet.tsx` ~1570 dòng | Chu kỳ AUTO-57: tách section JSX thành sub-component có props tường minh |
