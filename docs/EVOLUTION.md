@@ -162,3 +162,7 @@
 - [R/T] `RelationshipManager.tsx` (1041 dòng God Object): trích lib thuần `relationship-manager-lib.ts` + rewire component (fetch 77→20 dòng); gỡ 2 interface trùng lặp; +21 test.
 - [HIGH] `/genealogy` 500: `getPersons` thiếu `createdAt/updatedAt` trong select (mapper `.toISOString()`) → trích `PERSON_LIST_SELECT` + 3 regression test. 3 trang genealogy 200.
 - Test: 2274 pass / 1 skip / 0 fail. Lint: 939→936 (787→784 lỗi).
+
+**Phiên 2026-10-31 (AUTO-57)**:
+- [R/T] `lib/template-builder.ts`: 9 lỗi lint → 0 (tách XML parts + 8 body thành hằng; 2 mẫu có ngày dùng `injectSignDate` thuần giữ đúng thời điểm ký); +9 test; byte-equivalence 8/8 mẫu.
+- Test: 2283 pass. Lint: 936→927 (784→775 lỗi). Nợ Quality còn: server (finance/actions 16, seals 16, matters/export-xlsx 13, preservations/actions-v2 12, documents/actions 11) + UI god objects (intake-sheet ~1570, procedure-content 1357, RelationshipManager 3 arrow JSX).

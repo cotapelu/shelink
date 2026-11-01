@@ -1,9 +1,22 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-31 (AUTO-56).
+Cập nhật lần cuối: 2026-10-31 (AUTO-57).
 
-## Chu kỳ đã hoàn thành (gần đây)
+## Chu kỳ đã hoàn thành (gần đối)
 
+### [CYCLE-AUTO-57] — 2026-10-31: [R/T] `lib/template-builder.ts` 9 lỗi lint → 0
+Loại: Refactor [R] + Tests [T] — ưu tiên MEDIUM. Không đổi hành vi (đã chứng minh). ~40 phút.
+
+**Đã hoàn thành**:
+- [x] Tách `createDocxBuffer` (43 dòng) → `mergeFieldsXml` + `documentXml` + 3 hằng XML (`CONTENT_TYPES_XML`, `ROOT_RELS_XML`, `EMPTY_DOC_RELS_XML`); export `createDocxBuffer` để test.
+- [x] Nội dung 8 mẫu tách khỏi `buildBuffer` thành hằng có tên (`INTAKE_BODY`, `RETAINER_BODY`, `LITIGATION_BODY`, `HEARING_BODY`, `OPINION_BODY`, `ARCHIVE_BODY`, `CLOSING_BODY`, `RISK_NOTICE_BODY`) — mỗi `buildBuffer` còn 1 dòng.
+- [x] **Giữ hành vi đúng từng chữ**: 2 mẫu có ngảy ký `${new Date()...}` trong literal (民事起诉状, 法律意见书) dùng placeholder `__SIGN_DATE__` + `injectSignDate()` **thuần** (đánh giá lúc gọi, như gốc) — 6 mẫu tĩnh còn lại hạ const an toàn.
+- [x] Test mới `src/tests/lib/template-builder.test.ts` **11 test**: 8 mẫu tên không trùng/category/generatedAt/PK-magic, MERGEFIELD per variable, 4 part docx tối thiản, `injectSignDate` (thay + không có placeholder).
+- [x] **Kiểm tra tương đương**: so byte-level `word/document.xml` của cả 8 mẫu giữa bản HEAD và bản refactor → **giống nhau** (sau chuẩn hóa ngảy động).
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test **2283 pass / 1 skip / 0 fail** (2274→2283, +9 file mới); full lint **927 (775 lỗi)** — **giảm 9 lỗi** (936→927); `template-builder.ts` 9→0 lỗi; consumer `server/archive/render.ts` + 50 test archive pass.
+
+**Bẫy ghi nhận**: template literal dài KHÔNG thể tách hàm để đạt ≤20 dòng (vẫn tính đủ dòng literal) → đúng cách là hạ thành const; giá trị động (`new Date()` lúc gọi) phải dùng placeholder + hàm thuần chèn, không được hạ const (sai thời điểm ký).
 ### [CYCLE-AUTO-56] — 2026-10-31: [R/T] RelationshipManager 1041 dòng + [P0-bug] /genealogy 500
 Loại: Refactor [R] + Violation Fix. Không đổi schema/migration, giữ API component. ~1h.
 

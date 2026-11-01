@@ -158,3 +158,10 @@
 |---|---|---|
 | Select-vs-mapper drift | `getPersons` thiếu cột mà `mapPrismaPerson` (.toISOString) cần → /genealogy 500 toàn trang | Hằng số select + comment cảnh báo + regression test khóa field; nguyên tắc: mapper dùng `.toISOString()` thì select phải có Date |
 | God Object còn lại | `RelationshipManager.tsx` còn 3 arrow JSX 99/70/65 dòng + main 891 dòng/complexity 35; `procedure-content.tsx` 1357 dòng; `intake-sheet.tsx` ~1570 dòng | Chu kỳ AUTO-57: tách section JSX thành sub-component có props tường minh |
+
+## Sau AUTO-57 (2026-10-31)
+
+| Vấn đề | Chi tiết | Cách khắc phục |
+|---|---|---|
+| Template literal vs max-lines | Hàm chứa template literal 27 dòng vẫn vi phạm ≤20 dòng — không tách chuỗi được | Hạ thành `const`; giá trị động (new Date() lúc gọi) dùng placeholder + hàm thuần chèn lúc build |
+| Nợ server lớn | `server/finance/actions.ts` (16 lỗi), `server/seals/actions.ts` (16), `server/matters/export-xlsx.ts` (13) | Chu kỳ AUTO-58: trích validation/mapping thuần + test, theo mẫu đã dùng cho archive/leave |

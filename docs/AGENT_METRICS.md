@@ -352,3 +352,11 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Lint**: 936 problems (784 lỗi / 152 warning) — giảm 3 so với đầu chu kỳ (939/787/152); RelationshipManager 13→10 lỗi.
 - **Bảo mật**: không đổi bề mặt; `/genealogy` 500 đã hết (data-integrity fix phía server select).
 - **Ghi chú**: smoke phát hiện 500 → nhảy hàng theo §5.1 (quality gate failure). Bẫy ghi nhận: select Prisma thiếu cột mà mapper frontend bắt buộc → 500 toàn trang; thêm regression test khóa hợp đồng select.
+
+## [CYCLE-AUTO-57] — 2026-10-31: [R/T] template-builder.ts 9 lỗi → 0
+- **Loại**: Refactor [R] + Tests [T]. ~40 phút. ✅.
+- **Test delta**: +9 (2274→2283 pass / 1 skip / 0 fail).
+- **Phủ**: module trước đây 0 test → 11 test (structure + từng part docx + injectSignDate).
+- **Lint**: 927 problems (775 lỗi / 152 warning) — giảm 9 so với đầu chu kỳ (936/784/152).
+- **Bảo mật**: không đổi bề mặt; fix typo Ngảy→Ngày trong comment (không ảnh hưởng runtime).
+- **Ghi chú**: đã chứng minh byte-equivalence với HEAD (8/8 mẫu, chuẩn hóa ngảy động).

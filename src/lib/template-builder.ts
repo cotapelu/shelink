@@ -6,6 +6,9 @@
  * - applicableCategories (empty = all)
  * - variables (merge fields)
  * - buildBuffer(): returns DOCX buffer with docxtemplater-rendered content
+ *
+ * Refactor AUTO-57: nội dung 8 mẫu tách khỏi buildBuffer thành hằng có tên;
+ * XML parts của DOCX tách thành helper riêng (mỗi hàm ≤20 dòng, có unit test).
  */
 
 import PizZip from "pizzip";
@@ -27,15 +30,16 @@ interface Template {
   buildBuffer(): Buffer;
 }
 
-// Helper: Create DOCX buffer
-function createDocxBuffer(title: string, body: string, variables: string[]): Buffer {
-  const zip = new PizZip();
-
-  const mergeFields = variables.map(v =>
+/** XML merge field cho docxtemplater (mỗi biến 1 MERGEFIELD). */
+function mergeFieldsXml(variables: string[]): string {
+  return variables.map(v =>
     `<w:fldChar w:fldCharType="begin"/><w:r><w:instrText xml:space="preserve"> MERGEFIELD ${v} \\* MERGEFORMAT </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/><w:r><w:t>{{{${v}}}}</w:t></w:r>`
   ).join("");
+}
 
-  const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+/** word/document.xml: title + body + merge fields + mốc thời gian sinh. */
+function documentXml(title: string, body: string, variables: string[]): string {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:body>
     <w:p>
@@ -45,43 +49,44 @@ function createDocxBuffer(title: string, body: string, variables: string[]): Buf
       </w:r>
     </w:p>
     <w:p><w:r><w:t>${body}</w:t></w:r></w:p>
-    ${mergeFields}
+    ${mergeFieldsXml(variables)}
     <w:p><w:r><w:t>生成时间：{{generatedAt}}</w:t></w:r></w:p>
     <w:sectPr><w:pgSz w:w="11906" w:h="16840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr>
   </w:body>
 </w:document>`;
+}
 
-  zip.file("word/document.xml", documentXml);
-  zip.file("[Content_Types].xml",
-    `<?xml version="1.0" encoding="UTF-8"?>
+const CONTENT_TYPES_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
   <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
-</Types>`);
-  zip.file("_rels/.rels",
-    `<?xml version="1.0" encoding="UTF-8"?>
+</Types>`;
+
+const ROOT_RELS_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
-</Relationships>`);
-  zip.file("word/_rels/document.xml.rels",
-    `<?xml version="1.0" encoding="UTF-8"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-</Relationships>`);
+</Relationships>`;
 
+const EMPTY_DOC_RELS_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+</Relationships>`;
+
+/** Gói nội dung thành DOCX buffer tối thiản (docxtemplater đọc được). */
+export function createDocxBuffer(title: string, body: string, variables: string[]): Buffer {
+  const zip = new PizZip();
+  zip.file("word/document.xml", documentXml(title, body, variables));
+  zip.file("[Content_Types].xml", CONTENT_TYPES_XML);
+  zip.file("_rels/.rels", ROOT_RELS_XML);
+  zip.file("word/_rels/document.xml.rels", EMPTY_DOC_RELS_XML);
   return zip.generate({ type: "nodebuffer", compression: "DEFLATE" });
 }
 
-// 8 Templates
-export const BUILTIN_TEMPLATES: Template[] = [
-  {
-    name: "收案登记表",
-    category: "INTAKE",
-    description: "收案时登记基本信息、委托方信息、案由等。",
-    applicableCategories: [],
-    variables: ["matter.internalCode", "matter.title", "client.name", "client.idNumber", "client.phone", "client.address", "cause.name", "intake.receivedAt", "intake.description", "lawyer.name", "intake.note", "generatedAt"],
-    buildBuffer() {
-      return createDocxBuffer(this.name, `${FIRM.name}
+// ─── Nội dung 8 mẫu ───
+// Chữ ký ngày trong 2 mẫu tố tụng cần ĐÚNG thời điểm sinh văn bản (new Date()
+// lúc gọi), nên dùng function; 6 mẫu còn lại chỉ tham chiếu hằng tĩnh → const.
+
+const INTAKE_BODY = `${FIRM.name}
 收案登记表
 
 案件编号：{{{matter.internalCode}}}
@@ -103,17 +108,9 @@ export const BUILTIN_TEMPLATES: Template[] = [
 四、备注
 {{{intake.note}}}
 
-本登记表仅作内部备案使用。`, this.variables);
-    }
-  },
-  {
-    name: "委托代理合同",
-    category: "RETAINER",
-    description: "标准委托代理合同，含费用、付款节点、权利义务。",
-    applicableCategories: [],
-    variables: ["firm.name", "firm.address", "firm.phone", "firm.licenseNo", "client.name", "client.idNumber", "client.address", "matter.title", "matter.category", "fee.amount", "fee.type", "fee.schedule", "lawyer.name", "generatedAt"],
-    buildBuffer() {
-      return createDocxBuffer(this.name, `${FIRM.name}
+本登记表仅作内部备案使用。`;
+
+const RETAINER_BODY = `${FIRM.name}
 委托代理合同
 
 甲方（委托人）：{{{client.name}}}
@@ -147,17 +144,10 @@ export const BUILTIN_TEMPLATES: Template[] = [
 
 乙方（盖章）：${FIRM.name}
 日期：___________
-`, this.variables);
-    }
-  },
-  {
-    name: "民事起诉状",
-    category: "LITIGATION",
-    description: "民事诉讼起诉状标准模板。",
-    applicableCategories: ["CIVIL_COMMERCIAL", "CRIMINAL", "ADMINISTRATIVE"],
-    variables: ["firm.name", "client.name", "client.idNumber", "client.address", "parties.defendants[0].name", "parties.defendants[0].idNumber", "parties.defendants[0].address", "matter.cause.name", "matter.claimAmount", "court.name", "generatedAt"],
-    buildBuffer() {
-      return createDocxBuffer(this.name, `${FIRM.name}
+`;
+
+/** Ngày ký tại thời điểm sinh văn bản (giữ hành vi gốc). */
+const LITIGATION_BODY = `${FIRM.name}
 民事起诉状
 
 原告：{{{client.name}}}
@@ -180,19 +170,12 @@ export const BUILTIN_TEMPLATES: Template[] = [
 {{{court.name}}}
 
 具状人（原告）：{{{client.name}}}
-${new Date().getFullYear()}年${new Date().getMonth()+1}月${new Date().getDate()}日
+__SIGN_DATE__
 附：证据清单
-`, this.variables);
-    }
-  },
-  {
-    name: "谈话笔录",
-    category: "HEARING",
-    description: "与当事人或证人的谈话记录。",
-    applicableCategories: [],
-    variables: ["matter.internalCode", "lawyer.name", "client.name", "client.idNumber", "interviewee.name", "interviewee.relationship", "interviewee.phone", "interview.date", "interview.content", "generatedAt"],
-    buildBuffer() {
-      return createDocxBuffer(this.name, `${FIRM.name}
+`;
+
+
+const HEARING_BODY = `${FIRM.name}
 谈话笔录
 
 案件编号：{{{matter.internalCode}}}
@@ -212,17 +195,10 @@ ${new Date().getFullYear()}年${new Date().getMonth()+1}月${new Date().getDate(
 谈话人（签字）：___________
 被谈话人（签字）：___________
 日期：{{{interview.date}}}
-`, this.variables);
-    }
-  },
-  {
-    name: "法律意见书",
-    category: "WORK_PRODUCT",
-    description: "针对具体法律问题的专业意见。",
-    applicableCategories: [],
-    variables: ["firm.name", "firm.address", "firm.phone", "client.name", "matter.title", "matter.cause.name", "lawyer.name", "opinion.date", "opinion.background", "opinion.analysis", "opinion.conclusion", "generatedAt"],
-    buildBuffer() {
-      return createDocxBuffer(this.name, `${FIRM.name}
+`;
+
+/** Ngày ký tại thời điểm sinh (giữ hành vi gốc). */
+const OPINION_BODY = `${FIRM.name}
 法律意见书
 
 致：{{{client.name}}}
@@ -246,18 +222,10 @@ ${new Date().getFullYear()}年${new Date().getMonth()+1}月${new Date().getDate(
 承办律师：{{{lawyer.name}}}
 
 ${FIRM.name}（盖章）
-${new Date().getFullYear()}年${new Date().getMonth()+1}月${new Date().getDate()}日
-`, this.variables);
-    }
-  },
-  {
-    name: "卷宗目录",
-    category: "ARCHIVE",
-    description: "归档卷宗的文件目录。",
-    applicableCategories: [],
-    variables: ["matter.internalCode", "matter.title", "client.name", "matter.category", "archive.date", "folder.name", "documents[].name", "documents[].date", "generatedAt"],
-    buildBuffer() {
-      return createDocxBuffer(this.name, `${FIRM.name}
+__SIGN_DATE__
+`;
+
+const ARCHIVE_BODY = `${FIRM.name}
 卷宗目录
 
 案件编号：{{{matter.internalCode}}}
@@ -276,17 +244,9 @@ ${new Date().getFullYear()}年${new Date().getMonth()+1}月${new Date().getDate(
 保管人：___________
 检查人：___________
 归档日期：{{{archive.date}}}
-`, this.variables);
-    }
-  },
-  {
-    name: "结案登记表",
-    category: "CLOSING",
-    description: "案件结案时填写，含办案小结。",
-    applicableCategories: [],
-    variables: ["matter.internalCode", "matter.title", "client.name", "matter.category", "lawyer.name", "matter.closedAt", "closure.reason", "closure.summary", "generatedAt"],
-    buildBuffer() {
-      return createDocxBuffer(this.name, `${FIRM.name}
+`;
+
+const CLOSING_BODY = `${FIRM.name}
 结案登记表
 
 一、案件基本信息
@@ -311,17 +271,9 @@ ${new Date().getFullYear()}年${new Date().getMonth()+1}月${new Date().getDate(
 归档日期：{{{matter.closedAt}}}
 
 备注：_______________
-`, this.variables);
-    }
-  },
-  {
-    name: "风险告知书",
-    category: "BLANK",
-    description: "向客户告知法律服务的潜在风险。",
-    applicableCategories: [],
-    variables: ["client.name", "client.idNumber", "matter.category", "matter.cause.name", "risk.items[].description", "risk.items[].level", "generatedAt"],
-    buildBuffer() {
-      return createDocxBuffer(this.name, `${FIRM.name}
+`;
+
+const RISK_NOTICE_BODY = `${FIRM.name}
 法律服务风险告知书
 
 致：{{{client.name}}}
@@ -348,7 +300,95 @@ ${new Date().getFullYear()}年${new Date().getMonth()+1}月${new Date().getDate(
 
 律师事务所（盖章）：
 ${FIRM.name}
-`, this.variables);
+`;
+
+/** Chèn ngày ký thời điểm sinh vào placeholder (thuần, dùng lúc buildBuffer). */
+export function injectSignDate(body: string): string {
+  const d = new Date();
+  const today = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+  return body.replace("__SIGN_DATE__", today);
+}
+
+// 8 Templates
+export const BUILTIN_TEMPLATES: Template[] = [
+  {
+    name: "收案登记表",
+    category: "INTAKE",
+    description: "收案时登记基本信息、委托方信息、案由等。",
+    applicableCategories: [],
+    variables: ["matter.internalCode", "matter.title", "client.name", "client.idNumber", "client.phone", "client.address", "cause.name", "intake.receivedAt", "intake.description", "lawyer.name", "intake.note", "generatedAt"],
+    buildBuffer() {
+      return createDocxBuffer(this.name, INTAKE_BODY, this.variables);
+    }
+  },
+  {
+    name: "委托代理合同",
+    category: "RETAINER",
+    description: "标准委托代理合同，含费用、付款节点、权利义务。",
+    applicableCategories: [],
+    variables: ["firm.name", "firm.address", "firm.phone", "firm.licenseNo", "client.name", "client.idNumber", "client.address", "matter.title", "matter.category", "fee.amount", "fee.type", "fee.schedule", "lawyer.name", "generatedAt"],
+    buildBuffer() {
+      return createDocxBuffer(this.name, RETAINER_BODY, this.variables);
+    }
+  },
+  {
+    name: "民事起诉状",
+    category: "LITIGATION",
+    description: "民事诉讼起诉状标准模板。",
+    applicableCategories: ["CIVIL_COMMERCIAL", "CRIMINAL", "ADMINISTRATIVE"],
+    variables: ["firm.name", "client.name", "client.idNumber", "client.address", "parties.defendants[0].name", "parties.defendants[0].idNumber", "parties.defendants[0].address", "matter.cause.name", "matter.claimAmount", "court.name", "generatedAt"],
+    buildBuffer() {
+      return createDocxBuffer(this.name, injectSignDate(LITIGATION_BODY), this.variables);
+    }
+  },
+  {
+    name: "谈话笔录",
+    category: "HEARING",
+    description: "与当事人或证人的谈话记录。",
+    applicableCategories: [],
+    variables: ["matter.internalCode", "lawyer.name", "client.name", "client.idNumber", "interviewee.name", "interviewee.relationship", "interviewee.phone", "interview.date", "interview.content", "generatedAt"],
+    buildBuffer() {
+      return createDocxBuffer(this.name, HEARING_BODY, this.variables);
+    }
+  },
+  {
+    name: "法律意见书",
+    category: "WORK_PRODUCT",
+    description: "针对具体法律问题的专业意见。",
+    applicableCategories: [],
+    variables: ["firm.name", "firm.address", "firm.phone", "client.name", "matter.title", "matter.cause.name", "lawyer.name", "opinion.date", "opinion.background", "opinion.analysis", "opinion.conclusion", "generatedAt"],
+    buildBuffer() {
+      return createDocxBuffer(this.name, injectSignDate(OPINION_BODY), this.variables);
+    }
+  },
+  {
+    name: "卷宗目录",
+    category: "ARCHIVE",
+    description: "归档卷宗的文件目录。",
+    applicableCategories: [],
+    variables: ["matter.internalCode", "matter.title", "client.name", "matter.category", "archive.date", "folder.name", "documents[].name", "documents[].date", "generatedAt"],
+    buildBuffer() {
+      return createDocxBuffer(this.name, ARCHIVE_BODY, this.variables);
+    }
+  },
+  {
+    name: "结案登记表",
+    category: "CLOSING",
+    description: "案件结案时填写，含办案小结。",
+    applicableCategories: [],
+    variables: ["matter.internalCode", "matter.title", "client.name", "matter.category", "lawyer.name", "matter.closedAt", "closure.reason", "closure.summary", "generatedAt"],
+    buildBuffer() {
+      return createDocxBuffer(this.name, CLOSING_BODY, this.variables);
+    }
+  },
+  {
+    name: "风险告知书",
+    category: "BLANK",
+    description: "向客户告知法律服务的潜在风险。",
+    applicableCategories: [],
+    variables: ["client.name", "client.idNumber", "matter.category", "matter.cause.name", "risk.items[].description", "risk.items[].level", "generatedAt"],
+    buildBuffer() {
+      return createDocxBuffer(this.name, RISK_NOTICE_BODY, this.variables);
     }
   }
 ];
