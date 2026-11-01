@@ -1,6 +1,21 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-31 (AUTO-66).
+Cập nhật lần cuối: 2026-10-31 (I18N-1).
+
+### [CYCLE-I18N-1] — 2026-10-31: Phân tích toàn bộ nợ tiếng Trung + pilot invoice-management ✅
+Loại: De-zh (i18n) + Tests. Không đổi hành vi.
+
+**Khảo sát (định lượng)**: **703 file / 6.691 dòng** có chữ Hán trong `src/` (app 276, components 141, lib 61, server 114, tests 85).
+
+**Phân loại rủi ro (ghi `docs/I18N-GLOSSARY.md` — đọc trước khi thay)**:
+- 🟢 An toàn: nhãn UI, message lỗi, toast, placeholder, comment (có thể thay ngay).
+- 🟡 Cần đồng bộ: chuỗi test đang assert (đổi test cùng commit); `toLocaleString("zh-CN")`→`"vi-VN"`.
+- 🔴 **Ràng buộc ngoài — GIỮ NGUYÊN**: `lib/express/companies.ts` (key = tên hãng gửi API 快递鸟/快递100), `STATE_TONE` (trạng thái thô từ API hãng).
+- 🔴 **Chờ chủ sở hưởn quyết**: `lib/template-builder.ts` (văn bản pháp lý — dịch chuyên nghiệp), `lib/ai/review-prompts.ts` + `lib/yuandian/*` (prompt gửi model ngoài Qwen/chineselaw), `lib/china-regions.ts` (sai dữ liệu thị trường), `lib/sms-parser.ts` (phụ thuộc nguồn SMS).
+
+**Pilot hoàn tất**: `finance/_components/invoice-management.tsx` (93 dòng → **0**, trừ comment license): 62 chuỗi UI + 2× `zh-CN`→`vi-VN`. Verify: typecheck PASS · 159 test (finance+app) pass · `/finance` **200**.
+
+**Tiếp theo (I18N-2)**: `lib/enums.ts` (13 comment) + `finance/_components/invoice-create-dialog.tsx` (59 dòng) — cùng glossary, test không bám chuỗi đã kiểm.
 
 ### [CYCLE-AUTO-66] — 2026-10-31: [R/T] seals/actions.ts: 16 → 1 lỗi (helper dùng chung + 2 lib)
 Loại: Refactor [R] + Tests [T]. Không đổi hành vi. ~55 phút.

@@ -429,3 +429,10 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Lint**: 896 problems (744 lỗi / 152 warning) — giảm 10 so với đầu chu kỳ (906/754/152); seals/actions.ts 16→1 (chỉ file>300).
 - **Bảo mật**: message lỗi + thứ tự kiểm tra (load→trạng thái→quyền) giữ nguyên; `auditSealAction`/`notifySealStatusChange` bọc đúng field gốc (đã đối chiếu).
 - **Ghi chú**: Prisma cần `SealType[]` (không phải string[]) — param helper đã fix kiểu.
+
+## [CYCLE-I18N-1] — 2026-10-31: Phân tích nợ tiếng Trung + pilot invoice-management ✅
+- **Loại**: De-zh (i18n) + Tests. ~35 phút. ✅.
+- **Phát hiện**: 703 file / 6.691 dòng chữ Hán. Phân loại rủi ro 3 tầng (an toàn / đồng bộ test / ràng buộc ngoài+chờ duyệt) — ghi docs/I18N-GLOSSARY.md.
+- **Pilot**: invoice-management.tsx 93→0 dòng Hán (trừ license); 62 chuỗi + 2 locale.
+- **Test delta**: 0 mới (2368 pass / 1 skip / 0 fail — không hồi quy; pilot không cần test mới vì không có logic thuần).
+- **Ghi chú**: companies.ts/STATE_TONE giữ tiếng Trung CÓ CHỦ ĐÍCH (hợp đồng API hãng xe); glossary chốt 30+ thuật ngữ dùng lại.
