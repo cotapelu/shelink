@@ -40,7 +40,7 @@ import { toDate } from "@/lib/sms-parser";
 import { procedureTypeLabel } from "@/lib/enums";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 生成 Hearing
+// Tạo Hearing
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export function GenerateHearingDialog({
@@ -56,7 +56,7 @@ export function GenerateHearingDialog({
 }) {
   const parsed = sms.parsedJson as unknown as ParsedJson;
   const [procedureId, setProcedureId] = useState(matter.procedures[0]?.id ?? "");
-  const [title, setTitle] = useState(parsed.smsType === "HEARING_NOTICE" ? "开庭" : "庭审");
+  const [title, setTitle] = useState(parsed.smsType === "HEARING_NOTICE" ? "phiên tòa" : "xét xử");
   const initDate = parsed.hearingDate ? toDate(parsed.hearingDate) : null;
   const [dateStr, setDateStr] = useState(
     initDate ? formatLocal(initDate) : ""
@@ -68,12 +68,12 @@ export function GenerateHearingDialog({
 
   const submit = () => {
     if (!procedureId) {
-      toast.error("请选择程序");
+      toast.error("Vui lòng chọn thủ tục");
       return;
     }
     const d = dateStr ? new Date(dateStr) : null;
     if (!d || isNaN(d.getTime())) {
-      toast.error("请填写有效的开庭时间");
+      toast.error("Vui lòng nhập thời gian mở phiên tòa hợp lệ");
       return;
     }
     startTransition(async () => {
@@ -81,16 +81,16 @@ export function GenerateHearingDialog({
         await generateHearingFromSms({
           smsId: sms.id,
           procedureId,
-          title: title.trim() || "庭审",
+          title: title.trim() || "xét xử",
           startsAt: d,
           room: room.trim(),
           judge: judge.trim(),
           notes: notes.trim()
         });
-        toast.success("已生成开庭并标记此短信处理完成");
+        toast.success("Đã tạo phiên tòa và đánh dấu SMS này đã xử lý");
         onOpenChange(false);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "失败");
+        toast.error(e instanceof Error ? e.message : "Thất bại");
       }
     });
   };
@@ -101,13 +101,13 @@ export function GenerateHearingDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gavel className="h-4 w-4 text-primary" />
-            生成开庭 · {matter.internalCode} {matter.title}
+            Tạo phiên tòa · {matter.internalCode} {matter.title}
           </DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div className="md:col-span-2">
-            <Label className="text-[11px]">关联程序 *</Label>
+            <Label className="text-[11px]">Thủ tục liên quan *</Label>
             <RadioChips
               size="sm"
               className="mt-2"
@@ -121,17 +121,17 @@ export function GenerateHearingDialog({
           </div>
 
           <div>
-            <Label className="text-[11px]">标题 *</Label>
+            <Label className="text-[11px]">Tiêu đề *</Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="开庭 / 二审庭审 / 询问"
+              placeholder="phiên tòa / xét xử phúc thẩm / hỏi ý kiến"
               className="mt-1"
             />
           </div>
 
           <div>
-            <Label className="text-[11px]">开庭时间 *</Label>
+            <Label className="text-[11px]">Thời gian mở phiên tòa *</Label>
             <Input
               type="datetime-local"
               value={dateStr}
@@ -141,17 +141,17 @@ export function GenerateHearingDialog({
           </div>
 
           <div>
-            <Label className="text-[11px]">法庭</Label>
+            <Label className="text-[11px]">Phòng xét xử</Label>
             <Input value={room} onChange={(e) => setRoom(e.target.value)} className="mt-1" />
           </div>
 
           <div>
-            <Label className="text-[11px]">承办法官</Label>
+            <Label className="text-[11px]">Thẩm phán chủ trì</Label>
             <Input value={judge} onChange={(e) => setJudge(e.target.value)} className="mt-1" />
           </div>
 
           <div className="md:col-span-2">
-            <Label className="text-[11px]">备注</Label>
+            <Label className="text-[11px]">Ghi chú</Label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -163,11 +163,11 @@ export function GenerateHearingDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={pending}>
             {pending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-            生成开庭
+            Tạo phiên tòa
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -176,31 +176,31 @@ export function GenerateHearingDialog({
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 生成 Deadline
+// Tạo Deadline
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const DEADLINE_CATEGORIES = [
-  { value: "APPEAL", label: "上诉期" },
-  { value: "EVIDENCE", label: "举证期" },
-  { value: "RESPONSE", label: "答辩期" },
-  { value: "PERFORMANCE", label: "履行期" },
-  { value: "ENFORCEMENT", label: "执行期" },
-  { value: "LIMITATION", label: "诉讼时效" },
-  { value: "ARBITRATION_SET_ASIDE", label: "撤裁期" },
-  { value: "CUSTOM", label: "其他" }
+  { value: "APPEAL", label: "Thời hiệu kháng cáo" },
+  { value: "EVIDENCE", label: "Thời hạn chứng minh" },
+  { value: "RESPONSE", label: "Thời hạn trả lời" },
+  { value: "PERFORMANCE", label: "Thời hạn thực hiện" },
+  { value: "ENFORCEMENT", label: "Thời hạn thi hành" },
+  { value: "LIMITATION", label: "Thời hiệu khởi kiện" },
+  { value: "ARBITRATION_SET_ASIDE", label: "Thời hạn xin hủy án trọng tài" },
+  { value: "CUSTOM", label: "Khác" }
 ] as const;
 type DeadlineCategory = (typeof DEADLINE_CATEGORIES)[number]["value"];
 
 function pickDefaultDeadlineTitle(parsed: ParsedJson): { title: string; category: DeadlineCategory } {
-  if (parsed.appealDeadline) return { title: `上诉期 ${parsed.appealDeadline}`, category: "APPEAL" };
-  if (parsed.smsType === "EVIDENCE_SUBMIT") return { title: "举证期限", category: "EVIDENCE" };
-  if (parsed.smsType === "FEE_NOTICE") return { title: "诉讼费缴纳", category: "PERFORMANCE" };
-  if (parsed.smsType === "JUDGMENT_NOTICE") return { title: "判决书生效 / 履行期", category: "PERFORMANCE" };
-  return { title: parsed.summary.slice(0, 30) || "期限", category: "CUSTOM" };
+  if (parsed.appealDeadline) return { title: `Thời hiệu kháng cáo ${parsed.appealDeadline}`, category: "APPEAL" };
+  if (parsed.smsType === "EVIDENCE_SUBMIT") return { title: "Thời hạn chứng minh", category: "EVIDENCE" };
+  if (parsed.smsType === "FEE_NOTICE") return { title: "Nộp phý tố tụng", category: "PERFORMANCE" };
+  if (parsed.smsType === "JUDGMENT_NOTICE") return { title: "Bản án có hiệu lực / Thời hạn thực hiện", category: "PERFORMANCE" };
+  return { title: parsed.summary.slice(0, 30) || "Thời hạn", category: "CUSTOM" };
 }
 
 function pickDefaultDueDate(parsed: ParsedJson): Date | null {
-  // 上诉期：默认从判决日 + N 日；若无判决日则空
+  // Thời hiệu kháng cáo: mặc định từ ngày tuyên án + N ngày; nếu không có ngày tuyên án thì để trống
   if (parsed.appealDeadline && parsed.judgmentDate) {
     const base = toDate(parsed.judgmentDate);
     const days = parseInt(parsed.appealDeadline);
@@ -210,7 +210,7 @@ function pickDefaultDueDate(parsed: ParsedJson): Date | null {
       return d;
     }
   }
-  // 其他：取 dates 中第一个日期
+  // Khác: lấy ngày đầu tiên trong dates
   for (const s of parsed.dates) {
     const d = toDate(s);
     if (d) return d;
@@ -243,12 +243,12 @@ export function GenerateDeadlineDialog({
 
   const submit = () => {
     if (!procedureId) {
-      toast.error("请选择程序");
+      toast.error("Vui lòng chọn thủ tục");
       return;
     }
     const d = dateStr ? new Date(dateStr) : null;
     if (!d || isNaN(d.getTime())) {
-      toast.error("请填写有效的截止日期");
+      toast.error("Vui lòng nhập ngày đến hạn hợp lệ");
       return;
     }
     startTransition(async () => {
@@ -256,16 +256,16 @@ export function GenerateDeadlineDialog({
         await generateDeadlineFromSms({
           smsId: sms.id,
           procedureId,
-          title: title.trim() || "期限",
+          title: title.trim() || "Thời hạn",
           category,
           dueAt: d,
           basis: basis.trim(),
           remindDays
         });
-        toast.success("已生成期限并标记此短信处理完成");
+        toast.success("Đã tạo thời hạn và đánh dấu SMS này đã xử lý");
         onOpenChange(false);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "失败");
+        toast.error(e instanceof Error ? e.message : "Thất bại");
       }
     });
   };
@@ -276,13 +276,13 @@ export function GenerateDeadlineDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary" />
-            生成期限 · {matter.internalCode} {matter.title}
+            Tạo thời hạn · {matter.internalCode} {matter.title}
           </DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div className="md:col-span-2">
-            <Label className="text-[11px]">关联程序 *</Label>
+            <Label className="text-[11px]">Thủ tục liên quan *</Label>
             <RadioChips
               size="sm"
               className="mt-2"
@@ -296,7 +296,7 @@ export function GenerateDeadlineDialog({
           </div>
 
           <div className="md:col-span-2">
-            <Label className="text-[11px]">期限类别 *</Label>
+            <Label className="text-[11px]">Loại thời hạn *</Label>
             <RadioChips
               size="sm"
               className="mt-2"
@@ -307,17 +307,17 @@ export function GenerateDeadlineDialog({
           </div>
 
           <div className="md:col-span-2">
-            <Label className="text-[11px]">标题 *</Label>
+            <Label className="text-[11px]">Tiêu đề *</Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="上诉期 15 日 / 举证期限 30 日"
+              placeholder="thời hiệu kháng cáo 15 ngày / thời hạn chứng minh 30 ngày"
               className="mt-1"
             />
           </div>
 
           <div>
-            <Label className="text-[11px]">截止日期 *</Label>
+            <Label className="text-[11px]">Ngày đến hạn *</Label>
             <Input
               type="date"
               value={dateStr}
@@ -327,7 +327,7 @@ export function GenerateDeadlineDialog({
           </div>
 
           <div>
-            <Label className="text-[11px]">提前提醒（天）</Label>
+            <Label className="text-[11px]">Nhắc trước (ngày)</Label>
             <Input
               type="number"
               min={1}
@@ -339,7 +339,7 @@ export function GenerateDeadlineDialog({
           </div>
 
           <div className="md:col-span-2">
-            <Label className="text-[11px]">期限依据</Label>
+            <Label className="text-[11px]">Cơ sở thời hạn</Label>
             <Textarea
               value={basis}
               onChange={(e) => setBasis(e.target.value)}
@@ -351,11 +351,11 @@ export function GenerateDeadlineDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={pending}>
             {pending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-            生成期限
+            Tạo thời hạn
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -377,5 +377,5 @@ function formatLocalDateOnly(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-// 让 MatterCombobox 类型在该模块可见（重导以便 inbox-view 使用）
+// Cho kiểu MatterCombobox hiển thị trong module này (re-export để inbox-view dùng)
 export type { MatterOption };

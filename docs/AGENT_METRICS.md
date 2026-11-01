@@ -510,3 +510,9 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Sửa**: seed.ts folderDefs (8 tên) + UPDATE 8 dòng DocumentFolder trong DB dev (收案→Tiếp nhận, 立案→Thụ lý, 委托手续→Thủ tục ủy quyền, 证据→Chứng cứ, 程序文书→Văn bản thủ tục, 庭审→Phiên tòa, 裁判→Quyết định, 结案→Kết thúc).
 - **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744; smoke /matters/[id] 200, hồ sơ hiển thị tiếng Việt.
 - **Ghi chú**: đây là pattern "code-string ↔ seed-data" — phải sửa CẢ HAI, không chỉ một bên.
+
+## [CYCLE-I18N-13] — 2026-10-31: sms-actions-dialogs.tsx → tiếng Việt
+- **Loại**: De-zh (i18n). ~25 phút. ✅.
+- **Đã làm**: 42 cặm thay chính xác (dialog tạo phiên tòa/thời hạn từ SMS, nhãn loại thời hạn, toast, comment) + sed 10 dòng lai.
+- **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /inbox 200.
+- **Ghi chú**: bẫy thứ tự lặp LẦN 5 (开庭 trước 开庭时间) — quy trình 2 bước vẫn ổn. Đề xuất cải tiến: tạo helper sortPairsByLengthDesc dùng chung.
