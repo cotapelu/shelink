@@ -51,10 +51,10 @@ import { cn } from "@/lib/utils";
 type PeriodKey = "month" | "quarter" | "year" | "lastYear" | "custom";
 
 const PERIOD_LABEL: Record<Exclude<PeriodKey, "custom">, string> = {
-  month: "本月",
-  quarter: "本季",
-  year: "本年",
-  lastYear: "上年"
+  month: "Tháng này",
+  quarter: "Quý này",
+  year: "Năm này",
+  lastYear: "Năm trước"
 };
 
 export function ReportsView({
@@ -87,34 +87,34 @@ export function ReportsView({
   const [scanning, startScanning] = useTransition();
 
   function handleScanOverdue() {
-    if (!confirm("立刻扫描已结案超过 30 天未归档的案件，给主办律师发预警通知？")) return;
+    if (!confirm("Quét ngay các vụ đã kết thúc quá 30 ngày chưa lưu trữ, gửi cảnh báo cho luật sư chủ trì?")) return;
     startScanning(async () => {
       try {
         const r = await triggerArchiveOverdueScanNow();
         toast.success(
-          `归档逾期扫描完成：${r.scanned} 候选 / ${r.notified} 通知 / ${r.suppressed} 抑制`
+          `Quét quá hạn lưu trữ xong: ${r.scanned} ứng viên / ${r.notified} thông báo / ${r.suppressed} ẩn`
         );
       } catch (err) {
-        toast.error("扫描失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Quét thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
 
   function handlePushWeekly() {
-    if (!confirm("立刻给所有 ADMIN / 主任律师 / 律师推送本周报告？每人收到一条通知。")) return;
+    if (!confirm("Đẩy ngay báo cáo tuần này cho mọi ADMIN / chủ nhiệm / luật sư? Mỗi người nhận 1 thông báo.")) return;
     startPushing(async () => {
       try {
         const res = await pushWeeklyReportToAll();
         if (res.failed.length === 0) {
-          toast.success(`已推送本周报告（${res.weekLabel}），共 ${res.succeeded} 人`);
+          toast.success(`Đã đẩy báo cáo tuần (${res.weekLabel}), tổng ${res.succeeded} người`);
         } else {
           toast.warning(
-            `部分成功：${res.succeeded} 成功，${res.failed.length} 失败`,
+            `Thành công một phần: ${res.succeeded} thành công, ${res.failed.length} thất bại`,
             { description: res.failed.map((f) => f.error).slice(0, 3).join("；") }
           );
         }
       } catch (err) {
-        toast.error("推送失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Đẩy thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -155,10 +155,10 @@ export function ReportsView({
         <div>
           <h1 className="flex items-center gap-2 text-xl">
             <BarChart3 className="h-5 w-5 text-primary" strokeWidth={1.8} />
-            律所报表
+            Báo cáo văn phòng
           </h1>
           <p className="mt-0.5 text-[12px] text-muted-foreground">
-            统计期：<span className="text-foreground">{periodLabel}</span>
+            Kỳ thống kê: <span className="text-foreground">{periodLabel}</span>
           </p>
         </div>
         <div className="flex items-center gap-2 ll-no-print">
@@ -189,7 +189,7 @@ export function ReportsView({
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              自定义
+              Tuỳ chỉnh
             </button>
           </div>
           <Button
@@ -198,14 +198,14 @@ export function ReportsView({
             onClick={handleScanOverdue}
             disabled={scanning}
             className="gap-1.5"
-            title="扫描已结超过 30 天未归档的案件"
+            title="Quét vụ đã kết thúc quá 30 ngày chưa lưu trữ"
           >
             {scanning ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <Send className="h-3.5 w-3.5" />
             )}
-            扫归档逾期
+            Quét quá hạn lưu trữ
           </Button>
           <Button
             size="sm"
@@ -213,29 +213,29 @@ export function ReportsView({
             onClick={handlePushWeekly}
             disabled={pushing}
             className="gap-1.5"
-            title="给所有律师推送本周报告通知"
+            title="Đẩy thông báo báo cáo tuần cho mọi luật sư"
           >
             {pushing ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <Send className="h-3.5 w-3.5" />
             )}
-            推送周报
+            Đẩy báo cáo tuần
           </Button>
           <Button
             size="sm"
             variant="outline"
             onClick={() => window.print()}
             className="gap-1.5"
-            title="Cmd/Ctrl+P 同样可触发，可以「另存为 PDF」"
+            title="Cmd/Ctrl+P cũng kích hoạt được, có thể 「Lưu thành PDF」"
           >
             <Printer className="h-3.5 w-3.5" />
-            打印 / PDF
+            In / PDF
           </Button>
           <Link href={exportHref} prefetch={false}>
             <Button size="sm" className="gap-1.5">
               <Download className="h-3.5 w-3.5" />
-              导出 xlsx
+              Xuất xlsx
             </Button>
           </Link>
         </div>
@@ -244,7 +244,7 @@ export function ReportsView({
       {customOpen && (
         <div className="ll-no-print flex flex-wrap items-end gap-2 rounded-md border border-border bg-card p-3 text-xs">
           <div>
-            <label className="text-muted-foreground">起始（含）</label>
+            <label className="text-muted-foreground">Bắt đầu (gồm)</label>
             <Input
               type="date"
               value={start}
@@ -254,7 +254,7 @@ export function ReportsView({
           </div>
           <span className="pb-2 text-muted-foreground">~</span>
           <div>
-            <label className="text-muted-foreground">结束（含）</label>
+            <label className="text-muted-foreground">Kết thúc (gồm)</label>
             <Input
               type="date"
               value={end}
@@ -263,9 +263,9 @@ export function ReportsView({
             />
           </div>
           <Button size="sm" onClick={applyCustom} disabled={!start || !end}>
-            应用
+            Áp dụng
           </Button>
-          <span className="ml-2 text-[10px] text-muted-foreground">最大跨度 5 年</span>
+          <span className="ml-2 text-[10px] text-muted-foreground">Khoảng cách tối đa 5 năm</span>
         </div>
       )}
 
@@ -278,23 +278,23 @@ export function ReportsView({
 
       {/* KPI */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Kpi icon={Briefcase} label="本期新收" value={data.kpis.newIntake} color="#5B8DEF" />
-        <Kpi icon={Wallet} label="在办中" value={data.kpis.inProgress} color="#F5A742" />
-        <Kpi icon={CheckCircle2} label="本期已结" value={data.kpis.closed} color="#48BB78" />
+        <Kpi icon={Briefcase} label="Tiếp nhận mới kỳ này" value={data.kpis.newIntake} color="#5B8DEF" />
+        <Kpi icon={Wallet} label="Đang xử lý" value={data.kpis.inProgress} color="#F5A742" />
+        <Kpi icon={CheckCircle2} label="Đã kết thúc kỳ này" value={data.kpis.closed} color="#48BB78" />
         <Kpi
           icon={Archive}
-          label="本期已归档"
+          label="Đã lưu trữ kỳ này"
           value={data.kpis.archived}
           color="#9B7BF7"
-          hint={data.kpis.closed > 0 ? `归档率 ${Math.round(data.kpis.archiveRate * 100)}%` : ""}
+          hint={data.kpis.closed > 0 ? `Tỷ lệ lưu trữ ${Math.round(data.kpis.archiveRate * 100)}%` : ""}
         />
       </div>
 
-      {/* 类别分布 */}
+      {/* Phân bố loại */}
       <section className="rounded-lg border border-border bg-card p-5">
-        <h3 className="mb-3 text-sm font-medium">本期新收 · 类别分布</h3>
+        <h3 className="mb-3 text-sm font-medium">Tiếp nhận mới kỳ này · Phân bố loại</h3>
         {data.byCategory.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">本期暂无新收案件</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">Kỳ này chưa có tiếp nhận mới</p>
         ) : (
           <ul className="space-y-2">
             {data.byCategory.map((c) => {
@@ -326,20 +326,20 @@ export function ReportsView({
       </section>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        {/* 律师产出 */}
+        {/* Luật sư sản lượng */}
         <section className="rounded-lg border border-border bg-card p-4">
-          <h3 className="mb-3 text-sm font-medium">律师产出 · 本期</h3>
+          <h3 className="mb-3 text-sm font-medium">Sản lượng luật sư · kỳ này</h3>
           {data.byLawyer.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">本期无产出数据</p>
+            <p className="py-6 text-center text-sm text-muted-foreground">Kỳ này chưa có dữ liệu sản lượng</p>
           ) : (
             <div className="overflow-hidden rounded border border-border">
               <table className="w-full text-xs">
                 <thead className="bg-muted/30 text-muted-foreground">
                   <tr>
-                    <th className="px-2 py-1.5 text-left font-normal">律师</th>
-                    <th className="px-2 py-1.5 text-right font-normal">新收</th>
-                    <th className="px-2 py-1.5 text-right font-normal">已结</th>
-                    <th className="px-2 py-1.5 text-right font-normal">收款（元）</th>
+                    <th className="px-2 py-1.5 text-left font-normal">Luật sư</th>
+                    <th className="px-2 py-1.5 text-right font-normal">Tiếp nhận mới</th>
+                    <th className="px-2 py-1.5 text-right font-normal">Đã kết thúc</th>
+                    <th className="px-2 py-1.5 text-right font-normal">Thu tiền (đ)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -362,20 +362,20 @@ export function ReportsView({
           )}
         </section>
 
-        {/* 客户应收 */}
+        {/* Khách hàngPhải thu */}
         <section className="rounded-lg border border-border bg-card p-4">
-          <h3 className="mb-3 text-sm font-medium">客户应收 · 本期</h3>
+          <h3 className="mb-3 text-sm font-medium">Phải thu khách hàng · kỳ này</h3>
           {data.byClientReceivable.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">本期无应收数据</p>
+            <p className="py-6 text-center text-sm text-muted-foreground">Kỳ này chưa có dữ liệu phải thu</p>
           ) : (
             <div className="overflow-hidden rounded border border-border">
               <table className="w-full text-xs">
                 <thead className="bg-muted/30 text-muted-foreground">
                   <tr>
-                    <th className="px-2 py-1.5 text-left font-normal">客户</th>
-                    <th className="px-2 py-1.5 text-right font-normal">应收</th>
-                    <th className="px-2 py-1.5 text-right font-normal">已收</th>
-                    <th className="px-2 py-1.5 text-right font-normal">余额</th>
+                    <th className="px-2 py-1.5 text-left font-normal">Khách hàng</th>
+                    <th className="px-2 py-1.5 text-right font-normal">Phải thu</th>
+                    <th className="px-2 py-1.5 text-right font-normal">Đã thu</th>
+                    <th className="px-2 py-1.5 text-right font-normal">Còn lại</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -405,22 +405,22 @@ export function ReportsView({
         </section>
       </div>
 
-      {/* 办案周期分析 */}
+      {/* Phân tích chu kỳ xử lý */}
       <section className="rounded-lg border border-border bg-card p-5">
-        <h3 className="mb-3 text-sm font-medium">办案周期 · 本期已结案件（收案 → 结案）</h3>
+        <h3 className="mb-3 text-sm font-medium">Chu kỳ xử lý · vụ đã kết thúc kỳ này (tiếp nhận → kết thúc)</h3>
         {cycle.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">本期无已结案件</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">Kỳ này chưa có vụ đã kết thúc</p>
         ) : (
           <div className="overflow-hidden rounded border border-border">
             <table className="w-full text-xs">
               <thead className="bg-muted/30 text-muted-foreground">
                 <tr>
-                  <th className="px-2 py-1.5 text-left font-normal">类别</th>
-                  <th className="px-2 py-1.5 text-right font-normal">样本数</th>
-                  <th className="px-2 py-1.5 text-right font-normal">均值（天）</th>
-                  <th className="px-2 py-1.5 text-right font-normal">中位数（天）</th>
-                  <th className="px-2 py-1.5 text-right font-normal">最快（天）</th>
-                  <th className="px-2 py-1.5 text-right font-normal">最慢（天）</th>
+                  <th className="px-2 py-1.5 text-left font-normal">Loại</th>
+                  <th className="px-2 py-1.5 text-right font-normal">Số mẫu</th>
+                  <th className="px-2 py-1.5 text-right font-normal">Trung bình (ngày)</th>
+                  <th className="px-2 py-1.5 text-right font-normal">Trung vị (ngày)</th>
+                  <th className="px-2 py-1.5 text-right font-normal">Nhanh nhất (ngày)</th>
+                  <th className="px-2 py-1.5 text-right font-normal">Chậm nhất (ngày)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -440,17 +440,17 @@ export function ReportsView({
         )}
       </section>
 
-      {/* AI 审查 top issues */}
+      {/* AI kiểm tra top issues */}
       <section className="rounded-lg border border-border bg-card p-5">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-medium">
-          AI 审查 · 本期高频问题
+          Kiểm tra AI · vấn đề tần cao kỳ này
           <span className="text-[10px] font-normal text-muted-foreground">
-            （{reviewAnalysis.recordCount} 次审查 / {reviewAnalysis.documentCount} 份文档 /{" "}
-            {reviewAnalysis.totalItems} 条问题）
+            （{reviewAnalysis.recordCount} lần kiểm tra / {reviewAnalysis.documentCount} văn bản /{" "}
+            {reviewAnalysis.totalItems} vấn đề）
           </span>
         </h3>
         {reviewAnalysis.totalItems === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">本期没有 AI 审查记录</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">Kỳ này chưa có bản ghi kiểm tra AI</p>
         ) : (
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2 text-xs">
@@ -462,10 +462,10 @@ export function ReportsView({
               <table className="w-full text-xs">
                 <thead className="bg-muted/30 text-muted-foreground">
                   <tr>
-                    <th className="px-2 py-1.5 text-left font-normal">问题标题</th>
-                    <th className="px-2 py-1.5 text-left font-normal w-20">类型</th>
-                    <th className="px-2 py-1.5 text-right font-normal w-16">次数</th>
-                    <th className="px-2 py-1.5 text-right font-normal w-32">高/中/低</th>
+                    <th className="px-2 py-1.5 text-left font-normal">Tiêu đề vấn đề</th>
+                    <th className="px-2 py-1.5 text-left font-normal w-20">Loại</th>
+                    <th className="px-2 py-1.5 text-right font-normal w-16">Số lần</th>
+                    <th className="px-2 py-1.5 text-right font-normal w-32">Cao/TB/Thấp</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -494,17 +494,17 @@ export function ReportsView({
 }
 
 const TYPE_CN = {
-  MISSING: "缺失",
-  RISK: "风险",
-  ISSUE: "问题",
-  SUGGESTION: "建议"
+  MISSING: "Thiếu",
+  RISK: "Rủi ro",
+  ISSUE: "Vấn đề",
+  SUGGESTION: "Đề xuất"
 } as const;
 
 function SevTotalChip({ sev, n }: { sev: "HIGH" | "MEDIUM" | "LOW"; n: number }) {
   const meta = {
-    HIGH: { label: "高严重", cls: "border-rose-200 bg-rose-50 text-rose-700" },
-    MEDIUM: { label: "中严重", cls: "border-amber-200 bg-amber-50 text-amber-700" },
-    LOW: { label: "低严重", cls: "border-slate-200 bg-slate-50 text-slate-600" }
+    HIGH: { label: "Nghiêm trọng cao", cls: "border-rose-200 bg-rose-50 text-rose-700" },
+    MEDIUM: { label: "Nghiêm trọng TB", cls: "border-amber-200 bg-amber-50 text-amber-700" },
+    LOW: { label: "Nghiêm trọng thấp", cls: "border-slate-200 bg-slate-50 text-slate-600" }
   }[sev];
   return (
     <div className={cn("rounded border px-3 py-2 text-xs", meta.cls)}>

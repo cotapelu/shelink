@@ -477,3 +477,8 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Đã làm**: `intake-sheet.tsx` (100 dòng → 0) + 4 file chrome cùng chuỗi (dashboard-greeting, hero-block, topbar, matters-view, intakes-table) + assertion test `intake-sheet.test.tsx` (2 lần: chuỗi + loại matcher getByText).
 - **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke `/`, `/intakes`, `/matters` đều 200.
 - **Ghi chú**: full suite bắt đúng coupling test co-located (mình grep pattern tên file nhưng test nằm cùng thư mục _components); bẫy thứ tự lặp lại lần 2 — đã ghi glossary + quy trình sửa 2 bước.
+
+## [CYCLE-I18N-9] — 2026-10-31: reports-view.tsx → tiếng Việt
+- **Loại**: De-zh (i18n). ~25 phút. ✅.
+- **Đã làm**: 69 cặm thay chính xác (KPI, biểu đồ, bảng laporan, AI issues labels, phân loại severity) + sed 5 dòng sót do bẫy thứ tự (đã lặp lại lần 3 — quy trình 2 bước hoạt động tốt).
+- **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /reports 200.

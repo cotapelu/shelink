@@ -132,3 +132,19 @@ Khi bảng thay có cả chuỗi ngắn ("主办律师") và chuỗi dài chứa
 
 ### ⚠️ Bẫy thứ tự lặp lại LẦN 2 (I18N-8) — đã xử lý
 Batch script lại rơi vào bẫy "件" (ngắn) thay trước "案件管理" (dài) → "案vụ管理". **Cách xử lý đã dùng**: chạy batch → script phát hiện remaining → script thứ 2 sửa chuỗi lai chính xác. **Nguyên tắc bất biến: sắp cặm thay theo độ dài GIẢM DẦN**; khi phát sinh lai, xử lý bằng cặm chính xác, KHÔNG regex.
+
+## Bổ sung I18N-9 (2026-10-31) — reports
+
+| Tiếng Trung | Tiếng Việt |
+|---|---|
+| 本月/本季/本年/上年 | Tháng này / Quý này / Năm này / Năm trước |
+| 本期新收/在办中/本期已结/本期已归档 | Tiếp nhận mới kỳ này / Đang xử lý / Đã kết thúc kỳ này / Đã lưu trữ kỳ này |
+| 归档率 | Tỷ lệ lưu trữ |
+| 律师产出/客户应收/办案周期 | Sản lượng luật sư / Phải thu khách hàng / Chu kỳ xử lý |
+| 应收/已收/余额 | Phải thu / Đã thu / Còn lại |
+| 样本数/均值/中位数/最快/最慢（天） | Số mẫu / Trung bình / Trung vị / Nhanh nhất / Chậm nhất (ngày) |
+| 缺失/风险/问题/建议 | Thiếu / Rủi ro / Vấn đề / Đề xuất |
+| 高/中/低严重 | Nghiêm trọng cao/TB/thấp |
+| 扫描已结超 30 天未归档 | Quét vụ đã kết thúc quá 30 ngày chưa lưu trữ |
+| 推送周报 | Đẩy báo cáo tuần |
+| 起始（含）/结束（含）/最大跨度 | Bắt đầu (gồm) / Kết thúc (gồm) / Khoảng cách tối đa |
