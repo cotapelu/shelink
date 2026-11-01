@@ -88,7 +88,7 @@ type ProcedureWithChildren = MatterProcedure & {
   memos: ProcedureMemo[];
 };
 
-// 聚合后带程序标签的行类型
+// Kiểu dòng sau khi gộp, kèm nhãn thủ tục
 type HearingRowItem = Hearing & { procLabel: string };
 type DeadlineRowItem = Deadline & { procLabel: string };
 type MemoRowItem = ProcedureMemo & { procLabel: string };
@@ -98,7 +98,7 @@ const procLabelOf = (p: MatterProcedure) =>
   p.customLabel ?? procedureTypeLabel[p.type];
 
 /**
- * v0.46：「Quan trọng」全案聚合（Xét xử安排 + 重要Thời hạn + Chuyển phát记录 + 其他Ghi chú）。
+ * v0.46：「Quan trọng」gộp toàn vụ (lịch xét xử + thời hạn quan trọng + bản ghi chuyển phát + ghi chú khác).
  */
 export function ProcedureRemindersAndMemos({
   matterId,
@@ -148,7 +148,7 @@ export function ProcedureRemindersAndMemos({
   );
 }
 
-// ============ Quan trọng（四类统一展示）============
+// ============ Quan trọng (hiển thị thống nhất 4 loại)============
 
 function ImportantItemsCard({
   matterId,
@@ -263,7 +263,7 @@ function ImportantItemsCard({
               {total}
             </span>
           </span>
-          {/* 分类按钮组 */}
+          {/* Nhóm nút phân loại */}
           <div className="flex flex-wrap items-center gap-0.5 rounded-md border border-border bg-background p-0.5">
             {filters.map((f) => (
               <button
@@ -363,7 +363,7 @@ function ImportantItemsCard({
   );
 }
 
-// 程序标签小徽章（仅多程序时显示，标明该条属于哪个程序）
+// Huy hiệu nhãn thủ tục (chỉ hiện khi nhiều thủ tục, đánh dấu dòng thuộc thủ tục nào)
 function ProcTag({ label }: { label: string }) {
   return (
     <Badge
@@ -624,18 +624,18 @@ function MemoRow({
   );
 }
 
-// ============ 统一ThêmQuan trọng ============
+// ============ Thêm Quan trọng thống nhất ============
 
 const deadlineCategoryLabel: Record<DeadlineCreateInput["category"], string> = {
-  LIMITATION: "诉讼时效",
-  EVIDENCE: "举证期限",
-  APPEAL: "上诉期",
-  PERFORMANCE: "履行期",
-  RESPONSE: "答辩期",
-  ENFORCEMENT: "执行申请",
-  ARBITRATION_SET_ASIDE: "撤销仲裁期",
-  PRESERVATION: "保全期限",
-  CUSTOM: "其他"
+  LIMITATION: "Thời hiệu khởi kiện",
+  EVIDENCE: "Thời hạn chứng minh",
+  APPEAL: "Thời hiệu kháng cáo",
+  PERFORMANCE: "Thời hạn thực hiện",
+  RESPONSE: "Thời hạn trả lời",
+  ENFORCEMENT: "Yêu cầu thi hành",
+  ARBITRATION_SET_ASIDE: "Thời hạn xin hủy án trọng tài",
+  PRESERVATION: "Thời hạn bảo toàn",
+  CUSTOM: "Khác"
 };
 
 const importantTypeMeta: Record<ImportantFilter, { label: string; icon: React.ElementType }> = {
@@ -646,16 +646,16 @@ const importantTypeMeta: Record<ImportantFilter, { label: string; icon: React.El
 };
 
 const CN_NUM: Record<number, string> = {
-  1: "一",
-  2: "二",
-  3: "三",
-  4: "四",
-  5: "五",
-  6: "六",
-  7: "七",
-  8: "八",
-  9: "九",
-  10: "十"
+  1: "1",
+  2: "2",
+  3: "3",
+  4: "4",
+  5: "5",
+  6: "6",
+  7: "7",
+  8: "8",
+  9: "9",
+  10: "10"
 };
 
 function toDateInput(date = new Date()) {
@@ -730,7 +730,7 @@ function ImportantItemDialog({
     const numStr = CN_NUM[count] ?? String(count);
     setType(defaultType);
     setHearingProcedureId(procId);
-    setHearingTitle(proc ? `${proc.label}第${numStr}次Xét xử` : "");
+    setHearingTitle(proc ? `${proc.label}lần xét xử thứ ${numStr}` : "");
     setHearingStartsAt(toDateTimeInput());
     setHearingRoom("");
     setHearingAddress("");
@@ -760,7 +760,7 @@ function ImportantItemDialog({
     if (!proc) return;
     const count = (hearingCounts[procId] ?? 0) + 1;
     const numStr = CN_NUM[count] ?? String(count);
-    setHearingTitle(`${proc.label}第${numStr}次Xét xử`);
+    setHearingTitle(`${proc.label}lần xét xử thứ ${numStr}`);
   }
 
   function handleSummonsUpload(file: File) {
@@ -778,14 +778,14 @@ function ImportantItemDialog({
         if (result.judge) setHearingJudge(result.judge);
         if (result.caseNumber || result.parties) {
           const parts: string[] = [];
-          if (result.caseNumber) parts.push(`案号：${result.caseNumber}`);
-          if (result.parties?.length) parts.push(`当事人：${result.parties.join("、")}`);
+          if (result.caseNumber) parts.push(`Số án: ${result.caseNumber}`);
+          if (result.parties?.length) parts.push(`Các bên: ${result.parties.join(", ")}`);
           setHearingNotes(parts.join("\n"));
         }
-        toast.success("传票识别完成，请核对信息");
+        toast.success("Đã nhận diện giấy triệu tập, vui lòng kiểm tra");
       } catch (err) {
-        toast.error("传票识别失败", {
-          description: err instanceof Error ? err.message : "请手动填写"
+        toast.error("Nhận diện giấy triệu tập thất bại", {
+          description: err instanceof Error ? err.message : "vui lòng nhập tay"
         });
       } finally {
         if (summonsRef.current) summonsRef.current.value = "";
@@ -801,13 +801,13 @@ function ImportantItemDialog({
         const result = await parseExpressLabel(fd);
         if (result.trackingNo) {
           setTrackingNo(result.trackingNo);
-          toast.success(`已识别单号：${result.trackingNo}`);
+          toast.success(`Đã nhận diện mã vận đơn：${result.trackingNo}`);
         } else {
-          toast.warning("未识别到单号，请手动输入");
+          toast.warning("Chưa nhận diện được mã vận đơn, vui lòng nhập tay");
         }
         if (result.companyCode) setCompanyCode(result.companyCode);
       } catch (err) {
-        toast.error("识别失败", {
+        toast.error("Nhận diện thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       } finally {
@@ -818,16 +818,16 @@ function ImportantItemDialog({
 
   function submitHearing() {
     if (!hearingProcedureId) {
-      toast.error("请先选择所处程序");
+      toast.error("Vui lòng chọn thủ tục trước");
       return;
     }
     if (!hearingTitle.trim()) {
-      toast.error("请填写Xét xử主题");
+      toast.error("Vui lòng nhập chủ đề phiên tòa");
       return;
     }
     const startsAt = new Date(hearingStartsAt);
     if (Number.isNaN(startsAt.getTime())) {
-      toast.error("请填写有效Xét xử时间");
+      toast.error("Vui lòng nhập thời gian phiên tòa hợp lệ");
       return;
     }
     startTransition(async () => {
@@ -843,11 +843,11 @@ function ImportantItemDialog({
           contact: hearingContact.trim(),
           notes: hearingNotes.trim()
         });
-        toast.success("Xét xử安排已Thêm");
+        toast.success("Đã thêm lịch xét xử");
         onOpenChange(false);
         router.refresh();
       } catch (err) {
-        toast.error("Thêm失败", {
+        toast.error("Thêm thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -856,16 +856,16 @@ function ImportantItemDialog({
 
   function submitDeadline() {
     if (!deadlineProcedureId) {
-      toast.error("请先选择所处程序");
+      toast.error("Vui lòng chọn thủ tục trước");
       return;
     }
     if (!deadlineTitle.trim()) {
-      toast.error("请填写Thời hạn名称");
+      toast.error("Vui lòng nhập tên thời hạn");
       return;
     }
     const dueAt = new Date(`${deadlineDueAt}T00:00:00`);
     if (Number.isNaN(dueAt.getTime())) {
-      toast.error("请填写有效到期日");
+      toast.error("Vui lòng nhập ngày đến hạn hợp lệ");
       return;
     }
     startTransition(async () => {
@@ -878,11 +878,11 @@ function ImportantItemDialog({
           basis: deadlineBasis.trim(),
           remindDays: deadlineRemindDays
         });
-        toast.success("重要Thời hạn已Thêm");
+        toast.success("Đã thêm thời hạn quan trọng");
         onOpenChange(false);
         router.refresh();
       } catch (err) {
-        toast.error("Thêm失败", {
+        toast.error("Thêm thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -891,11 +891,11 @@ function ImportantItemDialog({
 
   function submitExpress() {
     if (!trackingNo.trim()) {
-      toast.error("请填写或识别Chuyển phát单号");
+      toast.error("Vui lòng nhập hoặc nhận diện mã chuyển phát");
       return;
     }
     if (!purpose.trim()) {
-      toast.error("请填写Chuyển phát用途");
+      toast.error("Vui lòng nhập mục đích chuyển phát");
       return;
     }
     startTransition(async () => {
@@ -909,11 +909,11 @@ function ImportantItemDialog({
           recipient: recipient.trim(),
           recipientPhone: recipientPhone.trim()
         });
-        toast.success("Chuyển phát记录已Thêm");
+        toast.success("Đã thêm bản ghi chuyển phát");
         onOpenChange(false);
         router.refresh();
       } catch (err) {
-        toast.error("Thêm失败", {
+        toast.error("Thêm thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -922,11 +922,11 @@ function ImportantItemDialog({
 
   function submitMemo() {
     if (!memoProcedureId) {
-      toast.error("请先选择所处程序");
+      toast.error("Vui lòng chọn thủ tục trước");
       return;
     }
     if (!memoContent.trim()) {
-      toast.error("请填写Ghi chú内容");
+      toast.error("Vui lòng nhập nội dung ghi chú");
       return;
     }
     startTransition(async () => {
@@ -935,11 +935,11 @@ function ImportantItemDialog({
           procedureId: memoProcedureId,
           content: memoContent.trim()
         });
-        toast.success("其他Ghi chú已Thêm");
+        toast.success("Đã thêm ghi chú khác");
         onOpenChange(false);
         router.refresh();
       } catch (err) {
-        toast.error("Thêm失败", {
+        toast.error("Thêm thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -964,7 +964,7 @@ function ImportantItemDialog({
         <DialogHeader className="border-b border-border px-6 py-4">
           <DialogTitle>ThêmQuan trọng</DialogTitle>
           <DialogDescription className="text-xs">
-            在一个窗口内选择事项分类并填写信息
+            Chọn loại sự kiện và nhập thông tin trong một cửa sổ
           </DialogDescription>
         </DialogHeader>
 
@@ -996,7 +996,7 @@ function ImportantItemDialog({
           <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
             {procedureMissing && (
               <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700">
-                请先Thêm案件程序后，再录入Xét xử安排、重要Thời hạn或其他Ghi chú。
+                Vui lòng thêm thủ tục vụ án trước, rồi mới nhập lịch xét xử, thời hạn quan trọng hoặc ghi chú khác.
               </div>
             )}
 
@@ -1026,22 +1026,22 @@ function ImportantItemDialog({
                     ) : (
                       <ScanText className="h-3.5 w-3.5" />
                     )}
-                    {summonsPending ? "识别中…" : "上传传票识别"}
+                    {summonsPending ? "Đang nhận diện…" : "Tải ảnh giấy triệu tập để nhận diện"}
                   </Button>
                   <span className="text-[11px] text-muted-foreground">
-                    上传传票照片，自动填充Xét xử信息
+                    Tải ảnh giấy triệu tập, tự động điền thông tin phiên tòa
                   </span>
                 </div>
-                <ImportantField label="主题" required>
+                <ImportantField label="Chủ đề" required>
                   <Input
                     value={hearingTitle}
                     onChange={(e) => setHearingTitle(e.target.value)}
-                    placeholder="如：第一次Xét xử"
+                    placeholder="vd: phiên tòa lần 1"
                     disabled={procedureMissing}
                   />
                 </ImportantField>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <ImportantField label="所处程序" required>
+                  <ImportantField label="Thủ tục" required>
                     <ProcedureSelect
                       value={hearingProcedureId}
                       procedures={procedures}
@@ -1052,14 +1052,14 @@ function ImportantItemDialog({
                       }}
                     />
                   </ImportantField>
-                  <ImportantField label="审理法院">
+                  <ImportantField label="Toà xét xử">
                     <Input
                       readOnly
                       value={proceduresDetail[hearingProcedureId]?.handlingAgency ?? "—"}
                       className="bg-muted/50 text-muted-foreground"
                     />
                   </ImportantField>
-                  <ImportantField label="Xét xử时间" required>
+                  <ImportantField label="Thời gian xét xử" required>
                     <Input
                       type="datetime-local"
                       value={hearingStartsAt}
@@ -1067,39 +1067,39 @@ function ImportantItemDialog({
                       disabled={procedureMissing}
                     />
                   </ImportantField>
-                  <ImportantField label="法庭">
+                  <ImportantField label="Phòng xét xử">
                     <Input
                       value={hearingRoom}
                       onChange={(e) => setHearingRoom(e.target.value)}
-                      placeholder="如：第三法庭"
+                      placeholder="vd: Phòng xét xử số 3"
                       disabled={procedureMissing}
                     />
                   </ImportantField>
-                  <ImportantField label="主审 / 仲裁员">
+                  <ImportantField label="Chủ tọa / Trọng tài viên">
                     <Input
                       value={hearingJudge}
                       onChange={(e) => setHearingJudge(e.target.value)}
                       disabled={procedureMissing}
                     />
                   </ImportantField>
-                  <ImportantField label="联系方式">
+                  <ImportantField label="Liên hệ">
                     <Input
                       value={hearingContact}
                       onChange={(e) => setHearingContact(e.target.value)}
-                      placeholder="法官/书记员电话"
+                      placeholder="SĐT thẩm phán / thư ký"
                       disabled={procedureMissing}
                     />
                   </ImportantField>
                 </div>
-                <ImportantField label="Xét xử地址">
+                <ImportantField label="Địa điểm xét xử">
                   <Input
                     value={hearingAddress}
                     onChange={(e) => setHearingAddress(e.target.value)}
-                    placeholder="如：XX路XX号XX法院"
+                    placeholder="vd: số XX đường XX, Toà án XX"
                     disabled={procedureMissing}
                   />
                 </ImportantField>
-                <ImportantField label="备注">
+                <ImportantField label="Ghi chú">
                   <Textarea
                     rows={4}
                     value={hearingNotes}
@@ -1112,7 +1112,7 @@ function ImportantItemDialog({
 
             {type === "deadline" && (
               <>
-                <ImportantField label="所处程序" required>
+                <ImportantField label="Thủ tục" required>
                   <ProcedureSelect
                     value={deadlineProcedureId}
                     procedures={procedures}
@@ -1120,16 +1120,16 @@ function ImportantItemDialog({
                     onChange={setDeadlineProcedureId}
                   />
                 </ImportantField>
-                <ImportantField label="Thời hạn名称" required>
+                <ImportantField label="Tên thời hạn" required>
                   <Input
                     value={deadlineTitle}
                     onChange={(e) => setDeadlineTitle(e.target.value)}
-                    placeholder="如：举证截止 / 上诉到期日"
+                    placeholder="vd: hạn chứng minh / ngày hết thời hiệu kháng cáo"
                     disabled={procedureMissing}
                   />
                 </ImportantField>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <ImportantField label="Thời hạn类型">
+                  <ImportantField label="Loại thời hạn">
                     <Select
                       value={deadlineCategory}
                       onValueChange={(value) =>
@@ -1149,7 +1149,7 @@ function ImportantItemDialog({
                       </SelectContent>
                     </Select>
                   </ImportantField>
-                  <ImportantField label="到期日" required>
+                  <ImportantField label="Ngày đến hạn" required>
                     <Input
                       type="date"
                       value={deadlineDueAt}
@@ -1158,15 +1158,15 @@ function ImportantItemDialog({
                     />
                   </ImportantField>
                 </div>
-                <ImportantField label="计算依据">
+                <ImportantField label="Cơ sở tính">
                   <Input
                     value={deadlineBasis}
                     onChange={(e) => setDeadlineBasis(e.target.value)}
-                    placeholder="如：判决书送达日 2026-05-01 + 15 日"
+                    placeholder="vd: ngày nhận bản án 2026-05-01 + 15 ngày"
                     disabled={procedureMissing}
                   />
                 </ImportantField>
-                <ImportantField label="提前提醒（天）">
+                <ImportantField label="Nhắc trước (ngày)">
                   <Input
                     type="number"
                     min={0}
@@ -1182,12 +1182,12 @@ function ImportantItemDialog({
 
             {type === "express" && (
               <>
-                <ImportantField label="单号" required>
+                <ImportantField label="Mã số" required>
                   <div className="flex gap-1">
                     <Input
                       value={trackingNo}
                       onChange={(e) => setTrackingNo(e.target.value)}
-                      placeholder="可手动输入或上传图片识别"
+                      placeholder="Nhập tay hoặc tải ảnh để nhận diện"
                       className="font-mono"
                     />
                     <input
@@ -1213,19 +1213,19 @@ function ImportantItemDialog({
                       ) : (
                         <ScanLine className="h-3 w-3" />
                       )}
-                      识别
+                      Nhận diện
                     </Button>
                   </div>
                 </ImportantField>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <ImportantField label="Chuyển phát公司">
+                  <ImportantField label="Hãng chuyển phát">
                     <Input
                       value={companyCode}
                       onChange={(e) => setCompanyCode(e.target.value)}
-                      placeholder="留空则自动识别"
+                      placeholder="Để trống sẽ tự nhận diện"
                     />
                   </ImportantField>
-                  <ImportantField label="方向">
+                  <ImportantField label="Hướng">
                     <Select
                       value={direction}
                       onValueChange={(value) => setDirection(value as "OUTBOUND" | "INBOUND")}
@@ -1234,24 +1234,24 @@ function ImportantItemDialog({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="OUTBOUND">Gửi đi（我方→外）</SelectItem>
-                        <SelectItem value="INBOUND">Nhận（外→我方）</SelectItem>
+                        <SelectItem value="OUTBOUND">Gửi đi (ta → ngoài)</SelectItem>
+                        <SelectItem value="INBOUND">Nhận (ngoài → ta)</SelectItem>
                       </SelectContent>
                     </Select>
                   </ImportantField>
                 </div>
-                <ImportantField label="用途" required>
+                <ImportantField label="Mục đích" required>
                   <Input
                     value={purpose}
                     onChange={(e) => setPurpose(e.target.value)}
-                    placeholder="如：起诉状寄朝阳法院"
+                    placeholder="vd: gửi đơn khởi kiện về Toà án"
                   />
                 </ImportantField>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <ImportantField label="Nhận人 / 单位">
+                  <ImportantField label="Người / đơn vị nhận">
                     <Input value={recipient} onChange={(e) => setRecipient(e.target.value)} />
                   </ImportantField>
-                  <ImportantField label="Nhận电话">
+                  <ImportantField label="Điện thoại người nhận">
                     <Input
                       value={recipientPhone}
                       onChange={(e) => setRecipientPhone(e.target.value)}
@@ -1264,7 +1264,7 @@ function ImportantItemDialog({
 
             {type === "memo" && (
               <>
-                <ImportantField label="所处程序" required>
+                <ImportantField label="Thủ tục" required>
                   <ProcedureSelect
                     value={memoProcedureId}
                     procedures={procedures}
@@ -1272,12 +1272,12 @@ function ImportantItemDialog({
                     onChange={setMemoProcedureId}
                   />
                 </ImportantField>
-                <ImportantField label="Ghi chú内容" required>
+                <ImportantField label="Nội dung ghi chú" required>
                   <Textarea
                     rows={6}
                     value={memoContent}
                     onChange={(e) => setMemoContent(e.target.value)}
-                    placeholder="输入Ghi chú内容..."
+                    placeholder="Nhập nội dung ghi chú..."
                     disabled={procedureMissing}
                   />
                 </ImportantField>
@@ -1292,7 +1292,7 @@ function ImportantItemDialog({
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              取消
+              Huỷ
             </Button>
             <Button
               type="submit"
@@ -1323,7 +1323,7 @@ function ProcedureSelect({
   return (
     <Select value={value || undefined} onValueChange={onChange} disabled={disabled}>
       <SelectTrigger>
-        <SelectValue placeholder="选择所处程序" />
+        <SelectValue placeholder="Chọn thủ tục" />
       </SelectTrigger>
       <SelectContent>
         {procedures.map((p) => (

@@ -81,3 +81,16 @@
 ### ⚠️ Bài học đắt giá (I18N-4)
 - **Luôn grep TOÀN BỘ file test** trước khi kết luận "không coupling". Ở `schemas.test.ts`, grep `head` chỉ thấy license + data mẫu → tưởng không bám; thực tế 2 assertion bám message. Phát hiện nhờ **full test suite** sau khi đã đổi source.
 - Dấu fullwidth `（），；：` chỉ đổi **đúng chỗ đang chạm** (party/procedure export), chỗ khác (members, contacts) giữ để tránch churn test — chu kỳ riêng cho punctuation.
+
+## Bổ sung I18N-5 (2026-10-31) — procedure-content
+
+| Tiếng Trung | Tiếng Việt |
+|---|---|
+| 诉讼时效 / 举证期限 / 上诉期 / 履行期 / 答辩期 / 撤销仲裁期 / 保全期限 | Thời hiệu khởi kiện / Thời hạn chứng minh / Thời hiệu kháng cáo / Thời hạn thực hiện / Thời hạn trả lời / Thời hạn xin hủy án trọng tài / Thời hạn bảo toàn |
+| 第N次Xét xử | lần xét xử thứ N |
+| 案号 / 当事人 | Số án / Các bên |
+| 所处程序 / 审理法院 / 法庭 / 主审 / 联系 | Thủ tục / Toà xét xử / Phòng xét xử / Chủ tọa / Liên hệ |
+| 提前提醒（天）/ 计算依据 / 到期日 / 单号 | Nhắc trước (ngày) / Cơ sở tính / Ngày đến hạn / Mã số |
+| Nhận的人 / Nhận电话 / Chuyển phát公司 / 用途 / 方向 | Người nhận / Điện thoại người nhận / Hãng chuyển phát / Mục đích / Hướng |
+
+**Kỹ thuật mới**: file hỗn hợp Việt–Trung (dịch dở) → dùng **script thay chính xác (ordered string pairs, chuỗi dài trước)**, xác nhận `applied: 80/82`, rồi xử lý sót bằng sed từng dòng. Không dùng regex trên toàn file (dễ vỡ chuỗi dài).

@@ -454,3 +454,9 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Đã làm**: `matters/schemas.ts` (11 chuỗi+comment, gồm 2 message zod), `matters/code-generator.ts` + `clients/code-generator.ts` (comment), `clients/actions.ts` (2 comment), `export-xlsx.ts` (14: nhãn party/procedure, boolean Có/Không, "Chính", dấu fullwidth trong chuỗi đang chạm) + **đồng bộ 11 assertion** trong `export-xlsx.test.ts` và **2 assertion** trong `schemas.test.ts`.
 - **Gates**: typecheck PASS; test **2368 pass / 1 skip / 0 fail**; lint 896/744 (không đổi); export 33/33, schemas 43/43.
 - **Ghi chú**: bắt 2 fail ngay sau khi đổi source → đúng quy trình "test fail → sửa test cùng chu kỳ"; grep toàn bộ test (không chỉ head).
+
+## [CYCLE-I18N-5] — 2026-10-31: procedure-content.tsx (Hỗn hợp Việt–Trung) → tiếng Việt
+- **Loại**: De-zh (i18n). ~40 phút. ✅.
+- **Đã làm**: 82 cặm thay chính xác (comment, nhãn form, toast, placeholder, phân loại thời hạn, số đếm Trung→số) qua script ordered-pairs + sed xử lý 11 dòng sót.
+- **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /matters/[id] 200.
+- **Ghi chú**: không test nào bám file này (đã grep); kỹ thuật script pairs khác regex toàn file.
