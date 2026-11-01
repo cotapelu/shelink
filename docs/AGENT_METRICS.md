@@ -384,3 +384,11 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Lint**: 923 problems (771 lỗi / 152 warning) — giảm 2 so với đầu chu kỳ (925/773/152); finance/actions.ts 14→12.
 - **Bảo mật**: quyền truy cập giữ nguyên (assertCanAccessMatter trước query); không rò dữ liệu.
 - **Ghi chú**: sort ổn định cho phần không-primary (giữ thứ tự insert Map) — đã có test khóa.
+
+## [CYCLE-AUTO-61] — 2026-10-31: [R/T] finance-stats-lib (3 action thống kê) (+13 test)
+- **Loại**: Refactor [R] + Tests [T]. ~40 phút. ✅.
+- **Test delta**: +13 (2325→2338 pass / 1 skip / 0 fail).
+- **Phủ**: stats/buckets/dates 100% nhánh chính (gồm qua năm, ngoài cửa sổ, ép Decimal-like).
+- **Lint**: 921 problems (769 lỗi / 152 warning) — giảm 2 so với đầu chu kỳ (923/771/152); finance/actions.ts 12→10.
+- **Bảo mật**: visFilter & phân quyền getPersonalRevenue giữ nguyên (rewire không đổi điều kiện).
+- **Ghi chú**: `toAmount` ép Decimal-like an toàn (string → Number||0) — test khóa.

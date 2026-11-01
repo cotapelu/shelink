@@ -1,8 +1,21 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-31 (AUTO-60).
+Cập nhật lần cuối: 2026-10-31 (AUTO-61).
 
 ## Chu kỳ đã hoàn thành (gần đây)
+
+### [CYCLE-AUTO-61] — 2026-10-31: [R/T] finance-stats-lib: getMatterFinance/getMonthlyRevenue/getPersonalRevenue
+Loại: Refactor [R] + Tests [T] — ưu tiên MEDIUM. Không đổi hành vi. ~40 phút.
+
+**Đã hoàn thành**:
+- [x] Trích `src/server/finance/finance-stats-lib.ts` (thuần): `computeMatterFinanceStats` (7 chỉ số, ép Decimal-like an toàn), `revenueWindowStart` (lùi months-1, neo mùng 1), `buildMonthlyRevenueBuckets` (label Tháng x + phân bổ qua năm), `monthStartOf`/`yearStartOf`, `monthOffset`.
+- [x] Rewire 3 action: `getMatterFinance` (44→~30, phần stats thuần ra khỏi DB action), `getMonthlyRevenue` (35→~13, mất cả loop bucket), `getPersonalRevenue` (35→~12, trích `commissionSum` + 2 aggregate chạy song song như cũ).
+- [x] Test mới `finance-stats-lib.test.ts` **13 test**: toàn 0, cộng theo type, ép string/Decimal-like, lùi tháng/qua năm, label, phân bổ đúng tháng + bỏ ngoài cửa sổ + bỏ trước cửa sổ, monthStart/yearStart.
+- [x] Lưu ý hành vi: `getPersonalRevenue` giữ nguyên 2 aggregate song song; ép Decimal qua helper `toAmount` (Number(value)||0 cho chuỗi).
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test **2338 pass / 1 skip / 0 fail** (2325→2338, +13); full lint **921 (769 lỗi)** — giảm 2; `finance/actions.ts` 12→10 lỗi; **5/5 lib finance 0 lỗi**; 119 test finance pass.
+
+**Còn lại `finance/actions.ts`** (10 lỗi): `createFeeEntry` (51 + arrow 33), `deleteFeeEntry` (36), `getMatterFinance` (30 — khối Promise.all 4 query), `createBilling` (27), `deleteBilling` (25), `setCommissionPlan` (30), `listMatterInvoiceRequests` (24), file ~555>300 → AUTO-62 (mục tiêu: tách query ra helper io + audit/revalidate dùng chung).
 
 ### [CYCLE-AUTO-60] — 2026-10-31: [R/T] getMatterInvoiceContext (77 dòng, cx 18) → invoice-context-lib
 Loại: Refactor [R] + Tests [T] — ưu tiên MEDIUM. Không đổi hành vi. ~35 phút.

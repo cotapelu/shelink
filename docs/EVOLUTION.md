@@ -179,3 +179,7 @@
 **Phiên 2026-10-31 (AUTO-60)**:
 - [R/T] `getMatterInvoiceContext` (cx 18, 77 dòng): tách `invoice-context-lib.ts` (buildClientOptions/buildInvoiceContext) + `MATTER_INVOICE_SELECT`; action 77→10 dòng; +12 test.
 - Test: 2325 pass / 1 skip / 0 fail. Lint: 925→923 (773→771 lỗi). `finance/actions.ts`: 16→12 lỗi, 4 lib finance 0 lỗi.
+
+**Phiên 2026-10-31 (AUTO-61)**:
+- [R/T] `finance-stats-lib.ts` mới: computeMatterFinanceStats/buckets/revenue windows; rewire 3 action thống kê; +13 test.
+- Test: 2338 pass / 1 skip / 0 fail. Lint: 923→921 (771→769 lỗi). `finance/actions.ts`: 16→10 lỗi; 5/5 lib finance 0 lỗi.

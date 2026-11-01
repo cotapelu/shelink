@@ -63,6 +63,13 @@ import {
   buildClientOptions,
   buildInvoiceContext
 } from "./invoice-context-lib";
+import {
+  buildMonthlyRevenueBuckets,
+  computeMatterFinanceStats,
+  monthStartOf,
+  revenueWindowStart,
+  yearStartOf
+} from "./finance-stats-lib";
 
 // ============ Billing ============
 
@@ -284,18 +291,8 @@ export async function getMatterFinance(matterId: string) {
     })
   ]);
 
-  const sum = (filter: (e: (typeof entries)[number]) => boolean) =>
-    entries.filter(filter).reduce((acc, e) => acc + Number(e.amount), 0);
-
-  const stats = {
-    contractAmount: billings.reduce((acc, b) => acc + Number(b.contractAmount), 0),
-    receivable: sum((e) => e.type === "RECEIVABLE"),
-    received: sum((e) => e.type === "RECEIVED"),
-    refund: sum((e) => e.type === "REFUND"),
-    cost: sum((e) => e.type === "COST"),
-    commission: sum((e) => e.type === "COMMISSION"),
-    invoiced: issuedInvoices.reduce((acc, i) => acc + Number(i.amount), 0)
-  };
+  // Tổng hợp số liệu (thuần, đã test — finance-stats-lib)
+  const stats = computeMatterFinanceStats({ billings, entries, issuedInvoices });
 
   return { billings, entries, plans, stats };
 }
@@ -459,8 +456,7 @@ export async function listAllFeeEntries(params: {
 export async function getMonthlyRevenue(months = 6) {
   const session = await requireSession();
   const visFilter = matterVisibilityFilter(session.user.id, session.user.role);
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
+  const start = revenueWindowStart(new Date(), months);
 
   const entries = await prisma.feeEntry.findMany({
     where: {
@@ -471,25 +467,17 @@ export async function getMonthlyRevenue(months = 6) {
     select: { type: true, amount: true, occurredAt: true }
   });
 
-  const buckets: { month: string; received: number; receivable: number }[] = [];
-  for (let i = 0; i < months; i++) {
-    const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
-    buckets.push({
-      month: `Tháng ${d.getMonth() + 1}`,
-      received: 0,
-      receivable: 0
-    });
-  }
+  // Bucket + phân bổ (thuần, đã test — finance-stats-lib)
+  return buildMonthlyRevenueBuckets(start, months, entries);
+}
 
-  for (const e of entries) {
-    const d = new Date(e.occurredAt);
-    const idx = (d.getFullYear() - start.getFullYear()) * 12 + d.getMonth() - start.getMonth();
-    if (idx < 0 || idx >= months) continue;
-    if (e.type === "RECEIVED") buckets[idx].received += Number(e.amount);
-    if (e.type === "RECEIVABLE") buckets[idx].receivable += Number(e.amount);
-  }
-
-  return buckets;
+/** Tổng hoa hồng của 1 người từ mốc thời gian (dùng cho báo cáo thu nhập). */
+async function commissionSum(userId: string, since: Date): Promise<number> {
+  const r = await prisma.feeEntry.aggregate({
+    where: { type: "COMMISSION", beneficiaryUserId: userId, occurredAt: { gte: since } },
+    _sum: { amount: true }
+  });
+  return Number(r._sum.amount ?? 0);
 }
 
 export async function getPersonalRevenue(userId: string) {
@@ -497,35 +485,12 @@ export async function getPersonalRevenue(userId: string) {
   if (!isManager(session.user.role) && session.user.id !== userId) {
     throw new Error("Chỉ được xem dữ liệu thu nhập của chính mình");
   }
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  monthStart.setHours(0, 0, 0, 0);
-
-  const yearStart = new Date(monthStart.getFullYear(), 0, 1);
-
-  const [monthly, yearly] = await Promise.all([
-    prisma.feeEntry.aggregate({
-      where: {
-        type: "COMMISSION",
-        beneficiaryUserId: userId,
-        occurredAt: { gte: monthStart }
-      },
-      _sum: { amount: true }
-    }),
-    prisma.feeEntry.aggregate({
-      where: {
-        type: "COMMISSION",
-        beneficiaryUserId: userId,
-        occurredAt: { gte: yearStart }
-      },
-      _sum: { amount: true }
-    })
+  const now = new Date();
+  const [monthlyCommission, yearlyCommission] = await Promise.all([
+    commissionSum(userId, monthStartOf(now)),
+    commissionSum(userId, yearStartOf(now))
   ]);
-
-  return {
-    monthlyCommission: Number(monthly._sum.amount ?? 0),
-    yearlyCommission: Number(yearly._sum.amount ?? 0)
-  };
+  return { monthlyCommission, yearlyCommission };
 }
 
 // ============ Bảng tuổi nợ (DATA-MODEL §4.31) ============
