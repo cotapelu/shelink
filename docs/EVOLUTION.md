@@ -188,3 +188,7 @@
 - [R] `finance/actions.ts`: 10 lỗi → 1 (còn file>300). Tách 7 hàm: run*/createCommissionChildren/toBillingCreateData/INVOICE_REQUEST_LIST_SELECT/findMatterLabel/queries.ts (fetchMatterFinanceData).
 - Test: 2338 pass / 1 skip / 0 fail. Lint: 921→912 (769→760 lỗi).
 - Chu kỳ minh họa rõ đạo lý: **edit atomic** — verify file sau mỗi edit báo lỗi trước khi làm tiếp.
+
+**Phiên 2026-10-31 (AUTO-63) — BLOCKED**:
+- [R] Tách finance/actions.ts (440 dòng) → bị chặn bởi ràng buộc Next.js: `"use server"` không cho re-export named → /finance 500 tại runtime. Đã revert sạch, gate giữ nguyên (912/760/152).
+- Kế hoạch AUTO-64 (đúng cách): consumer import trực tiếp từ module mới (5 component + 9 test file), KHÔNG re-export.

@@ -399,3 +399,10 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Lint**: 912 problems (760 lỗi / 152 warning) — giảm 9 so với đầu chu kỳ (921/769/152); finance/actions.ts 10→1 (chỉ còn file >300 dòng).
 - **Bảo mật**: thứ tự phân quyền trong createInvoiceRequest giữ nguyên (roleViolation → assertCanAssociateMatter → data validation); deleteFeeEntry cascade transaction nguyên vẹn.
 - **Ghi chú**: để ý atomic — 1 edit call lỗi thì KHÔNG edit nào apply; luôn kiểm tra file sau mỗi lần edit báo lỗi.
+
+## [CYCLE-AUTO-63] — 2026-10-31: [R] tách finance/actions.ts → BLOCKED và revert
+- **Loại**: Refactor [R]. ~20 phút. Trạng thái: ❌ Blocked (rủi ro runtime, đã rollback sạch).
+- **Nội dung thử**: tách Billing/FeeEntry/CommissionPlan sang `billing-actions.ts` + re-export từ `actions.ts`.
+- **Kết quả**: typecheck PASS, test PASS, lint sạch — **nhưng runtime 500**: Turbopack không hỗ trợ re-export (`export { x } from`) từ module `"use server"` → "The module has no exports at all".
+- **Hành động**: `git checkout` phục hồi toàn bộ; gate xác nhận về đúng trạng thái đầu chu kỳ (912/760/152; /finance 200).
+- ** Bài học (ghi PROFILE)**: với Next.js 16 + "use server", tách module = **sửa import ở consumer**, KHÔNG re-export. Lần sau làm AUTO-64: cập nhật 5 consumer + 9 test file import trực tiếp.
