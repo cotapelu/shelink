@@ -460,3 +460,8 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Đã làm**: 82 cặm thay chính xác (comment, nhãn form, toast, placeholder, phân loại thời hạn, số đếm Trung→số) qua script ordered-pairs + sed xử lý 11 dòng sót.
 - **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /matters/[id] 200.
 - **Ghi chú**: không test nào bám file này (đã grep); kỹ thuật script pairs khác regex toàn file.
+
+## [CYCLE-I18N-6] — 2026-10-31: procedure-info-panel.tsx → tiếng Việt
+- **Loại**: De-zh (i18n). ~30 phút. ✅.
+- **Đã làm**: 79 cặm thay chính xác (nhãn loại thủ tục, vai trò bên, kết quả vụ, thẩm phán, label Pair, toast, dialog) + 6 dòng sót bằng sed.
+- **Gates**: typecheck PASS; test 2368 pass/1 skip/0 fail; lint 896/744 (không đổi); smoke /matters/[id] 200.

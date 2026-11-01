@@ -94,3 +94,20 @@
 | Nhận的人 / Nhận电话 / Chuyển phát公司 / 用途 / 方向 | Người nhận / Điện thoại người nhận / Hãng chuyển phát / Mục đích / Hướng |
 
 **Kỹ thuật mới**: file hỗn hợp Việt–Trung (dịch dở) → dùng **script thay chính xác (ordered string pairs, chuỗi dài trước)**, xác nhận `applied: 80/82`, rồi xử lý sót bằng sed từng dòng. Không dùng regex trên toàn file (dễ vỡ chuỗi dài).
+
+## Bổ sung I18N-6 (2026-10-31) — procedure-info-panel
+
+| Tiếng Trung | Tiếng Việt |
+|---|---|
+| 一审/二审/再审/重审信息 | Thông tin sơ thẩm / phúc thẩm / tái thẩm / xét xử lại |
+| 商事仲裁/劳动仲裁信息 | Thông tin trọng tài thương mại / lao động |
+| 撤销仲裁裁决/不予执行仲裁审查 | Xin hủy án trọng tài / Xem xét không thi hành án trọng tài |
+| 强制执行/执行异议信息 | Cưỡng chế thi hành / Phản đối thi hành án |
+| 侦查/审查起诉/死刑复核/刑罚执行/减刑假释审查 | Điều tra / Xét xử truy tố / Xem xét tử hình / Thi hành án hình sự / Xem xét giảm án-tha tù |
+| 行政复议/非诉行政执行/非诉阶段 | Khiếu nại hành chính / Thi hành hành chính phi tố tụng / Giai đoạn phi tố tụng |
+| 客户/相对方/第三人/共同诉讼人/代理人/证人 | Khách hàng / Bên đối phương / Người thứ ba / Đồng khởi kiện / Người đại diện / Nhân chứng |
+| 胜诉/部分胜诉/败诉/调解/撤回/驳回 | Thắng kiện / Thắng kiện một phần / Thua kiện / Hòa giải / Rút đơn / Bác bỏ |
+| 主审法官/执行法官/首席仲裁员 | Thẩm phán chủ tọa / Thẩm phán thi hành án / Trọng tài viên trưởng |
+| 诉讼请求/仲裁请求 | Yêu cầu khởi kiện / Yêu cầu trọng tài |
+| 管辖地/管辖机构/立案/裁决 | Địa giới / Cơ quan xử lý / Tiếp nhận / Kết thúc-quyết định |
+| 证件号/统一社会信用代码 | Số giấy tờ / Mã số thuế |

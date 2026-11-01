@@ -55,30 +55,30 @@ import { InfoRow, Pair } from "./info-panel";
 import { JurisdictionSelect } from "@/app/(app)/intakes/_components/jurisdiction-select";
 import { agencyOptions } from "@/lib/china-regions";
 
-// v0.45: 程序类型到「XX信息」的映射（覆盖所有程序类型）
+// v0.45: Map loại thủ tục → nhãn 「Thông tin XX」 (bao phủ mọi loại thủ tục)
 const PROC_INFO_LABEL: Record<string, string> = {
-  FIRST_INSTANCE: "一审信息",
-  SECOND_INSTANCE: "二审信息",
-  RETRIAL_REVIEW: "再审审查信息",
-  RETRIAL: "再审信息",
-  REMAND_FIRST: "重审一审信息",
-  REMAND_SECOND: "重审二审信息",
-  PROSECUTORIAL_SUPERVISION: "检察监督信息",
-  COMMERCIAL_ARBITRATION: "商事仲裁信息",
-  LABOR_ARBITRATION: "劳动仲裁信息",
-  ARBITRATION_SET_ASIDE: "撤销仲裁裁决信息",
-  ARBITRATION_ENFORCEMENT_REVIEW: "不予执行仲裁审查信息",
-  ENFORCEMENT: "强制执行信息",
-  ENFORCEMENT_OBJECTION: "执行异议信息",
-  INVESTIGATION: "侦查信息",
-  PROSECUTION_REVIEW: "审查起诉信息",
-  DEATH_PENALTY_REVIEW: "死刑复核信息",
-  CRIMINAL_ENFORCEMENT: "刑罚执行信息",
-  COMMUTATION_PAROLE_REVIEW: "减刑假释审查信息",
-  ADMIN_RECONSIDERATION: "行政复议信息",
-  ADMIN_NON_LITIGATION_ENFORCEMENT: "非诉行政执行信息",
-  NON_LITIGATION_PHASE: "非诉阶段信息",
-  CUSTOM: "程序信息"
+  FIRST_INSTANCE: "Thông tin sơ thẩm",
+  SECOND_INSTANCE: "Thông tin phúc thẩm",
+  RETRIAL_REVIEW: "Thông tin xem xét tái thẩm",
+  RETRIAL: "Thông tin tái thẩm",
+  REMAND_FIRST: "Thông tin sơ thẩm lại",
+  REMAND_SECOND: "Thông tin phúc thẩm lại",
+  PROSECUTORIAL_SUPERVISION: "Thông tin giám sát kiểm sát",
+  COMMERCIAL_ARBITRATION: "Thông tin trọng tài thương mại",
+  LABOR_ARBITRATION: "Thông tin trọng tài lao động",
+  ARBITRATION_SET_ASIDE: "Thông tin xin hủy án trọng tài",
+  ARBITRATION_ENFORCEMENT_REVIEW: "Thông tin xem xét không thi hành án trọng tài",
+  ENFORCEMENT: "Thông tin cưỡng chế thi hành",
+  ENFORCEMENT_OBJECTION: "Thông tin phản đối thi hành án",
+  INVESTIGATION: "Thông tin điều tra",
+  PROSECUTION_REVIEW: "Thông tin xét xử truy tố",
+  DEATH_PENALTY_REVIEW: "Thông tin xem xét tử hình",
+  CRIMINAL_ENFORCEMENT: "Thông tin thi hành án hình sự",
+  COMMUTATION_PAROLE_REVIEW: "Thông tin xem xét giảm án/tha tù",
+  ADMIN_RECONSIDERATION: "Thông tin khiếu nại hành chính",
+  ADMIN_NON_LITIGATION_ENFORCEMENT: "Thông tin thi hành hành chính phi tố tụng",
+  NON_LITIGATION_PHASE: "Thông tin giai đoạn phi tố tụng",
+  CUSTOM: "Thông tin thủ tục"
 };
 
 type Proc = {
@@ -134,13 +134,13 @@ type NewProcedurePartyDraft = {
 };
 
 const PARTY_ROLE_LABEL: Record<PartyRole, string> = {
-  CLIENT_PARTY: "客户",
-  OPPOSING_PARTY: "相对方",
-  THIRD_PARTY: "第三人",
-  CO_LITIGANT: "共同诉讼人",
-  AGENT: "代理人",
-  WITNESS: "证人",
-  OTHER: "其他"
+  CLIENT_PARTY: "Khách hàng",
+  OPPOSING_PARTY: "Bên đối phương",
+  THIRD_PARTY: "Người thứ ba",
+  CO_LITIGANT: "Đồng khởi kiện",
+  AGENT: "Người đại diện",
+  WITNESS: "Nhân chứng",
+  OTHER: "Khác"
 };
 
 const PARTY_ROLE_OPTIONS: PartyRole[] = [
@@ -161,15 +161,15 @@ const PARTY_TYPE_OPTIONS: PartyType[] = [
 ];
 
 const PROCEDURE_OUTCOME_LABEL: Record<ProcedureOutcome, string> = {
-  WON: "胜诉",
-  PARTIAL_WON: "部分胜诉",
-  LOST: "败诉",
-  MEDIATED: "调解",
-  WITHDRAWN: "撤回",
-  DISMISSED: "驳回",
-  COMPLETED: "已完成",
-  TRANSFERRED: "移送",
-  OTHER: "其他"
+  WON: "Thắng kiện",
+  PARTIAL_WON: "Thắng kiện một phần",
+  LOST: "Thua kiện",
+  MEDIATED: "Hòa giải",
+  WITHDRAWN: "Rút đơn",
+  DISMISSED: "Bác bỏ",
+  COMPLETED: "Hoàn thành",
+  TRANSFERRED: "Chuyển giao",
+  OTHER: "Khác"
 };
 
 function normalizePartyTypeForForm(partyType: PartyType): PartyType {
@@ -186,7 +186,7 @@ function normalizeStandingForUi(standing: LitigationStanding): LitigationStandin
   return standing;
 }
 
-// 按程序类型确定「主审法官」的称谓
+// Xác định danh xưng 「thẩm phán chủ tọa」 theo loại thủ tục
 const ARBITRATION: ProcedureType[] = [
   "COMMERCIAL_ARBITRATION",
   "LABOR_ARBITRATION",
@@ -201,13 +201,13 @@ const EXECUTION: ProcedureType[] = [
 ];
 
 function roleLabels(type: ProcedureType): { judge: string } {
-  if (ARBITRATION.includes(type)) return { judge: "首席仲裁员" };
-  if (EXECUTION.includes(type)) return { judge: "执行法官" };
-  return { judge: "主审法官" };
+  if (ARBITRATION.includes(type)) return { judge: "Trọng tài viên trưởng" };
+  if (EXECUTION.includes(type)) return { judge: "Thẩm phán thi hành án" };
+  return { judge: "Thẩm phán chủ tọa" };
 }
 
 function requestLabel(type: ProcedureType) {
-  return ARBITRATION.includes(type) ? "仲裁请求" : "诉讼请求";
+  return ARBITRATION.includes(type) ? "Yêu cầu trọng tài" : "Yêu cầu khởi kiện";
 }
 
 const dash = (v: string | null | undefined) => v?.trim() || "—";
@@ -299,7 +299,7 @@ function PartyNameWithClientBadge({ party }: { party: Pick<PartyLite, "name" | "
       <span className="min-w-0 truncate">{party.name}</span>
       {party.role === "CLIENT_PARTY" && (
         <span className="shrink-0 rounded border border-primary/20 bg-primary/10 px-1 py-0 text-[10px] font-medium leading-4 text-primary">
-          客户
+          Khách hàng
         </span>
       )}
     </span>
@@ -378,11 +378,11 @@ function StandingName({
 function partyDetailItems(party: PartyLite) {
   const idValue = party.partyType === "NATURAL_PERSON" ? party.idNumber : party.enterpriseSocialCode;
   const items: string[] = [];
-  if (party.contactName) items.push(`联系人：${party.contactName}`);
-  if (party.phone) items.push(`电话：${party.phone}`);
-  if (idValue) items.push(`${party.partyType === "NATURAL_PERSON" ? "证件号" : "统一社会信用代码"}：${idValue}`);
-  if (party.partyType !== "NATURAL_PERSON" && party.legalRep) items.push(`法定代表人：${party.legalRep}`);
-  if (party.address) items.push(`地址：${party.address}`);
+  if (party.contactName) items.push(`Người liên hệ: ${party.contactName}`);
+  if (party.phone) items.push(`Điện thoại: ${party.phone}`);
+  if (idValue) items.push(`${party.partyType === "NATURAL_PERSON" ? "Số giấy tờ" : "Mã số thuế"}：${idValue}`);
+  if (party.partyType !== "NATURAL_PERSON" && party.legalRep) items.push(`Người đại diện: ${party.legalRep}`);
+  if (party.address) items.push(`Địa chỉ: ${party.address}`);
   return items;
 }
 
@@ -410,18 +410,18 @@ export function ProcedureInfoPanel({
     <section className="rounded-lg border border-border bg-card">
       <div className="overflow-hidden rounded-lg">
         <InfoRow>
-          <Pair label="立案时间">{p.acceptedAt ? formatDate(p.acceptedAt) : "—"}</Pair>
-          <Pair label="案号">
+          <Pair label="Thời điểm tiếp nhận">{p.acceptedAt ? formatDate(p.acceptedAt) : "—"}</Pair>
+          <Pair label="Số án">
             <span className="font-mono tabular">{dash(p.caseNumber)}</span>
           </Pair>
         </InfoRow>
         <InfoRow>
-          <Pair label="管辖地">{dash(p.jurisdiction)}</Pair>
-          <Pair label="管辖机构">{dash(p.handlingAgency)}</Pair>
+          <Pair label="Địa giới">{dash(p.jurisdiction)}</Pair>
+          <Pair label="Cơ quan xử lý">{dash(p.handlingAgency)}</Pair>
         </InfoRow>
         <InfoRow>
           <Pair label={judge}>{dash(p.presidingJudge)}</Pair>
-          <Pair label="联系方式">
+          <Pair label="Liên hệ">
             <span className="font-mono tabular">{dash(p.presidingJudgeContact)}</span>
           </Pair>
         </InfoRow>
@@ -432,8 +432,8 @@ export function ProcedureInfoPanel({
           </Pair>
         </InfoRow>
         <InfoRow>
-          <Pair label="裁决时间">{p.concludedAt ? formatDate(p.concludedAt) : "—"}</Pair>
-          <Pair label="裁决结果">{outcomeText(p)}</Pair>
+          <Pair label="Thời điểm kết thúc">{p.concludedAt ? formatDate(p.concludedAt) : "—"}</Pair>
+          <Pair label="Kết quả giải quyết">{outcomeText(p)}</Pair>
         </InfoRow>
       </div>
 
@@ -507,7 +507,7 @@ function ProcedurePartiesSummary({
   return (
     <div className="bg-card">
       {partyRows.length === 0 ? (
-        <div className="px-2.5 py-2 text-xs text-muted-foreground">暂无案件当事人</div>
+        <div className="px-2.5 py-2 text-xs text-muted-foreground">Chưa có bên tham gia vụ án</div>
       ) : (
         <div className="divide-y divide-border">
           {partyRows.map(({ party, primaryStanding, otherStandings }) => {
@@ -520,7 +520,7 @@ function ProcedurePartiesSummary({
                 <div className="flex min-w-0 items-start gap-2">
                   <span className="shrink-0">
                     <StandingName standing={primaryStanding}>
-                      {primaryStanding ? litigationStandingLabel[primaryStanding] : "未设置地位"}
+                      {primaryStanding ? litigationStandingLabel[primaryStanding] : "Chưa đặt lập trường"}
                     </StandingName>
                   </span>
                   <div className="flex min-w-0 items-center gap-1 overflow-hidden whitespace-nowrap">
@@ -536,7 +536,7 @@ function ProcedurePartiesSummary({
                   className="min-w-0 break-words text-left text-[11px] leading-4 text-muted-foreground"
                   title={details.join(" · ")}
                 >
-                  {details.length > 0 ? details.join(" · ") : "暂无联系方式及地址信息"}
+                  {details.length > 0 ? details.join(" · ") : "Chưa có thông tin liên hệ và địa chỉ"}
                 </div>
               </div>
             );
@@ -653,19 +653,19 @@ function EditDialog({
   function addNewProcedureParty() {
     const name = newPartyForm.name.trim();
     if (!name) {
-      toast.error("请填写当事人名称");
+      toast.error("Vui lòng nhập tên bên tham gia");
       return;
     }
     if (newPartyForm.standings.length === 0) {
-      toast.error("请选择程序地位");
+      toast.error("Vui lòng chọn lập trường thủ tục");
       return;
     }
     if (newPartyForm.partyType === "NATURAL_PERSON" && !newPartyForm.idNumber.trim()) {
-      toast.error("请填写证件号");
+      toast.error("Vui lòng nhập số giấy tờ");
       return;
     }
     if (newPartyForm.partyType !== "NATURAL_PERSON" && !newPartyForm.enterpriseSocialCode.trim()) {
-      toast.error("请填写统一社会信用代码");
+      toast.error("Vui lòng nhập mã số thuế");
       return;
     }
     setNewProcedureParties((rows) => [
@@ -693,7 +693,7 @@ function EditDialog({
 
   function save() {
     if (newProcedureParties.some((party) => party.standings.length === 0)) {
-      toast.error("新增当事人需至少选择一个程序地位");
+      toast.error("Bên mới cần chọn ít nhất một lập trường thủ tục");
       return;
     }
     startTransition(async () => {
@@ -715,10 +715,10 @@ function EditDialog({
             standings
           }))
         });
-        toast.success("已保存");
+        toast.success("Đã lưu");
         onSaved();
       } catch (err) {
-        toast.error("保存失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Lưu thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -727,21 +727,21 @@ function EditDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] w-[92vw] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>编辑{PROC_INFO_LABEL[proc.type] ?? "程序信息"}</DialogTitle>
+          <DialogTitle>Sửa {PROC_INFO_LABEL[proc.type] ?? "Thông tin thủ tục"}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <FieldRow label="管辖地（省/市/区县）">
+          <FieldRow label="Địa giới (tỉnh/thành/phường)">
             <JurisdictionSelect
               value={form.jurisdiction}
               onChange={(v) => set("jurisdiction", v)}
             />
           </FieldRow>
-          <FieldRow label="管辖机构">
+          <FieldRow label="Cơ quan xử lý">
             <Input
               list={`proc-agency-${proc.id}`}
               value={form.handlingAgency}
               onChange={(e) => set("handlingAgency", e.target.value)}
-              placeholder="如：广州市天河区人民法院"
+              placeholder="vd: Toà án Nhân dân quận..."
             />
             <datalist id={`proc-agency-${proc.id}`}>
               {agencyOptions(form.jurisdiction).map((a) => (
@@ -749,13 +749,13 @@ function EditDialog({
               ))}
             </datalist>
           </FieldRow>
-          <FieldRow label="案号">
+          <FieldRow label="Số án">
             <Input value={form.caseNumber} onChange={(e) => set("caseNumber", e.target.value)} className="font-mono" />
           </FieldRow>
-          <FieldRow label="我方地位">
+          <FieldRow label="Lập trường phía ta">
             <Select value={form.ourStanding} onValueChange={(v) => set("ourStanding", v)}>
               <SelectTrigger className="h-9 bg-background">
-                <SelectValue placeholder="选择我方地位" />
+                <SelectValue placeholder="Chọn lập trường phía ta" />
               </SelectTrigger>
               <SelectContent>
                 {standingOptions.map((s) => (
@@ -769,18 +769,18 @@ function EditDialog({
           <FieldRow label={judge}>
             <Input value={form.presidingJudge} onChange={(e) => set("presidingJudge", e.target.value)} />
           </FieldRow>
-          <FieldRow label={`${judge}联系方式`}>
+          <FieldRow label={`${judge} — Liên hệ`}>
             <Input value={form.presidingJudgeContact} onChange={(e) => set("presidingJudgeContact", e.target.value)} className="font-mono" />
           </FieldRow>
-          <FieldRow label="立案时间">
+          <FieldRow label="Thời điểm tiếp nhận">
             <Input type="date" value={form.acceptedAt} onChange={(e) => set("acceptedAt", e.target.value)} />
           </FieldRow>
-          <FieldRow label="裁决 / 结案时间">
+          <FieldRow label="Thời điểm kết thúc / quyết định">
             <Input type="date" value={form.concludedAt} onChange={(e) => set("concludedAt", e.target.value)} />
           </FieldRow>
           <div className="space-y-2 border-t border-border pt-3 sm:col-span-2">
             <div className="flex items-center justify-between gap-3">
-              <Label className="text-xs">程序当事人</Label>
+              <Label className="text-xs">Các bên của thủ tục</Label>
               <Button
                 type="button"
                 variant="outline"
@@ -793,12 +793,12 @@ function EditDialog({
                 ) : (
                   <Plus className="h-3.5 w-3.5" />
                 )}
-                {showNewPartyForm ? "收起" : "添加"}
+                {showNewPartyForm ? "Thu lại" : "Thêm"}
               </Button>
             </div>
             {parties.length === 0 ? (
               <div className="rounded-md border border-border px-3 py-2 text-xs text-muted-foreground">
-                暂无案件当事人
+                Chưa có bên tham gia vụ án
               </div>
             ) : (
               <div className="max-h-72 overflow-y-auto rounded-md border border-border">
@@ -858,7 +858,7 @@ function EditDialog({
                           )
                         }
                         className="ml-auto rounded p-0.5 text-muted-foreground hover:text-destructive"
-                        title="移除"
+                        title="Xóa"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
@@ -890,7 +890,7 @@ function EditDialog({
                     list={`new-procedure-party-${proc.id}`}
                     value={newPartyForm.name}
                     onChange={(e) => handleNewPartyNameChange(e.target.value)}
-                    placeholder="新增当事人名称"
+                    placeholder="Tên bên tham gia mới"
                     className="h-8"
                   />
                   <datalist id={`new-procedure-party-${proc.id}`}>
@@ -941,8 +941,8 @@ function EditDialog({
                     }
                     placeholder={
                       newPartyForm.partyType === "NATURAL_PERSON"
-                        ? "证件号"
-                        : "统一社会信用代码"
+                        ? "Số giấy tờ"
+                        : "Mã số thuế"
                     }
                     className="h-8"
                   />
@@ -952,7 +952,7 @@ function EditDialog({
                     onClick={addNewProcedureParty}
                     className="h-8 px-2 text-xs"
                   >
-                    确认添加
+                    Xác nhận thêm
                   </Button>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2">
@@ -977,11 +977,11 @@ function EditDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={save} disabled={pending} className="gap-1.5">
             {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-            保存
+            Lưu
           </Button>
         </DialogFooter>
       </DialogContent>
