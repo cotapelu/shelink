@@ -192,3 +192,7 @@
 **Phiên 2026-10-31 (AUTO-63) — BLOCKED**:
 - [R] Tách finance/actions.ts (440 dòng) → bị chặn bởi ràng buộc Next.js: `"use server"` không cho re-export named → /finance 500 tại runtime. Đã revert sạch, gate giữ nguyên (912/760/152).
 - Kế hoạch AUTO-64 (đúng cách): consumer import trực tiếp từ module mới (5 component + 9 test file), KHÔNG re-export.
+
+**Phiên 2026-10-31 (AUTO-64)**:
+- [R] Tách `finance/actions.ts` (558 dòng) → `billing-actions.ts` (240 dòng) + `actions.ts` (331 dòng, 0 lỗi lint). Consumer import trực tiếp (3 file).
+- Test: 2338 pass / 1 skip / 0 fail. Lint: 912→911 (760→759 lỗi).

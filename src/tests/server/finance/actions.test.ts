@@ -5,12 +5,13 @@ import {
   deleteBilling,
   setCommissionPlan,
   createFeeEntry,
-  deleteFeeEntry,
+  deleteFeeEntry
+} from "@/server/finance/billing-actions";
+import {
   getMatterFinance,
   listMatterInvoiceRequests,
   getMatterInvoiceContext,
-  listAllFeeEntries,
-  // other finance functions later
+  listAllFeeEntries
 } from "@/server/finance/actions";
 import { requireSession } from "@/lib/auth/session";
 import { audit } from "@/server/audit";

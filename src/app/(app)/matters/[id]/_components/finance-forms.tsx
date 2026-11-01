@@ -50,12 +50,12 @@ import {
   type BillingCreateInput,
   type FeeEntryCreateInput
 } from "@/server/finance/schemas";
+import { listMatterInvoiceRequests } from "@/server/finance/actions";
 import {
   createBilling,
   createFeeEntry,
-  setCommissionPlan,
-  listMatterInvoiceRequests
-} from "@/server/finance/actions";
+  setCommissionPlan
+} from "@/server/finance/billing-actions";
 import { uploadDocument } from "@/server/documents/actions";
 import { recognizeInvoiceFromImage, type RecognizedInvoice } from "@/server/ai/actions";
 import { userRoleLabel } from "@/lib/enums";

@@ -1,6 +1,16 @@
 # Danh sách TODO riêng cho Agent
 
-Cập nhật lần cuối: 2026-10-31 (AUTO-62).
+Cập nhật lần cuối: 2026-10-31 (AUTO-64).
+
+### [CYCLE-AUTO-63] — 2026-10-31: [R] tách finance/actions.ts → BLOCKED và revert ❌
+Thử tách + **re-export named** từ module `"use server"` → Turbopack (Next 16) không hỗ trợ → `/finance` 500. Đã `git checkout` phục hồi sạch, gate về 912/760/152. Ghi nhận docs-only commit `df20566`. **Bài học: tách module server-action = sửa import consumer trực tiếp, KHÔNG re-export.**
+
+### [CYCLE-AUTO-64] — 2026-10-31: [R] Tách finance/actions.ts → billing-actions (đúng cách) ✅
+- [x] `src/server/finance/billing-actions.ts` (240 dòng, `"use server"` riêng): Billing + FeeEntry + CommissionPlan (kèm helpers run*/cascade/audit).
+- [x] `actions.ts` 558→331 dòng, **0 lỗi lint**; dọn sạch import thừa sau tách.
+- [x] KHÔNG re-export — sửa import trực tiếp 3 consumer: `finance-forms.tsx` (3), `actions.test.ts` (5), `deleteFeeEntry.test.ts` (1).
+- **Cổng**: typecheck PASS; prisma:validate PASS; test 2338 pass/1 skip/0 fail; lint **911 (759)** (-1); smoke `/finance` 200 + `/matters/[id]` 200.
+- **Tiếp (AUTO-65)**: `server/seals/actions.ts` (16 lỗi), `matters/export-xlsx.ts` (13).
 
 ## Chu kỳ đã hoàn thành (gần đây)
 

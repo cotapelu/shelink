@@ -406,3 +406,10 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Kết quả**: typecheck PASS, test PASS, lint sạch — **nhưng runtime 500**: Turbopack không hỗ trợ re-export (`export { x } from`) từ module `"use server"` → "The module has no exports at all".
 - **Hành động**: `git checkout` phục hồi toàn bộ; gate xác nhận về đúng trạng thái đầu chu kỳ (912/760/152; /finance 200).
 - ** Bài học (ghi PROFILE)**: với Next.js 16 + "use server", tách module = **sửa import ở consumer**, KHÔNG re-export. Lần sau làm AUTO-64: cập nhật 5 consumer + 9 test file import trực tiếp.
+
+## [CYCLE-AUTO-64] — 2026-10-31: [R] tách finance/actions.ts → billing-actions ✅
+- **Loại**: Refactor [R]. ~35 phút. ✅.
+- **Test delta**: 0 mới (2338 pass / 1 skip / 0 fail) — thuần move code, 119 test finance giữ nguyên.
+- **Lint**: 911 problems (759 lỗi / 152 warning) — giảm 1; finance/actions.ts **0 lỗi** (bớt lỗi file>300).
+- **Bảo mật**: không đổi bề mặt; smoke runtime /finance 200 + /matters/[id] 200.
+- **Ghi chú**: áp dụng đúng bài học AUTO-63 (không re-export).

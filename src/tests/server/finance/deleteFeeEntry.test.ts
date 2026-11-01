@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { deleteFeeEntry } from "@/server/finance/actions";
+import { deleteFeeEntry } from "@/server/finance/billing-actions";
 import { requireSession } from "@/lib/auth/session";
 import { audit } from "@/server/audit";
 import { revalidatePath } from "next/cache";
