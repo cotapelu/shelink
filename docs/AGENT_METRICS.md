@@ -442,3 +442,9 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Pilot**: invoice-create-dialog.tsx 54→0 dòng Hán (trừ license): 54 chuỗi (label/toast/placeholder/comment) + `tags` document "Căn cứ xuất hóa đơn"; lib/enums.ts 11 dòng comment còn lại → tiếng Việt.
 - **Gates**: typecheck PASS; test 159 (app+finance) + 57 (enums) pass; smoke /finance 200 + /matters/[id] 200.
 - **Ghi chú**: test `finance-invoice-create-dialog.test.tsx` chỉ assert hàm search (chuỗi "二审" là input mẫu) → không coupling, giữ nguyên.
+
+## [CYCLE-I18N-3] — 2026-10-31: invoices/actions.ts → tiếng Việt
+- **Loại**: De-zh (i18n). ~15 phút. ✅.
+- **Pilot**: `server/invoices/actions.ts`: 17 chuỗi (message lỗi, notification content, zod message, tag document "Yêu cầu hóa đơn"/"Hóa đơn điện tử", comment) + locale `zh-CN`→`vi-VN` → 0 dòng Hán (trừ license).
+- **Gates**: typecheck PASS; test 40 (4 file invoice) pass; smoke /finance 200.
+- **Ghi chú**: vùng server finance (actions/billing-actions/invoices) + UI finance + enums đã sạch chuỗi Hán — trừ license + ràng buộc ngoài.

@@ -209,3 +209,7 @@
 **Phiên 2026-10-31 (I18N-2)**:
 - De-zh: `invoice-create-dialog.tsx` (54 dòng) + comment `lib/enums.ts`. Vùng finance đã sạch chuỗi Hán (trừ license + ràng buộc ngoài).
 - Tiếp (I18N-3): server messages `invoices/actions.ts` + `finance/actions.ts` còn sót; rồi UI lớn (procedure-content 97, reports-view 74).
+
+**Phiên 2026-10-31 (I18N-3)**:
+- De-zh: `server/invoices/actions.ts` (17 chuỗi + locale). **Vùng finance (server + UI + enums) sạch chuỗi Hán.**
+- Tiếp (I18N-4): `server/matters/*` messages + `server/clients/*` (message lỗi), rồi UI lớn (procedure-content 97, reports-view 74, procedure-info-panel 89).

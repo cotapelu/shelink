@@ -42,7 +42,7 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
 function requireFinanceOrApprover(role: string) {
   if (role !== "FINANCE" && role !== "ADMIN" && role !== "PRINCIPAL_LAWYER") {
-    throw new Error("仅财务 / 管理员 / 主任律师可处理开票");
+    throw new Error("Chỉ Tài chính / quản trị / luật sư chủ trì mới được xử lý hóa đơn");
   }
 }
 
@@ -68,10 +68,10 @@ function invoiceRequestVisibilityWhere(
   };
 }
 
-/** 律师在案件详情提交开票申请 */
+/** Luật sư gửi yêu cầu xuất hóa đơn từ chi tiết vụ án */
 const createSchema = z.object({
   matterId: z.string().cuid(),
-  amount: z.coerce.number().positive("金额需大于 0"),
+  amount: z.coerce.number().positive("Số tiền phải lớn hơn 0"),
   title: z.string().max(120).optional().or(z.literal("")),
   requestNote: z.string().max(500).optional().or(z.literal(""))
 });
@@ -82,7 +82,7 @@ export async function createInvoiceRequest(input: z.infer<typeof createSchema>) 
   await assertCanAssociateMatter(session.user.id, data.matterId);
   await assertMatterWritable(data.matterId);
 
-  await assertCanLeadMatter(session.user.id, data.matterId, "仅案件主办/协办律师可申请开票");
+  await assertCanLeadMatter(session.user.id, data.matterId, "Chỉ luật sư chủ trì/hợp tác của vụ mới được yêu cầu xuất hóa đơn");
 
   const created = await prisma.invoiceRequest.create({
     data: {
@@ -111,10 +111,10 @@ export async function createInvoiceRequest(input: z.infer<typeof createSchema>) 
   await notifyRoleApprovers({
     roles: ["ADMIN", "PRINCIPAL_LAWYER", "FINANCE"],
     excludeUserId: session.user.id,
-    title: "新的发票审批待处理",
-    content: `${session.user.name ?? "有用户"} 提交了开票申请：${
-      matter ? `${matter.internalCode} ${matter.title}` : "关联案件"
-    }，金额 ${data.amount.toLocaleString("zh-CN")} 元`,
+    title: "Có yêu cầu xuất hóa đơn mới cần duyệt",
+    content: `${session.user.name ?? "Người dùng"} đã gửi yêu cầu xuất hóa đơn: ${
+      matter ? `${matter.internalCode} ${matter.title}` : "Không liên kết vụ án"
+    }, số tiền ${data.amount.toLocaleString("vi-VN")} đồng`,
     href: "/finance",
     refType: "InvoiceRequest",
     refId: created.id,
@@ -178,32 +178,32 @@ export async function listInvoiceRequestsByMatter(matterId: string) {
 }
 
 /**
- * 财务批准 + 上传电子发票。FormData：
+ * Tài chính duyệt + tải lên hóa đơn điện tử. FormData:
  *   requestId, processNote?, contractScan(File?), invoiceFile(File?)
- * - 不传 invoiceFile：状态 APPROVED
- * - 传 invoiceFile：状态 ISSUED
+ * - Không gửi invoiceFile: trạng thái APPROVED
+ * - Có gửi invoiceFile: trạng thái ISSUED
  *
- * contractScan 仅保留兼容旧数据流；申请依据应由申请人上传到 evidenceDocIds。
+ * contractScan chỉ giữ để tương thích luồng dữ liệu cũ; căn cứ của yêu cầu do người yêu cầu tải lên evidenceDocIds.
  */
 export async function approveInvoiceRequest(formData: FormData) {
   const session = await requireSession();
   requireFinanceOrApprover(session.user.role);
 
   const requestId = formData.get("requestId");
-  if (typeof requestId !== "string" || !requestId) throw new Error("requestId 缺失");
+  if (typeof requestId !== "string" || !requestId) throw new Error("Thiếu requestId");
 
   const existing = await prisma.invoiceRequest.findUnique({
     where: { id: requestId },
     select: { id: true, matterId: true, status: true }
   });
-  if (!existing) throw new Error("申请不存在");
-  if (existing.status === "ISSUED") throw new Error("此申请已开具");
-  if (existing.status === "REJECTED") throw new Error("此申请已驳回");
+  if (!existing) throw new Error("Yêu cầu không tồn tại");
+  if (existing.status === "ISSUED") throw new Error("Yêu cầu này đã xuất hóa đơn");
+  if (existing.status === "REJECTED") throw new Error("Yêu cầu này đã bị từ chối");
 
   const processNote = formData.get("processNote");
   const contractScan = formData.get("contractScan");
   const invoiceFile = formData.get("invoiceFile");
-  // v0.14: 真实发票号（财务批准/开具时回填）
+  // v0.14: Số hóa đơn thực (kế toán điền lại khi duyệt/xuất)
   const invoiceNo = formData.get("invoiceNo");
 
   // File uploads (external, cannot be rolled back) happen first
@@ -259,7 +259,7 @@ export async function approveInvoiceRequest(formData: FormData) {
           algorithm: enc.algorithm,
           iv: enc.iv.toString("base64"),
           authTag: enc.authTag.toString("base64"),
-          tags: ["发票申请"],
+          tags: ["Yêu cầu hóa đơn"],
           uploadedById: session.user.id
         }
       });
@@ -281,7 +281,7 @@ export async function approveInvoiceRequest(formData: FormData) {
           algorithm: enc.algorithm,
           iv: enc.iv.toString("base64"),
           authTag: enc.authTag.toString("base64"),
-          tags: ["电子发票"],
+          tags: ["Hóa đơn điện tử"],
           uploadedById: session.user.id
         }
       });
@@ -327,7 +327,7 @@ function storageScope(matterId: string | null, requestId: string) {
 
 const rejectSchema = z.object({
   requestId: z.string().cuid(),
-  reason: z.string().min(1, "请说明驳回原因").max(500)
+  reason: z.string().min(1, "Vui lòng nêu lý do từ chối").max(500)
 });
 
 export async function rejectInvoiceRequest(input: z.infer<typeof rejectSchema>) {
@@ -339,8 +339,8 @@ export async function rejectInvoiceRequest(input: z.infer<typeof rejectSchema>) 
     where: { id: data.requestId },
     select: { matterId: true, status: true }
   });
-  if (!existing) throw new Error("申请不存在");
-  if (existing.status === "ISSUED") throw new Error("已开具的申请不可驳回");
+  if (!existing) throw new Error("Yêu cầu không tồn tại");
+  if (existing.status === "ISSUED") throw new Error("Yêu cầu đã xuất hóa đơn không thể từ chối");
 
   await prisma.invoiceRequest.update({
     where: { id: data.requestId },
@@ -365,7 +365,7 @@ export async function rejectInvoiceRequest(input: z.infer<typeof rejectSchema>) 
   return { ok: true };
 }
 
-/** 财务页 KPI：本月已开票合计 */
+/** KPI trang tài chính: tổng đã xuất HĐ trong tháng */
 export async function getInvoiceStats() {
   const session = await requireSession();
   const now = new Date();
