@@ -213,3 +213,7 @@
 **Phiên 2026-10-31 (I18N-3)**:
 - De-zh: `server/invoices/actions.ts` (17 chuỗi + locale). **Vùng finance (server + UI + enums) sạch chuỗi Hán.**
 - Tiếp (I18N-4): `server/matters/*` messages + `server/clients/*` (message lỗi), rồi UI lớn (procedure-content 97, reports-view 74, procedure-info-panel 89).
+
+**Phiên 2026-10-31 (I18N-4)**:
+- De-zh: server matters/clients + export-xlsx (coupled 13 assertion). Lỗi "grep head" đã ghi glossary.
+- Test: 2368 pass / 1 skip / 0 fail. Lint 896/744. Vùng finance + server matters/clients sạch chuỗi Hán (trừ license).

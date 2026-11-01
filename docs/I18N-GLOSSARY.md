@@ -66,3 +66,18 @@
 - Comment license (`Copyright 2026 叶森 (Sen Ye)`) **giữ nguyên** — đó là tên tác giả, không phải UI.
 - Sau mỗi module: chạy `grep -cP '[\x{4e00}-\x{9fff}]' <file>` để xác nhận chỉ còn comment license (2 dòng).
 - Chuỗi test phải đổi **trong cùng commit** với code để test luôn xanh (red-green).
+
+## Bổ sung I18N-2→4 (2026-10-31)
+
+| Tiếng Trung | Tiếng Việt |
+|---|---|
+| 是 / 否 | Có / Không (boolean export) |
+| 主 (liên hệ) | Chính |
+| 受理 / 结案 / 结果 (thủ tục) | Tiếp nhận / Kết thúc / Kết quả |
+| 证件 / 代码 / 电话 / 法定代表人 / 联系人 / 地址 / 备注 | Số giấy tờ / Mã số thuế / Điện thoại / Người đại diện / Người liên hệ / Địa chỉ / Ghi chú |
+| 案件名称必填 / 至少选择一个委托方 | Tên vụ án bắt buộc nhập / Chọn ít nhất một bên ủy quyền |
+| 案由 | Nguyên nhân (cause) |
+
+### ⚠️ Bài học đắt giá (I18N-4)
+- **Luôn grep TOÀN BỘ file test** trước khi kết luận "không coupling". Ở `schemas.test.ts`, grep `head` chỉ thấy license + data mẫu → tưởng không bám; thực tế 2 assertion bám message. Phát hiện nhờ **full test suite** sau khi đã đổi source.
+- Dấu fullwidth `（），；：` chỉ đổi **đúng chỗ đang chạm** (party/procedure export), chỗ khác (members, contacts) giữ để tránch churn test — chu kỳ riêng cho punctuation.

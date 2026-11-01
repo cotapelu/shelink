@@ -103,7 +103,7 @@ export const partyRoleSchema = z.enum([
 // v0.27 / v0.30: Loại chủ thể của party (natural person điền số ID, các thể nhân khác điền unified social credit code)
 export const partyTypeSchema = z.enum([
   "NATURAL_PERSON",
-  "ORGANIZATION", // 旧数据兼容
+  "ORGANIZATION", // Tương thích dữ liệu cũ
   "COMPANY",
   "PARTNERSHIP",
   "INDIVIDUAL_BUSINESS",
@@ -116,7 +116,7 @@ export const partyTypeSchema = z.enum([
 export const partyInputSchema = z
   .object({
     role: partyRoleSchema,
-    // v0.5: Litigation standing cụ thể (theo首 procedure)
+    // v0.5: Lập trường tố tụng cụ thể (theo thủ tục đầu tiên)
     standing: litigationStandingSchema.optional(),
     ordinal: z.number().int().min(1).default(1),
     // v0.27: Loại chủ thể quyết định field bắt buộc
@@ -153,14 +153,14 @@ export const partyInputSchema = z
   });
 
 export const matterCreateSchema = z.object({
-  // v0.27: 案件名称去除所有空白字符（产品要求，避免列表/详情显示空格）
+  // v0.27: Tên vụ án loại bỏ mọi ký tự khoảng trắng (yêu cầu sản phẩm, tránh hiển thị thừa space ở danh sách/chi tiết)
   title: z.preprocess(
     (v) => (typeof v === "string" ? v.replace(/\s+/g, "") : v),
-    z.string().min(1, "案件名称必填").max(200)
+    z.string().min(1, "Tên vụ án bắt buộc nhập").max(200)
   ),
   category: matterCategorySchema,
 
-  // 案由
+  // Nguyên nhân (cause)
   causeId: z.string().cuid().optional().or(z.literal("")),
   causeFreeText: z.string().max(200).optional().or(z.literal("")),
 
@@ -172,13 +172,13 @@ export const matterCreateSchema = z.object({
 
   intakeDate: z.coerce.date().optional(),
 
-  // 客户：至少一个，第一个默认 primary
-  clientIds: z.array(z.string().cuid()).min(1, "至少选择一个委托方"),
+  // Khách hàng: ít nhất một, mặc định cái đầu là primary
+  clientIds: z.array(z.string().cuid()).min(1, "Chọn ít nhất một bên ủy quyền"),
 
-  // 当事人列表（委托方、对方、第三人）
+  // Danh sách các bên (bên ủy quyền, bên đối phương, người thứ ba)
   parties: z.array(partyInputSchema).default([]),
 
-  // 首程序
+  // Thủ tục đầu tiên
   firstProcedure: z.object({
     type: procedureTypeSchema,
     customLabel: z.string().max(40).optional().or(z.literal("")),
@@ -191,12 +191,12 @@ export const matterCreateSchema = z.object({
 export type MatterCreateInput = z.infer<typeof matterCreateSchema>;
 export type PartyInput = z.infer<typeof partyInputSchema>;
 
-// v0.27: 案件基本信息编辑（系统编号 / 收案日期 readonly，不在此处）
+// v0.27: Sửa thông tin cơ bản vụ án (mã hệ thống / ngày tiếp nhận readonly, không xử lý tại đây)
 export const matterUpdateBasicSchema = z.object({
   id: z.string().cuid(),
   title: z.preprocess(
     (v) => (typeof v === "string" ? v.replace(/\s+/g, "") : v),
-    z.string().min(1, "案件名称必填").max(200)
+    z.string().min(1, "Tên vụ án bắt buộc nhập").max(200)
   ),
   causeId: z.string().cuid().optional().or(z.literal("")),
   causeFreeText: z.string().max(200).optional().or(z.literal("")),

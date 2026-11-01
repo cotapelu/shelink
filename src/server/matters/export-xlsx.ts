@@ -978,8 +978,8 @@ function buildProcedureOutcome(procedure: MatterExportRow["procedures"][number],
 function buildProcedureParties(procedure: MatterExportRow["procedures"][number], index: number): Record<string, unknown> {
   return {
     [`procedure${index}Parties`]: procedure.procedureParties
-      .map((row) => `${label(litigationStandingLabel, row.standing)}：${formatParty(row.party)}`)
-      .join("；")
+      .map((row) => `${label(litigationStandingLabel, row.standing)}: ${formatParty(row.party)}`)
+      .join("; ")
   };
 }
 
@@ -1027,9 +1027,9 @@ function formatProcedureSummary(procedures: MatterExportRow["procedures"]) {
         procedure.caseNumber,
         procedure.handlingAgency,
         procedure.status ? procedureStatusLabel[procedure.status] : "",
-        procedure.acceptedAt ? `受理:${formatDate(procedure.acceptedAt)}` : "",
-        procedure.concludedAt ? `结案:${formatDate(procedure.concludedAt)}` : "",
-        procedure.outcome ? `结果:${procedureOutcomeLabel[procedure.outcome]}` : ""
+        procedure.acceptedAt ? `Tiếp nhận: ${formatDate(procedure.acceptedAt)}` : "",
+        procedure.concludedAt ? `Kết thúc: ${formatDate(procedure.concludedAt)}` : "",
+        procedure.outcome ? `Kết quả: ${procedureOutcomeLabel[procedure.outcome]}` : ""
       ].filter(Boolean).join(" / ")
     )
     .join("；");
@@ -1037,8 +1037,8 @@ function formatProcedureSummary(procedures: MatterExportRow["procedures"]) {
 
 function formatParties(parties: { role: PartyRole; standing: LitigationStanding | null; partyType: PartyType; name: string; idNumber: string | null; enterpriseSocialCode: string | null; phone: string | null; address: string | null; legalRep: string | null; contactName: string | null; notes: string | null }[]) {
   return parties
-    .map((party) => `${partyRoleLabel[party.role]}：${formatParty(party)}`)
-    .join("；");
+    .map((party) => `${partyRoleLabel[party.role]}: ${formatParty(party)}`)
+    .join("; ");
 }
 
 function formatParty(party: {
@@ -1056,15 +1056,15 @@ function formatParty(party: {
   const detail = [
     label(litigationStandingLabel, party.standing),
     partyTypeLabel[party.partyType],
-    party.idNumber ? `证件:${party.idNumber}` : "",
-    party.enterpriseSocialCode ? `代码:${party.enterpriseSocialCode}` : "",
-    party.phone ? `电话:${party.phone}` : "",
-    party.legalRep ? `法定代表人:${party.legalRep}` : "",
-    party.contactName ? `联系人:${party.contactName}` : "",
-    party.address ? `地址:${party.address}` : "",
-    party.notes ? `备注:${party.notes}` : ""
+    party.idNumber ? `Số giấy tờ: ${party.idNumber}` : "",
+    party.enterpriseSocialCode ? `Mã số thuế: ${party.enterpriseSocialCode}` : "",
+    party.phone ? `Điện thoại: ${party.phone}` : "",
+    party.legalRep ? `Người đại diện: ${party.legalRep}` : "",
+    party.contactName ? `Người liên hệ: ${party.contactName}` : "",
+    party.address ? `Địa chỉ: ${party.address}` : "",
+    party.notes ? `Ghi chú: ${party.notes}` : ""
   ].filter(Boolean);
-  return detail.length > 0 ? `${party.name}（${detail.join("，")}）` : party.name;
+  return detail.length > 0 ? `${party.name} (${detail.join(", ")})` : party.name;
 }
 
 function formatContacts(
@@ -1073,7 +1073,7 @@ function formatContacts(
   return contacts
     .map((contact) =>
       [
-        contact.isPrimary ? "主" : "",
+        contact.isPrimary ? "Chính" : "",
         contact.name,
         contact.title,
         contact.phone,
@@ -1172,7 +1172,7 @@ function decimalNumber(value: Prisma.Decimal | number | null | undefined) {
 }
 
 function yesNo(value: boolean | null | undefined) {
-  return value ? "是" : "否";
+  return value ? "Có" : "Không";
 }
 
 function label<T extends string>(

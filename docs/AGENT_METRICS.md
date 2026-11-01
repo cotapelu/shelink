@@ -448,3 +448,9 @@ Loại: Test (T). Ưu tiên: MEDIUM (đẩy Health Score qua gate nhánh ≥80%)
 - **Pilot**: `server/invoices/actions.ts`: 17 chuỗi (message lỗi, notification content, zod message, tag document "Yêu cầu hóa đơn"/"Hóa đơn điện tử", comment) + locale `zh-CN`→`vi-VN` → 0 dòng Hán (trừ license).
 - **Gates**: typecheck PASS; test 40 (4 file invoice) pass; smoke /finance 200.
 - **Ghi chú**: vùng server finance (actions/billing-actions/invoices) + UI finance + enums đã sạch chuỗi Hán — trừ license + ràng buộc ngoài.
+
+## [CYCLE-I18N-4] — 2026-10-31: server matters/clients + export-xlsx (coupled) → tiếng Việt
+- **Loại**: De-zh (i18n). ~45 phút. ✅.
+- **Đã làm**: `matters/schemas.ts` (11 chuỗi+comment, gồm 2 message zod), `matters/code-generator.ts` + `clients/code-generator.ts` (comment), `clients/actions.ts` (2 comment), `export-xlsx.ts` (14: nhãn party/procedure, boolean Có/Không, "Chính", dấu fullwidth trong chuỗi đang chạm) + **đồng bộ 11 assertion** trong `export-xlsx.test.ts` và **2 assertion** trong `schemas.test.ts`.
+- **Gates**: typecheck PASS; test **2368 pass / 1 skip / 0 fail**; lint 896/744 (không đổi); export 33/33, schemas 43/43.
+- **Ghi chú**: bắt 2 fail ngay sau khi đổi source → đúng quy trình "test fail → sửa test cùng chu kỳ"; grep toàn bộ test (không chỉ head).

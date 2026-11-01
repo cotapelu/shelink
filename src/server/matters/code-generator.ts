@@ -24,7 +24,7 @@ import { matterCategoryCode } from "@/lib/procedures-by-category";
 import { getFirmProfile, CATEGORY_ABBR } from "@/server/settings/firm-profile";
 import { renderCaseNoTemplate } from "@/lib/matters/firm-caseno";
 
-/** SystemSetting 原子计数器：key 自增并返回新值（serializable 防并发冲突） */
+/** Bộ đếm atomic trên SystemSetting: key tự tăng và trả về giá trị mới (transaction Serializable tránh xung đột đồng thời) */
 async function nextCounter(key: string): Promise<number> {
   return prisma.$transaction(
     async (tx) => {
@@ -43,9 +43,9 @@ async function nextCounter(key: string): Promise<number> {
 }
 
 /**
- * 原子生成 internalCode：{前缀}-{YYYY}-{CODE}-{4位流水}
+ * Sinh internalCode atomic: {tiền tố}-{YYYY}-{CODE}-{số thứ tự 4 chữ số}
  *
- * 前缀可在「设置 → 律所信息」配置（默认 LL）。计数器 key 形如 `code-counter-2026-CC`。
+ * Tiền tố cấu hình được ở 「Cài đặt → Thông tin văn phòng」 (mặc định LL). Key đếm dạng `code-counter-2026-CC`.
  */
 export async function generateInternalCode(category: MatterCategory): Promise<string> {
   const year = new Date().getFullYear();
@@ -57,9 +57,9 @@ export async function generateInternalCode(category: MatterCategory): Promise<st
 }
 
 /**
- * v0.42 生成所内案号（项 11）：按「设置 → 律所信息」的模板渲染。
- * 计数器按 年 + 类别 独立自增，key 形如 `firm-caseno-2026-CC`。
- * 模板为空时回退默认；与 internalCode 计数器互不干扰。
+ * v0.42 Sinh mã nội bộ (mục 11): render theo mẫu ở 「Cài đặt → Thông tin văn phòng」.
+ * Bộ đếm tự tăng độc lập theo năm + loại, key dạng `firm-caseno-2026-CC`.
+ * Mẫu rỗng thì fallback mặc định; không nhiễu với bộ đếm internalCode.
  */
 export async function generateFirmCaseNo(category: MatterCategory): Promise<string> {
   const year = new Date().getFullYear();

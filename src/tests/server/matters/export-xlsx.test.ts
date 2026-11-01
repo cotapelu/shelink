@@ -750,13 +750,13 @@ describe("buildMatterRow section builders - litigation kind (CIVIL_COMMERCIAL)",
     expect(at("causeFreeText")).toBe("Tự do");
     expect(at("claimAmount")).toBe(150000);
     expect(at("ourStanding")).toBe("Nguyên đơn");
-    expect(at("counterclaimAsPlaintiff")).toBe("是");
-    expect(at("counterclaimAsDefendant")).toBe("否");
+    expect(at("counterclaimAsPlaintiff")).toBe("Có");
+    expect(at("counterclaimAsDefendant")).toBe("Không");
     expect(at("barFiling")).toBe("Cần, liên quan tập thể");
 
     // buildPartiesAndSummary
-    expect(at("parties")).toContain("Khách hàng：Công ty ABC（Nguyên đơn，Công ty，代码:0123456789，电话:0909，法定代表人:Nguyễn Văn X，地址:456 Đường B）");
-    expect(at("parties")).toContain("Đối phương：Nguyễn Văn B（Bị đơn，Cá nhân，证件:123456789）");
+    expect(at("parties")).toContain("Khách hàng: Công ty ABC (Nguyên đơn, Công ty, Mã số thuế: 0123456789, Điện thoại: 0909, Người đại diện: Nguyễn Văn X, Địa chỉ: 456 Đường B)");
+    expect(at("parties")).toContain("Đối phương: Nguyễn Văn B (Bị đơn, Cá nhân, Số giấy tờ: 123456789)");
     // litigation kind does not emit procedureSummary column
     expect(data.headers).toContain(COL.parties);
     expect(data.headers).not.toContain(COL.procedureSummary);
@@ -808,7 +808,7 @@ describe("buildMatterRow section builders - litigation kind (CIVIL_COMMERCIAL)",
     expect(at("sourceClaimAmount")).toBe(120000);
     expect(at("sourceClaimDescription")).toBe("Bồi thường");
     expect(at("sourceBarFiling")).toBe("Cần, liên quan tập thể");
-    expect(at("sourceCounterclaim")).toBe("是");
+    expect(at("sourceCounterclaim")).toBe("Có");
     // litigation source columns only (no business/counsel source columns)
     expect(at("sourceFeeType")).toBe("Cố định");
     expect(at("sourceFeeAmount")).toBe(8000);
@@ -844,13 +844,13 @@ describe("buildMatterRow section builders - litigation kind (CIVIL_COMMERCIAL)",
     expect(at("procedure1Handler")).toBe("Thẩm phán A");
     expect(at("procedure1OurStanding")).toBe("Nguyên đơn");
     expect(at("procedure1LeadLawyer")).toBe("Luật sư A");
-    expect(at("procedure1ExternalLead")).toBe("否");
+    expect(at("procedure1ExternalLead")).toBe("Không");
     expect(at("procedure1AcceptedAt")).toBe("2025-02-01");
     expect(at("procedure1ConcludedAt")).toBe("");
     expect(at("procedure1Outcome")).toBe("");
     expect(at("procedure1OutcomeNote")).toBe("");
-    expect(at("procedure1Parties")).toContain("Nguyên đơn：Công ty ABC");
-    expect(at("procedure1Parties")).toContain("Bị đơn：Nguyễn Văn B");
+    expect(at("procedure1Parties")).toContain("Nguyên đơn: Công ty ABC");
+    expect(at("procedure1Parties")).toContain("Bị đơn: Nguyễn Văn B");
 
     // procedure slot 2 (null branches + outcome branch)
     expect(at("procedure2Type")).toBe("Trọng tài thương mại");
@@ -858,7 +858,7 @@ describe("buildMatterRow section builders - litigation kind (CIVIL_COMMERCIAL)",
     expect(at("procedure2Engagement")).toBe("Chỉ đăng ký");
     expect(at("procedure2Status")).toBe("Đã kết thúc");
     expect(at("procedure2CaseNumber")).toBe("");
-    expect(at("procedure2ExternalLead")).toBe("是");
+    expect(at("procedure2ExternalLead")).toBe("Có");
     expect(at("procedure2LeadLawyer")).toBe("");
     expect(at("procedure2AcceptedAt")).toBe("");
     expect(at("procedure2ConcludedAt")).toBe("2025-04-01");
@@ -1019,8 +1019,8 @@ describe("buildMatterRow section builders - litigation kind (CIVIL_COMMERCIAL)",
     expect(at("causeFreeText")).toBe("");
     expect(at("claimAmount")).toBe("");
     expect(at("ourStanding")).toBe("");
-    expect(at("counterclaimAsPlaintiff")).toBe("否");
-    expect(at("counterclaimAsDefendant")).toBe("是");
+    expect(at("counterclaimAsPlaintiff")).toBe("Không");
+    expect(at("counterclaimAsDefendant")).toBe("Có");
     expect(at("barFiling")).toBe("Không");
     // procedure columns exist (maxProcedures >= 1) but are empty
     expect(data.headers).toContain(COL.procedure1Type);

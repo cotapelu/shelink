@@ -419,7 +419,7 @@ export async function updateClient(input: ClientUpdateInput) {
   const data = clientUpdateSchema.parse(input);
   const { id, contacts, gender, ...rest } = data;
 
-  // 简单策略：删除所有联系人 + 重新创建。后续可优化为 diff
+  // Chiến lược đơn giản: xóa toàn bộ liên hệ + tạo lại. Sau có thể tối ưu bằng diff
   await prisma.$transaction([
     prisma.contact.deleteMany({ where: { clientId: id } }),
     prisma.client.update({
@@ -479,7 +479,7 @@ export async function softDeleteClient(id: string) {
   return { ok: true };
 }
 
-// 单独的 contact 操作（用于详情页快速编辑联系人，不通过整 client 重写）
+// Thao tác liên hệ riêng (sửa nhanh liên hệ ở trang chi tiết, không ghi lại toàn bộ client)
 export async function addContact(clientId: string, input: ContactInput) {
   const session = await requireSession();
   if (!isManager(session.user.role)) {

@@ -333,7 +333,7 @@ describe('matterCreateSchema', () => {
       clientIds: [GEN.client],
       firstProcedure: { type: 'FIRST_INSTANCE' as any }
     };
-    expect(() => matterCreateSchema.parse(input)).toThrow("案件名称必填");
+    expect(() => matterCreateSchema.parse(input)).toThrow("Tên vụ án bắt buộc nhập");
   });
 
   it('rejects non-string title', () => {
@@ -353,7 +353,7 @@ describe('matterCreateSchema', () => {
       clientIds: [] as any,
       firstProcedure: { type: 'FIRST_INSTANCE' as any }
     };
-    expect(() => matterCreateSchema.parse(input)).toThrow("至少选择一个委托方");
+    expect(() => matterCreateSchema.parse(input)).toThrow("Chọn ít nhất một bên ủy quyền");
   });
 
   it('accepts claimAmount as string that coerces to number', () => {

@@ -21,10 +21,10 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 /**
- * v0.39: 原子生成客户编号 KH-{YYYY}-{4位流水}
+ * v0.39: Sinh mã khách hàng atomic KH-{YYYY}-{số thứ tự 4 chữ số}
  *
- * 计数器存在 SystemSetting，key 形如 `client-code-counter-2026`。
- * 与 matters/code-generator.ts 同款 Serializable 事务避免并发冲突。
+ * Bộ đếm lưu ở SystemSetting, key dạng `client-code-counter-2026`.
+ * Cùng cơ chế transaction Serializable với matters/code-generator.ts để tránh xung đột đồng thời.
  */
 export async function generateClientCode(): Promise<string> {
   const year = new Date().getFullYear();
