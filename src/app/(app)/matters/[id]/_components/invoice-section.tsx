@@ -86,14 +86,14 @@ export function InvoiceSection({ matterId }: { matterId: string }) {
       <header className="flex items-center justify-between border-b border-border px-5 py-3">
         <h3 className="flex items-center gap-2 text-sm font-semibold">
           <Receipt className="h-4 w-4 text-primary" />
-          开票申请
+          Yêu cầu xuất HĐ
           {requests && (
             <span className="text-xs text-muted-foreground">({requests.length})</span>
           )}
         </h3>
         <Button size="sm" onClick={() => setOpen(true)} className="h-7 gap-1">
           <Plus className="h-3.5 w-3.5" />
-          申请开票
+          Yêu cầu xuất HĐ
         </Button>
       </header>
 
@@ -103,7 +103,7 @@ export function InvoiceSection({ matterId }: { matterId: string }) {
         </p>
       ) : !requests || requests.length === 0 ? (
         <p className="py-10 text-center text-xs text-muted-foreground">
-          还没有开票申请。客户需要发票时点上方&ldquo;申请开票&rdquo;
+          Chưa có yêu cầu xuất HĐ nào. Khi khách cần hóa đơn thì bấm&ldquo;Yêu cầu xuất HĐ&rdquo;ở trên
         </p>
       ) : (
         <ul className="divide-y divide-border">
@@ -145,7 +145,7 @@ function InvoiceItem({ row }: { row: InvoiceRow }) {
           )}
         </div>
         <div className="mt-0.5 text-[11px] text-muted-foreground">
-          申请：{row.requestedBy.name} · {new Date(row.requestedAt).toLocaleString("zh-CN", {
+          Người yêu cầu: {row.requestedBy.name} · {new Date(row.requestedAt).toLocaleString("vi-VN", {
             month: "2-digit",
             day: "2-digit",
             hour: "2-digit",
@@ -154,16 +154,16 @@ function InvoiceItem({ row }: { row: InvoiceRow }) {
           {row.processedBy && (
             <>
               {" · "}
-              {row.status === "REJECTED" ? "驳回" : "处理"}：{row.processedBy.name}
+              {row.status === "REJECTED" ? "Từ chối" : "Xử lý"}: {row.processedBy.name}
             </>
           )}
         </div>
         {row.requestNote && (
-          <div className="mt-1 text-[11px] text-foreground/80">备注：{row.requestNote}</div>
+          <div className="mt-1 text-[11px] text-foreground/80">Ghi chú: {row.requestNote}</div>
         )}
         {row.processNote && (
           <div className="mt-1 text-[11px] text-destructive/80">
-            财务备注：{row.processNote}
+            Ghi chú tài chính: {row.processNote}
           </div>
         )}
       </div>
@@ -177,7 +177,7 @@ function InvoiceItem({ row }: { row: InvoiceRow }) {
             title={row.contractScan.name}
           >
             <FileCheck2 className="h-3 w-3" />
-            合同
+            Hợp đồng
           </a>
         )}
         {row.invoiceFile && (
@@ -189,7 +189,7 @@ function InvoiceItem({ row }: { row: InvoiceRow }) {
             title={row.invoiceFile.name}
           >
             <Download className="h-3 w-3" />
-            电子发票
+            Hoá đơn điện tử
           </a>
         )}
       </div>
@@ -220,7 +220,7 @@ function CreateInvoiceDialog({
   function handleSubmit() {
     const amt = Number(amount);
     if (!amt || amt <= 0) {
-      toast.warning("请填写有效的开票金额");
+      toast.warning("Hãy điền số tiền hợp lệ");
       return;
     }
     startTransition(async () => {
@@ -231,11 +231,11 @@ function CreateInvoiceDialog({
           title,
           requestNote: note
         });
-        toast.success("开票申请已提交，等待财务处理");
+        toast.success("Đã gửi yêu cầu xuất HĐ, chờ tài chính xử lý");
         reset();
         onOpenChange(false);
       } catch (err) {
-        toast.error("提交失败", {
+        toast.error("Gửi thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -254,16 +254,16 @@ function CreateInvoiceDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Receipt className="h-4 w-4 text-primary" />
-            申请开具发票
+            Yêu cầu xuất hóa đơn
           </DialogTitle>
           <DialogDescription className="text-xs">
-            提交后由财务处理，财务会上传扫描件合同 + 电子发票
+            Sau khi gửi do tài chính xử lý, tài chính sẽ tải lên bản scan hợp đồng + hoá đơn điện tử
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 py-2">
           <div className="space-y-1.5">
-            <Label className="text-xs">开票金额（元）*</Label>
+            <Label className="text-xs">Số tiền yêu cầu xuất (VNĐ) *</Label>
             <Input
               type="number"
               step="0.01"
@@ -275,18 +275,18 @@ function CreateInvoiceDialog({
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs">抬头 / 备注</Label>
+            <Label className="text-xs">Đơn vị mua / Ghi chú</Label>
             <Input
-              placeholder="如：某某公司 / 阶段款"
+              placeholder="vd: Công ty Moux / tiền giai đoạn"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs">说明（可选）</Label>
+            <Label className="text-xs">Diễn giải (tuỳ chọn)</Label>
             <Textarea
               rows={3}
-              placeholder="如：开具增值税专用发票，税号 ..."
+              placeholder="vd: xuất hóa đơn GTGT, mã số thuế..."
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
@@ -295,11 +295,11 @@ function CreateInvoiceDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={handleSubmit} disabled={isPending} className="gap-1.5">
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            提交申请
+            Gửi yêu cầu
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -20,12 +20,12 @@
 "use client";
 
 /**
- * v0.27: 程序下"案件材料"区
- * v0.42: 分类切换 tab + 来源方 + docx/xlsx 在线预览
+ * v0.27: Khu "tài liệu vụ án" dưới thủ tục
+ * v0.42: tab chuyển phân loại + bên nguồn + xem trực tuyến docx/xlsx
  *
- * - 每个程序独立呈现自己关联的 Document
- * - 上传时必选 category；诉辩/证据类可标注来源方（取本案当事人）
- * - 预览：pdf/图片/文本走 download?inline=1；docx/xlsx 走 /preview 转 HTML
+ * - Mỗi thủ tục hiển thị độc lập Document liên kết với mình
+ * - Khi tải lên bắt buộc chọn category; loại tố tụng / chứng cứ có thể ghi bên nguồn (lấy từ các bên của vụ án)
+ * - Xem trước: pdf/ảnh/văn bản đi qua download?inline=1; docx/xlsx đi qua /preview chuyển HTML
  */
 import { useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
@@ -62,14 +62,14 @@ import { canPreview, officePreviewKind } from "@/lib/storage/mime-ext";
 import { cn, formatDate } from "@/lib/utils";
 import { litigationStandingLabel } from "@/lib/enums";
 
-// v0.42: 类别标签按律师习惯改名
+// v0.42: đổi tên nhãn phân loại theo thói quen luật sư
 const categoryLabel: Record<DocumentCategory, string> = {
-  PLEADING: "诉辩文件",
-  EVIDENCE: "证据",
-  PROCEDURE: "程序文件",
-  JUDGMENT: "裁决",
-  CONTRACT: "其他",
-  OTHER: "其他"
+  PLEADING: "Văn bản tố tụng",
+  EVIDENCE: "Chứng cứ",
+  PROCEDURE: "Tài liệu thủ tục",
+  JUDGMENT: "Quyết định",
+  CONTRACT: "Khác",
+  OTHER: "Khác"
 };
 const CATEGORY_OPTIONS: DocumentCategory[] = [
   "PLEADING",
@@ -78,9 +78,9 @@ const CATEGORY_OPTIONS: DocumentCategory[] = [
   "JUDGMENT",
   "OTHER"
 ];
-// 需要标注来源方的类别（诉辩 / 证据）
+// Các loại cần ghi bên nguồn (tố tụng / chứng cứ)
 const SOURCE_CATEGORIES: DocumentCategory[] = ["PLEADING", "EVIDENCE"];
-const COURT_PROCEDURE_SOURCE = "法院程序文件";
+const COURT_PROCEDURE_SOURCE = "Tài liệu thủ tục toà án";
 
 type ProcedureParty = {
   id: string;
@@ -105,64 +105,64 @@ function iconFor(d: Pick<DocItem, "mimeType" | "name">) {
   const ext = d.name.split(".").pop()?.toLowerCase() ?? "";
 
   if (mime.startsWith("image/") || ["jpg", "jpeg", "png", "gif", "webp", "heic"].includes(ext)) {
-    return { src: "/file-icons/image.svg", alt: "图片文件" };
+    return { src: "/file-icons/image.svg", alt: "Tệp ảnh" };
   }
   if (mime.includes("pdf") || ext === "pdf") {
-    return { src: "/file-icons/pdf.svg", alt: "PDF 文件" };
+    return { src: "/file-icons/pdf.svg", alt: "Tệp PDF" };
   }
   if (
     mime.includes("word") ||
     mime.includes("msword") ||
     ["doc", "docx"].includes(ext)
   ) {
-    return { src: "/file-icons/word.svg", alt: "Word 文件" };
+    return { src: "/file-icons/word.svg", alt: "Tệp Word" };
   }
   if (
     mime.includes("spreadsheet") ||
     mime.includes("excel") ||
     ["xls", "xlsx", "csv"].includes(ext)
   ) {
-    return { src: "/file-icons/excel.svg", alt: "Excel 文件" };
+    return { src: "/file-icons/excel.svg", alt: "Tệp Excel" };
   }
   if (
     mime.includes("presentation") ||
     mime.includes("powerpoint") ||
     ["ppt", "pptx"].includes(ext)
   ) {
-    return { src: "/file-icons/presentation.svg", alt: "演示文稿" };
+    return { src: "/file-icons/presentation.svg", alt: "Trình chiếu" };
   }
   if (mime.includes("json") || ext === "json") {
-    return { src: "/file-icons/json.svg", alt: "JSON 文件" };
+    return { src: "/file-icons/json.svg", alt: "Tệp JSON" };
   }
   if (
     mime.includes("xml") ||
     ["xml", "html", "htm", "css", "js", "jsx", "ts", "tsx", "java", "py", "go", "rb", "php", "sh", "yml", "yaml"].includes(ext)
   ) {
-    return { src: "/file-icons/code.svg", alt: "代码文件" };
+    return { src: "/file-icons/code.svg", alt: "Tệp mã" };
   }
   if (
     mime.startsWith("text/") ||
     ["txt", "md", "rtf", "log"].includes(ext)
   ) {
-    return { src: "/file-icons/text.svg", alt: "文本文件" };
+    return { src: "/file-icons/text.svg", alt: "Tệp văn bản" };
   }
   if (
     mime.includes("zip") ||
     mime.includes("rar") ||
     ["zip", "rar", "7z", "tar", "gz"].includes(ext)
   ) {
-    return { src: "/file-icons/archive.svg", alt: "压缩包" };
+    return { src: "/file-icons/archive.svg", alt: "Gói nén" };
   }
   if (mime.startsWith("audio/") || ["mp3", "wav", "m4a", "aac"].includes(ext)) {
-    return { src: "/file-icons/audio.svg", alt: "音频文件" };
+    return { src: "/file-icons/audio.svg", alt: "Tệp âm thanh" };
   }
   if (mime.startsWith("video/") || ["mp4", "mov", "avi", "mkv"].includes(ext)) {
-    return { src: "/file-icons/video.svg", alt: "视频文件" };
+    return { src: "/file-icons/video.svg", alt: "Tệp video" };
   }
-  return { src: "/file-icons/generic.svg", alt: "文件" };
+  return { src: "/file-icons/generic.svg", alt: "Tệp" };
 }
 
-// 预览 URL：office 文档走转 HTML，其余走 inline
+// URL xem trước: tài liệu office chuyển HTML, còn lại đi inline
 function previewUrl(d: DocItem): string | null {
   if (officePreviewKind(d.mimeType, d.name)) {
     return `/api/documents/${d.id}/preview`;
@@ -194,10 +194,10 @@ export function ProcedureDocumentsSection({
   const [sourceParty, setSourceParty] = useState<string>("");
   const [customName, setCustomName] = useState("");
   const [isPending, startTransition] = useTransition();
-  // 当前分类筛选（全部 = null）
+  // Lọc theo phân loại hiện tại (tất cả = null)
   const [filter, setFilter] = useState<DocumentCategory | null>(null);
 
-  // 归属/来源选项：当前程序当事人（诉讼地位 + 名称）
+  // Tuỳ chọn thuộc/nguồn: các bên của thủ tục hiện tại (lập trường tố tụng + tên)
   const sourceOptions = useMemo(
     () => {
       const seen = new Set<string>([COURT_PROCEDURE_SOURCE]);
@@ -226,7 +226,7 @@ export function ProcedureDocumentsSection({
 
   function handleSubmit() {
     if (!picked) {
-      toast.error("请先选择文件");
+      toast.error("Hãy chọn tệp trước");
       return;
     }
     startTransition(async () => {
@@ -241,7 +241,7 @@ export function ProcedureDocumentsSection({
         }
         fd.set("name", customName.trim() || picked.name);
         await uploadDocument(fd);
-        toast.success("上传成功");
+        toast.success("Tải lên thành công");
         setOpen(false);
         setPicked(null);
         setCustomName("");
@@ -249,7 +249,7 @@ export function ProcedureDocumentsSection({
         if (fileRef.current) fileRef.current.value = "";
         router.refresh();
       } catch (err) {
-        toast.error("上传失败", {
+        toast.error("Tải lên thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -257,14 +257,14 @@ export function ProcedureDocumentsSection({
   }
 
   function handleDelete(id: string, name: string) {
-    if (!confirm(`删除材料"${name}"？`)) return;
+    if (!confirm(`Xoá tài liệu "${name}"?`)) return;
     startTransition(async () => {
       try {
         await deleteDocument(id);
-        toast.success("已删除");
+        toast.success("Đã xoá");
         router.refresh();
       } catch (err) {
-        toast.error("删除失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Xoá thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -274,12 +274,12 @@ export function ProcedureDocumentsSection({
       <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-2">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 text-[13px] font-medium whitespace-nowrap">
-            案件材料
+            Tài liệu vụ án
             <span className="ml-1 font-mono text-[11px] text-muted-foreground tabular">
               {documents.length}
             </span>
           </span>
-          {/* 分类按钮组（参考用印审批） */}
+          {/* Nhóm nút phân loại (tham khảo duyệt dùng dấu) */}
           <div className="flex items-center gap-0.5 rounded-md border border-border bg-background p-0.5">
             <button
               type="button"
@@ -291,7 +291,7 @@ export function ProcedureDocumentsSection({
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              全部
+              Tất cả
             </button>
             {CATEGORY_OPTIONS.map((c) => (
               <button
@@ -313,17 +313,17 @@ export function ProcedureDocumentsSection({
         {canManage && (
           <Button size="sm" onClick={() => setOpen(true)} className="h-6 gap-0.5 px-2 text-[11px] shrink-0">
             <Plus className="h-2.5 w-2.5" />
-            上传
+            Tải lên
           </Button>
         )}
       </header>
 
       {filtered.length === 0 ? (
         <p className="px-4 py-6 text-center text-xs text-muted-foreground">
-          {filter ? "该分类下暂无材料" : "本程序还没有材料"}
+          {filter ? "Chưa có tài liệu trong phân loại này" : "Thủ tục này chưa có tài liệu"}
         </p>
       ) : (
-        // 单文件行列表，无外框
+        // Danh sách dòng từng tệp, không khung ngoài
         <ul className="divide-y divide-border px-4">
           {filtered.map((d) => {
             const icon = iconFor(d);
@@ -341,7 +341,7 @@ export function ProcedureDocumentsSection({
                       target="_blank"
                       rel="noreferrer"
                       className="truncate text-xs hover:text-primary hover:underline"
-                      title="点击打开查看"
+                      title="Bấm để mở xem"
                     >
                       {d.name}
                     </a>
@@ -363,7 +363,7 @@ export function ProcedureDocumentsSection({
                       target="_blank"
                       rel="noreferrer"
                       className="p-1 text-muted-foreground hover:text-primary"
-                      title="预览"
+                      title="Xem trước"
                     >
                       <Eye className="h-3.5 w-3.5" />
                     </a>
@@ -373,7 +373,7 @@ export function ProcedureDocumentsSection({
                     target="_blank"
                     rel="noreferrer"
                     className="p-1 text-muted-foreground hover:text-primary"
-                    title="下载"
+                    title="Tải xuống"
                   >
                     <Download className="h-3.5 w-3.5" />
                   </a>
@@ -382,7 +382,7 @@ export function ProcedureDocumentsSection({
                       type="button"
                       onClick={() => handleDelete(d.id, d.name)}
                       className="p-1 text-muted-foreground hover:text-destructive"
-                      title="删除"
+                      title="Xoá"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -398,15 +398,15 @@ export function ProcedureDocumentsSection({
         <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>上传案件材料</DialogTitle>
+            <DialogTitle>Tải lên tài liệu vụ án</DialogTitle>
             <DialogDescription className="text-xs">
-              文件 ≤ 20MB · 自动关联到当前程序
+              Tệp ≤ 20MB · Tự động liên kết tới thủ tục hiện tại
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2">
             <div className="space-y-1.5">
-              <Label className="text-xs">材料类别 *</Label>
+              <Label className="text-xs">Loại tài liệu *</Label>
               <Select value={category} onValueChange={(v) => setCategory(v as DocumentCategory)}>
                 <SelectTrigger className="h-10 bg-background">
                   <SelectValue />
@@ -421,19 +421,19 @@ export function ProcedureDocumentsSection({
               </Select>
             </div>
 
-            {/* v0.42 归属/来源：诉辩/证据类才出现，选项=当前程序当事人 */}
+            {/* v0.42 thuộc/nguồn: chỉ hiện với loại tố tụng / chứng cứ, tuỳ chọn = các bên của thủ tục hiện tại */}
             {SOURCE_CATEGORIES.includes(category) && sourceOptions.length > 0 && (
               <div className="space-y-1.5">
-                <Label className="text-xs">归属/来源（可选）</Label>
+                <Label className="text-xs">Thuộc/nguồn (tuỳ chọn)</Label>
                 <Select
                   value={sourceParty || "__none__"}
                   onValueChange={(v) => setSourceParty(v === "__none__" ? "" : v)}
                 >
                   <SelectTrigger className="h-10 bg-background">
-                    <SelectValue placeholder="选择归属/来源" />
+                    <SelectValue placeholder="Chọn thuộc/nguồn" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__">不标注</SelectItem>
+                    <SelectItem value="__none__">Không ghi</SelectItem>
                     {sourceOptions.map((s) => (
                       <SelectItem key={s} value={s}>
                         {s}
@@ -445,7 +445,7 @@ export function ProcedureDocumentsSection({
             )}
 
             <div className="space-y-1.5">
-              <Label className="text-xs">文件 *</Label>
+              <Label className="text-xs">Tệp *</Label>
               <Input
                 ref={fileRef}
                 type="file"
@@ -453,28 +453,28 @@ export function ProcedureDocumentsSection({
               />
               {picked && (
                 <p className="text-[10px] text-muted-foreground">
-                  已选 {picked.name}（{(picked.size / 1024).toFixed(0)} KB）
+                  Đã chọn {picked.name} ({(picked.size / 1024).toFixed(0)} KB)
                 </p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">显示名（可选，留空用文件名）</Label>
+              <Label className="text-xs">Tên hiển thị (tuỳ chọn, để trống dùng tên tệp)</Label>
               <Input
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
-                placeholder="如：原告起诉状-定稿"
+                placeholder="vd: Đơn khởi kiện của nguyên đơn - bản chốt"
               />
             </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)} disabled={isPending}>
-              取消
+              Huỷ
             </Button>
             <Button onClick={handleSubmit} disabled={isPending || !picked}>
               {isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
-              上传
+              Tải lên
             </Button>
           </DialogFooter>
         </DialogContent>

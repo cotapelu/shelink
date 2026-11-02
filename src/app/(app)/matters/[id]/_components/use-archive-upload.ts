@@ -36,10 +36,10 @@ async function runChecklistUpload(args: {
   setUploadingItemId(item.id);
   try {
     await uploadDocument(buildArchiveUploadFormData({ matterId, item, file }));
-    toast.success(`已上传：${item.label}`, { description: file.name });
+    toast.success(`Đã tải lên: ${item.label}`, { description: file.name });
     await refreshPrep();
   } catch (err) {
-    toast.error("上传失败", { description: err instanceof Error ? err.message : "" });
+    toast.error("Tải lên thất bại", { description: err instanceof Error ? err.message : "" });
   } finally {
     setUploadingItemId(null);
   }

@@ -38,9 +38,9 @@ export function ArchiveBasicInfoStep({
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label>结案方式</Label>
+          <Label>Hình thức kết thúc</Label>
           <Select value={closedReason} onValueChange={(v) => onClosedReasonChange(v as ArchiveClosedReason)}>
-            <SelectTrigger><SelectValue placeholder="选择" /></SelectTrigger>
+            <SelectTrigger><SelectValue placeholder="Chọn" /></SelectTrigger>
             <SelectContent>
               {Object.entries(CLOSED_REASON_CN).map(([key, label]) => (
                 <SelectItem key={key} value={key}>{label}</SelectItem>
@@ -49,17 +49,17 @@ export function ArchiveBasicInfoStep({
           </Select>
         </div>
         <div>
-          <Label>结案日期</Label>
+          <Label>Ngày kết thúc</Label>
           <Input type="date" value={completedAt} onChange={e => onCompletedAtChange(e.target.value)} />
         </div>
       </div>
       <div>
-        <Label>结案小结</Label>
-        <Textarea value={summary} onChange={e => onSummaryChange(e.target.value)} placeholder="案件结果概述" rows={4} />
+        <Label>Tóm tắt kết thúc</Label>
+        <Textarea value={summary} onChange={e => onSummaryChange(e.target.value)} placeholder="Mô tả kết quả vụ án" rows={4} />
       </div>
       <div>
-        <Label>判决/裁决摘要（可选）</Label>
-        <Textarea value={judgmentSummary} onChange={e => onJudgmentSummaryChange(e.target.value)} placeholder="判决书/裁决书关键内容" rows={4} />
+        <Label>Tóm tắt bản án/quyết định (tuỳ chọn)</Label>
+        <Textarea value={judgmentSummary} onChange={e => onJudgmentSummaryChange(e.target.value)} placeholder="Nội dung then chốt của bản án/quyết định" rows={4} />
       </div>
     </div>
   );

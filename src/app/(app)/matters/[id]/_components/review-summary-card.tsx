@@ -31,7 +31,7 @@ export function ReviewSummaryCard({
 }) {
   const hasRecords = summary.recordCount > 0;
 
-  // v0.27: AI 复检入口暂隐 —— 没记录时整张卡片不渲染（避免出现没按钮的空提示）
+  // v0.27: cửa vào kiểm tra lại AI tạm ẩn —— không có bản ghi thì không render cả thẻ (tránh hiện gợi ý rỗng không có nút)
   if (!hasRecords) {
     return null;
   }
@@ -41,13 +41,13 @@ export function ReviewSummaryCard({
       <header className="mb-2 flex items-center justify-between">
         <h3 className="flex items-center gap-1.5 text-xs font-medium text-violet-700">
           <Sparkles className="h-3.5 w-3.5" />
-          AI 审查总览
+          Tổng quan kiểm tra AI
         </h3>
         <div className="flex items-center gap-3">
           <span className="font-mono text-[10px] text-muted-foreground">
-            {summary.documentCount} 份文档 · {summary.recordCount} 次审查 · 共 {summary.totalItems} 条
+            {summary.documentCount} tài liệu · {summary.recordCount} lần kiểm tra · tổng {summary.totalItems} mục
             {summary.latestReviewedAt && (
-              <span className="ml-2">最新 {summary.latestReviewedAt.toLocaleDateString("zh-CN")}</span>
+              <span className="ml-2">Mới nhất {summary.latestReviewedAt.toLocaleDateString("vi-VN")}</span>
             )}
           </span>
           <BatchReviewButton matterId={matterId} />
@@ -64,7 +64,7 @@ export function ReviewSummaryCard({
         <div className="mt-3 space-y-1.5">
           <div className="flex items-center gap-1 text-[10px] text-rose-700">
             <AlertTriangle className="h-3 w-3" />
-            最近 HIGH 风险（最多 3 条）
+            Rủi ro HIGH gần nhất (tối đa 3 mục)
           </div>
           <ul className="space-y-1">
             {summary.topHighItems.map((it, i) => (
@@ -91,9 +91,9 @@ export function ReviewSummaryCard({
 
 function SevTile({ sev, n }: { sev: "HIGH" | "MEDIUM" | "LOW"; n: number }) {
   const meta = {
-    HIGH: { label: "高风险", cls: "border-rose-300 bg-rose-50 text-rose-700" },
-    MEDIUM: { label: "中风险", cls: "border-amber-300 bg-amber-50 text-amber-700" },
-    LOW: { label: "低风险", cls: "border-slate-300 bg-slate-50 text-slate-600" }
+    HIGH: { label: "Rủi ro cao", cls: "border-rose-300 bg-rose-50 text-rose-700" },
+    MEDIUM: { label: "Rủi ro trung bình", cls: "border-amber-300 bg-amber-50 text-amber-700" },
+    LOW: { label: "Rủi ro thấp", cls: "border-slate-300 bg-slate-50 text-slate-600" }
   }[sev];
   return (
     <div className={cn("rounded border px-2 py-1.5", meta.cls)}>

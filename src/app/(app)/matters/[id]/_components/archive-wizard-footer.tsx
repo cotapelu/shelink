@@ -27,16 +27,16 @@ export function ArchiveWizardFooter({
   return (
     <div className="flex justify-between">
       <Button variant="outline" onClick={onBack} disabled={step === 0 || isPending}>
-        上一步
+        Quay lại
       </Button>
       {isLast ? (
         <Button onClick={onSubmit} disabled={!canProceed || isPending}>
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          提交归档
+          Gửi lưu trữ
         </Button>
       ) : (
         <Button onClick={onNext} disabled={!canProceed || isPending}>
-          下一步
+          Tiếp theo
         </Button>
       )}
     </div>

@@ -65,12 +65,12 @@ export function CustomFieldsPanel({
       <header className="flex items-center justify-between border-b border-border px-4 py-2">
         <span className="flex items-center gap-1.5 text-[13px] font-medium">
           <ListChecks className="h-3.5 w-3.5 text-primary" />
-          自定义信息
+          Thông tin tuỳ chỉnh
         </span>
         {canEdit && (
           <Button variant="ghost" size="sm" className="h-7 gap-1" onClick={() => setEditOpen(true)}>
             <Pencil className="h-3 w-3" />
-            编辑
+            Sửa
           </Button>
         )}
       </header>
@@ -124,10 +124,10 @@ function EditDialog({
     startTransition(async () => {
       try {
         await saveMatterCustomValues(matterId, draft);
-        toast.success("已保存");
+        toast.success("Đã lưu");
         onClose();
       } catch (err) {
-        toast.error("保存失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Lưu thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -136,7 +136,7 @@ function EditDialog({
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>编辑自定义信息</DialogTitle>
+          <DialogTitle>Sửa thông tin tuỳ chỉnh</DialogTitle>
         </DialogHeader>
 
         <div className="max-h-[60vh] space-y-3 overflow-y-auto">
@@ -149,7 +149,7 @@ function EditDialog({
               {d.fieldType === "SELECT" ? (
                 <Select value={draft[d.key] ?? ""} onValueChange={(v) => set(d.key, v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="请选择" />
+                    <SelectValue placeholder="Chọn" />
                   </SelectTrigger>
                   <SelectContent>
                     {d.options.map((o) => (
@@ -172,10 +172,10 @@ function EditDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={pending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={pending}>
-            保存
+            Lưu
           </Button>
         </DialogFooter>
       </DialogContent>

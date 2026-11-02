@@ -5,7 +5,7 @@
 
 import type { FolderDocument, FolderPayload } from "./folder-types";
 
-/** Nhóm tài liệu theo folder. Key `null` = 散件 (không thuộc folder nào). */
+/** Nhóm tài liệu theo folder. Key `null` = tài liệu rời (không thuộc folder nào). */
 export function groupDocumentsByFolder(
   folders: FolderPayload[],
   documents: FolderDocument[]
@@ -22,7 +22,7 @@ export function groupDocumentsByFolder(
   return { byFolderId, loose: byFolderId.get(null) ?? [] };
 }
 
-/** Tài liệu đang hiển thị: theo folder đang chọn, hoặc 散件 khi chọn null. */
+/** Tài liệu đang hiển thị: theo folder đang chọn, hoặc tài liệu rời khi chọn null. */
 export function documentsForActive(
   byFolderId: Map<string | null, FolderDocument[]>,
   activeFolderId: string | null,

@@ -38,8 +38,8 @@ import {
 import { createTask } from "@/server/tasks/actions";
 
 /**
- * v0.16: 案件详情"重要时限及提醒"卡内的新建 Dialog
- * 复用 Task 表（matterId + title + dueAt + description + priority）
+ * v0.16: Dialog tạo mới trong thẻ "Thời hạn & nhắc nhở quan trọng" ở chi tiết vụ án
+ * Tái sử dụng bảng Task (matterId + title + dueAt + description + priority)
  */
 export function AddReminderDialog({
   open,
@@ -71,11 +71,11 @@ export function AddReminderDialog({
 
   function submit() {
     if (!title.trim()) {
-      toast.warning("请填写提醒标题");
+      toast.warning("Hãy nhập tiêu đề nhắc nhở");
       return;
     }
     if (!date) {
-      toast.warning("请选择日期");
+      toast.warning("Hãy chọn ngày");
       return;
     }
 
@@ -100,11 +100,11 @@ export function AddReminderDialog({
           assigneeId: "",
           stageId: ""
         });
-        toast.success("已添加");
+        toast.success("Đã thêm");
         onOpenChange(false);
         router.refresh();
       } catch (err) {
-        toast.error("添加失败", {
+        toast.error("Thêm thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -117,20 +117,20 @@ export function AddReminderDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Bell className="h-4 w-4 text-primary" />
-            添加重要时限 / 提醒
+            Thêm thời hạn / nhắc nhở quan trọng
           </DialogTitle>
           <DialogDescription className="text-xs">
-            可用作截止日期、关键节点或自定义提醒事项
+            Dùng làm ngày đến hạn, mốc then chốt hoặc việc nhắc tuỳ chỉnh
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label className="text-xs">
-              标题 <span className="text-destructive">*</span>
+              Tiêu đề <span className="text-destructive">*</span>
             </Label>
             <Input
-              placeholder="如：提交答辩状 / 缴纳保全费 / 提交证据清单"
+              placeholder="vd: nộp bản trả lời / nộp phí bảo toàn / nộp danh mục chứng cứ"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -139,12 +139,12 @@ export function AddReminderDialog({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs">
-                日期 <span className="text-destructive">*</span>
+                Ngày <span className="text-destructive">*</span>
               </Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">时间</Label>
+              <Label className="text-xs">Giờ</Label>
               <div className="flex items-center gap-2">
                 <input
                   type="time"
@@ -161,19 +161,19 @@ export function AddReminderDialog({
                     onChange={(e) => setAllDay(e.target.checked)}
                     className="h-3 w-3"
                   />
-                  全天
+                  Cả ngày
                 </label>
               </div>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">优先级</Label>
+            <Label className="text-xs">Mức ưu tiên</Label>
             <div className="flex gap-2">
               {[
-                { value: 0, label: "普通" },
-                { value: 1, label: "高" },
-                { value: 2, label: "紧急" }
+                { value: 0, label: "Thường" },
+                { value: 1, label: "Cao" },
+                { value: 2, label: "Khẩn cấp" }
               ].map((p) => (
                 <button
                   key={p.value}
@@ -192,10 +192,10 @@ export function AddReminderDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">备注（可选）</Label>
+            <Label className="text-xs">Ghi chú (tuỳ chọn)</Label>
             <Textarea
               rows={2}
-              placeholder="补充说明、相关材料等"
+              placeholder="Diễn giải thêm, tài liệu liên quan..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -204,11 +204,11 @@ export function AddReminderDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={isPending} className="gap-1.5">
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            添加
+            Thêm
           </Button>
         </DialogFooter>
       </DialogContent>

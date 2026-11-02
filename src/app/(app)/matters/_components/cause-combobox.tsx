@@ -42,12 +42,12 @@ type Props = {
 };
 
 /**
- * 案由级联选择器
- * - 一次性拉本 category 全部案由
- * - 去掉一级，从二级起级联：二级 / 三级 / 四级，渐进展开（选了上一级才出现下一列）
- * - 单击即选：有子级 → 展开下一列；无子级（叶子）→ 直接选中。两次点击可选到常见三级案由。
- * - 列宽收窄，弹层随列数增长，避免一打开就铺满整页
- * - 名称过长截断，hover 显示全名
+ * Bộ chọn nguyên nhân cấp dẫn
+ * - Kéo toàn bộ nguyên nhân của category một lần
+ * - Bỏ cấp 1, cấp dẫn từ cấp 2: cấp 2 / cấp 3 / cấp 4, mở dần (chọn xong cấp trước mới hiện cột sau)
+ * - Bấm đơn là chọn: có cấp con → mở cột sau; không có cấp con (lá) → chọn thẳng. Hai lần bấm là chọn được nguyên nhân cấp 3 thông dụng.
+ * - Thu hẹp bề rộng cột, lớp bật lên theo số cột tăng, tránh mở ra là phủ kín trang
+ * - Tên quá dài thì cắt, hover hiện tên đầy đủ
  */
 export function CauseCombobox({ value, onChange, category, disabled }: Props) {
   const [open, setOpen] = useState(false);
@@ -60,7 +60,7 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
 
   const [searchInput, setSearchInput] = useState<string>("");
 
-  // 打开时拉全量
+  // Khi mở thì kéo toàn bộ
   function handleOpen(o: boolean) {
     setOpen(o);
     if (o && allNodes.length === 0) {
@@ -70,14 +70,14 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
       });
     }
     if (o) {
-      // 重置 picked 状态（避免上次残留）
+      // Reset trạng thái picked (tránh sót lại lần trước)
       setPickedL2(null);
       setPickedL3(null);
       setSearchInput("");
     }
   }
 
-  // category 变化时重置
+  // Khi category đổi thì reset
   useEffect(() => {
     setAllNodes([]);
     if (value) {
@@ -87,7 +87,7 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category]);
 
-  // 同步显示已选名字 / l2 路径
+  // Đồng bộ hiển thị tên đã chọn / đường dẫn l2
   useEffect(() => {
     if (value && allNodes.length > 0) {
       const found = allNodes.find((o) => o.id === value);
@@ -97,7 +97,7 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
     }
   }, [value, allNodes]);
 
-  // 去掉一级：二级直接平铺为第一列
+  // Bỏ cấp 1: cấp 2 trải phẳng thành cột đầu
   const l2Nodes = useMemo(() => allNodes.filter((n) => n.level === 2), [allNodes]);
   const l3Nodes = useMemo(
     () => (pickedL2 ? allNodes.filter((n) => n.level === 3 && n.parentId === pickedL2) : []),
@@ -108,7 +108,7 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
     [allNodes, pickedL3]
   );
 
-  // 搜索过滤（跨级模糊）
+  // Lọc tìm kiếm (mờ xuyên cấp)
   const searchMatched = useMemo(() => {
     const q = searchInput.trim();
     if (!q) return null;
@@ -122,8 +122,8 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
     return allNodes.some((x) => x.parentId === n.id);
   }
 
-  // 选用一个案由：任意层级都可直接选中。
-  // 有子级 → 选中并展开下一列（可继续下钻，也可就此停下）；叶子 → 选中并关闭。
+  // Chọn một nguyên nhân: mọi cấp đều chọn trực tiếp được.
+  // Có cấp con → chọn đồng thời mở cột sau (có thể xuống sâu tiếp, hoặc dừng ở đây); lá → chọn và đóng.
   function selectNode(node: Node, level: number) {
     onChange(node.id, node.name);
     setSelectedName(node.name);
@@ -139,7 +139,7 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
     }
   }
 
-  // 搜索结果直接选中并关闭
+  // Kết quả tìm kiếm chọn thẳng và đóng
   function pickNode(node: Node) {
     onChange(node.id, node.name);
     setSelectedName(node.name);
@@ -159,7 +159,7 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
           {value && selectedName ? (
             <span className="truncate">{selectedName}</span>
           ) : (
-            <span className="text-muted-foreground">点击选择</span>
+            <span className="text-muted-foreground">Bấm để chọn</span>
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -171,11 +171,11 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
         portalled={false}
         className="w-auto max-w-[92vw] p-0"
       >
-        {/* 搜索栏 */}
+        {/* Thanh tìm kiếm */}
         <div className="border-b border-border p-2">
           <div className="relative w-[240px]">
             <Input
-              placeholder="搜索案由，或下方逐级浏览"
+              placeholder="Tìm nguyên nhân, hoặc duyệt theo cấp bên dưới"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="h-8 pr-7 text-xs"
@@ -195,13 +195,13 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
         {isPending ? (
           <div className="flex w-[240px] items-center justify-center py-10 text-xs text-muted-foreground">
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            <span className="ml-2">加载案由库...</span>
+            <span className="ml-2">Đang tải kho nguyên nhân...</span>
           </div>
         ) : searchMatched ? (
-          // 搜索模式：扁平结果带路径
+          // Chế độ tìm: kết quả phẳng kèm đường dẫn
           <div className="max-h-[360px] w-[320px] overflow-y-auto p-1">
             {searchMatched.length === 0 ? (
-              <p className="py-6 text-center text-xs text-muted-foreground">未找到匹配</p>
+              <p className="py-6 text-center text-xs text-muted-foreground">Không tìm thấy kết quả khớp</p>
             ) : (
               searchMatched.map((n) => (
                 <button
@@ -220,11 +220,11 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
             )}
           </div>
         ) : (
-          // 级联模式：渐进展开（选了上一级才出现下一列）
-          // 单击任意层级即选中；有子级则同时展开下一列，可继续下钻或就此停下
+          // Chế độ cấp dẫn: mở dần (chọn xong cấp trước mới hiện cột sau)
+          // Bấm đơn bất kỳ cấp nào là chọn; có cấp con thì đồng thời mở cột sau, có thể xuống sâu tiếp hoặc dừng
           <div className="flex divide-x divide-border">
             <Column
-              title="二级"
+              title="Cấp 2"
               items={l2Nodes}
               activeId={pickedL2}
               hasChildren={hasChildren}
@@ -232,17 +232,17 @@ export function CauseCombobox({ value, onChange, category, disabled }: Props) {
             />
             {pickedL2 && (
               <Column
-                title="三级"
+                title="Cấp 3"
                 items={l3Nodes}
                 activeId={pickedL3}
-                empty="该二级下无三级"
+                empty="Cấp 2 này không có cấp 3"
                 hasChildren={hasChildren}
                 onPick={(n) => selectNode(n, 3)}
               />
             )}
             {pickedL3 && l4Nodes.length > 0 && (
               <Column
-                title="四级"
+                title="Cấp 4"
                 items={l4Nodes}
                 activeId={null}
                 hasChildren={() => false}

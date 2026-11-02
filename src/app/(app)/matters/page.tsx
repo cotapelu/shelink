@@ -84,9 +84,9 @@ type Props = {
     tab?: string;
     search?: string;
     category?: MatterCategory;
-    status?: string; // all tab 下的状态筛选
-    from?: string; // 收案时间起 yyyy-mm-dd
-    to?: string; // 收案时间止
+    status?: string; // Lọc trạng thái dưới tab tất cả
+    from?: string; // Thời gian tiếp nhận từ yyyy-mm-dd
+    to?: string; // Thời gian tiếp nhận đến
     sortBy?: string;
     sortDir?: string;
     page?: string;
@@ -103,14 +103,14 @@ export default async function MattersPage({ searchParams }: Props) {
   const dateFrom = resolveDateStart(params.from);
   const dateTo = resolveDateEnd(params.to);
 
-  // 收案抽屉所需：客户下拉 + 同事列表
+  // Ngăn kéo tiếp nhận cần: dropdown khách hàng + danh sách đồng nghiệp
   const [clientsResponse, colleagues] = await Promise.all([
     listClients({ pageSize: 100 }),
     listActiveColleagues()
   ]);
 
   if (tab === "intake" || tab === "revision") {
-    // 待审批 / 待补正：从 Intake 表筛
+    // Chờ duyệt / chờ bổ sung: lọc từ bảng Intake
     const intakeSortBy = sortBy === "claimAmount" ? "claimAmount" : "intakeDate";
     const intakes = await listIntakes({
       search: params.search,
@@ -165,15 +165,15 @@ export default async function MattersPage({ searchParams }: Props) {
     );
   }
 
-  // active / archived / all：查 Matter 表
+  // active / archived / all: tra bảng Matter
   let statusGroup: { statusIn?: ("PENDING_ACCEPTANCE" | "IN_PROGRESS" | "ON_HOLD" | "CLOSED" | "ARCHIVED")[]; statusNotIn?: ("PENDING_ACCEPTANCE" | "IN_PROGRESS" | "ON_HOLD" | "CLOSED" | "ARCHIVED")[] } = {};
   if (tab === "archived") {
     statusGroup = { statusIn: ["ARCHIVED"] };
   } else if (tab === "active") {
     statusGroup = { statusNotIn: ["CLOSED", "ARCHIVED"] };
   } else if (tab === "all") {
-    // 全部案件：通过收案审批的（排除 PENDING_ACCEPTANCE — 那是收案阶段）
-    // 可被 searchParams.status 进一步筛选
+    // Toàn bộ vụ án: đã qua duyệt tiếp nhận (loại PENDING_ACCEPTANCE — đó là giai đoạn tiếp nhận)
+    // Có thể lọc tiếp bằng searchParams.status
     if (params.status === "active") {
       statusGroup = { statusIn: ["IN_PROGRESS", "ON_HOLD"] };
     } else if (params.status === "closed") {

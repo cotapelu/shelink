@@ -54,7 +54,7 @@ export default async function MatterDetailPage({ params }: { params: Promise<{ i
         procedure: { select: { id: true, type: true, customLabel: true } }
       }
     }),
-    // v0.5: 从 Intake 上传过来的合同（同时绑定 intakeId 和 matterId）
+    // v0.5: hợp đồng tải lên từ Intake (đồng thời gắn intakeId và matterId)
     matter.intakeId
       ? prisma.document.findMany({
           where: {
@@ -68,13 +68,13 @@ export default async function MatterDetailPage({ params }: { params: Promise<{ i
           }
         })
       : Promise.resolve([]),
-    // v0.8: 卷宗
+    // v0.8: hồ sơ
     prisma.documentFolder.findMany({
       where: { matterId: matter.id },
       orderBy: [{ orderIndex: "asc" }, { createdAt: "asc" }],
       select: { id: true, name: true, orderIndex: true, isDefault: true }
     }),
-    // v0.8: 适用本案件类别的模板
+    // v0.8: mẫu áp dụng cho loại vụ án này
     prisma.documentTemplate.findMany({
       where: {
         enabled: true,
@@ -94,10 +94,10 @@ export default async function MatterDetailPage({ params }: { params: Promise<{ i
         isBuiltIn: true
       }
     }),
-    // v0.9.3: 本案保全记录
+    // v0.9.3: bản ghi bảo toàn của vụ án
     listPreservationCases({ matterId: matter.id, status: "ALL" }),
     listActiveColleagues(),
-    // v0.11: 案件下用印申请关联的合同附件（待盖章稿 + 盖章后扫描件）
+    // v0.11: tệp hợp đồng liên kết yêu cầu dùng dấu của vụ án (bản chờ đóng dấu + bản scan sau đóng dấu)
     prisma.sealRequest.findMany({
       where: { matterId: matter.id },
       orderBy: { createdAt: "desc" },
@@ -111,7 +111,7 @@ export default async function MatterDetailPage({ params }: { params: Promise<{ i
         stampedDoc: { select: { id: true, name: true, size: true, createdAt: true } }
       }
     }),
-    // v0.11: 案件下快递追踪
+    // v0.11: theo dõi chuyển phát của vụ án
     prisma.expressTracking.findMany({
       where: { matterId: matter.id },
       orderBy: { createdAt: "desc" },
@@ -126,9 +126,9 @@ export default async function MatterDetailPage({ params }: { params: Promise<{ i
         createdAt: true
       }
     }),
-    // v0.18: 最新归档申请状态（用于显示"归档中"/"已驳回" banner）
+    // v0.18: trạng thái yêu cầu lưu trữ mới nhất (dùng cho banner "đang lưu trữ"/"đã từ chối")
     getLatestArchiveRecord(matter.id),
-    // v0.28: 案件自定义字段定义（启用项）
+    // v0.28: định nghĩa trường tuỳ chỉnh của vụ án (mục đang bật)
     prisma.customFieldDef.findMany({
       where: { entityType: "MATTER", enabled: true },
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
@@ -136,7 +136,7 @@ export default async function MatterDetailPage({ params }: { params: Promise<{ i
     })
   ]);
 
-  // v0.22: 本案 AI 审查总览（聚合 ReviewRecord）
+  // v0.22: tổng quan kiểm tra AI của vụ án (gộp ReviewRecord)
   const reviewSummary = await getMatterReviewSummary(matter.id);
   const currentMatterMember = session?.user.id
     ? matter.members.find((member) => member.userId === session.user.id)
@@ -154,7 +154,7 @@ export default async function MatterDetailPage({ params }: { params: Promise<{ i
   );
   const canOwnThisMatter = Boolean(session?.user.id && matter.ownerId === session.user.id);
 
-  // v0.8: 卷宗对应文档（含 templateId 标识）
+  // v0.8: tài liệu tương ứng hồ sơ (gồm định danh templateId)
   const folderDocuments = documents.map((d) => ({
     id: d.id,
     name: d.name,
@@ -171,7 +171,7 @@ export default async function MatterDetailPage({ params }: { params: Promise<{ i
         className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        返回案件列表
+        Về danh sách vụ án
       </Link>
 
       <ReviewSummaryCard summary={reviewSummary} matterId={matter.id} />

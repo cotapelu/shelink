@@ -19,12 +19,12 @@ export function SearchResultsTable({ keywordResults, vectorResults, onSaveCase, 
       <table className="w-full text-sm">
         <thead className="bg-muted/30 text-muted-foreground">
           <tr>
-            <th className="px-3 py-2 text-left font-normal">案号</th>
-            <th className="px-3 py-2 text-left font-normal">标题</th>
-            <th className="px-2 py-2 text-left font-normal w-24">法院</th>
-            <th className="px-2 py-2 text-left font-normal w-20">日期</th>
-            <th className="px-2 py-2 text-left font-normal w-20">相似度</th>
-            <th className="px-2 py-2 text-right font-normal w-24">操作</th>
+            <th className="px-3 py-2 text-left font-normal">Số án</th>
+            <th className="px-3 py-2 text-left font-normal">Tiêu đề</th>
+            <th className="px-2 py-2 text-left font-normal w-24">Toà án</th>
+            <th className="px-2 py-2 text-left font-normal w-20">Ngày</th>
+            <th className="px-2 py-2 text-left font-normal w-20">Độ tương đồng</th>
+            <th className="px-2 py-2 text-right font-normal w-24">Thao tác</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">

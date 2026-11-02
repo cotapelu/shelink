@@ -28,9 +28,9 @@ import type { MatterPayload } from "./matter-detail-tabs";
 type PartyRow = MatterPayload["parties"][number];
 
 const ROLE_STYLE: Record<string, { label: string; cls: string }> = {
-  CLIENT: { label: "客户", cls: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
-  OPPOSING_PARTY: { label: "相对方", cls: "bg-orange-500/10 text-orange-600 border-orange-500/20" },
-  THIRD_PARTY: { label: "第三人", cls: "bg-violet-500/10 text-violet-600 border-violet-500/20" }
+  CLIENT: { label: "Khách hàng", cls: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
+  OPPOSING_PARTY: { label: "Bên đối phương", cls: "bg-orange-500/10 text-orange-600 border-orange-500/20" },
+  THIRD_PARTY: { label: "Người thứ ba", cls: "bg-violet-500/10 text-violet-600 border-violet-500/20" }
 };
 
 export function PartiesPanel({ matter }: { matter: MatterPayload }) {
@@ -45,12 +45,12 @@ export function PartiesPanel({ matter }: { matter: MatterPayload }) {
     <section className="rounded-lg border border-border bg-card">
       <header className="flex items-center justify-between border-b border-border px-4 py-2">
         <span className="text-[13px] font-medium">
-          案件当事人
+          Các bên của vụ án
           <span className="ml-1 text-[11px] text-muted-foreground">({total})</span>
         </span>
       </header>
       <ul className="divide-y divide-border">
-        {/* 委托方：CRM 客户（可点开）*/}
+        {/* Bên ủy quyền: khách CRM (bấm mở được) */}
         {matter.clientLinks.map((cl) => (
           <ClientLinkRow
             key={`cl-${cl.clientId}`}
@@ -60,7 +60,7 @@ export function PartiesPanel({ matter }: { matter: MatterPayload }) {
             primary={cl.isPrimary}
           />
         ))}
-        {/* 委托方：非 CRM 录入的当事人 */}
+        {/* Bên ủy quyền: bên nhập không qua CRM */}
         {clientParties.map((p) => (
           <PartyRowItem key={p.id} party={p} roleKey="CLIENT" />
         ))}
@@ -110,7 +110,7 @@ function ClientLinkRow({
         <span className="truncate text-[13px] font-medium">{name}</span>
         <span className="shrink-0 text-[11px] text-muted-foreground">· {typeLabel}</span>
         {primary && (
-          <span className="shrink-0 rounded-sm bg-blue-500/10 px-1 text-[9.5px] text-blue-600">主</span>
+          <span className="shrink-0 rounded-sm bg-blue-500/10 px-1 text-[9.5px] text-blue-600">chính</span>
         )}
         <ChevronRight className="ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
       </Link>
@@ -127,7 +127,7 @@ function PartyRowItem({ party, roleKey }: { party: PartyRow; roleKey: string }) 
   const details: { icon: React.ReactNode; text: string; mono?: boolean }[] = [];
   if (idValue) details.push({ icon: <IdCard className="h-3 w-3" />, text: idValue, mono: true });
   if (isOrg && party.legalRep)
-    details.push({ icon: <UserCog className="h-3 w-3" />, text: `法定代表人 ${party.legalRep}` });
+    details.push({ icon: <UserCog className="h-3 w-3" />, text: `Người đại diện theo pháp luật ${party.legalRep}` });
   if (party.phone) details.push({ icon: <Phone className="h-3 w-3" />, text: party.phone, mono: true });
   if (party.address) details.push({ icon: <MapPin className="h-3 w-3" />, text: party.address });
 

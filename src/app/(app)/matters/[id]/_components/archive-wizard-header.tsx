@@ -25,10 +25,10 @@ export function ArchiveWizardHeader({ open, onOpenChange, step, totalSteps, chil
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileCheck2 className="h-5 w-5 text-[#9B7BF7]" />
-            归档案件
+            Lưu trữ vụ án
           </DialogTitle>
           <DialogDescription>
-            步骤 {step + 1} / {totalSteps} · 提交后进入管理员审批；审批通过后案件转为只读，并生成卷宗封皮和卷宗目录入归档卷宗。
+            Bước {step + 1} / {totalSteps} · Sau khi gửi sẽ vào duyệt của quản trị viên; duyệt xong vụ án chuyển sang chỉ đọc, đồng thời sinh bìa hồ sơ và mục lục hồ sơ vào hồ sơ lưu trữ.
           </DialogDescription>
         </DialogHeader>
         {children}

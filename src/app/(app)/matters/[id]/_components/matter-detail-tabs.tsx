@@ -197,10 +197,10 @@ export function MatterDetailTabs({
     startTransition(async () => {
       try {
         await deleteProcedure(id);
-        toast.success("程序已删除");
+        toast.success("Đã xoá thủ tục");
         router.refresh();
       } catch (err) {
-        toast.error("删除失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Xoá thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -210,14 +210,14 @@ export function MatterDetailTabs({
     .filter((p) => p.engagement === "ENGAGED")
     .sort((a, b) => a.order - b.order);
 
-  // 默认选中第一个在办程序（若有）
+  // Mặc định chọn thủ tục đang xử lý đầu tiên (nếu có)
   const currentProcedure = selectedProcId
     ? engagedProcedures.find((p) => p.id === selectedProcId)
     : engagedProcedures[0] ?? null;
 
   const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
-  // 当前选中程序的文档
+  // Tài liệu của thủ tục đang chọn
   const procDocs = currentProcedure
     ? documents
         .filter((d) => d.procedureId === currentProcedure.id)
@@ -243,7 +243,7 @@ export function MatterDetailTabs({
 
   return (
     <div className="space-y-4">
-      {/* H1 头部 */}
+      {/* Đầu trang H1 */}
       <motion.header
         initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
@@ -252,7 +252,7 @@ export function MatterDetailTabs({
       >
         <h1 className="min-w-0 flex-1 truncate text-[0.95rem] font-medium leading-tight" title={matter.title}>
           {matter.title}
-          {matterCategoryKind(matter.category) !== "project" && "案"}
+          {matterCategoryKind(matter.category) !== "project" && "vụ"}
         </h1>
         <MatterStatusPill status={matter.status} />
         {currentUserRole && canLeadThisMatter && (
@@ -264,7 +264,7 @@ export function MatterDetailTabs({
         )}
       </motion.header>
 
-      {/* 归档状态 banner */}
+      {/* Banner trạng thái lưu trữ */}
       {latestArchive && (
         <motion.div
           initial={{ opacity: 0, y: 4 }}
@@ -283,7 +283,7 @@ export function MatterDetailTabs({
         </motion.div>
       )}
 
-      {/* 单页竖向布局 */}
+      {/* Bố cục dọc một trang */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -311,11 +311,11 @@ export function MatterDetailTabs({
         </div>
 
         <section className="h-full rounded-lg border border-border bg-card xl:col-span-3">
-          {/* 程序切换标签 */}
+          {/* Tab chuyển thủ tục */}
           <header className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2">
-            <span className="text-[13px] font-medium">案件程序</span>
+            <span className="text-[13px] font-medium">Thủ tục vụ án</span>
             {engagedProcedures.length === 0 ? (
-              <span className="text-xs text-muted-foreground">暂无在办程序</span>
+              <span className="text-xs text-muted-foreground">Chưa có thủ tục đang xử lý</span>
             ) : (
               engagedProcedures.map((p, idx) => {
                 const isActive = currentProcedure?.id === p.id;
@@ -341,7 +341,7 @@ export function MatterDetailTabs({
                           variant="outline"
                           className="ml-0.5 border-border bg-muted/30 px-1 text-[9px] font-normal"
                         >
-                          已结
+                          Đã kết thúc
                         </Badge>
                       )}
                     </button>
@@ -350,12 +350,12 @@ export function MatterDetailTabs({
                         type="button"
                         onClick={() => {
                           const label = p.customLabel ?? procedureTypeLabel[p.type];
-                          if (confirm(`确定删除程序「${label}」？该程序下的所有开庭、期限、备忘和材料记录将被一并删除，此操作不可撤销。`)) {
+                          if (confirm(`Chắc chắn xoá thủ tục "${label}"? Mọi phiên tòa, thời hạn, ghi nhớ và bản ghi tài liệu trong thủ tục này sẽ bị xoá theo, thao tác không hoàn tác được.`)) {
                             handleDeleteProcedure(p.id);
                           }
                         }}
                         className="ml-0.5 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover/proc:opacity-100"
-                        title="删除此程序"
+                        title="Xoá thủ tục này"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -371,7 +371,7 @@ export function MatterDetailTabs({
                 className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80"
               >
                 <Plus className="h-3 w-3" strokeWidth={2} />
-                添加程序
+                Thêm thủ tục
               </button>
             )}
             {currentProcedure && canAssociateThisMatter && (
@@ -382,12 +382,12 @@ export function MatterDetailTabs({
                 className="ml-auto h-6 gap-1 text-[11px] text-muted-foreground hover:text-primary"
               >
                 <Pencil className="h-3 w-3" strokeWidth={1.8} />
-                编辑
+                Sửa
               </Button>
             )}
           </header>
 
-          {/* 当前程序内容：基本信息 + 案件材料 */}
+          {/* Nội dung thủ tục hiện tại: thông tin cơ bản + tài liệu vụ án */}
           {currentProcedure ? (
             <div className="space-y-4 p-4">
               <ProcedureInfoPanel
@@ -407,7 +407,7 @@ export function MatterDetailTabs({
             </div>
           ) : (
             <p className="px-4 py-8 text-center text-xs text-muted-foreground">
-              请先添加程序以管理开庭、期限和案件材料
+              Hãy thêm thủ tục trước để quản lý phiên tòa, thời hạn và tài liệu vụ án
             </p>
           )}
         </section>
@@ -536,7 +536,7 @@ function buildProcedurePartyOptions(matter: MatterPayload) {
       enterpriseSocialCode: client.type === "INDIVIDUAL" ? null : client.idNumber,
       enterpriseName: client.type === "INDIVIDUAL" ? null : client.name,
       enterpriseBoundAt: null,
-      notes: "案件关联客户",
+      notes: "Khách hàng liên kết vụ án",
       createdAt: new Date(),
       updatedAt: new Date()
     });

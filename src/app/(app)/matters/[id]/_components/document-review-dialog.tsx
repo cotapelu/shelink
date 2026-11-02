@@ -63,22 +63,22 @@ type Props = {
 };
 
 const typeMeta: Record<ReviewType, { label: string; Icon: typeof AlertTriangle; color: string }> = {
-  MISSING: { label: "缺失要素", Icon: FileWarning, color: "text-amber-600" },
-  RISK: { label: "法律风险", Icon: AlertTriangle, color: "text-rose-600" },
-  ISSUE: { label: "条款问题", Icon: AlertCircle, color: "text-orange-600" },
-  SUGGESTION: { label: "优化建议", Icon: Lightbulb, color: "text-sky-600" }
+  MISSING: { label: "Yếu tố còn thiếu", Icon: FileWarning, color: "text-amber-600" },
+  RISK: { label: "Rủi ro pháp lý", Icon: AlertTriangle, color: "text-rose-600" },
+  ISSUE: { label: "Vấn đề điều khoản", Icon: AlertCircle, color: "text-orange-600" },
+  SUGGESTION: { label: "Đề xuất tối ưu", Icon: Lightbulb, color: "text-sky-600" }
 };
 
 const sevStyle: Record<ReviewSeverity, { label: string; cls: string }> = {
-  HIGH: { label: "高", cls: "bg-rose-50 text-rose-700 border-rose-200" },
-  MEDIUM: { label: "中", cls: "bg-amber-50 text-amber-700 border-amber-200" },
-  LOW: { label: "低", cls: "bg-slate-50 text-slate-600 border-slate-200" }
+  HIGH: { label: "Cao", cls: "bg-rose-50 text-rose-700 border-rose-200" },
+  MEDIUM: { label: "Trung bình", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+  LOW: { label: "Thấp", cls: "bg-slate-50 text-slate-600 border-slate-200" }
 };
 
 const TYPE_ORDER: ReviewType[] = ["MISSING", "RISK", "ISSUE", "SUGGESTION"];
 
 type View =
-  | { kind: "list" } // 历史 + 新审查入口
+  | { kind: "list" } // Lịch sử + cửa vào kiểm tra mới
   | { kind: "result"; result: ReviewResult; isNew: boolean }
   | { kind: "history-detail"; entry: ReviewHistoryEntry; items: ReviewItem[]; documentName: string };
 
@@ -96,7 +96,7 @@ export function DocumentReviewDialog({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  // 打开/换 doc 时重置 + 拉历史
+  // Khi mở/đổi doc thì reset + kéo lịch sử
   useEffect(() => {
     if (!open || !documentId) return;
     let cancelled = false;
@@ -110,7 +110,7 @@ export function DocumentReviewDialog({
         if (!cancelled) setHistory(h);
       })
       .catch(() => {
-        // 历史查询失败不阻塞新审查
+        // Tra lịch sử lỗi không chặn kiểm tra mới
       })
       .finally(() => {
         if (!cancelled) setLoadingHistory(false);
@@ -128,10 +128,10 @@ export function DocumentReviewDialog({
       const r = await reviewDocument({ documentId });
       setView({ kind: "result", result: r, isNew: true });
       setSaved(false);
-      // 重新拉历史（新审查已落库）
+      // Kéo lại lịch sử (kiểm tra mới đã ghi DB)
       listReviewHistory({ documentId }).then(setHistory).catch(() => {});
     } catch (err) {
-      setError(err instanceof Error ? err.message : "AI 审查失败");
+      setError(err instanceof Error ? err.message : "Kiểm tra AI thất bại");
     } finally {
       setReviewing(false);
     }
@@ -141,7 +141,7 @@ export function DocumentReviewDialog({
     try {
       const rec = await getReviewRecord({ recordId: entry.id });
       if (!rec) {
-        toast.error("记录不存在或已删除");
+        toast.error("Bản ghi không tồn tại hoặc đã xoá");
         return;
       }
       setView({
@@ -152,7 +152,7 @@ export function DocumentReviewDialog({
       });
       setSaved(false);
     } catch (err) {
-      toast.error("加载历史详情失败", {
+      toast.error("Tải chi tiết lịch sử thất bại", {
         description: err instanceof Error ? err.message : ""
       });
     }
@@ -169,9 +169,9 @@ export function DocumentReviewDialog({
         items: view.result.items
       });
       setSaved(true);
-      toast.success("已保存审查结果到本案", { description: res.documentName });
+      toast.success("Đã lưu kết quả kiểm tra vào vụ án", { description: res.documentName });
     } catch (err) {
-      toast.error("保存失败", {
+      toast.error("Lưu thất bại", {
         description: err instanceof Error ? err.message : ""
       });
     } finally {
@@ -179,7 +179,7 @@ export function DocumentReviewDialog({
     }
   }
 
-  // 当前要展示的 items（list view 无内容）
+  // Các items cần hiển thị hiện tại (list view không có nội dung)
   const currentItems: ReviewItem[] | null =
     view.kind === "result" ? view.result.items : view.kind === "history-detail" ? view.items : null;
   const currentDocName =
@@ -207,20 +207,20 @@ export function DocumentReviewDialog({
                 type="button"
                 onClick={() => setView({ kind: "list" })}
                 className="text-muted-foreground hover:text-foreground"
-                title="返回列表"
+                title="Về danh sách"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
             )}
             <Sparkles className="h-4 w-4 text-violet-500" />
-            AI 文书审查
+            Kiểm tra văn bản AI
           </DialogTitle>
           <DialogDescription className="text-xs">
-            {view.kind === "list" && "查看历史或发起新审查"}
+            {view.kind === "list" && "Xem lịch sử hoặc bắt đầu kiểm tra mới"}
             {view.kind === "result" &&
-              `${view.result.documentName}${view.result.truncated ? "（已截断前 6000 字）" : ""}`}
+              `${view.result.documentName}${view.result.truncated ? " (đã cắt 6000 chữ đầu)" : ""}`}
             {view.kind === "history-detail" &&
-              `${currentDocName} · 历史 ${view.entry.reviewedAt.toLocaleString("zh-CN")}`}
+              `${currentDocName} · Lịch sử ${view.entry.reviewedAt.toLocaleString("vi-VN")}`}
           </DialogDescription>
         </DialogHeader>
 
@@ -239,7 +239,7 @@ export function DocumentReviewDialog({
                 ) : (
                   <Sparkles className="h-4 w-4" />
                 )}
-                {history.length === 0 ? "开始 AI 审查" : "重新 AI 审查"}
+                {history.length === 0 ? "Bắt đầu kiểm tra AI" : "Kiểm tra AI lại"}
               </Button>
 
               {error && (
@@ -251,16 +251,16 @@ export function DocumentReviewDialog({
               <div>
                 <h4 className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                   <History className="h-3.5 w-3.5" />
-                  审查历史
+                  Lịch sử kiểm tra
                   <span className="font-mono text-[10px]">
                     {loadingHistory ? "…" : history.length}
                   </span>
                 </h4>
                 {loadingHistory ? (
-                  <p className="py-6 text-center text-xs text-muted-foreground">加载中…</p>
+                  <p className="py-6 text-center text-xs text-muted-foreground">Đang tải…</p>
                 ) : history.length === 0 ? (
                   <p className="py-6 text-center text-xs text-muted-foreground">
-                    还没有 AI 审查记录
+                    Chưa có bản ghi kiểm tra AI nào
                   </p>
                 ) : (
                   <ul className="space-y-1.5">
@@ -276,8 +276,8 @@ export function DocumentReviewDialog({
                               {h.reviewedAt.toLocaleString("zh-CN")}
                             </span>
                             <span className="text-[10px] text-muted-foreground">
-                              {h.reviewedBy.name} · {h.itemCount} 条
-                              {h.truncated ? " · 已截断" : ""}
+                              {h.reviewedBy.name} · {h.itemCount} mục
+                              {h.truncated ? " · Đã cắt" : ""}
                             </span>
                           </div>
                           <div className="flex items-center gap-1">
@@ -305,8 +305,8 @@ export function DocumentReviewDialog({
             (currentItems.length === 0 ? (
               <div className="py-10 text-center text-sm text-muted-foreground">
                 {view.kind === "result" && view.isNew
-                  ? "AI 未发现明显问题（不代表无瑕疵，请律师人工复核）"
-                  : "本次审查无条目"}
+                  ? "AI không phát hiện vấn đề rõ rệt (không có nghĩa là không có khuyết điểm, hãy nhờ luật sư kiểm tra lại)"
+                  : "Lần kiểm tra này không có mục"}
               </div>
             ) : (
               <div className="space-y-5">
@@ -342,9 +342,9 @@ export function DocumentReviewDialog({
         <div className="flex items-center justify-between border-t border-border px-5 py-2.5">
           <span className="text-[11px] text-muted-foreground">
             {view.kind === "result"
-              ? `分析字符数：${view.result.textPreviewChars}`
+              ? `Số ký tự phân tích: ${view.result.textPreviewChars}`
               : view.kind === "history-detail"
-                ? `分析字符数：${view.entry.textPreviewChars}`
+                ? `Số ký tự phân tích: ${view.entry.textPreviewChars}`
                 : ""}
           </span>
           <div className="flex items-center gap-2">
@@ -352,7 +352,7 @@ export function DocumentReviewDialog({
               saved ? (
                 <span className="inline-flex items-center gap-1 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-700">
                   <Check className="h-3 w-3" />
-                  已存到本案
+                  Đã lưu vào vụ án
                 </span>
               ) : (
                 <Button
@@ -368,12 +368,12 @@ export function DocumentReviewDialog({
                   ) : (
                     <BookmarkPlus className="h-3 w-3" />
                   )}
-                  存到本案
+                  Lưu vào vụ án
                 </Button>
               )
             )}
             <Button type="button" variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-              关闭
+              Đóng
             </Button>
           </div>
         </div>

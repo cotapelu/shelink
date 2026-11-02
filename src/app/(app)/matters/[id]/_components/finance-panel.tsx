@@ -27,10 +27,10 @@ import { InvoiceRequestSheet } from "./invoice-request-sheet";
 import type { FinancePayload, UserOption } from "./matter-detail-tabs";
 
 /**
- * v0.12 重构：财务面板瘦身
- * - 删除：合同板块 / 分成方案 / 快捷录入 / 收付流水（5 类）
- * - 保留：律师费到账列表（仅 RECEIVED 类型）+ 顶部小计 + 申请开票按钮
- * - 数据主要由后台财务人员录入，案件页只读
+ * v0.12 refactor: thu gọn bảng tài chính
+ * - Bỏ: khu hợp đồng / phương án phân chia / nhập nhanh / dòng thu chi (5 loại)
+ * - Giữ: danh sách phí luật sư đã về (chỉ loại RECEIVED) + tổng phụ đầu trang + nút yêu cầu xuất HĐ
+ * - Dữ liệu chủ yếu do nhân viên tài chính nhập ở trang quản trị, trang vụ án chỉ đọc
  */
 export function FinancePanel({
   matterId,
@@ -52,11 +52,11 @@ export function FinancePanel({
   const outstanding = Math.max(stats.receivable - stats.received, 0);
 
   const cards: { label: string; value: number; tone: StatTone; className?: string }[] = [
-    { label: "合同额", value: stats.contractAmount, tone: "neutral", className: "col-span-2" },
-    { label: "已收", value: stats.received, tone: "emerald" },
-    { label: "待收", value: outstanding, tone: "amber" },
-    { label: "支出", value: stats.cost, tone: "red" },
-    { label: "分成", value: stats.commission, tone: "neutral" }
+    { label: "Giá trị hợp đồng", value: stats.contractAmount, tone: "neutral", className: "col-span-2" },
+    { label: "Đã thu", value: stats.received, tone: "emerald" },
+    { label: "Chờ thu", value: outstanding, tone: "amber" },
+    { label: "Chi", value: stats.cost, tone: "red" },
+    { label: "Phân chia", value: stats.commission, tone: "neutral" }
   ];
 
   return (
@@ -65,7 +65,7 @@ export function FinancePanel({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 text-[13px] font-medium">
             <Wallet className="h-3.5 w-3.5 text-primary" />
-            财务费用
+            Chi phí tài chính
           </span>
           {canRequestInvoice && (
             <Button
@@ -74,13 +74,13 @@ export function FinancePanel({
               className="h-6 gap-0.5 px-2 text-[11px]"
             >
               <Receipt className="h-2.5 w-2.5" />
-              申请开票
+              Yêu cầu xuất HĐ
             </Button>
           )}
         </div>
       </header>
 
-      {/* 紧凑指标卡（对照案件云"财务概览"指标看板） */}
+      {/* Thẻ chỉ số gọn (đối chiếu bảng chỉ số "tổng quan tài chính" của 案件云) */}
       <div className="grid grid-cols-3 gap-px border-b border-border bg-border sm:grid-cols-6">
         {cards.map((c) => (
           <StatCard
@@ -95,7 +95,7 @@ export function FinancePanel({
 
       {received.length === 0 ? (
         <p className="py-6 text-center text-xs text-muted-foreground">
-          暂无到账记录（由财务管理人员后台录入）
+          Chưa có bản ghi đã về (do nhân viên tài chính nhập ở trang quản trị)
         </p>
       ) : (
         <ul className="divide-y divide-border">
@@ -111,7 +111,7 @@ export function FinancePanel({
                 )}
                 {e.invoiceNo && (
                   <span className="ml-2 font-mono text-[10.5px]">
-                    · 发票 {e.invoiceNo}
+                    · HĐ {e.invoiceNo}
                   </span>
                 )}
                 {e.note && <span className="ml-2 text-[10.5px]">· {e.note}</span>}

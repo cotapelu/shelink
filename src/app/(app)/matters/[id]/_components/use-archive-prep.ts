@@ -27,7 +27,7 @@ function usePrepLoader(matterId: string, refreshPrep: () => Promise<void>): bool
   useEffect(() => {
     setLoading(true);
     refreshPrep()
-      .catch((err) => toast.error("加载归档数据失败", { description: err instanceof Error ? err.message : "" }))
+      .catch((err) => toast.error("Tải dữ liệu lưu trữ thất bại", { description: err instanceof Error ? err.message : "" }))
       .finally(() => setLoading(false));
   }, [matterId, refreshPrep]);
   return loading;

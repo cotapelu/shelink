@@ -84,14 +84,14 @@ export function ContractsCard({
   const rows: ContractRow[] = [
     ...intakeContracts.map((d) => ({
       kind: "intake" as const,
-      label: "收案时上传",
+      label: "Tải lên khi tiếp nhận",
       doc: d
     })),
     ...sealContracts.flatMap((sr): ContractRow[] => {
       const arr: ContractRow[] = [
         {
           kind: "draft",
-          label: "用印申请",
+          label: "Yêu cầu dùng dấu",
           doc: sr.draftDoc,
           sealCode: sr.code
         }
@@ -99,7 +99,7 @@ export function ContractsCard({
       if (sr.stampedDoc) {
         arr.push({
           kind: "stamped",
-          label: "盖章后扫描",
+          label: "Bản scan sau đóng dấu",
           doc: sr.stampedDoc,
           sealCode: sr.code
         });
@@ -112,14 +112,14 @@ export function ContractsCard({
     <section className="ll-surface rounded-lg border border-border p-4">
       <header className="mb-3 flex items-center gap-2">
         <FileText className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} />
-        <span className="text-[15px]">委托合同 / 附件</span>
+        <span className="text-[15px]">Hợp đồng ủy quyền / tệp đính kèm</span>
         <span className="font-mono text-[11px] text-muted-foreground tabular">
           {rows.length}
         </span>
       </header>
       {rows.length === 0 ? (
         <p className="py-6 text-center text-xs text-muted-foreground">
-          暂无合同或用印附件
+          Chưa có hợp đồng hoặc tệp dùng dấu
         </p>
       ) : (
         <ul className="space-y-1.5">
@@ -153,7 +153,7 @@ export function ContractsCard({
                 target="_blank"
                 rel="noreferrer"
                 className="text-muted-foreground transition-colors hover:text-primary"
-                aria-label="下载"
+                aria-label="Tải xuống"
               >
                 <Download className="h-4 w-4" strokeWidth={1.6} />
               </a>
@@ -189,7 +189,7 @@ export function ExpressMiniCard({
       <header className="flex items-center justify-between border-b border-border px-4 py-2">
         <span className="flex items-center gap-1.5 text-[13px] font-medium">
           <Package className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} />
-          快递记录
+          Bản ghi chuyển phát
           <span className="ml-1 font-mono text-[11px] text-muted-foreground tabular">
             {expresses.length}
           </span>
@@ -198,19 +198,19 @@ export function ExpressMiniCard({
           {matterId && (
             <Button size="sm" onClick={() => setAddOpen(true)} className="h-6 gap-0.5 px-2 text-[11px]">
               <Plus className="h-2.5 w-2.5" />
-              添加
+              Thêm
             </Button>
           )}
           <Link
             href="/express"
             className="text-[11px] text-muted-foreground transition-colors hover:text-primary"
           >
-            全部 →
+            Tất cả →
           </Link>
         </div>
       </header>
       {expresses.length === 0 ? (
-        <p className="py-6 text-center text-xs text-muted-foreground">暂无快递记录</p>
+        <p className="py-6 text-center text-xs text-muted-foreground">Chưa có bản ghi chuyển phát</p>
       ) : (
         <ul className="space-y-1.5">
           {expresses.slice(0, 6).map((e) => (
@@ -250,11 +250,11 @@ export function ExpressMiniCard({
 }
 
 /**
- * v0.27: 添加快递记录 dialog
+ * v0.27: Dialog thêm bản ghi chuyển phát
  *
- * - 单号：可手动输入 / 上传单号照片 OCR 自动填
- * - 用途必填；方向默认 OUTBOUND；matter 已绑定
- * - 提交后调 createExpress（内部自动 detectCompany + trackExpress 拉取首条轨迹）
+ * - Mã vận đơn: nhập tay / tải ảnh vận đơn OCR tự điền
+ * - Mục đích bắt buộc; hướng mặc định OUTBOUND; matter đã gắn
+ * - Sau khi gửi gọi createExpress (bên trong tự detectCompany + trackExpress kéo lộ trình đầu tiên)
  */
 function AddExpressDialog({
   open,
@@ -294,13 +294,13 @@ function AddExpressDialog({
         const r = await parseExpressLabel(fd);
         if (r.trackingNo) {
           setTrackingNo(r.trackingNo);
-          toast.success(`已识别单号：${r.trackingNo}`);
+          toast.success(`Đã nhận diện mã vận đơn: ${r.trackingNo}`);
         } else {
-          toast.warning("未识别到单号，请手动输入");
+          toast.warning("Không nhận diện được mã vận đơn, hãy nhập tay");
         }
         if (r.companyCode) setCompanyCode(r.companyCode);
       } catch (err) {
-        toast.error("识别失败", {
+        toast.error("Nhận diện thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -309,11 +309,11 @@ function AddExpressDialog({
 
   function handleSubmit() {
     if (!trackingNo.trim()) {
-      toast.error("请填写或识别快递单号");
+      toast.error("Hãy điền hoặc nhận diện mã vận đơn");
       return;
     }
     if (!purpose.trim()) {
-      toast.error("请填写用途");
+      toast.error("Hãy điền mục đích");
       return;
     }
     startSubmit(async () => {
@@ -327,12 +327,12 @@ function AddExpressDialog({
           recipient: recipient.trim(),
           recipientPhone: recipientPhone.trim()
         });
-        toast.success("快递记录已创建");
+        toast.success("Đã tạo bản ghi chuyển phát");
         reset();
         onOpenChange(false);
         router.refresh();
       } catch (err) {
-        toast.error("创建失败", {
+        toast.error("Tạo thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -343,20 +343,20 @@ function AddExpressDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>添加快递记录</DialogTitle>
+          <DialogTitle>Thêm bản ghi chuyển phát</DialogTitle>
           <DialogDescription className="text-xs">
-            可上传快递单照片自动识别单号，也可手动输入。
+            Có thể tải ảnh phiếu gửi để tự nhận diện mã vận đơn, hoặc nhập tay.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 py-2">
           <div className="space-y-1.5">
-            <Label className="text-xs">单号</Label>
+            <Label className="text-xs">Mã vận đơn</Label>
             <div className="flex gap-1">
               <Input
                 value={trackingNo}
                 onChange={(e) => setTrackingNo(e.target.value)}
-                placeholder="可手动输入或上传图片识别"
+                placeholder="Nhập tay hoặc tải ảnh để nhận diện"
                 className="font-mono"
               />
               <input
@@ -376,29 +376,29 @@ function AddExpressDialog({
                 onClick={() => fileRef.current?.click()}
                 disabled={ocrPending}
                 className="h-9 shrink-0 gap-1"
-                title="上传快递单照片，AI 自动识别单号 + 快递公司"
+                title="Tải ảnh phiếu gửi, AI tự nhận diện mã vận đơn + hãng chuyển phát"
               >
                 {ocrPending ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
                 ) : (
                   <ScanLine className="h-3 w-3" />
                 )}
-                识别
+                Nhận diện
               </Button>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1.5">
-              <Label className="text-xs">快递公司</Label>
+              <Label className="text-xs">Hãng chuyển phát</Label>
               <Input
                 value={companyCode}
                 onChange={(e) => setCompanyCode(e.target.value)}
-                placeholder="留空则自动识别"
+                placeholder="Để trống thì tự nhận diện"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">方向</Label>
+              <Label className="text-xs">Hướng</Label>
               <Select
                 value={direction}
                 onValueChange={(v) => setDirection(v as "OUTBOUND" | "INBOUND")}
@@ -407,32 +407,32 @@ function AddExpressDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="OUTBOUND">寄出（我方→外）</SelectItem>
-                  <SelectItem value="INBOUND">收件（外→我方）</SelectItem>
+                  <SelectItem value="OUTBOUND">Gửi đi (ta → ngoài)</SelectItem>
+                  <SelectItem value="INBOUND">Nhận về (ngoài → ta)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">用途 *</Label>
+            <Label className="text-xs">Mục đích *</Label>
             <Input
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
-              placeholder="如：起诉状寄朝阳法院"
+              placeholder="vd: gửi đơn khởi kiện cho Toà Triều Dương"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1.5">
-              <Label className="text-xs">收件人 / 单位</Label>
+              <Label className="text-xs">Người nhận / đơn vị</Label>
               <Input
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">收件电话</Label>
+              <Label className="text-xs">Điện thoại người nhận</Label>
               <Input
                 value={recipientPhone}
                 onChange={(e) => setRecipientPhone(e.target.value)}
@@ -444,11 +444,11 @@ function AddExpressDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={handleSubmit} disabled={submitting}>
             {submitting && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
-            保存并跟踪
+            Lưu và theo dõi
           </Button>
         </DialogFooter>
       </DialogContent>

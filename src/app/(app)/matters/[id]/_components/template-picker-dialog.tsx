@@ -51,11 +51,11 @@ import {
 function describeMissing(paths: string[]): string {
   if (paths.length === 0) return "";
   const labels = paths.slice(0, 4).map((p) => VARIABLE_LABEL_CN[p] ?? p);
-  const more = paths.length > 4 ? ` 等 ${paths.length} 项` : "";
+  const more = paths.length > 4 ? ` và ${paths.length} mục nữa` : "";
   return labels.join("、") + more;
 }
 
-// 哪些变量允许行内补全（即写即存源表）—— 与 template-engine.ts applyOverrides 对齐
+// Những biến nào cho phép điền nội tuyến (viết là lưu bảng nguồn) —— khớp với applyOverrides của template-engine.ts
 const EDITABLE_OVERRIDES = new Set([
   "client.idNumber",
   "client.address",
@@ -85,7 +85,7 @@ export function TemplatePickerDialog({
   const [overrides, setOverrides] = useState<Record<string, string>>({});
   const [pending, startTransition] = useTransition();
 
-  // 适用本案件类别的模板（含未限定类别的）
+  // Mẫu áp dụng cho loại vụ án này (gồm mẫu không giới hạn loại)
   const applicable = useMemo(
     () =>
       templates.filter(
@@ -107,7 +107,7 @@ export function TemplatePickerDialog({
 
   const selected = applicable.find((t) => t.id === selectedId) ?? null;
 
-  // 列出该模板的可编辑变量（白名单内的）
+  // Liệt kê biến sửa được của mẫu đó (trong whitelist)
   const editableVars = selected
     ? selected.variables.filter((v) => EDITABLE_OVERRIDES.has(v))
     : [];
@@ -129,16 +129,16 @@ export function TemplatePickerDialog({
           overrides
         });
         if (res.missing.length > 0) {
-          toast.warning(`已生成「${res.fileName}」，但以下字段为空需手动补：${describeMissing(res.missing)}`);
+          toast.warning(`Đã sinh "${res.fileName}" nhưng các trường sau còn rỗng cần điền tay: ${describeMissing(res.missing)}`);
         } else {
-          toast.success(`已生成「${res.fileName}」并归档`);
+          toast.success(`Đã sinh "${res.fileName}" và lưu trữ`);
         }
-        // 触发下载
+        // Kích hoạt tải xuống
         window.open(`/api/documents/${res.documentId}/download`, "_blank");
         reset();
         onOpenChange(false);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "生成失败");
+        toast.error(e instanceof Error ? e.message : "Sinh thất bại");
       }
     });
   };
@@ -155,20 +155,20 @@ export function TemplatePickerDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            从模板新建文书
+            Tạo văn bản từ mẫu
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Step 1: 选模板 */}
+          {/* Bước 1: chọn mẫu */}
           <div>
             <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
-              1 · 选模板
+              1 · Chọn mẫu
             </Label>
             <div className="mt-2 max-h-[280px] overflow-y-auto rounded border border-border">
               {grouped.length === 0 ? (
                 <p className="p-4 text-center text-sm text-muted-foreground">
-                  该案件类型暂无可用模板
+                  Loại vụ án này chưa có mẫu dùng được
                 </p>
               ) : (
                 grouped.map(([cat, items]) => (
@@ -213,15 +213,15 @@ export function TemplatePickerDialog({
             </div>
           </div>
 
-          {/* Step 2: 行内补全 */}
+          {/* Bước 2: điền nội tuyến */}
           {selected && editableVars.length > 0 && (
             <div>
               <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                2 · 补全可能缺失的字段
+                2 · Bù các trường có thể còn thiếu
               </Label>
               <p className="mt-1 flex items-start gap-1.5 text-[11px] text-muted-foreground">
                 <AlertCircle className="mt-0.5 h-3 w-3 shrink-0" />
-                这些字段会即时写入源表（委托人/对方资料），下次自动带出
+                Các trường này sẽ ghi ngay vào bảng nguồn (dữ liệu bên ủy quyền/bên đối phương), lần sau tự mang ra
               </p>
               <div className="mt-2 grid grid-cols-2 gap-2">
                 {editableVars.map((path) => (
@@ -232,7 +232,7 @@ export function TemplatePickerDialog({
                       onChange={(e) =>
                         setOverrides((prev) => ({ ...prev, [path]: e.target.value }))
                       }
-                      placeholder="如已存在 DB 留空即可"
+                      placeholder="vd nếu đã có trong DB thì để trống"
                       className="h-8 text-[12px]"
                     />
                   </div>
@@ -241,23 +241,23 @@ export function TemplatePickerDialog({
             </div>
           )}
 
-          {/* Step 3: 选卷宗 */}
+          {/* Bước 3: chọn hồ sơ */}
           {selected && (
             <div>
               <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                {editableVars.length > 0 ? "3" : "2"} · 归档到哪个卷宗
+                {editableVars.length > 0 ? "3" : "2"} · Lưu trữ vào hồ sơ nào
               </Label>
               <Select value={targetFolderId} onValueChange={setTargetFolderId}>
                 <SelectTrigger className="mt-2">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="auto">自动（按模板大类推荐）</SelectItem>
+                  <SelectItem value="auto">Tự động (gợi ý theo nhóm mẫu)</SelectItem>
                   {folders.map((f) => (
                     <SelectItem key={f.id} value={f.id}>
                       {f.name}
                       {f.isDefault && (
-                        <span className="ml-1 text-[10px] text-muted-foreground">· 默认</span>
+                        <span className="ml-1 text-[10px] text-muted-foreground">· Mặc định</span>
                       )}
                     </SelectItem>
                   ))}
@@ -269,11 +269,11 @@ export function TemplatePickerDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={!selected || pending}>
             {pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
-            生成并下载
+            Sinh và tải xuống
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -38,7 +38,7 @@ export function InfoPanel({
 }: {
   matter: MatterPayload;
   userOptions: UserOption[];
-  /** v0.43 项1：委托合同 = 收案（审批）阶段上传、绑定本案的文件 */
+  /** v0.43 mục 1: hợp đồng ủy quyền = tệp tải lên ở giai đoạn tiếp nhận (duyệt), gắn với vụ án */
   contracts: { id: string; name: string }[];
   canEditMatter: boolean;
   canManageRelatedMatters: boolean;
@@ -62,15 +62,15 @@ export function InfoPanel({
     others.length === 0
       ? "—"
       : others
-          .map((m) => m.role === "CO_LEAD" ? m.user.name : `${m.user.name}（助理）`)
+          .map((m) => m.role === "CO_LEAD" ? m.user.name : `${m.user.name} (trợ lý)`)
           .join("，");
-  // 客户明细
+  // Chi tiết khách hàng
   const clientIdNumber = primaryClient?.idNumber ?? null;
   // Unused contact fields kept for future use
   // const clientContactName = clientContact?.name ?? null;
   // const clientPhone = clientContact?.phone ?? client?.phone ?? null;
 
-  // 其他案件当事人（第三方 / 关联方）；相对方统一在案件程序的程序当事人中展示
+  // Các bên khác của vụ án (người thứ ba / bên liên quan); bên đối phương hiển thị thống nhất ở bên của thủ tục trong chương trình vụ án
   const otherParties = matter.parties
     .filter(
       (p) =>
@@ -78,7 +78,7 @@ export function InfoPanel({
     )
     .map((p) => ({
       id: p.id,
-      label: p.role === "THIRD_PARTY" ? "第三方" : "关联方",
+      label: p.role === "THIRD_PARTY" ? "Người thứ ba" : "Bên liên quan",
       name: p.name,
       idNumber:
         p.partyType !== "NATURAL_PERSON" ? p.enterpriseSocialCode : p.idNumber,
@@ -86,19 +86,19 @@ export function InfoPanel({
       phone: p.phone
     }));
 
-  // 关联案件（双向合并去重）
+  // Vụ án liên quan (gộp hai chiều, khử trùng)
   const relatedMatters = [
     ...matter.linksFrom.map((l) => l.relatedMatter),
     ...matter.linksTo.map((l) => l.matter)
   ].filter((m, i, arr) => arr.findIndex((x) => x.id === m.id) === i);
 
-  // v0.35: 按案件类别分叉展示（诉讼/仲裁 vs 非诉/专项 vs 顾问）
+  // v0.35: hiển thị phân nhánh theo loại vụ án (tố tụng/trọng tài vs phi tố tụng/đặc biệt vs tư vấn)
   const kind = matterCategoryKind(matter.category);
   const period = (s: Date | null, e: Date | null) => {
     if (!s && !e) return "—";
     return `${s ? formatDate(s) : "—"} ~ ${e ? formatDate(e) : "—"}`;
   };
-  // v0.42 项11：案件信息表展示「所内案号」（状态已在页头 Pill 体现）
+  // v0.42 mục 11: bảng thông tin vụ án hiển thị「mã nội bộ」(trạng thái đã thể hiện ở Pill đầu trang)
   const claimCell = matter.claimAmount ? (
     <span className="font-mono tabular">¥{Number(matter.claimAmount).toLocaleString()}</span>
   ) : (
@@ -107,13 +107,13 @@ export function InfoPanel({
 
   return (
     <div className="h-full">
-      {/* —— 案件信息：全宽，明暗分栏表格，灵活每行多列 —— */}
+      {/* —— Thông tin vụ án: bảng rộng toàn phần, phân cột sáng-tối, mỗi hàng linh hoạt nhiều cột —— */}
       <section className="h-full rounded-lg border border-border bg-card">
         <header className="flex items-center justify-between border-b border-border px-4 py-2">
           <span className="text-[13px] font-medium">
-            基本信息
+            Thông tin cơ bản
             <span className="ml-1.5 font-mono text-[11px] font-normal tabular text-muted-foreground/70">
-              丨 {matter.firmCaseNo || matter.internalCode}
+              ｜ {matter.firmCaseNo || matter.internalCode}
             </span>
           </span>
           {canEditMatter && (
@@ -124,51 +124,51 @@ export function InfoPanel({
               className="h-6 gap-1 text-[11px] text-muted-foreground hover:text-primary"
             >
               <Pencil className="h-3 w-3" strokeWidth={1.8} />
-              编辑
+              Sửa
             </Button>
           )}
         </header>
         <div className="overflow-hidden rounded-b-lg">
-          {/* 行1：收案时间 | 案件类型 */}
+          {/* Hàng 1: thời gian tiếp nhận | loại vụ án */}
           <InfoRow>
-            <Pair label="收案时间">
+            <Pair label="Thời gian tiếp nhận">
               {matter.intakeDate ? formatDate(matter.intakeDate) : "—"}
             </Pair>
-            <Pair label="案件类型">{matterCategoryLabel[matter.category]}</Pair>
+            <Pair label="Loại vụ án">{matterCategoryLabel[matter.category]}</Pair>
           </InfoRow>
-          {/* 行2：按类别分叉 —— 诉讼/仲裁 vs 非诉/专项 vs 顾问 */}
+          {/* Hàng 2: phân nhánh theo loại —— tố tụng/trọng tài vs phi tố tụng/đặc biệt vs tư vấn */}
           {kind === "litigation" && (
             <InfoRow>
-              <Pair label="案由">{matter.cause?.name ?? matter.causeFreeText ?? "—"}</Pair>
-              <Pair label="标的">{claimCell}</Pair>
+              <Pair label="Nguyên nhân">{matter.cause?.name ?? matter.causeFreeText ?? "—"}</Pair>
+              <Pair label="Giá trị tranh chấp">{claimCell}</Pair>
             </InfoRow>
           )}
           {kind === "project" && (
             <>
               <InfoRow>
-                <Pair label="业务类型">{matter.businessType || "—"}</Pair>
-                <Pair label="项目金额">{claimCell}</Pair>
+                <Pair label="Loại nghiệp vụ">{matter.businessType || "—"}</Pair>
+                <Pair label="Giá trị dự án">{claimCell}</Pair>
               </InfoRow>
               <InfoRow>
-                <Pair label="起止时间">{period(matter.serviceStart, matter.serviceEnd)}</Pair>
-                <Pair label="交付成果">{matter.deliverables || "—"}</Pair>
+                <Pair label="Thời gian bắt đầu-kết thúc">{period(matter.serviceStart, matter.serviceEnd)}</Pair>
+                <Pair label="Sản phẩm bàn giao">{matter.deliverables || "—"}</Pair>
               </InfoRow>
             </>
           )}
           {kind === "counsel" && (
             <InfoRow>
-              <Pair label="顾问类型">{matter.counselType || "—"}</Pair>
-              <Pair label="顾问期限">{period(matter.serviceStart, matter.serviceEnd)}</Pair>
+              <Pair label="Loại tư vấn">{matter.counselType || "—"}</Pair>
+              <Pair label="Thời hạn tư vấn">{period(matter.serviceStart, matter.serviceEnd)}</Pair>
             </InfoRow>
           )}
-          {/* 行3：主办律师 | 协办人员 */}
+          {/* Hàng 3: luật sư chủ trì | nhân sự cộng tác */}
           <InfoRow>
-            <Pair label="主办律师">{lead ? lead.user.name : "—"}</Pair>
-            <Pair label="协办人员">{coLabel}</Pair>
+            <Pair label="Luật sư chủ trì">{lead ? lead.user.name : "—"}</Pair>
+            <Pair label="Nhân sự cộng tác">{coLabel}</Pair>
           </InfoRow>
-          {/* 行4：客户 | 证件号码 */}
+          {/* Hàng 4: khách hàng | số giấy tờ */}
           <InfoRow>
-            <Pair label="客户">
+            <Pair label="Khách hàng">
               {primaryClient ? (
                 <Link
                   href={`/clients/${primaryClient.id}`}
@@ -182,28 +182,28 @@ export function InfoPanel({
                 "—"
               )}
             </Pair>
-            <Pair label="证件号码">
+            <Pair label="Số giấy tờ">
               <span className="font-mono tabular">{clientIdNumber ?? "—"}</span>
             </Pair>
           </InfoRow>
-          {/* 行5：其他案件当事人（每人一行）*/}
+          {/* Hàng 5: các bên khác của vụ án (mỗi người một hàng) */}
           {otherParties.map((op) => (
             <InfoRow key={op.id}>
               <Pair label={op.label}>{op.name || "—"}</Pair>
-              <Pair label="证件号码">
+              <Pair label="Số giấy tờ">
                 <span className="font-mono tabular">{op.idNumber || "—"}</span>
               </Pair>
             </InfoRow>
           ))}
-          {/* 行6：委托合同 */}
+          {/* Hàng 6: hợp đồng ủy quyền */}
           <InfoRow>
-            <Pair label="委托合同" grow>
+            <Pair label="Hợp đồng ủy quyền" grow>
               <DelegationContracts contracts={contracts} />
             </Pair>
           </InfoRow>
-          {/* 行7：关联案件 */}
+          {/* Hàng 7: vụ án liên quan */}
           <InfoRow>
-            <Pair label="关联案件" grow>
+            <Pair label="Vụ án liên quan" grow>
               <RelatedMattersField
                 matterId={matter.id}
                 related={relatedMatters}
@@ -247,7 +247,7 @@ export function InfoPanel({
 
 /* —— Sub-components —— */
 
-// v0.43 项1：委托合同——收案上传、绑定本案的文件，点击文件名在浏览器内打开
+// v0.43 mục 1: hợp đồng ủy quyền — tệp tải lên ở tiếp nhận, gắn với vụ án, bấm tên tệp để mở ngay trong trình duyệt
 function DelegationContracts({ contracts }: { contracts: { id: string; name: string }[] }) {
   if (contracts.length === 0) {
     return <span className="text-muted-foreground">—</span>;
@@ -271,7 +271,7 @@ function DelegationContracts({ contracts }: { contracts: { id: string; name: str
   );
 }
 
-// 一行：移动端纵向堆叠（pair 间横线），md+ 横向排列（pair 间竖线）
+// Một hàng: mobile xếp dọc (giữa các pair có kẻ ngang), md+ xếp ngang (giữa các pair có kẻ dọc)
 export function InfoRow({
   children,
   className
@@ -291,7 +291,7 @@ export function InfoRow({
   );
 }
 
-// 一个标签-取值对：标签灰底（暗），取值白底（亮）
+// Một cặp nhãn-giá trị: nhãn nền xám (tối), giá trị nền trắng (sáng)
 export function Pair({
   label,
   grow,
@@ -302,7 +302,7 @@ export function Pair({
   label: string;
   grow?: boolean;
   wide?: boolean;
-  /** 只占内容宽度（值不换行），用于系统编号/收案时间等短字段，避免撑成两行 */
+  /** Chỉ chiếm bề rộng nội dung (giá trị không xuống dòng), dùng cho mã hệ thống/thời gian tiếp nhận các trường ngắn, tránh giãn thành hai hàng */
   tight?: boolean;
   children: React.ReactNode;
 }) {

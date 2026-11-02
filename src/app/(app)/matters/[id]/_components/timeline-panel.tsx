@@ -27,7 +27,7 @@ const iconByType: Record<string, React.ComponentType<React.SVGProps<SVGSVGElemen
   PROCEDURE_ADDED: FileText,
   HEARING_SCHEDULED: Gavel,
   FEE_RECEIVED: Coins,
-  // v0.43 项4：补齐案件动态
+  // v0.43 mục 4: bù động thái của vụ án
   DEADLINE_ADDED: CalendarClock,
   TASK_ADDED: ListChecks,
   DOCUMENT_UPLOADED: Upload,
@@ -46,14 +46,14 @@ const colorByType: Record<string, string> = {
 };
 
 export function TimelinePanel({ events }: { events: TimelineEvent[] }) {
-  // v0.43：按发生时间倒序（最新动态在上）
+  // v0.43: theo thời gian phát sinh giảm dần (động thái mới nhất lên trên)
   const sorted = [...events].sort(
     (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
   );
   if (events.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border bg-card py-16 text-center">
-        <p className="text-sm text-muted-foreground">还没有时间线事件</p>
+        <p className="text-sm text-muted-foreground">Chưa có sự kiện dòng thời gian</p>
       </div>
     );
   }

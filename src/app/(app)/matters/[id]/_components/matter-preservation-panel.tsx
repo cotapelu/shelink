@@ -69,18 +69,18 @@ export function MatterPreservationPanel({
       <div className="mb-4 flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-lg">
           <Shield className="h-4 w-4 text-primary" />
-          财产保全
-          {totalProps.length > 0 && <span className="font-mono text-[11px] text-muted-foreground">{totalProps.length} 项</span>}
+          Bảo toàn tài sản
+          {totalProps.length > 0 && <span className="font-mono text-[11px] text-muted-foreground">{totalProps.length} tài sản</span>}
         </h3>
         <Button onClick={() => setCreateOpen(true)} size="sm" className="gap-1.5">
-          <Plus className="h-3.5 w-3.5" /> 新建保全
+          <Plus className="h-3.5 w-3.5" /> Tạo bảo toàn
         </Button>
       </div>
 
       {cases.length === 0 ? (
         <div className="ll-surface rounded-lg border border-border p-10 text-center text-sm text-muted-foreground">
           <Shield className="mx-auto mb-2 h-6 w-6 opacity-40" />
-          该案件暂无保全记录
+          Vụ án này chưa có bản ghi bảo toàn
         </div>
       ) : (
         <div className="space-y-3">
@@ -121,12 +121,12 @@ function CaseCard({ cs, matters, users }: { cs: PreservationCaseRow; matters: Ma
             {cs.court && <span className="text-xs text-muted-foreground">{cs.court}</span>}
           </div>
           <div className="mt-0.5 text-[11px] text-muted-foreground">
-            {cs.targets.length} 个被保全人 · {allProps.length} 项财产
+            {cs.targets.length} bên bị bảo toàn · {allProps.length} tài sản
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <button type="button" onClick={() => setEditOpen(true)} className="rounded-md p-1 text-muted-foreground hover:text-foreground"><Pencil className="h-3 w-3" /></button>
-          <button type="button" onClick={() => { if (confirm("确认删除？")) { startTransition(async () => { try { await deletePreservationCase({ id: cs.id }); toast.success("已删除"); } catch { toast.error("删除失败"); } }); } }} className="rounded-md p-1 text-muted-foreground hover:text-destructive"><Trash2 className="h-3 w-3" /></button>
+          <button type="button" onClick={() => { if (confirm("Xác nhận xoá?")) { startTransition(async () => { try { await deletePreservationCase({ id: cs.id }); toast.success("Đã xoá"); } catch { toast.error("Xoá thất bại"); } }); } }} className="rounded-md p-1 text-muted-foreground hover:text-destructive"><Trash2 className="h-3 w-3" /></button>
         </div>
       </button>
 
@@ -137,10 +137,10 @@ function CaseCard({ cs, matters, users }: { cs: PreservationCaseRow; matters: Ma
               <div className="flex items-center gap-2 mb-1">
                 <UserPlus className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs font-medium">{t.name}</span>
-                <button type="button" onClick={() => setAddPropOpen(t.id)} className="text-[10px] text-primary hover:underline">+ 添加财产</button>
+                <button type="button" onClick={() => setAddPropOpen(t.id)} className="text-[10px] text-primary hover:underline">+ Thêm tài sản</button>
               </div>
               {t.properties.length === 0 ? (
-                <p className="pl-5 text-[11px] text-muted-foreground">暂无财产</p>
+                <p className="pl-5 text-[11px] text-muted-foreground">Chưa có tài sản</p>
               ) : (
                 <div className="pl-5 space-y-1">
                   {t.properties.map((p) => {
@@ -157,8 +157,8 @@ function CaseCard({ cs, matters, users }: { cs: PreservationCaseRow; matters: Ma
                         <span className="shrink-0 rounded border px-1 py-0 text-[9px]" style={{ borderColor: sc.border, color: sc.text, backgroundColor: sc.bg }}>{PRES_STATUS_CN[p.status]}</span>
                         {isActive && (
                           <>
-                            <button type="button" onClick={() => setRenewPropOpen(p.id)} className="shrink-0 text-[10px] text-primary hover:underline">续保</button>
-                            <button type="button" onClick={() => { startTransition(async () => { try { await liftProperty(p.id); toast.success("已解除"); } catch { toast.error("操作失败"); } }); }} className="shrink-0 text-[10px] text-muted-foreground hover:text-foreground">解除</button>
+                            <button type="button" onClick={() => setRenewPropOpen(p.id)} className="shrink-0 text-[10px] text-primary hover:underline">Gia hạn</button>
+                            <button type="button" onClick={() => { startTransition(async () => { try { await liftProperty(p.id); toast.success("Đã gỡ bỏ"); } catch { toast.error("Thao tác thất bại"); } }); }} className="shrink-0 text-[10px] text-muted-foreground hover:text-foreground">Gỡ bỏ</button>
                           </>
                         )}
                       </div>
@@ -168,7 +168,7 @@ function CaseCard({ cs, matters, users }: { cs: PreservationCaseRow; matters: Ma
               )}
             </div>
           ))}
-          <Button size="sm" variant="ghost" onClick={() => setAddTargetOpen(true)} className="h-7 gap-1 text-[11px]"><UserPlus className="h-3 w-3" />添加被保全人</Button>
+          <Button size="sm" variant="ghost" onClick={() => setAddTargetOpen(true)} className="h-7 gap-1 text-[11px]"><UserPlus className="h-3 w-3" />Thêm bên bị bảo toàn</Button>
         </div>
       )}
 

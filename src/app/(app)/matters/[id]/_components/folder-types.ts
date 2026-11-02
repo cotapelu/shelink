@@ -18,7 +18,7 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * 卷宗 / 模板相关的共享类型（v0.8）
+ * Kiểu dùng chung liên quan hồ sơ / mẫu (v0.8)
  */
 
 export type FolderPayload = {
@@ -56,37 +56,37 @@ export type TemplateSummary = {
 };
 
 export const TEMPLATE_CATEGORY_CN: Record<TemplateSummary["category"], string> = {
-  INTAKE: "收案文书",
-  RETAINER: "委托文书",
-  LITIGATION: "诉讼文书",
-  HEARING: "庭审文书",
-  WORK_PRODUCT: "工作成果",
-  ARCHIVE: "卷宗文书",
-  CLOSING: "结案文书",
-  BLANK: "空白文档"
+  INTAKE: "Văn bản tiếp nhận",
+  RETAINER: "Văn bản ủy quyền",
+  LITIGATION: "Văn bản tố tụng",
+  HEARING: "Văn bản phiên tòa",
+  WORK_PRODUCT: "Kết quả công việc",
+  ARCHIVE: "Văn bản hồ sơ",
+  CLOSING: "Văn bản kết thúc",
+  BLANK: "Văn bản trắng"
 };
 
 export const VARIABLE_LABEL_CN: Record<string, string> = {
-  "firm.name": "律所名称",
-  "firm.address": "律所地址",
-  "firm.phone": "律所电话",
-  "lawyer.name": "主办律师",
-  "lawyer.phone": "律师电话",
-  "matter.code": "案件编号",
-  "matter.title": "案件名称",
-  "matter.causeText": "案由",
-  "matter.intakeDate": "收案日期",
-  "matter.claimAmount": "涉案标的",
-  "matter.ourStanding": "我方诉讼地位",
-  "client.name": "委托人姓名",
-  "client.idNumber": "委托人证件号",
-  "client.address": "委托人住址",
-  "client.phone": "委托人电话",
-  "opposing.name": "对方姓名",
-  "opposing.idNumber": "对方证件号",
-  "opposing.address": "对方住址",
-  "opposing.phone": "对方电话",
-  "proceeding.court": "受理法院",
-  "proceeding.caseNo": "案号",
-  "todayCN": "生成日期"
+  "firm.name": "Tên văn phòng",
+  "firm.address": "Địa chỉ văn phòng",
+  "firm.phone": "Điện thoại văn phòng",
+  "lawyer.name": "Luật sư chủ trì",
+  "lawyer.phone": "Điện thoại luật sư",
+  "matter.code": "Mã vụ án",
+  "matter.title": "Tên vụ án",
+  "matter.causeText": "Nguyên nhân",
+  "matter.intakeDate": "Ngày tiếp nhận",
+  "matter.claimAmount": "Giá trị tranh chấp",
+  "matter.ourStanding": "Lập trường tố tụng phía ta",
+  "client.name": "Tên bên ủy quyền",
+  "client.idNumber": "Số giấy tờ bên ủy quyền",
+  "client.address": "Địa chỉ bên ủy quyền",
+  "client.phone": "Điện thoại bên ủy quyền",
+  "opposing.name": "Tên bên đối phương",
+  "opposing.idNumber": "Số giấy tờ bên đối phương",
+  "opposing.address": "Địa chỉ bên đối phương",
+  "opposing.phone": "Điện thoại bên đối phương",
+  "proceeding.court": "Toà tiếp nhận",
+  "proceeding.caseNo": "Số án",
+  "todayCN": "Ngày sinh" // key giữ nguyên (hợp đồng template-engine)
 };

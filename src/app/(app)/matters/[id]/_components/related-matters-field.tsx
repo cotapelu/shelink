@@ -73,12 +73,12 @@ export function RelatedMattersField({
     startMutate(async () => {
       try {
         await addMatterLink(matterId, id);
-        toast.success("已关联");
+        toast.success("Đã liên kết");
         setOpen(false);
         setQuery("");
         router.refresh();
       } catch (err) {
-        toast.error("关联失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Liên kết thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -90,7 +90,7 @@ export function RelatedMattersField({
         await removeMatterLink(matterId, id);
         router.refresh();
       } catch (err) {
-        toast.error("解除失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Gỡ liên kết thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -102,8 +102,8 @@ export function RelatedMattersField({
           type="button"
           variant="outline"
           size="sm"
-          aria-label="关联案件"
-          title="关联案件"
+          aria-label="Liên kết vụ án"
+          title="Liên kết vụ án"
           className="h-5 w-5 rounded-sm p-0 text-muted-foreground"
         >
           <Plus className="h-2.5 w-2.5" />
@@ -116,7 +116,7 @@ export function RelatedMattersField({
             autoFocus
             value={query}
             onChange={(e) => runSearch(e.target.value)}
-            placeholder="搜索案件名称 / 系统编号"
+            placeholder="Tìm tên vụ án / mã hệ thống"
             className="h-8 pl-7 text-xs"
           />
         </div>
@@ -126,7 +126,7 @@ export function RelatedMattersField({
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             </div>
           ) : results.length === 0 ? (
-            <p className="py-6 text-center text-xs text-muted-foreground">无可关联的案件</p>
+            <p className="py-6 text-center text-xs text-muted-foreground">Không có vụ án nào để liên kết</p>
           ) : (
             results.map((m) => (
               <button
@@ -162,7 +162,7 @@ export function RelatedMattersField({
             className="inline-flex min-w-0 items-center gap-1 text-primary hover:underline"
             title={`${m.internalCode} ${m.title}`}
           >
-            {/* v0.43 项1：关联案件展示不再显示系统编号，仅标题（编号仍在 hover title） */}
+            {/* v0.43 mục 1: hiển thị vụ án liên quan không còn hiện mã hệ thống, chỉ tiêu đề (mã vẫn ở hover title) */}
             <span className="max-w-[260px] truncate">{m.title}</span>
           </Link>
           {canManage && (
@@ -171,7 +171,7 @@ export function RelatedMattersField({
               onClick={() => remove(m.id)}
               disabled={pending}
               className="rounded-sm p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-              title="解除关联"
+              title="Gỡ liên kết"
             >
               <X className="h-3 w-3" />
             </button>
@@ -182,7 +182,7 @@ export function RelatedMattersField({
 
       {related.length === 0 && (
         <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-          暂无关联
+          Chưa có liên kết
           {addButton}
         </span>
       )}

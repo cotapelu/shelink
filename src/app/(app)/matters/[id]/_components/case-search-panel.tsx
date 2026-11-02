@@ -22,7 +22,8 @@ export function CaseSearchPanel({ matterId, matterCategory, defaultCauseName }: 
   const [causeInput, setCauseInput] = useState(defaultCauseName ?? "");
   const [qw, setQw] = useState("");
   const [provinces, setProvinces] = useState<string[]>([]);
-  const [wszl, setWszl] = useState<Array<"判决书" | "裁定书" | "调解书" | "决定书">>(["判决书"]);
+  // wszl: giá trị contract của API tra cứu án lệ (giữ nguyên — xem keyword-search-form)
+const [wszl, setWszl] = useState<Array<"判决书" | "裁定书" | "调解书" | "决定书">>(["判决书"]);
   const [jaStart, setJaStart] = useState("");
   const [jaEnd, setJaEnd] = useState("");
 
@@ -46,9 +47,9 @@ export function CaseSearchPanel({ matterId, matterCategory, defaultCauseName }: 
           top_k: topK
         });
         setKeywordResult(res);
-        toast.success(`检索完成，命中 ${res.total} 条`);
+        toast.success(`Tra xong, khớp ${res.total} mục`);
       } catch (err) {
-        toast.error("检索失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Tra thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -58,9 +59,9 @@ export function CaseSearchPanel({ matterId, matterCategory, defaultCauseName }: 
       try {
         await saveCaseToMatter({ matterId, caseHit });
         setSavedIds(p => new Set([...p, caseHit.id]));
-        toast.success("已保存关联案例");
+        toast.success("Đã lưu vụ án liên quan");
       } catch (err) {
-        toast.error("保存失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Lưu thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -87,7 +88,7 @@ export function CaseSearchPanel({ matterId, matterCategory, defaultCauseName }: 
       )}
       {mode === "vector" && (
         <div className="rounded-lg border p-4">
-          <p>向量检索（开发中）</p>
+          <p>Tra vector (đang phát triển)</p>
         </div>
       )}
       {keywordResult && (

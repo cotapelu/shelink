@@ -82,35 +82,35 @@ export function LifecycleActions({
 
   function handleSubmit() {
     if (dialog === "close" && !text.trim()) {
-      toast.warning("请填写结案小结");
+      toast.warning("Hãy nhập tóm tắt kết thúc");
       return;
     }
     startTransition(async () => {
       try {
         if (dialog === "close") {
           await closeMatter({ id: matterId, summary: text });
-          toast.success("案件已结案");
+          toast.success("Vụ án đã kết thúc");
         } else if (dialog === "hold") {
           await holdMatter({ id: matterId, reason: text });
-          toast.success("案件已暂停");
+          toast.success("Vụ án đã tạm dừng");
         }
         setDialog(null);
         router.refresh();
       } catch (err) {
-        toast.error("操作失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Thao tác thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
 
   function handleReopen() {
-    if (!confirm("将案件重新开放为'办理中'？")) return;
+    if (!confirm("Mở lại vụ án về trạng thái 'đang xử lý'?")) return;
     startTransition(async () => {
       try {
         await reopenMatter(matterId);
-        toast.success("案件已重新开放");
+        toast.success("Vụ án đã mở lại");
         router.refresh();
       } catch (err) {
-        toast.error("操作失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Thao tác thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -120,15 +120,15 @@ export function LifecycleActions({
       <div className="inline-flex items-center gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-md border border-[#9B7BF7]/30 bg-[#9B7BF7]/10 px-3 py-1.5 text-xs text-[#9B7BF7]">
           <Lock className="h-3.5 w-3.5" />
-          已归档（只读）
+          Đã lưu trữ (chỉ đọc)
         </span>
         <a
           href={`/api/archive/${matterId}/export`}
           className="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-3 py-1.5 text-xs hover:bg-muted/30"
-          title="导出归档 ZIP（含材料 + 结构化数据 + 卷宗封皮目录）"
+          title="Xuất ZIP lưu trữ (gồm tài liệu + dữ liệu có cấu trúc + bìa và mục lục hồ sơ)"
         >
           <Download className="h-3.5 w-3.5" />
-          导出 ZIP
+          Xuất ZIP
         </a>
       </div>
     );
@@ -140,26 +140,26 @@ export function LifecycleActions({
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" disabled={isPending} className="gap-1.5">
             {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MoreHorizontal className="h-3.5 w-3.5" />}
-            状态
+            Trạng thái
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-44">
           {(status === "ON_HOLD" || status === "CLOSED") && (
             <DropdownMenuItem onSelect={handleReopen}>
               <Play className="mr-2 h-4 w-4" />
-              重新开放
+              Mở lại
             </DropdownMenuItem>
           )}
           {status === "IN_PROGRESS" && (
             <DropdownMenuItem onSelect={() => open("hold")}>
               <Pause className="mr-2 h-4 w-4" />
-              暂停办理
+              Tạm dừng xử lý
             </DropdownMenuItem>
           )}
           {status !== "CLOSED" && (
             <DropdownMenuItem onSelect={() => open("close")}>
               <CheckCircle2 className="mr-2 h-4 w-4 text-[#4ADE80]" />
-              结案
+              Kết thúc
             </DropdownMenuItem>
           )}
           {canArchive && (
@@ -170,7 +170,7 @@ export function LifecycleActions({
                 className="text-[#9B7BF7] focus:text-[#9B7BF7]"
               >
                 <Archive className="mr-2 h-4 w-4" />
-                归档（不可逆）
+                Lưu trữ (không hoàn tác được)
               </DropdownMenuItem>
             </>
           )}
@@ -180,17 +180,17 @@ export function LifecycleActions({
       <Dialog open={dialog !== null} onOpenChange={(o) => !o && setDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{dialog === "close" ? "结案" : "暂停案件"}</DialogTitle>
+            <DialogTitle>{dialog === "close" ? "Kết thúc" : "Tạm dừng vụ án"}</DialogTitle>
             <DialogDescription>
               {dialog === "close" &&
-                "结案后案件状态为'已结案'，仍可编辑。结案小结会进入时间线。"}
-              {dialog === "hold" && "暂停后案件不再显示在'办理中'筛选。"}
+                "Sau khi kết thúc, trạng thái vụ án là 'đã kết thúc', vẫn sửa được. Tóm tắt kết thúc sẽ vào dòng thời gian."}
+              {dialog === "hold" && "Sau khi tạm dừng, vụ án không còn hiện ở lọc 'đang xử lý'."}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-1.5">
             <Label className="text-xs">
-              {dialog === "close" ? "结案小结" : "暂停原因"}
+              {dialog === "close" ? "Tóm tắt kết thúc" : "Lý do tạm dừng"}
               {dialog === "close" && <span className="ml-1 text-destructive">*</span>}
             </Label>
             <Textarea
@@ -198,8 +198,8 @@ export function LifecycleActions({
               onChange={(e) => setText(e.target.value)}
               placeholder={
                 dialog === "close"
-                  ? "如：经一审判决支持原告诉请，对方未上诉，判决已生效"
-                  : "如：等待客户补充证据材料"
+                  ? "vd: bản án sơ thẩm chấp nhận yêu cầu của nguyên đơn, bên kia không kháng cáo, bản án đã có hiệu lực"
+                  : "vd: chờ khách bổ sung tài liệu chứng cứ"
               }
               rows={5}
             />
@@ -207,11 +207,11 @@ export function LifecycleActions({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialog(null)} disabled={isPending}>
-              取消
+              Huỷ
             </Button>
             <Button onClick={handleSubmit} disabled={isPending}>
               {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-              {dialog === "close" ? "确认结案" : "确认暂停"}
+              {dialog === "close" ? "Xác nhận kết thúc" : "Xác nhận tạm dừng"}
             </Button>
           </DialogFooter>
         </DialogContent>

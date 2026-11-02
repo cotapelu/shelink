@@ -45,15 +45,15 @@ export function OverviewPanel({ matter }: { matter: MatterPayload }) {
 
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-      {/* 近期期限 */}
+      {/* Thời hạn sắp tới */}
       <section className="rounded-xl border border-border bg-card p-5 lg:col-span-2">
         <h2 className="mb-4 flex items-center gap-2 text-base font-semibold">
           <Briefcase className="h-4 w-4 text-primary" />
-          近期期限
+          Thời hạn sắp tới
         </h2>
         {upcomingDeadlines.length === 0 ? (
           <p className="py-6 text-center text-xs text-muted-foreground">
-            暂无未完成的期限
+            Chưa có thời hạn nào chưa hoàn tất
           </p>
         ) : (
           <ul className="space-y-2">
@@ -82,7 +82,7 @@ export function OverviewPanel({ matter }: { matter: MatterPayload }) {
                             : "text-foreground"
                       }`}
                     >
-                      {isOverdue ? `逾期 ${-days} 天` : days === 0 ? "今天" : `${days} 天`}
+                      {isOverdue ? `Quá hạn ${-days} ngày` : days === 0 ? "Hôm nay" : `${days} ngày`}
                     </div>
                     <div className="font-mono text-[10px] text-muted-foreground tabular">
                       {new Date(d.dueAt).toLocaleDateString("zh-CN")}
@@ -95,11 +95,11 @@ export function OverviewPanel({ matter }: { matter: MatterPayload }) {
         )}
       </section>
 
-      {/* 近期开庭 */}
+      {/* Phiên tòa sắp tới */}
       <section className="rounded-xl border border-border bg-card p-5">
-        <h2 className="mb-4 text-base font-semibold">近期开庭</h2>
+        <h2 className="mb-4 text-base font-semibold">Phiên tòa sắp tới</h2>
         {upcomingHearings.length === 0 ? (
-          <p className="py-6 text-center text-xs text-muted-foreground">暂无</p>
+          <p className="py-6 text-center text-xs text-muted-foreground">Chưa có</p>
         ) : (
           <ul className="space-y-2">
             {upcomingHearings.map((h) => (
@@ -122,11 +122,11 @@ export function OverviewPanel({ matter }: { matter: MatterPayload }) {
         )}
       </section>
 
-      {/* 团队 */}
+      {/* Đội ngũ */}
       <section className="rounded-xl border border-border bg-card p-5 lg:col-span-3">
         <h2 className="mb-4 flex items-center gap-2 text-base font-semibold">
           <Users className="h-4 w-4 text-primary" />
-          团队成员
+          Thành viên đội ngũ
         </h2>
         <ul className="grid grid-cols-1 gap-2 md:grid-cols-3">
           {matter.members.map((m) => (
@@ -146,7 +146,7 @@ export function OverviewPanel({ matter }: { matter: MatterPayload }) {
                 </div>
               </div>
               <Badge variant="outline" className="text-[10px]">
-                {m.role === "LEAD" ? "主办" : m.role === "CO_LEAD" ? "协办" : "助理"}
+                {m.role === "LEAD" ? "Chủ trì" : m.role === "CO_LEAD" ? "Cộng tác" : "Trợ lý"}
               </Badge>
             </li>
           ))}

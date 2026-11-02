@@ -103,18 +103,18 @@ export function AddBillingSheet({
           fd.set("name", contractFile.name);
           fd.set("category", "CONTRACT");
           fd.set("encrypted", "true");
-          fd.set("tags", `合同,${values.title}`);
+          fd.set("tags", `Hợp đồng,${values.title}`);
           fd.set("file", contractFile);
           await uploadDocument(fd);
-          toast.success("合同已创建，附件已加密入库");
+          toast.success("Hợp đồng đã tạo, tệp đính kèm đã mã hoá lưu vào kho");
         } else {
-          toast.success("合同已创建");
+          toast.success("Hợp đồng đã tạo");
         }
         reset();
         setContractFile(null);
         onOpenChange(false);
       } catch (err) {
-        toast.error("失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -123,22 +123,22 @@ export function AddBillingSheet({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[88vh] w-[92vw] max-w-2xl flex-col gap-0 p-0">
         <DialogHeader className="border-b border-border px-6 py-4">
-          <DialogTitle>新增合同</DialogTitle>
+          <DialogTitle>Thêm hợp đồng</DialogTitle>
           <DialogDescription className="text-xs">
-            一个案件可以有多份合同（如分阶段委托）。可同时上传合同扫描件，加密入库后归到本案材料库。
+            Một vụ án có thể có nhiều hợp đồng (vd ủy quyền theo giai đoạn). Có thể tải kèm bản scan hợp đồng, sau khi mã hoá lưu vào kho thì thuộc kho tài liệu của vụ.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col">
           <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
-            <Field label="合同名称" required error={errors.title?.message}>
+            <Field label="Tên hợp đồng" required error={errors.title?.message}>
               <Input
-                placeholder="如：委托代理合同 - 一审阶段"
+                placeholder="vd: Hợp đồng ủy quyền - giai đoạn sơ thẩm"
                 {...register("title")}
               />
             </Field>
 
-            <Field label="合同金额（元）" required>
+            <Field label="Giá trị hợp đồng (VNĐ)" required>
               <Input
                 type="number"
                 step="0.01"
@@ -147,32 +147,32 @@ export function AddBillingSheet({
               />
             </Field>
 
-            <Field label="状态">
+            <Field label="Trạng thái">
               <RadioChips
                 size="sm"
                 items={[
-                  { value: "DRAFT", label: "草稿" },
-                  { value: "ACTIVE", label: "生效中" },
-                  { value: "CLOSED", label: "已结清" }
+                  { value: "DRAFT", label: "Nháp" },
+                  { value: "ACTIVE", label: "Đang hiệu lực" },
+                  { value: "CLOSED", label: "Đã thanh toán xong" }
                 ]}
                 value={watchedStatus}
                 onChange={(v) => setValue("status", v as BillingCreateInput["status"])}
               />
             </Field>
 
-            <Field label="签订日期">
+            <Field label="Ngày ký">
               <Input type="date" {...register("signedAt", { valueAsDate: true })} />
             </Field>
 
-            <Field label="阶段付款约定">
+            <Field label="Thoả thuận thanh toán theo giai đoạn">
               <Textarea
                 rows={3}
-                placeholder="如：签约时收 30%，立案时收 30%，判决生效后收 40%"
+                placeholder="vd: thu 30% khi ký, thu 30% khi tiếp nhận, thu 40% sau khi bản án có hiệu lực"
                 {...register("schedule")}
               />
             </Field>
 
-            <Field label="合同附件（可选）">
+            <Field label="Tệp đính kèm hợp đồng (tuỳ chọn)">
               <label className="flex cursor-pointer items-center gap-2 rounded border border-dashed border-border px-3 py-3 text-[12px] text-muted-foreground hover:bg-muted/30">
                 <Paperclip className="h-3.5 w-3.5" />
                 {contractFile ? (
@@ -184,7 +184,7 @@ export function AddBillingSheet({
                     </span>
                   </span>
                 ) : (
-                  "选择 PDF / docx 文件，提交时自动加密入库"
+                  "Chọn tệp PDF / docx, khi gửi sẽ tự mã hoá lưu vào kho"
                 )}
                 <input
                   type="file"
@@ -203,11 +203,11 @@ export function AddBillingSheet({
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              取消
+              Huỷ
             </Button>
             <Button type="submit" disabled={isPending} className="gap-1.5">
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              创建
+              Tạo
             </Button>
           </DialogFooter>
         </form>
@@ -273,12 +273,12 @@ export function AddFeeEntrySheet({
       try {
         await createFeeEntry(values);
         toast.success(
-          values.type === "RECEIVED" ? "实收已录入，分成已自动计算" : "记录已创建"
+          values.type === "RECEIVED" ? "Đã ghi nhận khoản thu, phân chia đã tính tự động" : "Bản ghi đã tạo"
         );
         reset();
         onOpenChange(false);
       } catch (err) {
-        toast.error("失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -287,26 +287,26 @@ export function AddFeeEntrySheet({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[88vh] w-[92vw] max-w-2xl flex-col gap-0 p-0">
         <DialogHeader className="border-b border-border px-6 py-4">
-          <DialogTitle>新增收付记录</DialogTitle>
+          <DialogTitle>Thêm bản ghi thu/chi</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col">
           <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
-            <Field label="类型" required>
+            <Field label="Loại" required>
               <RadioChips
                 size="sm"
                 items={[
-                  { value: "RECEIVABLE", label: "应收" },
-                  { value: "RECEIVED", label: "实收", accent: "#16a34a" },
-                  { value: "REFUND", label: "退款", accent: "#dc2626" },
-                  { value: "COST", label: "成本" }
+                  { value: "RECEIVABLE", label: "Phải thu" },
+                  { value: "RECEIVED", label: "Đã thu", accent: "#16a34a" },
+                  { value: "REFUND", label: "Hoàn tiền", accent: "#dc2626" },
+                  { value: "COST", label: "Chi phí" }
                 ]}
                 value={type}
                 onChange={(v) => setValue("type", v as FeeEntryCreateInput["type"])}
               />
             </Field>
 
-            <Field label="金额（元）" required error={errors.amount?.message}>
+            <Field label="Số tiền (VNĐ)" required error={errors.amount?.message}>
               <Input
                 type="number"
                 step="0.01"
@@ -315,7 +315,7 @@ export function AddFeeEntrySheet({
               />
             </Field>
 
-            <Field label="发生日期" required>
+            <Field label="Ngày phát sinh" required>
               <Input
                 type="date"
                 {...register("occurredAt", { valueAsDate: true })}
@@ -323,7 +323,7 @@ export function AddFeeEntrySheet({
             </Field>
 
             {billings.length > 0 && (
-              <Field label="关联合同">
+              <Field label="Hợp đồng liên kết">
                 <Select
                   value={watchedBillingId || "none"}
                   onValueChange={(v) =>
@@ -334,7 +334,7 @@ export function AddFeeEntrySheet({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">不关联</SelectItem>
+                    <SelectItem value="none">Không liên kết</SelectItem>
                     {billings.map((b) => (
                       <SelectItem key={b.id} value={b.id}>
                         {b.title}
@@ -345,18 +345,18 @@ export function AddFeeEntrySheet({
               </Field>
             )}
 
-            <Field label="付款方 / 收款方">
-              <Input placeholder="如 上海青石建设有限公司" {...register("payerOrPayee")} />
+            <Field label="Bên trả / Bên nhận">
+              <Input placeholder="vd Công ty TNHH Xây dựng Thanh Thạch" {...register("payerOrPayee")} />
             </Field>
 
-            <Field label="方式">
-              <Input placeholder="转账 / 现金 / 支付宝" {...register("method")} />
+            <Field label="Phương thức">
+              <Input placeholder="Chuyển khoản / Tiền mặt / Ví điện tử" {...register("method")} />
             </Field>
 
             {invoiceRequests.length > 0 && (
               <Field
-                label="关联申请发票"
-                hint="选中后自动填金额；已开具的会填真实发票号，未开具的填占位 req:xxxxxxxx"
+                label="Hóa đơn yêu cầu liên kết"
+                hint="Chọn sẽ tự điền số tiền; đã xuất thì điền số hóa đơn thật, chưa xuất thì điền dấu giữ chỗ req:xxxxxxxx"
               >
                 <Select
                   value="none"
@@ -365,28 +365,28 @@ export function AddFeeEntrySheet({
                     const req = invoiceRequests.find((r) => r.id === v);
                     if (!req) return;
                     setValue("amount", Number(req.amount), { shouldDirty: true });
-                    // 优先用真实发票号（财务已 ISSUED 时回填），否则用占位
+                    // Ưu tiên dùng số hóa đơn thật (khi tài chính đã ISSUED thì điền lại), nếu không thì dùng dấu giữ chỗ
                     const invoiceNoValue = req.invoiceNo ?? `req:${req.id.slice(0, 8)}`;
                     setValue("invoiceNo", invoiceNoValue, { shouldDirty: true });
                     const existing = watchedNote ?? "";
                     const noteText = req.invoiceNo
-                      ? `关联申请发票 #${req.id.slice(0, 8)}${req.title ? "（" + req.title + "）" : ""}`
-                      : `关联申请发票（未开具）#${req.id.slice(0, 8)}${req.title ? "（" + req.title + "）" : ""}`;
+                      ? `HĐ yêu cầu liên kết #${req.id.slice(0, 8)}${req.title ? " (" + req.title + ")" : ""}`
+                      : `HĐ yêu cầu liên kết (chưa xuất) #${req.id.slice(0, 8)}${req.title ? " (" + req.title + ")" : ""}`;
                     setValue("note", existing ? `${existing}\n${noteText}` : noteText, {
                       shouldDirty: true
                     });
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="从已申请发票中选择" />
+                    <SelectValue placeholder="Chọn từ hóa đơn đã yêu cầu" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">不关联</SelectItem>
+                    <SelectItem value="none">Không liên kết</SelectItem>
                     {invoiceRequests.map((r) => (
                       <SelectItem key={r.id} value={r.id}>
                         ¥{Number(r.amount).toLocaleString()} ·{" "}
-                        {r.title ?? "未命名"} ·{" "}
-                        {r.invoiceNo ? `已开具 ${r.invoiceNo}` : r.status}
+                        {r.title ?? "Chưa đặt tên"} ·{" "}
+                        {r.invoiceNo ? `Đã xuất ${r.invoiceNo}` : r.status}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -394,7 +394,7 @@ export function AddFeeEntrySheet({
               </Field>
             )}
 
-            <Field label="发票号">
+            <Field label="Số hóa đơn">
               <Input className="font-mono" {...register("invoiceNo")} />
             </Field>
 
@@ -417,7 +417,7 @@ export function AddFeeEntrySheet({
               }}
             />
 
-            <Field label="备注">
+            <Field label="Ghi chú">
               <Textarea rows={2} {...register("note")} />
             </Field>
           </div>
@@ -429,11 +429,11 @@ export function AddFeeEntrySheet({
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              取消
+              Huỷ
             </Button>
             <Button type="submit" disabled={isPending} className="gap-1.5">
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              {type === "RECEIVED" ? "记录实收（自动分成）" : "保存"}
+              {type === "RECEIVED" ? "Ghi nhận thu (tự phân chia)" : "Lưu"}
             </Button>
           </DialogFooter>
         </form>
@@ -467,7 +467,7 @@ export function EditCommissionPlanDialog({
     if (available) {
       setPlans([...plans, { userId: available.id, percent: 0, label: "" }]);
     } else {
-      toast.warning("已为所有用户添加分成");
+      toast.warning("Đã thêm phân chia cho mọi người dùng");
     }
   }
 
@@ -483,16 +483,16 @@ export function EditCommissionPlanDialog({
 
   function handleSave() {
     if (total > 100) {
-      toast.error("分成总和不能超过 100%");
+      toast.error("Tổng phân chia không được vượt 100%");
       return;
     }
     startTransition(async () => {
       try {
         await setCommissionPlan({ matterId, items: plans });
-        toast.success("分成方案已保存");
+        toast.success("Đã lưu phương án phân chia");
         onOpenChange(false);
       } catch (err) {
-        toast.error("保存失败", {
+        toast.error("Lưu thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -503,16 +503,16 @@ export function EditCommissionPlanDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>分成方案</DialogTitle>
+          <DialogTitle>Phương án phân chia</DialogTitle>
           <p className="text-xs text-muted-foreground">
-            未列入的比例归律所留存。实收时按此方案自动派生分成条目。
+            Tỷ lệ không liệt kê thì văn phòng giữ lại. Khi thu sẽ tự sinh mục phân chia theo phương án này.
           </p>
         </DialogHeader>
 
         <div className="space-y-2">
           {plans.length === 0 ? (
             <p className="rounded-md border border-dashed border-border bg-background py-6 text-center text-xs text-muted-foreground">
-              未配置分成
+              Chưa cấu hình phân chia
             </p>
           ) : (
             plans.map((p, idx) => {
@@ -523,7 +523,7 @@ export function EditCommissionPlanDialog({
                 >
                   <div className="col-span-4">
                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      用户
+                      Người dùng
                     </Label>
                     <Select
                       value={p.userId}
@@ -543,7 +543,7 @@ export function EditCommissionPlanDialog({
                   </div>
                   <div className="col-span-3">
                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      百分比
+                      Tỷ lệ %
                     </Label>
                     <Input
                       type="number"
@@ -559,12 +559,12 @@ export function EditCommissionPlanDialog({
                   </div>
                   <div className="col-span-4">
                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      标签
+                      Nhãn
                     </Label>
                     <Input
                       value={p.label}
                       onChange={(e) => updateRow(idx, { label: e.target.value })}
-                      placeholder="主办律师 / 推荐人 / 合伙人"
+                      placeholder="Luật sư chủ trì / Người giới thiệu / Cộng sự"
                       className="mt-1 h-9 bg-background"
                     />
                   </div>
@@ -587,15 +587,15 @@ export function EditCommissionPlanDialog({
         <div className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
           <Button variant="outline" size="sm" onClick={addRow} className="h-7 gap-1">
             <Plus className="h-3.5 w-3.5" />
-            添加
+            Thêm
           </Button>
           <div className="flex items-center gap-4 text-xs">
             <div>
-              受益人合计：
+              Tổng người hưởng:
               <span className="ml-1 font-mono tabular text-foreground">{total.toFixed(1)}%</span>
             </div>
             <div>
-              律所留存：
+              Văn phòng giữ:
               <span className="ml-1 font-mono tabular text-muted-foreground">
                 {Math.max(0, 100 - total).toFixed(1)}%
               </span>
@@ -605,11 +605,11 @@ export function EditCommissionPlanDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={handleSave} disabled={isPending} className="gap-1.5">
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            保存方案
+            Lưu phương án
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -630,7 +630,7 @@ function InvoiceOcrBlock({
 
   const recognize = async () => {
     if (!file) {
-      toast.warning("请先选择发票图片");
+      toast.warning("Hãy chọn ảnh hóa đơn trước");
       return;
     }
     setBusy(true);
@@ -644,9 +644,9 @@ function InvoiceOcrBlock({
       }
       setPreview(res.data);
       onRecognized(res.data);
-      toast.success("已识别并自动填入");
+      toast.success("Đã nhận diện và tự động điền");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "识别失败");
+      toast.error(e instanceof Error ? e.message : "Nhận diện thất bại");
     } finally {
       setBusy(false);
     }
@@ -656,10 +656,10 @@ function InvoiceOcrBlock({
     <div className="space-y-1.5 rounded-md border border-dashed border-border bg-muted/20 p-3">
       <Label className="flex items-center gap-1.5 text-xs">
         <Sparkles className="h-3 w-3 text-primary" />
-        AI 发票识别（可选）
+        Nhận diện hóa đơn bằng AI (tuỳ chọn)
       </Label>
       <p className="text-[11px] text-muted-foreground">
-        上传增值税发票（JPG / PNG / PDF），识别后自动填发票号 / 金额 / 销售方 / 开票日
+        Tải lên hóa đơn GTGT (JPG / PNG / PDF), sau khi nhận diện sẽ tự điền số HĐ / số tiền / bên bán / ngày lập
       </p>
       <div className="flex items-center gap-2">
         <label className="flex flex-1 cursor-pointer items-center gap-2 rounded border border-border bg-background px-2.5 py-1.5 text-[11px] text-muted-foreground hover:bg-muted/30">
@@ -670,7 +670,7 @@ function InvoiceOcrBlock({
               {file.name}
             </span>
           ) : (
-            "选择发票（JPG / PNG / PDF）"
+            "Chọn hóa đơn (JPG / PNG / PDF)"
           )}
           <input
             type="file"
@@ -691,23 +691,23 @@ function InvoiceOcrBlock({
           className="h-8 gap-1 text-[11px]"
         >
           {busy && <Loader2 className="h-3 w-3 animate-spin" />}
-          识别
+          Nhận diện
         </Button>
       </div>
       {preview && (
         <div className="mt-1.5 grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-0.5 rounded border border-border bg-background p-2 text-[10.5px] text-muted-foreground">
-          {preview.invoiceType && <div>类型：{preview.invoiceType}</div>}
+          {preview.invoiceType && <div>Loại: {preview.invoiceType}</div>}
           {preview.invoiceNumber && (
             <div>
-              发票号：<span className="font-mono text-foreground/85">{preview.invoiceNumber}</span>
+              Số HĐ: <span className="font-mono text-foreground/85">{preview.invoiceNumber}</span>
             </div>
           )}
-          {preview.invoiceDate && <div>开票日：{preview.invoiceDate}</div>}
-          {preview.sellerName && <div>销售方：{preview.sellerName}</div>}
-          {preview.buyerName && <div>购买方：{preview.buyerName}</div>}
+          {preview.invoiceDate && <div>Ngày lập: {preview.invoiceDate}</div>}
+          {preview.sellerName && <div>Bên bán: {preview.sellerName}</div>}
+          {preview.buyerName && <div>Bên mua: {preview.buyerName}</div>}
           {preview.totalWithTax != null && (
             <div>
-              价税合计：
+              Tổng cộng tiền thuế:
               <span className="font-mono text-foreground/85">¥{preview.totalWithTax}</span>
             </div>
           )}

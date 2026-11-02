@@ -33,16 +33,16 @@ import type { SealContractItem } from "./info-extras";
 type Filter = "all" | "pending" | "done";
 
 const FILTERS: { value: Filter; label: string }[] = [
-  { value: "all", label: "全部" },
-  { value: "pending", label: "审批中" },
-  { value: "done", label: "已审批" }
+  { value: "all", label: "Tất cả" },
+  { value: "pending", label: "Đang duyệt" },
+  { value: "done", label: "Đã duyệt" }
 ];
 
 /**
- * v0.13: 案件详情"审批"板块（不再独立 tab，嵌入基本信息内）
- * - 仅显示用印审批（开票申请入口已收口到财务区，此处不重复）
- * - 顶部三分类切换：全部 / 审批中 / 已审批
- * - v0.23: 顶部"发起审批"改为弹窗，自动锁定当前案件 + 支持"+ 法定代表人章"
+ * v0.13: Khu "duyệt" ở chi tiết vụ án (không còn là tab riêng, nhúng trong thông tin cơ bản)
+ * - Chỉ hiển thị duyệt dùng dấu (cửa vào yêu cầu xuất HĐ đã thu về khu tài chính, không lặp lại ở đây)
+ * - Chuyển 3 phân loại đầu trang: Tất cả / Đang duyệt / Đã duyệt
+ * - v0.23: "bắt đầu duyệt" đầu trang đổi thành popup, tự khoá vụ án hiện tại + hỗ trợ "+ dấu người đại diện theo pháp luật"
  */
 export function ApprovalsPanel({
   matterId,
@@ -87,7 +87,7 @@ export function ApprovalsPanel({
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 text-[13px] font-medium">
             <Stamp className="h-3.5 w-3.5 text-primary" />
-            用印审批
+            Duyệt dùng dấu
             <span className="ml-1 font-mono text-[11px] text-muted-foreground tabular">
               {sealContracts.length}
             </span>
@@ -128,14 +128,14 @@ export function ApprovalsPanel({
             ) : (
               <Plus className="h-2.5 w-2.5" />
             )}
-            发起审批
+            Bắt đầu duyệt
           </Button>
         )}
       </header>
 
       {filtered.length === 0 ? (
         <p className="py-4 text-center text-xs text-muted-foreground">
-          {filter === "all" ? "暂无审批" : filter === "pending" ? "无审批中" : "无已审批"}
+          {filter === "all" ? "Chưa có duyệt nào" : filter === "pending" ? "Không có mục đang duyệt" : "Không có mục đã duyệt"}
         </p>
       ) : (
         <ul className="divide-y divide-border">
@@ -151,7 +151,7 @@ export function ApprovalsPanel({
                 href={`/approvals/seals?id=${s.id}`}
                 className="text-[11px] text-primary hover:text-primary/80"
               >
-                详情
+                Chi tiết
               </Link>
             </li>
           ))}
@@ -172,11 +172,11 @@ export function ApprovalsPanel({
 }
 
 const SEAL_STATUS_LABEL: Record<string, string> = {
-  PENDING: "待审批",
-  APPROVED: "已批准",
-  STAMPED: "已盖章",
-  REJECTED: "驳回",
-  CANCELLED: "撤销"
+  PENDING: "Chờ duyệt",
+  APPROVED: "Đã duyệt",
+  STAMPED: "Đã đóng dấu",
+  REJECTED: "Từ chối",
+  CANCELLED: "Thu hồi"
 };
 
 function SealStatusBadge({ status }: { status: string }) {

@@ -53,10 +53,10 @@ type InvoiceType = "PLAIN" | "SPECIAL";
 type InvoiceItem = "LAWYER_FEE" | "CONSULTING_FEE" | "AGENCY_FEE" | "OTHER";
 
 const INVOICE_ITEM_OPTIONS: { value: InvoiceItem; label: string }[] = [
-  { value: "LAWYER_FEE", label: "律师服务费" },
-  { value: "CONSULTING_FEE", label: "法律咨询费" },
-  { value: "AGENCY_FEE", label: "代理费" },
-  { value: "OTHER", label: "其他法律服务" }
+  { value: "LAWYER_FEE", label: "Phí luật sư" },
+  { value: "CONSULTING_FEE", label: "Phí tư vấn pháp lý" },
+  { value: "AGENCY_FEE", label: "Phí đại diện" },
+  { value: "OTHER", label: "Dịch vụ pháp lý khác" }
 ];
 
 export function InvoiceRequestSheet({
@@ -74,16 +74,16 @@ export function InvoiceRequestSheet({
     ReturnType<typeof getMatterInvoiceContext>
   > | null>(null);
 
-  // 表单状态
+  // Trạng thái form
   const [amount, setAmount] = useState<string>("");
-  // v0.42 项5：开票类型无默认值，必须主动选择一次
+  // v0.42 mục 5: loại hóa đơn không có giá trị mặc định, phải chủ động chọn một lần
   const [invoiceType, setInvoiceType] = useState<InvoiceType | null>(null);
   const [invoiceItem, setInvoiceItem] = useState<InvoiceItem>("LAWYER_FEE");
-  // v0.42 项3：开票抬头改下拉（本案客户）
+  // v0.42 mục 3: đơn vị mua đổi sang dropdown (khách của vụ án)
   const [buyerClientId, setBuyerClientId] = useState<string>("");
   const [buyerName, setBuyerName] = useState("");
   const [buyerTaxNo, setBuyerTaxNo] = useState("");
-  // v0.42 项4：专票购方六要素
+  // v0.42 mục 4: sáu yếu tố bên mua của hóa đơn GTGT
   const [buyerAddress, setBuyerAddress] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
   const [buyerBank, setBuyerBank] = useState("");
@@ -92,14 +92,14 @@ export function InvoiceRequestSheet({
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // 拉取案件上下文 + 重置表单
+  // Lấy ngữ cảnh vụ án + reset form
   useEffect(() => {
     if (!open) return;
     setCtxLoading(true);
     getMatterInvoiceContext(matterId)
       .then((data) => {
         setCtx(data);
-        // 只有一个客户时默认选中，多客户强制选择
+        // Chỉ một khách thì chọn mặc định, nhiều khách bắt buộc chọn
         if (data.clientOptions.length === 1) {
           const only = data.clientOptions[0];
           setBuyerClientId(only.id);
@@ -128,7 +128,7 @@ export function InvoiceRequestSheet({
     const c = ctx?.clientOptions.find((o) => o.id === id);
     if (c) {
       setBuyerName(c.name);
-      // 选中客户时预填税号（专票可直接复用，律师可改）
+      // Khi chọn khách thì điền sẵn mã số thuế (GTGT dùng lại được, luật sư có thể sửa)
       if (c.taxNo) setBuyerTaxNo(c.taxNo);
     }
   }
@@ -136,7 +136,7 @@ export function InvoiceRequestSheet({
   function handleFiles(list: FileList | null) {
     if (!list) return;
     const arr = Array.from(list).filter((f) => f.size <= 20 * 1024 * 1024);
-    if (arr.length < list.length) toast.warning("跳过了超过 20MB 的文件");
+    if (arr.length < list.length) toast.warning("Đã bỏ qua các tệp vượt quá 20MB");
     setEvidenceFiles((prev) => [...prev, ...arr]);
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -144,47 +144,47 @@ export function InvoiceRequestSheet({
   function submit() {
     const amt = Number(amount);
     if (!amt || amt <= 0) {
-      toast.warning("请填写金额");
+      toast.warning("Hãy điền số tiền");
       return;
     }
     if (!invoiceType) {
-      toast.warning("请选择开票类型");
+      toast.warning("Hãy chọn loại hóa đơn");
       return;
     }
     if (!buyerName.trim()) {
-      toast.warning("请选择开票抬头");
+      toast.warning("Hãy chọn đơn vị mua");
       return;
     }
     if (invoiceType === "SPECIAL") {
       if (!buyerTaxNo.trim()) {
-        toast.warning("增值税专用发票必须填写纳税人识别号");
+        toast.warning("Hóa đơn GTGT bắt buộc điền mã số thuế");
         return;
       }
       if (!buyerAddress.trim()) {
-        toast.warning("增值税专用发票必须填写购方地址");
+        toast.warning("Hóa đơn GTGT bắt buộc điền địa chỉ bên mua");
         return;
       }
       if (!buyerPhone.trim()) {
-        toast.warning("增值税专用发票必须填写购方电话");
+        toast.warning("Hóa đơn GTGT bắt buộc điền điện thoại bên mua");
         return;
       }
       if (!buyerBank.trim()) {
-        toast.warning("增值税专用发票必须填写开户银行");
+        toast.warning("Hóa đơn GTGT bắt buộc điền ngân hàng mở TK");
         return;
       }
       if (!buyerBankAccount.trim()) {
-        toast.warning("增值税专用发票必须填写银行账号");
+        toast.warning("Hóa đơn GTGT bắt buộc điền số tài khoản ngân hàng");
         return;
       }
     }
     if (evidenceFiles.length === 0) {
-      toast.warning("请上传开票依据（扫描版委托合同等）");
+      toast.warning("Hãy tải lên căn cứ xuất HĐ (bản scan hợp đồng ủy quyền...)");
       return;
     }
 
     startTransition(async () => {
       try {
-        // 1. 上传开票依据，拿到 docId
+        // 1. Tải lên căn cứ xuất HĐ, lấy docId
         const docIds: string[] = [];
         for (const file of evidenceFiles) {
           const fd = new FormData();
@@ -192,13 +192,13 @@ export function InvoiceRequestSheet({
           fd.set("name", file.name);
           fd.set("category", "OTHER");
           fd.set("encrypted", "true");
-          fd.set("tags", "开票依据");
+          fd.set("tags", "Căn cứ xuất HĐ");
           fd.set("file", file);
           const doc = await uploadDocument(fd);
           docIds.push(doc.id);
         }
 
-        // 2. 创建开票申请
+        // 2. Tạo yêu cầu xuất hóa đơn
         const isSpecial = invoiceType === "SPECIAL";
         await createInvoiceRequest({
           matterId,
@@ -215,10 +215,10 @@ export function InvoiceRequestSheet({
           requestNote
         });
 
-        toast.success("开票申请已提交");
+        toast.success("Đã gửi yêu cầu xuất hóa đơn");
         onOpenChange(false);
       } catch (err) {
-        toast.error("提交失败", {
+        toast.error("Gửi thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -233,21 +233,21 @@ export function InvoiceRequestSheet({
         <DialogHeader className="border-b border-border px-5 py-3">
           <DialogTitle className="flex items-center gap-2">
             <Receipt className="h-4 w-4 text-primary" />
-            申请开具发票
+            Yêu cầu xuất hóa đơn
           </DialogTitle>
           <DialogDescription className="text-xs">
             {ctxLoading
-              ? "加载案件信息..."
+              ? "Đang tải thông tin vụ án..."
               : ctx
-                ? `案件：${ctx.matterTitle}${ctx.intake ? "（已关联收案审批）" : ""}`
-                : "无法加载案件信息"}
+                ? `Vụ án: ${ctx.matterTitle}${ctx.intake ? " (đã liên kết duyệt tiếp nhận)" : ""}`
+                : "Không tải được thông tin vụ án"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
-          {/* v0.42 项5：金额 + 开票类型 同一行 */}
+          {/* v0.42 mục 5: số tiền + loại hóa đơn cùng một hàng */}
           <div className="grid grid-cols-2 gap-3">
-            <Field label="开票金额（元）" required>
+            <Field label="Số tiền yêu cầu xuất (VNĐ)" required>
               <Input
                 type="number"
                 step="0.01"
@@ -258,24 +258,24 @@ export function InvoiceRequestSheet({
                 onChange={(e) => setAmount(e.target.value)}
               />
             </Field>
-            <Field label="开票类型" required>
+            <Field label="Loại hóa đơn" required>
               <Select
                 value={invoiceType ?? undefined}
                 onValueChange={(v) => setInvoiceType(v as InvoiceType)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="请选择" />
+                  <SelectValue placeholder="Chọn" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PLAIN">普通发票</SelectItem>
-                  <SelectItem value="SPECIAL">增值税专用发票</SelectItem>
+                  <SelectItem value="PLAIN">Hóa đơn thường</SelectItem>
+                  <SelectItem value="SPECIAL">Hóa đơn GTGT</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
           </div>
 
-          {/* 开票名目 */}
-          <Field label="开票名目" required>
+          {/* Khoản mục */}
+          <Field label="Khoản mục" required>
             <RadioChips
               items={INVOICE_ITEM_OPTIONS}
               value={invoiceItem}
@@ -283,43 +283,43 @@ export function InvoiceRequestSheet({
             />
           </Field>
 
-          {/* v0.42 项3：客户抬头下拉（本案客户） */}
+          {/* v0.42 mục 3: dropdown khách hàng bên mua (khách của vụ án) */}
           <Field
-            label="开票抬头（客户）"
+            label="Đơn vị mua (khách hàng)"
             required
             hint={
               clientOptions.length === 0
-                ? "本案暂无关联客户，请先在案件当事人中登记客户"
-                : "选项为本案关联的客户"
+                ? "Vụ án chưa có khách hàng liên kết, hãy đăng ký khách ở mục các bên của vụ án"
+                : "Các tuỳ chọn là khách hàng liên kết của vụ án"
             }
           >
             {clientOptions.length > 0 ? (
               <Select value={buyerClientId} onValueChange={handlePickClient}>
                 <SelectTrigger>
-                  <SelectValue placeholder="请选择开票抬头" />
+                  <SelectValue placeholder="Chọn đơn vị mua" />
                 </SelectTrigger>
                 <SelectContent>
                   {clientOptions.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
-                      {c.isPrimary ? "（主要客户）" : ""}
+                      {c.isPrimary ? " (khách hàng chính)" : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             ) : (
               <Input
-                placeholder="如：上海某某科技有限公司 / 张三"
+                placeholder="vd: Công ty TNHH Moux-Shanghai / Nguyễn Văn A"
                 value={buyerName}
                 onChange={(e) => setBuyerName(e.target.value)}
               />
             )}
           </Field>
 
-          {/* 专票购方六要素（v0.42 项4，税法合规） */}
+          {/* Sáu yếu tố bên mua của HĐ GTGT (v0.42 mục 4, tuân thủ luật thuế) */}
           {invoiceType === "SPECIAL" && (
             <div className="space-y-3 rounded-md border border-primary/30 bg-primary/5 p-3">
-              <Field label="纳税人识别号（统一社会信用代码）" required>
+              <Field label="Mã số thuế (mã số doanh nghiệp)" required>
                 <Input
                   className="font-mono"
                   placeholder="91310000XXXXXXXXXX"
@@ -328,14 +328,14 @@ export function InvoiceRequestSheet({
                 />
               </Field>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="开户银行" required>
+                <Field label="Ngân hàng mở TK" required>
                   <Input
-                    placeholder="如：中国银行上海分行"
+                    placeholder="vd: Ngân hàng NN&PT Việt Nam - chi nhánh TP.HCM"
                     value={buyerBank}
                     onChange={(e) => setBuyerBank(e.target.value)}
                   />
                 </Field>
-                <Field label="银行账号" required>
+                <Field label="Số tài khoản ngân hàng" required>
                   <Input
                     className="font-mono"
                     placeholder="62XXXXXXXXXXXXXXXX"
@@ -345,14 +345,14 @@ export function InvoiceRequestSheet({
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="购方地址" required>
+                <Field label="Địa chỉ bên mua" required>
                   <Input
-                    placeholder="营业执照登记地址"
+                    placeholder="Địa chỉ đăng ký trên giấy phép kinh doanh"
                     value={buyerAddress}
                     onChange={(e) => setBuyerAddress(e.target.value)}
                   />
                 </Field>
-                <Field label="购方电话" required>
+                <Field label="Điện thoại bên mua" required>
                   <Input
                     className="font-mono"
                     placeholder="021-XXXXXXXX"
@@ -364,11 +364,11 @@ export function InvoiceRequestSheet({
             </div>
           )}
 
-          {/* 开票依据 */}
+          {/* Căn cứ xuất HĐ */}
           <Field
-            label="开票依据"
+            label="Căn cứ xuất HĐ"
             required
-            hint="正常情况下必须上传扫描版委托合同，支付凭证可选；特殊情况请提交情况说明，单文件 ≤ 20MB"
+            hint="Bình thường bắt buộc tải bản scan hợp đồng ủy quyền, chứng từ thanh toán tuỳ chọn; trường hợp đặc biệt hãy gửi bản giải trình, mỗi tệp ≤ 20MB"
             action={
               <Button
                 type="button"
@@ -378,7 +378,7 @@ export function InvoiceRequestSheet({
                 className="h-7 gap-1.5 px-2 text-[11px]"
               >
                 <Paperclip className="h-3.5 w-3.5" />
-                添加文件
+                Thêm tệp
               </Button>
             }
           >
@@ -393,7 +393,7 @@ export function InvoiceRequestSheet({
               />
               {evidenceFiles.length === 0 ? (
                 <p className="rounded-md border border-dashed border-border bg-background py-3 text-center text-xs text-muted-foreground">
-                  未选择任何文件
+                  Chưa chọn tệp nào
                 </p>
               ) : (
                 <ul className="space-y-1.5">
@@ -413,7 +413,7 @@ export function InvoiceRequestSheet({
                           setEvidenceFiles((c) => c.filter((_, j) => j !== i))
                         }
                         className="text-muted-foreground hover:text-destructive"
-                        aria-label="移除"
+                        aria-label="Xoá"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -424,11 +424,11 @@ export function InvoiceRequestSheet({
             </div>
           </Field>
 
-          {/* 申请备注 */}
-          <Field label="申请备注（可选）">
+          {/* Ghi chú yêu cầu */}
+          <Field label="Ghi chú yêu cầu (tuỳ chọn)">
             <Textarea
               rows={2}
-              placeholder="如：请尽快开具，客户催要"
+              placeholder="vd: xin xuất sớm, khách đang thúc"
               value={requestNote}
               onChange={(e) => setRequestNote(e.target.value)}
             />
@@ -442,11 +442,11 @@ export function InvoiceRequestSheet({
             onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={isPending || ctxLoading} className="gap-1.5">
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            提交申请
+            Gửi yêu cầu
           </Button>
         </DialogFooter>
       </DialogContent>

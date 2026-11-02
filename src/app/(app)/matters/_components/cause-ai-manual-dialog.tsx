@@ -44,15 +44,15 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   category: MatterCategory;
-  /** 用现有字段 tab 的预填内容（父组件按场景拼好） */
+  /** Nội dung điền sẵn cho tab dùng trường hiện có (component cha ghép theo tình huống) */
   contextHints?: string;
   onSelect: (causeId: string, causeName: string) => void;
 };
 
 const confidenceStyle = {
-  HIGH: { label: "高置信", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  MEDIUM: { label: "中置信", cls: "bg-amber-50 text-amber-700 border-amber-200" },
-  LOW: { label: "低置信", cls: "bg-slate-50 text-slate-600 border-slate-200" }
+  HIGH: { label: "Tin cậy cao", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  MEDIUM: { label: "Tin cậy trung bình", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+  LOW: { label: "Tin cậy thấp", cls: "bg-slate-50 text-slate-600 border-slate-200" }
 } as const;
 
 export function CauseAiManualDialog({
@@ -69,7 +69,7 @@ export function CauseAiManualDialog({
   const [candidates, setCandidates] = useState<CauseRecommendation[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // 打开/重开时重置
+  // Khi mở/mở lại thì reset
   useEffect(() => {
     if (!open) return;
     const initTab: Tab = hasHints ? "preset" : "free";
@@ -96,7 +96,7 @@ export function CauseAiManualDialog({
       const list = await recommendCause({ category, situation });
       setCandidates(list);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "AI 推荐失败");
+      setError(err instanceof Error ? err.message : "AI gợi ý thất bại");
     } finally {
       setLoading(false);
     }
@@ -108,22 +108,22 @@ export function CauseAiManualDialog({
         <DialogHeader className="border-b border-border px-5 py-3">
           <DialogTitle className="flex items-center gap-2 text-base">
             <Sparkles className="h-4 w-4 text-violet-500" />
-            AI 案由推荐
+            Gợi ý nguyên nhân bằng AI
           </DialogTitle>
           <DialogDescription className="text-xs">
-            描述案情后 AI 推荐 3 个候选案由，请人工核对后选用
+            Mô tả tình hình, AI gợi ý 3 nguyên nhân ứng viên, hãy đối chiếu thủ công rồi chọn
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 px-5 py-4">
-          {/* Tab 切换（仅有 hints 时显示） */}
+          {/* Chuyển Tab (chỉ hiện khi có hints) */}
           {hasHints && (
             <div className="flex rounded-md border border-border bg-card p-0.5">
               <TabBtn active={tab === "preset"} onClick={() => switchTab("preset")}>
-                用现有字段
+                Dùng trường hiện có
               </TabBtn>
               <TabBtn active={tab === "free"} onClick={() => switchTab("free")}>
-                自由输入
+                Tự do nhập
               </TabBtn>
             </div>
           )}
@@ -133,8 +133,8 @@ export function CauseAiManualDialog({
             onChange={(e) => setSituation(e.target.value)}
             placeholder={
               tab === "preset"
-                ? "已根据案件字段填入，可修改后再推荐"
-                : "描述案情：当事人是谁、做了什么、争议焦点、诉求"
+                ? "Đã điền theo trường của vụ án, có thể sửa rồi gợi ý lại"
+                : "Mô tả tình hình: ai là các bên, đã làm gì, tranh chấp ở đâu, yêu cầu gì"
             }
             rows={6}
             className="resize-none"
@@ -151,10 +151,10 @@ export function CauseAiManualDialog({
             ) : (
               <Sparkles className="h-4 w-4" />
             )}
-            {candidates.length > 0 ? "重新推荐" : "AI 推荐"}
+            {candidates.length > 0 ? "Gợi ý lại" : "Gợi ý bằng AI"}
           </Button>
 
-          {/* 结果区 */}
+          {/* Khu kết quả */}
           {error && (
             <div className="rounded border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
               {error}
@@ -202,7 +202,7 @@ export function CauseAiManualDialog({
         <DialogFooter className="border-t border-border px-5 py-2.5">
           <Button type="button" variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
             <X className="h-3.5 w-3.5" />
-            关闭
+            Đóng
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -20,12 +20,12 @@
 "use client";
 
 /**
- * v0.27: 由"编辑团队"扩展为"编辑案件"。
+ * v0.27: Mở rộng từ "sửa đội ngũ" thành "sửa vụ án".
  *
- * - 基本信息：title / 案由 / 标的额 / 我方地位（系统编号 + 收案日期 readonly）
- * - 团队：主办 / 协办 / 助理（沿用 v0.22 实现）
+ * - Thông tin cơ bản: title / nguyên nhân / giá trị tranh chấp / lập trường phía ta (mã hệ thống + ngày tiếp nhận readonly)
+ * - Đội ngũ: chủ trì / cộng tác / trợ lý (tiếp tục dùng hiện thực v0.22)
  *
- * 保存时按需触发两个 server action（基本信息 + 团队）。
+ * Khi lưu sẽ kích hoạt hai server action theo nhu cầu (thông tin cơ bản + đội ngũ).
  */
 import { useState, useTransition, useEffect } from "react";
 import { toast } from "sonner";
@@ -97,7 +97,7 @@ export function TeamEditorDialog({
   currentMembers,
   userOptions
 }: Props) {
-  // 基本信息字段
+  // Trường thông tin cơ bản
   const [title, setTitle] = useState(matterMeta.title);
   const [causeId, setCauseId] = useState<string>(matterMeta.causeId ?? "");
   const [causeFreeText, setCauseFreeText] = useState(matterMeta.causeFreeText ?? "");
@@ -108,7 +108,7 @@ export function TeamEditorDialog({
     matterMeta.ourStanding ?? ""
   );
 
-  // 团队字段
+  // Trường đội ngũ
   const [ownerId, setOwnerId] = useState(currentOwnerId);
   const [coLeads, setCoLeads] = useState<string[]>(
     currentMembers.filter((m) => m.role === "CO_LEAD").map((m) => m.userId)
@@ -141,18 +141,18 @@ export function TeamEditorDialog({
   function handleSave() {
     startTransition(async () => {
       try {
-        // 基本信息：title 必填，其他可空
+        // Thông tin cơ bản: title bắt buộc, các trường khác có thể rỗng
         if (!title.trim()) {
-          toast.error("案件名称不能为空");
+          toast.error("Tên vụ án không được rỗng");
           return;
         }
         const parsedAmount = claimAmount.trim() === "" ? null : Number(claimAmount);
         if (parsedAmount !== null && (isNaN(parsedAmount) || parsedAmount < 0)) {
-          toast.error("标的额格式有误");
+          toast.error("Định dạng giá trị tranh chấp không đúng");
           return;
         }
 
-        // 串行：先基本信息，再团队（避免一个失败时已部分写入）
+        // Nối tiếp: trước thông tin cơ bản, rồi đội ngũ (tránh ghi một phần khi một thao tác lỗi)
         await updateMatterBasicInfo({
           id: matterId,
           title,
@@ -169,10 +169,10 @@ export function TeamEditorDialog({
           assistantIds: assistants
         });
 
-        toast.success("案件信息已更新");
+        toast.success("Đã cập nhật thông tin vụ án");
         onOpenChange(false);
       } catch (err) {
-        toast.error("更新失败", {
+        toast.error("Cập nhật thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -183,45 +183,45 @@ export function TeamEditorDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>编辑案件</DialogTitle>
+          <DialogTitle>Sửa vụ án</DialogTitle>
           <DialogDescription className="text-xs">
-            系统编号、收案日期、类别不可修改；其他字段由当前主办律师维护。
+            Mã hệ thống, ngày tiếp nhận, loại không sửa được; các trường khác do luật sư chủ trì hiện tại duy trì.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 py-2">
-          {/* readonly 行 */}
+          {/* Hàng readonly */}
           <section className="grid grid-cols-3 gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-xs">
             <div>
-              <div className="text-[10px] text-muted-foreground">系统编号</div>
+              <div className="text-[10px] text-muted-foreground">Mã hệ thống</div>
               <div className="font-mono">{matterMeta.internalCode}</div>
             </div>
             <div>
-              <div className="text-[10px] text-muted-foreground">收案日</div>
+              <div className="text-[10px] text-muted-foreground">Ngày tiếp nhận</div>
               <div>{matterMeta.intakeDate ? formatDate(matterMeta.intakeDate) : "—"}</div>
             </div>
             <div>
-              <div className="text-[10px] text-muted-foreground">类别</div>
+              <div className="text-[10px] text-muted-foreground">Loại</div>
               <div>{matterCategoryLabel[matterMeta.category]}</div>
             </div>
           </section>
 
-          {/* 基本信息 */}
+          {/* Thông tin cơ bản */}
           <section className="space-y-3">
-            <h3 className="text-xs font-medium text-muted-foreground">基本信息</h3>
+            <h3 className="text-xs font-medium text-muted-foreground">Thông tin cơ bản</h3>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">案件名称</Label>
+              <Label className="text-xs">Tên vụ án</Label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="案件名称（保存时自动去除空格）"
+                placeholder="Tên vụ án (khi lưu tự xoá khoảng trắng)"
               />
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label className="text-xs">案由</Label>
+                <Label className="text-xs">Nguyên nhân</Label>
                 <CauseCombobox
                   category={matterMeta.category}
                   value={causeId}
@@ -229,7 +229,7 @@ export function TeamEditorDialog({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">自由文本案由（不在标准库时填）</Label>
+                <Label className="text-xs">Nguyên nhân text tự do (điền khi không có trong kho chuẩn)</Label>
                 <Input
                   value={causeFreeText}
                   onChange={(e) => setCauseFreeText(e.target.value)}
@@ -239,25 +239,25 @@ export function TeamEditorDialog({
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label className="text-xs">标的额（元）</Label>
+                <Label className="text-xs">Giá trị tranh chấp (VNĐ)</Label>
                 <Input
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   value={claimAmount}
                   onChange={(e) => setClaimAmount(e.target.value)}
-                  placeholder="非金钱标的留空"
+                  placeholder="Giá trị không phải tiền thì để trống"
                   className="font-mono"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">我方诉讼地位</Label>
+                <Label className="text-xs">Lập trường tố tụng phía ta</Label>
                 <Select
                   value={ourStanding || ""}
                   onValueChange={(v) => setOurStanding(v as LitigationStanding | "")}
                 >
                   <SelectTrigger className="h-10 bg-background">
-                    <SelectValue placeholder="选择地位" />
+                    <SelectValue placeholder="Chọn lập trường" />
                   </SelectTrigger>
                   <SelectContent>
                     {availableStandings.map((s) => (
@@ -271,12 +271,12 @@ export function TeamEditorDialog({
             </div>
           </section>
 
-          {/* 团队 */}
+          {/* Đội ngũ */}
           <section className="space-y-3 border-t border-border pt-4">
-            <h3 className="text-xs font-medium text-muted-foreground">承办团队</h3>
+            <h3 className="text-xs font-medium text-muted-foreground">Đội ngũ đảm nhận</h3>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">主办律师</Label>
+              <Label className="text-xs">Luật sư chủ trì</Label>
               <Select value={ownerId} onValueChange={setOwnerId}>
                 <SelectTrigger className="h-10 bg-background">
                   <SelectValue />
@@ -292,7 +292,7 @@ export function TeamEditorDialog({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">协办律师（可多选）</Label>
+              <Label className="text-xs">Luật sư cộng tác (chọn nhiều)</Label>
               <div className="grid grid-cols-1 gap-2 rounded-lg border border-border bg-background p-3 sm:grid-cols-2">
                 {userOptions
                   .filter((u) => u.id !== ownerId)
@@ -312,7 +312,7 @@ export function TeamEditorDialog({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">助理（可多选）</Label>
+              <Label className="text-xs">Trợ lý (chọn nhiều)</Label>
               <div className="grid grid-cols-1 gap-2 rounded-lg border border-border bg-background p-3 sm:grid-cols-2">
                 {userOptions
                   .filter((u) => u.id !== ownerId && !coLeads.includes(u.id))
@@ -335,11 +335,11 @@ export function TeamEditorDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={handleSave} disabled={isPending}>
             {isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
-            保存
+            Lưu
           </Button>
         </DialogFooter>
       </DialogContent>

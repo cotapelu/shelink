@@ -59,12 +59,12 @@ import type { NotePayload } from "./matter-detail-tabs";
 import { cn } from "@/lib/utils";
 
 const channelMeta = {
-  PHONE: { icon: Phone, label: "电话", color: "#4ADE80" },
-  WECHAT: { icon: MessageCircle, label: "微信", color: "#4FD1C5" },
-  EMAIL: { icon: Mail, label: "邮件", color: "#5B8DEF" },
-  MEETING: { icon: Users, label: "面谈", color: "#9B7BF7" },
-  COURT: { icon: Gavel, label: "法院", color: "#FBBF24" },
-  OTHER: { icon: MessageSquare, label: "其他", color: "#9BA8C7" }
+  PHONE: { icon: Phone, label: "Điện thoại", color: "#4ADE80" },
+  WECHAT: { icon: MessageCircle, label: "Zalo/chat", color: "#4FD1C5" },
+  EMAIL: { icon: Mail, label: "Email", color: "#5B8DEF" },
+  MEETING: { icon: Users, label: "Gặp trực tiếp", color: "#9B7BF7" },
+  COURT: { icon: Gavel, label: "Toà án", color: "#FBBF24" },
+  OTHER: { icon: MessageSquare, label: "Khác", color: "#9BA8C7" }
 } as const;
 
 const formSchema = z.object({
@@ -72,7 +72,7 @@ const formSchema = z.object({
   channel: z.enum(["PHONE", "WECHAT", "EMAIL", "MEETING", "COURT", "OTHER"]),
   withWhom: z.string().max(80).optional().or(z.literal("")),
   occurredAt: z.coerce.date(),
-  content: z.string().min(1, "内容不能为空").max(5000)
+  content: z.string().min(1, "Nội dung không được rỗng").max(5000)
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -88,13 +88,13 @@ export function NotesPanel({
   const [isPending, startTransition] = useTransition();
 
   function handleDelete(id: string) {
-    if (!confirm("删除这条沟通记录？")) return;
+    if (!confirm("Xoá bản ghi giao tiếp này?")) return;
     startTransition(async () => {
       try {
         await deleteNote(id);
-        toast.success("已删除");
+        toast.success("Đã xoá");
       } catch (err) {
-        toast.error("删除失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Xoá thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -103,7 +103,7 @@ export function NotesPanel({
     <div className="space-y-4">
       <header className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          按时间倒序展示。每条记录会进入审计日志。
+          Hiển thị theo thời gian giảm dần. Mỗi bản ghi sẽ vào log audit.
         </p>
         <Button
           onClick={() => setSheetOpen(true)}
@@ -111,14 +111,14 @@ export function NotesPanel({
           className="gap-1.5 "
         >
           <Plus className="h-4 w-4" />
-          录入沟通
+          Ghi nhận giao tiếp
         </Button>
       </header>
 
       {notes.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-card py-16 text-center">
           <p className="text-sm text-muted-foreground">
-            还没有沟通记录。点击 <span className="text-foreground">录入沟通</span> 开始
+            Chưa có bản ghi giao tiếp. Bấm <span className="text-foreground">Ghi nhận giao tiếp</span> để bắt đầu
           </p>
         </div>
       ) : (
@@ -149,7 +149,7 @@ export function NotesPanel({
                       </Badge>
                       {n.withWhom && (
                         <span className="text-xs text-muted-foreground">
-                          与 <span className="text-foreground">{n.withWhom}</span>
+                          Với <span className="text-foreground">{n.withWhom}</span>
                         </span>
                       )}
                       <span className="font-mono text-xs text-muted-foreground tabular">
@@ -181,7 +181,7 @@ export function NotesPanel({
                     onClick={() => handleDelete(n.id)}
                     disabled={isPending}
                     className="opacity-0 transition-opacity group-hover:opacity-100"
-                    aria-label="删除"
+                    aria-label="Xoá"
                   >
                     <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
                   </button>
@@ -231,7 +231,7 @@ function NoteSheet({
     startTransition(async () => {
       try {
         await createNote({ ...values, tags: [] });
-        toast.success("沟通记录已保存");
+        toast.success("Đã lưu bản ghi giao tiếp");
         reset({
           matterId,
           channel: "PHONE",
@@ -241,7 +241,7 @@ function NoteSheet({
         });
         onOpenChange(false);
       } catch (err) {
-        toast.error("保存失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Lưu thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -250,13 +250,13 @@ function NoteSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="flex w-full max-w-md flex-col gap-0 p-0">
         <SheetHeader className="border-b border-border bg-background px-6 py-4">
-          <SheetTitle>录入沟通</SheetTitle>
+          <SheetTitle>Ghi nhận giao tiếp</SheetTitle>
         </SheetHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col">
           <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
             <div className="space-y-2">
-              <Label className="text-xs">沟通渠道</Label>
+              <Label className="text-xs">Kênh giao tiếp</Label>
               <div className="grid grid-cols-3 gap-1.5">
                 {(["PHONE", "WECHAT", "EMAIL", "MEETING", "COURT", "OTHER"] as const).map(
                   (c) => {
@@ -284,12 +284,12 @@ function NoteSheet({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">沟通对象</Label>
-              <Input placeholder="如 张三 / 主审法官" {...register("withWhom")} />
+              <Label className="text-xs">Đối tượng giao tiếp</Label>
+              <Input placeholder="vd Nguyễn Văn A / thẩm phán chủ tọa" {...register("withWhom")} />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">时间</Label>
+              <Label className="text-xs">Thời gian</Label>
               <Input
                 type="datetime-local"
                 {...register("occurredAt", { valueAsDate: true })}
@@ -298,11 +298,11 @@ function NoteSheet({
 
             <div className="space-y-1.5">
               <Label className="text-xs">
-                内容 <span className="text-destructive">*</span>
+                Nội dung <span className="text-destructive">*</span>
               </Label>
               <Textarea
                 rows={8}
-                placeholder="简要记录沟通内容、对方意见、约定事项等"
+                placeholder="Ghi tóm tắt nội dung giao tiếp, ý kiến bên đối phương, các việc đã thoả thuận..."
                 {...register("content")}
               />
               {errors.content && (
@@ -318,11 +318,11 @@ function NoteSheet({
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              取消
+              Huỷ
             </Button>
             <Button type="submit" disabled={isPending} className="gap-1.5">
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              保存
+              Lưu
             </Button>
           </SheetFooter>
         </form>
@@ -331,5 +331,5 @@ function NoteSheet({
   );
 }
 
-// 兜底 select component (unused but referenced through interface)
+// Component select dự phòng (không dùng nhưng được tham chiếu qua interface)
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue };

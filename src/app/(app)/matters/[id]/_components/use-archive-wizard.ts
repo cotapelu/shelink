@@ -14,13 +14,13 @@ interface UseArchiveWizardProps {
   matterId: string;
 }
 
-const ARCHIVE_DONE_DESC = "卷宗封皮 + 目录已自动生成至归档卷宗";
+const ARCHIVE_DONE_DESC = "Bìa hồ sơ + mục lục đã tự sinh vào hồ sơ lưu trữ";
 
 /** Thông báo theo kết quả lưu trữ (thuần). */
 function archiveResultMessage(result: { status: string; archiveNo: string }): string {
   return result.status === "APPROVED"
-    ? `案件已归档（${result.archiveNo}）`
-    : `归档申请已提交（${result.archiveNo}），等待管理员审批`;
+    ? `Vụ án đã lưu trữ (${result.archiveNo})`
+    : `Đã gửi yêu cầu lưu trữ (${result.archiveNo}), chờ quản trị viên duyệt`;
 }
 
 /** Gọi archiveMatter + thông báo kết quả (tách khỏi hook — AUTO-55). */
@@ -45,7 +45,7 @@ async function runArchiveSubmit(args: {
     });
     toast.success(archiveResultMessage(result), { description: ARCHIVE_DONE_DESC });
   } catch (err) {
-    toast.error("归档失败", { description: err instanceof Error ? err.message : "" });
+    toast.error("Lưu trữ thất bại", { description: err instanceof Error ? err.message : "" });
   }
 }
 
@@ -79,12 +79,12 @@ export function useArchiveWizard({ matterId }: UseArchiveWizardProps) {
 
   const handleSubmit = useCallback(() => {
     if (!summary.trim()) {
-      toast.warning("请填写结案小结");
+      toast.warning("Hãy nhập tóm tắt kết thúc");
       return;
     }
     if (missingRequired.length > 0 && !forceWithMissing) {
-      toast.warning(`仍有 ${missingRequired.length} 项必交材料未勾选`, {
-        description: "如确实无法补齐，请勾选下方的'强制归档（缺项记录在档）'"
+      toast.warning(`Còn ${missingRequired.length} tài liệu bắt buộc chưa tích`, {
+        description: "Nếu thực sự không bù được, hãy tích 'lưu trữ cưỡng chế (ghi lại hạng mục thiếu trong hồ sơ)' bên dưới"
       });
       return;
     }

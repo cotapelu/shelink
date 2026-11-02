@@ -80,7 +80,7 @@ export function MattersTable({
       <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-card py-20 text-center">
         <div className="text-base text-muted-foreground">Không có vụ án phù hợp</div>
         <div className="text-xs text-muted-foreground/70">
-          点击右上角 <span className="text-foreground/80">Tạo vụ án mới</span> 开始
+          Bấm <span className="text-foreground/80">Tạo vụ án mới</span> ở góc phải để bắt đầu
         </div>
       </div>
     );
@@ -128,7 +128,7 @@ const MATTER_STATUS_DOT: Record<MatterRow["status"], string> = {
   ARCHIVED: "#8b5cf6"
 };
 
-// 通用卡片：供 MattersTable + IntakesTable 共用
+// Thẻ dùng chung: cho MattersTable + IntakesTable dùng chung
 export function CaseListCard({
   href,
   title,

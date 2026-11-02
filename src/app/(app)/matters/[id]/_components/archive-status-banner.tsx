@@ -60,7 +60,7 @@ export function ArchiveStatusBanner({ record, onReArchive }: Props) {
       <div className="flex-1 space-y-1">
         <div className="flex items-center gap-2">
           <span className={cn("text-sm font-medium", isRejected ? "text-destructive" : "text-[#9B7BF7]")}>
-            {isRejected ? "归档申请被驳回" : "归档申请审批中"}
+            {isRejected ? "Yêu cầu lưu trữ bị từ chối" : "Yêu cầu lưu trữ đang duyệt"}
           </span>
           <Badge
             variant="outline"
@@ -77,13 +77,13 @@ export function ArchiveStatusBanner({ record, onReArchive }: Props) {
         <div className="text-xs text-muted-foreground">
           {isRejected
             ? record.reviewNote
-              ? `驳回原因：${record.reviewNote}`
-              : "管理员未填写驳回原因"
-            : "归档申请已提交，请等待管理员审批。审批通过后案件将转为只读。"}
+              ? `Lý do từ chối: ${record.reviewNote}`
+              : "Quản trị viên chưa ghi lý do từ chối"
+            : "Đã gửi yêu cầu lưu trữ, hãy chờ quản trị viên duyệt. Duyệt xong vụ án sẽ chuyển sang chỉ đọc."}
         </div>
         {isRejected && record.missingItems.length > 0 && (
           <div className="text-[11px] text-muted-foreground">
-            上次缺项：{record.missingItems.join("、")}
+            Hạng mục thiếu lần trước: {record.missingItems.join(", ")}
           </div>
         )}
       </div>
@@ -94,7 +94,7 @@ export function ArchiveStatusBanner({ record, onReArchive }: Props) {
           className="mt-0.5 inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs hover:bg-muted/80"
         >
           <Archive className="h-3 w-3" />
-          重新归档
+          Lưu trữ lại
         </button>
       )}
     </div>
