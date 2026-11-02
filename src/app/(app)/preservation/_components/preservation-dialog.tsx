@@ -29,12 +29,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  createPreservationCase,
-  addTarget,
-  addProperty,
-  renewProperty,
-} from "@/server/preservations/actions-v2";
+import { createPreservationCase } from "@/server/preservations/preservation-case-actions";
+import { addTarget, addProperty, renewProperty } from "@/server/preservations/preservation-property-actions";
 import { PRES_TYPE_CN, PROPERTY_TYPE_CN, type PreservationCaseRow, type MatterOption, type UserOption } from "./preservation-types";
 import { PRESERVATION_DURATION_DAYS } from "@/lib/preservation-defaults";
 

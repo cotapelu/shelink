@@ -22,7 +22,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getMatterById } from "@/server/matters/actions";
 import { getMatterFinance } from "@/server/finance/actions";
-import { listPreservationCases } from "@/server/preservations/actions-v2";
+import { listPreservationCases } from "@/server/preservations/preservation-case-actions";
 import { listActiveColleagues } from "@/server/users/actions";
 import { getLatestArchiveRecord } from "@/server/archive/actions";
 import { getMatterReviewSummary } from "@/server/ai/matter-review-summary";

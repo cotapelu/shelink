@@ -17,7 +17,7 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
-import { listPreservationCases } from "@/server/preservations/actions-v2";
+import { listPreservationCases } from "@/server/preservations/preservation-case-actions";
 import { listActiveColleagues } from "@/server/users/actions";
 import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";

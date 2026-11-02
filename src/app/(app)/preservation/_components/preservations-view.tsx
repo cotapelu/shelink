@@ -32,7 +32,7 @@ import { Input } from "@/components/ui/input";
 import { RadioChips } from "@/components/ui/radio-chips";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/utils";
-import { deletePreservationCase } from "@/server/preservations/actions-v2";
+import { deletePreservationCase } from "@/server/preservations/preservation-case-actions";
 import {
   PreservationCaseDialog,
   AddTargetDialog,
@@ -229,7 +229,7 @@ function CaseCard({ caseData: cs, expanded, onToggle, matters, users }: { caseDa
                         {(prop.status === "ACTIVE" || prop.status === "RENEWED") && (
                           <>
                             <button type="button" onClick={() => setRenewPropOpen(prop.id)} className="shrink-0 text-[10px] text-primary hover:underline">Gia hạn</button>
-                            <button type="button" onClick={() => { startTransition(async () => { try { const { liftProperty } = await import("@/server/preservations/actions-v2"); await liftProperty(prop.id); toast.success("Đã gỡ bỏ"); } catch { toast.error("Thao tác thất bại"); } }); }} className="shrink-0 text-[10px] text-muted-foreground hover:text-foreground">Gỡ bỏ</button>
+                            <button type="button" onClick={() => { startTransition(async () => { try { const { liftProperty } = await import("@/server/preservations/preservation-property-actions"); await liftProperty(prop.id); toast.success("Đã gỡ bỏ"); } catch { toast.error("Thao tác thất bại"); } }); }} className="shrink-0 text-[10px] text-muted-foreground hover:text-foreground">Gỡ bỏ</button>
                           </>
                         )}
                       </div>

@@ -26,7 +26,8 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { cn, formatCurrency } from "@/lib/utils";
-import { deletePreservationCase, liftProperty } from "@/server/preservations/actions-v2";
+import { deletePreservationCase } from "@/server/preservations/preservation-case-actions";
+import { liftProperty } from "@/server/preservations/preservation-property-actions";
 import {
   PreservationCaseDialog,
   AddTargetDialog,
