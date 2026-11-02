@@ -460,3 +460,16 @@ Loại: I18N (de-zh) + chuẩn hoá VND/vi-VN + sửa test đồng bộ. Không 
 **Bẫy ghi nhận** (PROFILE): (1) block comment có dòng trống bị grep ẩn → nhiều cặm thay trượt; (2) thay chuỗi ngắn trước dài tạo chuỗi lai (`hồ sơ对应文档`, `Thêm加被保全人`) — luôn kiểm leftover; (3) **STATE_TONE suýt dịch key** (key = contract API) — đã khôi phục + ghi chú; (4) test co-located ngoài `src/tests` — phải chạy `npm test` đầy đủ ở cổng cuối.
 
 **Tiếp theo (GĐ sau)**: quyết định của chủ sở hữn cho các cụm 🔴 ở glossary (dịch văn bản pháp lý, dữ liệu VN thay Trung, bỏ/giữ tools luật TQ, xoá mock-data); hoặc chuyển sang task roadmap TODO.md (TD-H1 tách vertical plugin, TD-H2 onboarding wizard).
+
+## [CYCLE-AUTO-67b] — 2026-11-01: [R/T] export-xlsx.ts (1192 dòng, 13 lỗi) → 9 module + 33 test ✅
+
+Loại: Refactor [R] + Tests [T]. Không đổi hành vi (test cũ 33/33 xanh suốt quá trình).
+
+**Đã hoàn thành**:
+- [x] Tách `src/server/matters/export-xlsx.ts` (1192 dòng) thành: `matters-export-labels.ts` (nhãn/hằng), `matters-export-includes.ts` (Prisma include + row type), `matters-export-formatters.ts` (định dạng + trang hoá sheet), `matters-export-params.ts` (resolve params/where/order/sort), `matters-export-columns.ts` + `matters-export-rows-{format,intake,matter}.ts`; file gốc chỉ giữ IO (Prisma + ExcelJS), **219 dòng**.
+- [x] Cắt hàm lớn: `matterColumnsForKind` (139) → const cấp module + selector; `intakeColumnsForKind` (67) → tương tự; `buildIntakeRow` (49, cx35) → 5 section builder; `resolveMattersExportParams` (27) → parse helpers; `buildMatterWhere`/`buildIntakeWhere` (31-32) → searchOr/dateRange helpers; `sortMatterRows` arrow cx11 → `emptyLastCompare`/`compareSortValues`.
+- [x] **Bài học áp dụng**: mảng literal dài hạ const cấp module (AUTO-57); tách bằng script slice theo line-range + regex (tránh chép tay); kiểm tra export type trước khi import (TS2459 lặp 6 lần).
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test **2401 pass / 1 skip / 0 fail** (2368→2401, **+33**); lint **883 (731 lỗi / 152 warning)** — **-13 lỗi**, warnings về đúng baseline 152; dev :3000 `/login` 200.
+
+**Còn lại trong module matters** (nợ có sản từ HEAD, chưu đụng): `actions-link.ts` (3 lỗi), `helpers.ts` (2), `lifecycle.ts` (3).
