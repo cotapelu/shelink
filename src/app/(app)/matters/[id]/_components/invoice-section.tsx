@@ -35,10 +35,7 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
-import {
-  createInvoiceRequest,
-  listInvoiceRequestsByMatter
-} from "@/server/invoices/actions";
+import { createInvoiceRequest, listInvoiceRequestsByMatter } from "@/server/invoices/invoice-request-actions";
 import {
   invoiceRequestStatusLabel,
   invoiceRequestStatusColor

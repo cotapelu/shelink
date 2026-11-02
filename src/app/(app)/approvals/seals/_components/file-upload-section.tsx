@@ -22,7 +22,6 @@
 import { Paperclip, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 
 interface FileUploadSectionProps {
   file: File | null;

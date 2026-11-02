@@ -52,10 +52,7 @@ import {
   invoiceRequestStatusColor
 } from "@/lib/enums";
 import { formatCurrency, cn } from "@/lib/utils";
-import {
-  approveInvoiceRequest,
-  rejectInvoiceRequest
-} from "@/server/invoices/actions";
+import { approveInvoiceRequest, rejectInvoiceRequest } from "@/server/invoices/invoice-approval-actions";
 import { recognizeInvoiceFromImage, type RecognizedInvoice } from "@/server/ai/actions";
 import type { InvoiceRequestRow } from "./finance-view";
 

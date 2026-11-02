@@ -24,7 +24,8 @@ import {
   getPersonalRevenue,
   getReceivablesAging
 } from "@/server/finance/actions";
-import { listInvoiceRequests, getInvoiceStats } from "@/server/invoices/actions";
+import { listInvoiceRequests } from "@/server/invoices/invoice-request-actions";
+import { getInvoiceStats } from "@/server/invoices/invoice-approval-actions";
 import { FinanceView } from "./_components/finance-view";
 
 export default async function FinancePage() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronsUpDown, X } from "lucide-react";
+import { ChevronsUpDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { MatterOption } from "./matter-combobox";

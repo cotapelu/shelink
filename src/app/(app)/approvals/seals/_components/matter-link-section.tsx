@@ -1,6 +1,5 @@
 "use client";
 
-import { Link2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { MatterCombobox } from "./matter-combobox";
 import type { MatterOption } from "./seal-types";
