@@ -2,7 +2,7 @@
 
 import { useRef, useState, useCallback } from "react";
 import { toast } from "sonner";
-import { uploadDocument } from "@/server/documents/actions";
+import { uploadDocument } from "@/server/documents/document-upload";
 import type { ArchiveChecklistItem } from "@/lib/archive/checklists";
 import { buildArchiveUploadFormData } from "./archive-wizard-helpers";
 

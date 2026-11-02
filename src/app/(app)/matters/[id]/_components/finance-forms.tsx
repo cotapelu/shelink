@@ -57,7 +57,7 @@ import {
   createFeeEntry,
   setCommissionPlan
 } from "@/server/finance/billing-actions";
-import { uploadDocument } from "@/server/documents/actions";
+import { uploadDocument } from "@/server/documents/document-upload";
 import { recognizeInvoiceFromImage, type RecognizedInvoice } from "@/server/ai/actions";
 import { userRoleLabel } from "@/lib/enums";
 

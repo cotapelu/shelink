@@ -87,7 +87,7 @@ import {
 } from "@/lib/procedures-by-category";
 import { intakeCreateSchema, type IntakeCreateInput } from "@/server/intakes/schemas";
 import { createIntake } from "@/server/intakes/actions";
-import { uploadDocument } from "@/server/documents/actions";
+import { uploadDocument } from "@/server/documents/document-upload";
 import { parsePleading } from "@/server/ai/parse-pleading";
 
 import {

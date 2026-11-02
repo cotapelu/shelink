@@ -57,7 +57,7 @@ import {
   SheetDescription,
   SheetFooter
 } from "@/components/ui/sheet";
-import { uploadDocument, deleteDocument } from "@/server/documents/actions";
+import { uploadDocument, deleteDocument } from "@/server/documents/document-upload";
 import { cn } from "@/lib/utils";
 import { DocumentReviewDialog } from "./document-review-dialog";
 

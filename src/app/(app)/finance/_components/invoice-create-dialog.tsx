@@ -48,7 +48,7 @@ import {
   getMatterInvoiceContext,
   searchMattersForInvoice
 } from "@/server/finance/actions";
-import { uploadDocument } from "@/server/documents/actions";
+import { uploadDocument } from "@/server/documents/document-upload";
 import { cn } from "@/lib/utils";
 
 type InvoiceType = "PLAIN" | "SPECIAL";

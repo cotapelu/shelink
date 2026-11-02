@@ -57,7 +57,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { uploadDocument, deleteDocument } from "@/server/documents/actions";
+import { uploadDocument, deleteDocument } from "@/server/documents/document-upload";
 import { canPreview, officePreviewKind } from "@/lib/storage/mime-ext";
 import { cn, formatDate } from "@/lib/utils";
 import { litigationStandingLabel } from "@/lib/enums";

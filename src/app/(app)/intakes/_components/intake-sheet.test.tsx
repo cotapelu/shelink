@@ -46,7 +46,7 @@ vi.mock("@/server/intakes/actions", () => ({
   createIntake: vi.fn(),
 }));
 
-vi.mock("@/server/documents/actions", () => ({
+vi.mock("@/server/documents/document-upload", () => ({
   uploadDocument: vi.fn(),
 }));
 
