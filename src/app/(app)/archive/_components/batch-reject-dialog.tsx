@@ -68,11 +68,11 @@ function BatchStats({ succeeded, failed }: { succeeded: number; failed: number }
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
       <div className="rounded border border-emerald-500/40 bg-emerald-500/10 px-3 py-2">
-        <div className="text-[10px] text-emerald-700">成功</div>
+        <div className="text-[10px] text-emerald-700">Thành công</div>
         <div className="mt-0.5 font-mono text-lg text-emerald-700">{succeeded}</div>
       </div>
       <div className={`rounded border px-3 py-2 ${failed>0?"border-destructive/40 bg-destructive/10":"border-border bg-muted/30"}`}>
-        <div className={`text-[10px] ${failed>0?"text-destructive":"text-muted-foreground"}`}>失败</div>
+        <div className={`text-[10px] ${failed>0?"text-destructive":"text-muted-foreground"}`}>Thất bại</div>
         <div className={`mt-0.5 font-mono text-lg ${failed>0?"text-destructive":"text-muted-foreground"}`}>{failed}</div>
       </div>
     </div>
@@ -82,7 +82,7 @@ function BatchStats({ succeeded, failed }: { succeeded: number; failed: number }
 function FailedList({ failed, recordById }: { failed: {id:string,error:string}[]; recordById: Map<string,PendingRecord> }) {
   return (
     <div className="rounded border border-border bg-card">
-      <div className="border-b border-border px-2 py-1.5 text-[10px] text-muted-foreground">失败条目</div>
+      <div className="border-b border-border px-2 py-1.5 text-[10px] text-muted-foreground">Mục thất bại</div>
       <ul className="max-h-40 divide-y divide-border overflow-y-auto">
         {failed.map((f) => {
           const rec = recordById.get(f.id);
@@ -110,7 +110,7 @@ export function BatchResultPanel({ result, recordById }: { result: BatchResult; 
 function RecordList({ records }: { records: PendingRecord[] }) {
   return (
     <div className="rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs">
-      <div className="text-muted-foreground mb-1">本次驳回：</div>
+      <div className="text-muted-foreground mb-1">Từ chối lần này:</div>
       <div className="space-y-0.5 max-h-32 overflow-y-auto">
         {records.map((r) => (
           <div key={r.id} className="font-mono text-[#9B7BF7]">
@@ -127,12 +127,12 @@ function RejectNoteInput({ note, setNote }: { note: string; setNote: (v:string)=
   return (
     <div className="space-y-1.5">
       <Label className="text-xs">
-        统一驳回原因 <span className="text-destructive">*</span>
+        Lý do từ chối chung <span className="text-destructive">*</span>
       </Label>
       <Textarea
         value={note}
         onChange={(e)=>setNote(e.target.value)}
-        placeholder="如：本批结案小结普遍过于简略，请补充裁判要旨与办案心得后重新提交"
+        placeholder="vd: tóm tắt kết thúc của lô này nhìn chung quá sơ sài, hãy bù yếu tố then chốt của bản án và kinh nghiệm xử lý rồi gửi lại"
         rows={4}
       />
     </div>
@@ -142,11 +142,11 @@ function RejectNoteInput({ note, setNote }: { note: string; setNote: (v:string)=
 function BatchDialogFooter({ result, isPending, onClose, onSubmit }: { result: BatchResult; isPending: boolean; onClose: (v:boolean)=>void; onSubmit: (ids?:string[])=>void }) {
   return (
     <DialogFooter>
-      <Button variant="outline" onClick={()=>onClose(true)}>完成</Button>
+      <Button variant="outline" onClick={()=>onClose(true)}>Hoàn tất</Button>
       {result.failed.length>0 && (
         <Button variant="destructive" onClick={()=>onSubmit(result.failed.map(f=>f.id))} disabled={isPending}>
           {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-          重试失败的 {result.failed.length} 条
+          Thử lại {result.failed.length} mục thất bại
         </Button>
       )}
     </DialogFooter>
@@ -159,10 +159,10 @@ function BatchRejectForm({ records, note, setNote, onCancel, onSubmit, isPending
       <RecordList records={records} />
       <RejectNoteInput note={note} setNote={setNote} />
       <DialogFooter>
-        <Button variant="outline" onClick={onCancel} disabled={isPending}>取消</Button>
+        <Button variant="outline" onClick={onCancel} disabled={isPending}>Huỷ</Button>
         <Button variant="destructive" onClick={onSubmit} disabled={isPending}>
           {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-          确认驳回 {records.length} 条
+          Xác nhận từ chối {records.length} mục
         </Button>
       </DialogFooter>
     </>
@@ -178,17 +178,17 @@ function useBatchReject(records: PendingRecord[]) {
 
   async function submit(ids?: string[]) {
     const trimmed = note.trim();
-    if (!trimmed) return toast.warning("请填写驳回原因（将统一应用到所选记录）");
+    if (!trimmed) return toast.warning("Hãy nhập lý do từ chối (sẽ áp chung cho các bản ghi đã chọn)");
     const targetIds = ids ?? records.map((r) => r.id);
     startTransition(async () => {
       try {
         const { succeeded, failed } = await batchRejectArchiveRecords({ archiveIds: targetIds, note: trimmed });
         setResult({ succeeded, failed });
-        if (failed.length === 0) toast.success(`已批量驳回 ${succeeded.length} 条`);
-        else toast.warning(`部分成功：${succeeded.length} 成功，${failed.length} 失败`);
+        if (failed.length === 0) toast.success(`Đã từ chối hàng loạt ${succeeded.length} mục`);
+        else toast.warning(`Thành công một phần: ${succeeded.length} thành công, ${failed.length} thất bại`);
         router.refresh();
       } catch (err) {
-        toast.error("批量驳回失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Từ chối hàng loạt thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -204,8 +204,8 @@ export function BatchRejectDialog({ records, onClose }: { records: PendingRecord
     <Dialog open onOpenChange={o=>!o&&onClose(false)}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><X className="h-5 w-5 text-destructive" />批量驳回 {records.length} 条归档申请</DialogTitle>
-          <DialogDescription>驳回原因将统一发送给每条申请的提交律师。</DialogDescription>
+          <DialogTitle className="flex items-center gap-2"><X className="h-5 w-5 text-destructive" />Từ chối hàng loạt {records.length} yêu cầu lưu trữ</DialogTitle>
+          <DialogDescription>Lý do từ chối sẽ gửi chung cho luật sư gửi của mỗi yêu cầu.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           {result===null ? (

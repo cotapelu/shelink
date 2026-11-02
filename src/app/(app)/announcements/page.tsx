@@ -18,7 +18,7 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.38: 公告指引独立页（v0.37 曾并入 /service-center，现拆回）
+ * v0.38: trang hướng dẫn thông báo độc lập (v0.37 từng gộp vào /service-center, nay tách ra lại)
  */
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";

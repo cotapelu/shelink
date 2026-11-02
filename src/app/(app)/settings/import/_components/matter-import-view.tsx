@@ -51,7 +51,7 @@ export function MatterImportView() {
         setPreview(p);
       } catch (e) {
         setPreview(null);
-        toast.error(e instanceof Error ? e.message : "解析失败");
+        toast.error(e instanceof Error ? e.message : "Phân tích thất bại");
       }
     });
   };
@@ -60,7 +60,7 @@ export function MatterImportView() {
     if (!preview) return;
     const valid = preview.rows.filter((r) => r.valid).map((r) => ({ rowNo: r.rowNo, raw: r.raw }));
     if (valid.length === 0) {
-      toast.error("没有可导入的有效行");
+      toast.error("Không có dòng hợp lệ nào để import");
       return;
     }
     startImport(async () => {
@@ -69,9 +69,9 @@ export function MatterImportView() {
         setResult(res);
         setPreview(null);
         if (fileRef.current) fileRef.current.value = "";
-        toast.success(`导入完成：成功 ${res.succeeded.length}，失败 ${res.failed.length}`);
+        toast.success(`Import xong: thành công ${res.succeeded.length}, thất bại ${res.failed.length}`);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "导入失败");
+        toast.error(e instanceof Error ? e.message : "Import thất bại");
       }
     });
   };
@@ -88,19 +88,19 @@ export function MatterImportView() {
       <section className="ll-surface rounded-lg border border-border p-5">
         <header className="mb-3 flex items-center gap-2">
           <FileSpreadsheet className="h-4 w-4 text-primary" />
-          <h2 className="text-lg">案件批量导入</h2>
+          <h2 className="text-lg">Import hàng loạt vụ án</h2>
         </header>
         <p className="mb-4 text-[12px] text-muted-foreground">
-          下载 Excel 模板填写后上传 → 预览校验（有误的行会标红，仅导入无误行）→ 确认导入。
-          每行将创建客户（按名称+证件号查重）、案件（自动编号 + 所内案号 + 主办）、当事人（驱动利益冲突），
-          「办理中」的案件按类型自动生成首程序。
+          Tải mẫu Excel, điền rồi tải lên → xem trước kiểm tra (dòng lỗi sẽ tô đỏ, chỉ import dòng không lỗi) → xác nhận import.
+          Mỗi dòng sẽ tạo khách hàng (tra trùng theo tên+số giấy tờ), vụ án (tự mã + mã nội bộ + chủ trì), các bên (điều khiển kiểm tra xung đột lợi ích),
+          vụ án「đang xử lý」tự sinh thủ tục đầu theo loại.
         </p>
 
         <div className="flex flex-wrap items-center gap-3">
           <a href="/api/imports/matters/template" download>
             <Button variant="outline" className="gap-1.5">
               <Download className="h-3.5 w-3.5" />
-              下载模板
+              Tải mẫu
             </Button>
           </a>
 
@@ -113,21 +113,21 @@ export function MatterImportView() {
           />
           <Button onClick={() => fileRef.current?.click()} disabled={parsing} className="gap-1.5">
             {parsing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-            上传并预览
+            Tải lên và xem trước
           </Button>
           {fileName && <span className="text-[12px] text-muted-foreground">{fileName}</span>}
         </div>
       </section>
 
-      {/* —— 预览 —— */}
+      {/* —— Xem trước —— */}
       {preview && (
         <section className="ll-surface rounded-lg border border-border p-5">
           <header className="mb-3 flex items-center justify-between">
             <h3 className="text-[14px] font-medium">
-              预览
+              Xem trước
               <span className="ml-2 text-[12px] font-normal text-muted-foreground">
-                共 {preview.total} 行 · 可导入{" "}
-                <span className="text-emerald-700">{preview.validCount}</span> · 有误{" "}
+                Tổng {preview.total} dòng · Import được{" "}
+                <span className="text-emerald-700">{preview.validCount}</span> · Lỗi{" "}
                 <span className={preview.total - preview.validCount > 0 ? "text-destructive" : ""}>
                   {preview.total - preview.validCount}
                 </span>
@@ -135,11 +135,11 @@ export function MatterImportView() {
             </h3>
             <div className="flex gap-2">
               <Button variant="ghost" size="sm" onClick={reset}>
-                取消
+                Huỷ
               </Button>
               <Button size="sm" onClick={doImport} disabled={importing || preview.validCount === 0} className="gap-1.5">
                 {importing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                确认导入 {preview.validCount} 行
+                Xác nhận import {preview.validCount} dòng
               </Button>
             </div>
           </header>
@@ -148,8 +148,8 @@ export function MatterImportView() {
             <table className="w-full text-[12px]">
               <thead>
                 <tr className="border-b border-border bg-muted/40 text-left">
-                  <th className="whitespace-nowrap px-2 py-1.5 font-medium">行</th>
-                  <th className="whitespace-nowrap px-2 py-1.5 font-medium">校验</th>
+                  <th className="whitespace-nowrap px-2 py-1.5 font-medium">Dòng</th>
+                  <th className="whitespace-nowrap px-2 py-1.5 font-medium">Kiểm tra</th>
                   {preview.columns.map((c) => (
                     <th key={c.key} className="whitespace-nowrap px-2 py-1.5 font-medium">
                       {c.header}
@@ -191,27 +191,27 @@ export function MatterImportView() {
         </section>
       )}
 
-      {/* —— 结果 —— */}
+      {/* —— Kết quả —— */}
       {result && (
         <section className="ll-surface rounded-lg border border-border p-5">
           <header className="mb-3 flex items-center justify-between">
             <h3 className="text-[14px] font-medium">
-              导入结果 · 成功 <span className="text-emerald-700">{result.succeeded.length}</span> · 失败{" "}
+              Kết quả import · Thành công <span className="text-emerald-700">{result.succeeded.length}</span> · Thất bại{" "}
               <span className={result.failed.length > 0 ? "text-destructive" : ""}>{result.failed.length}</span>
             </h3>
             <Button variant="ghost" size="sm" onClick={reset}>
-              再导入一批
+              Import một lô nữa
             </Button>
           </header>
 
           {result.succeeded.length > 0 && (
             <div className="mb-3">
-              <p className="mb-1 text-[12px] text-muted-foreground">成功创建：</p>
+              <p className="mb-1 text-[12px] text-muted-foreground">Đã tạo thành công:</p>
               <ul className="space-y-0.5 text-[12px]">
                 {result.succeeded.map((s) => (
                   <li key={s.rowNo} className="flex items-center gap-2">
                     <CheckCircle2 className="h-3 w-3 shrink-0 text-emerald-600" />
-                    <span className="font-mono text-muted-foreground">第{s.rowNo}行</span>
+                    <span className="font-mono text-muted-foreground">dòng {s.rowNo}</span>
                     <span className="font-mono">{s.internalCode}</span>
                     {s.firmCaseNo && <span className="font-mono text-muted-foreground">{s.firmCaseNo}</span>}
                     <span className="truncate">{s.title}</span>
@@ -223,12 +223,12 @@ export function MatterImportView() {
 
           {result.failed.length > 0 && (
             <div>
-              <p className="mb-1 text-[12px] text-destructive">失败行：</p>
+              <p className="mb-1 text-[12px] text-destructive">Dòng lỗi:</p>
               <ul className="space-y-0.5 text-[12px]">
                 {result.failed.map((f) => (
                   <li key={f.rowNo} className="flex items-center gap-2 text-destructive">
                     <AlertCircle className="h-3 w-3 shrink-0" />
-                    <span className="font-mono">第{f.rowNo}行</span>
+                    <span className="font-mono">dòng {f.rowNo}</span>
                     <span>{f.error}</span>
                   </li>
                 ))}

@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label";
 import { RadioChips } from "@/components/ui/radio-chips";
 import { Textarea } from "@/components/ui/textarea";
 
-const PURPOSE_PRESETS = ["委托合同", "法律意见书", "所函", "证明", "其他"] as const;
+export const PURPOSE_PRESETS = ["Hợp đồng ủy quyền", "Ý kiến pháp lý", "Công văn văn phòng", "Chứng nhận", "Khác"] as const;
 export type PurposePreset = typeof PURPOSE_PRESETS[number];
 
 interface PurposeOtherInputProps {
@@ -34,15 +34,15 @@ interface PurposeOtherInputProps {
 function PurposeOtherInput({ purposeOther, setPurposeOther }: PurposeOtherInputProps) {
   return (
     <div className="space-y-1">
-      <Label>其他事由具体说明 <span className="text-destructive">*</span></Label>
+      <Label>Diễn giải cụ thể lý do「Khác」<span className="text-destructive">*</span></Label>
       <Textarea
         value={purposeOther}
         onChange={(e) => setPurposeOther(e.target.value)}
-        placeholder="请说明具体用印事由"
+        placeholder="Hãy nêu rõ lý do dùng dấu cụ thể"
         rows={2}
         className="mt-2 text-[12px]"
       />
-      <p className="text-[11px] text-muted-foreground">当选择「其他」时必须填写</p>
+      <p className="text-[11px] text-muted-foreground">Khi chọn「Khác」thì bắt buộc nhập</p>
     </div>
   );
 }
@@ -58,7 +58,7 @@ export function PurposeSection({ purposePreset, setPurposePreset, purposeOther, 
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <Label>用印事由 <span className="text-destructive">*</span></Label>
+        <Label>Lý do dùng dấu <span className="text-destructive">*</span></Label>
         <RadioChips
           items={PURPOSE_PRESETS.map((p) => ({ value: p, label: p }))}
           value={purposePreset || null}
@@ -66,7 +66,7 @@ export function PurposeSection({ purposePreset, setPurposePreset, purposeOther, 
           className="mt-2"
         />
       </div>
-      {purposePreset === "其他" && <PurposeOtherInput purposeOther={purposeOther} setPurposeOther={setPurposeOther} />}
+      {purposePreset === "Khác" && <PurposeOtherInput purposeOther={purposeOther} setPurposeOther={setPurposeOther} />}
     </div>
   );
 }

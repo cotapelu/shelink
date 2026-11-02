@@ -1,9 +1,9 @@
 import type { Tab } from "./seals-view";
 
 export function emptySealsText(tab: Tab, firmTabLabel: string): string {
-  if (tab === "pending") return "暂无待审批申请";
-  if (tab === "processed") return "暂无已审批申请";
-  if (tab === "toApprove") return "暂无待你审批的申请";
-  if (tab === "firm") return `暂无${firmTabLabel}记录`;
-  return "你还没有用章申请";
+  if (tab === "pending") return "Chưa có yêu cầu chờ duyệt";
+  if (tab === "processed") return "Chưa có yêu cầu đã duyệt";
+  if (tab === "toApprove") return "Chưa có yêu cầu nào chờ bạn duyệt";
+  if (tab === "firm") return `Chưa có bản ghi ${firmTabLabel}`;
+  return "Bạn chưa có yêu cầu dùng dấu nào";
 }

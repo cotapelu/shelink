@@ -59,13 +59,13 @@ export function PageOptionsSection({
             checked={crossPage}
             onCheckedChange={(v) => setCrossPage(v === true)}
           />
-          需要骑缝章
+          Cần dấu kẽ trang
         </label>
         <RadioChips
           size="sm"
           items={[
-            { value: "NORMAL", label: "普通" },
-            { value: "URGENT", label: "紧急", accent: "#DC2626" }
+            { value: "NORMAL", label: "Thường" },
+            { value: "URGENT", label: "Khẩn cấp", accent: "#DC2626" }
           ]}
           value={urgency}
           onChange={(v) => setUrgency(v as "NORMAL" | "URGENT")}

@@ -48,7 +48,7 @@ export function ConflictListItem({ hit }: ConflictListItemProps) {
         </div>
         {targetHref && (
           <Link href={targetHref} className="flex shrink-0 items-center gap-1 text-xs text-primary hover:underline">
-            查看
+            Xem
             <ExternalLink className="h-3 w-3" />
           </Link>
         )}

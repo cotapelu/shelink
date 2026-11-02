@@ -5,8 +5,8 @@ import { Check, XCircle, Pencil, Archive } from "lucide-react";
 import type { ExternalContactItem } from "./contacts-types";
 import type { ExternalContactCategory } from "@prisma/client";
 const L: Record<ExternalContactCategory, string> = {
-  COURT: "法院", PROSECUTOR: "检察院", POLICE: "公安", NOTARY: "公证处",
-  ARBITRATION: "仲裁", OTHER_FIRM: "他所律师", EXPERT: "鉴定专家", OTHER: "其他"
+  COURT: "Toà án", PROSECUTOR: "Viện kiểm sát", POLICE: "Công an", NOTARY: "Phòng công chứng",
+  ARBITRATION: "Trọng tài", OTHER_FIRM: "Luật sư VP khác", EXPERT: "Chuyên gia giám định", OTHER: "Khác"
 };
 
 interface ExternalContactRowContentProps {
@@ -28,7 +28,7 @@ export function ExternalContactRowContent({
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{contact.name}</span>
           <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">{L[contact.category]}</span>
-          {contact.status === "PENDING_REVIEW" && <span className="rounded-full border border-amber-300/70 bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">待审核</span>}
+          {contact.status === "PENDING_REVIEW" && <span className="rounded-full border border-amber-300/70 bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">Chờ duyệt</span>}
           {contact.title && <span className="text-[11px] text-muted-foreground">{contact.title}</span>}
         </div>
         <div className="mt-1 text-xs text-muted-foreground">

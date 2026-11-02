@@ -45,7 +45,7 @@ const PROVIDER_PRESETS = [
     baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
     text: "qwen-turbo",
     vision: "qwen-vl-max",
-    apply: "阿里云百炼控制台获取 key",
+    apply: "Lấy key ở console Alibaba Bailian",
     link: "https://bailian.console.aliyun.com/"
   },
   {
@@ -53,7 +53,7 @@ const PROVIDER_PRESETS = [
     baseUrl: "https://api.deepseek.com/v1",
     text: "deepseek-v4-flash",
     vision: "deepseek-v4-flash",
-    apply: "DeepSeek 平台获取 key",
+    apply: "Lấy key trên nền tảng DeepSeek",
     link: "https://platform.deepseek.com/api_keys"
   },
   {
@@ -61,7 +61,7 @@ const PROVIDER_PRESETS = [
     baseUrl: "https://api.moonshot.cn/v1",
     text: "moonshot-v1-8k",
     vision: "moonshot-v1-8k-vision-preview",
-    apply: "Moonshot 平台获取 key",
+    apply: "Lấy key trên nền tảng Moonshot",
     link: "https://platform.moonshot.cn/"
   },
   {
@@ -69,15 +69,15 @@ const PROVIDER_PRESETS = [
     baseUrl: "https://open.bigmodel.cn/api/paas/v4",
     text: "glm-4-flash",
     vision: "glm-4v",
-    apply: "智谱开放平台获取 key",
+    apply: "Lấy key trên nền tảng mở 智谱",
     link: "https://open.bigmodel.cn/"
   },
   {
-    name: "本地 Ollama",
+    name: "Ollama trên máy",
     baseUrl: "http://localhost:11434/v1",
     text: "qwen2.5:7b",
     vision: "llava:7b",
-    apply: "本机起 ollama 即用，无需 key",
+    apply: "Chạy ollama trên máy là dùng được, không cần key",
     link: "https://ollama.com/"
   }
 ] as const;
@@ -101,7 +101,7 @@ export function AiSettingsForm({
     setBaseUrl(p.baseUrl);
     setTextModel(p.text);
     setVisionModel(p.vision);
-    toast.info(`已应用 ${p.name} 默认配置，请填入对应 API key`);
+    toast.info(`Đã áp cấu hình mặc định ${p.name}, hãy điền API key tương ứng`);
   };
 
   const save = () => {
@@ -113,22 +113,22 @@ export function AiSettingsForm({
           textModel,
           visionModel
         });
-        toast.success("配置已保存");
-        setApiKey(""); // 不在前端持久 key
+        toast.success("Đã lưu cấu hình");
+        setApiKey(""); // Không lưu key ở frontend
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "保存失败");
+        toast.error(e instanceof Error ? e.message : "Lưu thất bại");
       }
     });
   };
 
   const clearKey = () => {
-    if (!confirm("确认清除已保存的 API key？所有依赖 AI 的功能将停止工作。")) return;
+    if (!confirm("Xác nhận xoá API key đã lưu? Mọi chức năng phụ thuộc AI sẽ ngừng hoạt động.")) return;
     startTransition(async () => {
       try {
         await clearAiKeyAction({ confirm: true });
-        toast.success("API key 已清除");
+        toast.success("Đã xoá API key");
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "失败");
+        toast.error(e instanceof Error ? e.message : "Thất bại");
       }
     });
   };
@@ -139,12 +139,12 @@ export function AiSettingsForm({
     try {
       const res = await testAiConnection();
       if (res.ok) {
-        setTestResult({ ok: true, msg: `连接成功，模型回复："${res.reply}"` });
+        setTestResult({ ok: true, msg: `Kết nối thành công, model trả lời: "${res.reply}"` });
       } else {
-        setTestResult({ ok: false, msg: res.message ?? "未知错误" });
+        setTestResult({ ok: false, msg: res.message ?? "Lỗi không rõ" });
       }
     } catch (e) {
-      setTestResult({ ok: false, msg: e instanceof Error ? e.message : "网络错误" });
+      setTestResult({ ok: false, msg: e instanceof Error ? e.message : "Lỗi mạng" });
     } finally {
       setTesting(false);
     }
@@ -155,23 +155,23 @@ export function AiSettingsForm({
       <section className="ll-surface rounded-lg border border-border p-5">
         <header className="mb-3 flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" strokeWidth={1.8} />
-          <h2 className="text-lg">AI 接入</h2>
+          <h2 className="text-lg">Tích hợp AI</h2>
           {initial.configured && (
             <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] text-emerald-700">
-              <CheckCircle2 className="h-3 w-3" /> 已配置
+              <CheckCircle2 className="h-3 w-3" /> Đã cấu hình
             </span>
           )}
         </header>
 
         <p className="mb-4 text-[12px] text-muted-foreground">
-          走 OpenAI 兼容协议，支持任意兼容 endpoint。配置后可启用：
-          <span className="text-foreground/85"> 发票 OCR · 法院短信 AI 增强解析</span>
-          （后续模块也会复用同一组配置）
+          Đi theo giao thức tương thích OpenAI, hỗ trợ mọi endpoint tương thích. Sau khi cấu hình sẽ bật được:
+          <span className="text-foreground/85"> OCR hóa đơn · Phân tích tăng cường AI cho tin nhắn toà án</span>
+          (các module sau cũng dùng lại chung một bộ cấu hình này)
         </p>
 
-        {/* Provider 预设 */}
+        {/* Preset provider */}
         <div className="mb-4">
-          <Label className="text-[11px]">快速预设</Label>
+          <Label className="text-[11px]">Preset nhanh</Label>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {PROVIDER_PRESETS.map((p) => (
               <button
@@ -192,7 +192,7 @@ export function AiSettingsForm({
               API Key
               {initial.configured && (
                 <span className="ml-2 font-mono text-[10px] text-muted-foreground">
-                  当前：{initial.apiKeyMasked}（留空保留原值）
+                  Hiện tại: {initial.apiKeyMasked} (để trống thì giữ giá trị cũ)
                 </span>
               )}
             </Label>
@@ -200,7 +200,7 @@ export function AiSettingsForm({
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder={initial.configured ? "如需更换粘贴新 key" : "粘贴 API key"}
+              placeholder={initial.configured ? "Cần đổi thì dán key mới" : "Dán API key"}
               className="mt-1 font-mono"
               autoComplete="off"
             />
@@ -218,24 +218,24 @@ export function AiSettingsForm({
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <Label className="text-[11px]">文本模型</Label>
+              <Label className="text-[11px]">Model văn bản</Label>
               <Input
                 value={textModel}
                 onChange={(e) => setTextModel(e.target.value)}
                 placeholder={defaults.textModel}
                 className="mt-1 font-mono text-[12px]"
               />
-              <p className="mt-1 text-[10px] text-muted-foreground">用于法院短信 AI 解析等</p>
+              <p className="mt-1 text-[10px] text-muted-foreground">Dùng cho phân tích AI tin nhắn toà án...</p>
             </div>
             <div>
-              <Label className="text-[11px]">视觉模型</Label>
+              <Label className="text-[11px]">Model thị giác</Label>
               <Input
                 value={visionModel}
                 onChange={(e) => setVisionModel(e.target.value)}
                 placeholder={defaults.visionModel}
                 className="mt-1 font-mono text-[12px]"
               />
-              <p className="mt-1 text-[10px] text-muted-foreground">用于发票 OCR 等</p>
+              <p className="mt-1 text-[10px] text-muted-foreground">Dùng cho OCR hóa đơn...</p>
             </div>
           </div>
         </div>
@@ -243,7 +243,7 @@ export function AiSettingsForm({
         <div className="mt-4 flex items-center gap-2">
           <Button onClick={save} disabled={pending} className="gap-1.5">
             {pending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            保存配置
+            Lưu cấu hình
           </Button>
           <Button
             variant="outline"
@@ -252,7 +252,7 @@ export function AiSettingsForm({
             className="gap-1.5"
           >
             {testing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            测试连接
+            Kiểm tra kết nối
           </Button>
           {initial.configured && (
             <Button
@@ -262,7 +262,7 @@ export function AiSettingsForm({
               className="ml-auto gap-1 text-destructive"
             >
               <Trash2 className="h-3 w-3" />
-              清除 key
+              Xoá key
             </Button>
           )}
         </div>
@@ -287,7 +287,7 @@ export function AiSettingsForm({
       </section>
 
       <section className="ll-surface rounded-lg border border-border p-5">
-        <h3 className="mb-3 text-base">获取 API key</h3>
+        <h3 className="mb-3 text-base">Lấy API key</h3>
         <ul className="space-y-2 text-[12px]">
           {PROVIDER_PRESETS.map((p) => (
             <li key={p.name} className="flex items-baseline gap-3">
@@ -299,15 +299,15 @@ export function AiSettingsForm({
                 rel="noreferrer"
                 className="ml-auto inline-flex items-center gap-1 text-primary hover:underline"
               >
-                打开
+                Mở
                 <ExternalLink className="h-3 w-3" />
               </a>
             </li>
           ))}
         </ul>
         <p className="mt-3 text-[11px] text-muted-foreground">
-          密钥使用 AES-256-GCM 加密存入 SystemSetting，与文档加密复用同一密钥（
-          <span className="font-mono">STORAGE_ENCRYPTION_KEY</span>）。前端永远不显示明文 key。
+          Khoá mã hoá AES-256-GCM lưu vào SystemSetting, dùng chung một khoá với mã hoá tài liệu (
+          <span className="font-mono">STORAGE_ENCRYPTION_KEY</span>). Frontend không bao giờ hiện key plaintext.
         </p>
       </section>
     </div>

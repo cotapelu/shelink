@@ -18,10 +18,10 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.38: 提醒维护 —— 手动触发"到期/开庭提醒"扫描。
+ * v0.38: Bảo trì nhắc nhở —— kích hoạt thủ công quét "nhắc đến hạn/mở phiên".
  *
- * cron 只在生产 next start 跑，dev 模式不触发；此页给管理员一个立即扫描的入口，
- * 方便本地验证开庭/期限提醒是否正确生成。
+ * cron chỉ chạy ở next start production, chế độ dev không kích hoạt; trang này cho admin một cửa vào quét ngay,
+ * thuận tiện kiểm tra trên máy nhắc phiên tòa/thời hạn có sinh đúng không.
  */
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
@@ -37,19 +37,19 @@ export default async function RemindersSettingsPage() {
   return (
     <div className="space-y-5">
       <header>
-        <h2 className="text-lg font-semibold">提醒维护</h2>
+        <h2 className="text-lg font-semibold">Bảo trì nhắc nhở</h2>
         <p className="mt-1 text-[13px] text-muted-foreground">
-          系统每天 09:00 自动扫描法定期限 / 开庭，对临近项推送站内通知（开庭提前 3 天 / 1 天 / 当天早上）。
-          自动扫描仅在生产环境运行，本地开发不触发——可在此手动立即扫一遍用于验证。
+          Hệ thống mỗi ngày 09:00 tự quét thời hạn / phiên tòa theo luật định, đẩy thông báo trong site cho mục sắp tới (phiên tòa trước 3 ngày / 1 ngày / sáng hôm đó).
+          Quét tự động chỉ chạy ở production, dev local không kích hoạt —— có thể quét ngay một lượt ở đây để kiểm chứng.
         </p>
       </header>
 
       <div className="rounded-xl border border-border bg-card p-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <div className="text-sm font-medium">立即扫描提醒</div>
+            <div className="text-sm font-medium">Quét nhắc nhở ngay</div>
             <div className="mt-0.5 text-[12px] text-muted-foreground">
-              扫描 T-3 / T-1 / T 的开庭与到期项，对接收人补推通知（当日已推过的不重复）。
+              Quét các mục mở phiên và đến hạn T-3 / T-1 / T, đẩy bù thông báo cho người nhận (đã đẩy trong ngày thì không lặp lại).
             </div>
           </div>
           <ReminderScanButton />

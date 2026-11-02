@@ -19,11 +19,11 @@ export function AuditTable({ result, expanded, onToggleExpand, onNextPage }: Aud
           <thead className="bg-muted/30 text-muted-foreground">
             <tr>
               <th className="w-8 px-2 py-1.5"></th>
-              <th className="w-40 px-2 py-1.5 text-left font-normal">时间</th>
-              <th className="w-20 px-2 py-1.5 text-left font-normal">操作人</th>
-              <th className="px-2 py-1.5 text-left font-normal">动作</th>
-              <th className="w-32 px-2 py-1.5 text-left font-normal">对象类型</th>
-              <th className="w-40 px-2 py-1.5 text-left font-normal">对象 ID</th>
+              <th className="w-40 px-2 py-1.5 text-left font-normal">Thời gian</th>
+              <th className="w-20 px-2 py-1.5 text-left font-normal">Người thao tác</th>
+              <th className="px-2 py-1.5 text-left font-normal">Hành động</th>
+              <th className="w-32 px-2 py-1.5 text-left font-normal">Loại đối tượng</th>
+              <th className="w-40 px-2 py-1.5 text-left font-normal">ID đối tượng</th>
               <th className="w-24 px-2 py-1.5 text-left font-normal">IP</th>
             </tr>
           </thead>
@@ -31,7 +31,7 @@ export function AuditTable({ result, expanded, onToggleExpand, onNextPage }: Aud
             {result.items.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-2 py-10 text-center text-muted-foreground">
-                  没有匹配的审计记录
+                  Không có bản ghi audit nào khớp
                 </td>
               </tr>
             ) : (
@@ -48,10 +48,10 @@ export function AuditTable({ result, expanded, onToggleExpand, onNextPage }: Aud
       </div>
 
       <div className="flex items-center justify-between text-xs text-muted-foreground mt-3">
-        <span>本页 {result.items.length} 条</span>
+        <span>Trang này {result.items.length} mục</span>
         {result.nextCursor && (
           <Button size="sm" variant="outline" onClick={onNextPage}>
-            下一页 →
+            Trang sau →
           </Button>
         )}
       </div>

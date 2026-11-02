@@ -7,13 +7,13 @@ import { formatDate } from "./date-utils";
 import { matterCategoryLabel, matterStatusLabel, litigationStandingLabel } from "@/lib/enums";
 
 const partyRoleLabel: Record<PartyRole, string> = {
-  CLIENT_PARTY: "委托方",
-  OPPOSING_PARTY: "对方",
-  THIRD_PARTY: "第三人",
-  CO_LITIGANT: "共同诉讼人",
-  AGENT: "代理人",
-  WITNESS: "证人",
-  OTHER: "其他"
+  CLIENT_PARTY: "Bên ủy quyền",
+  OPPOSING_PARTY: "Bên đối phương",
+  THIRD_PARTY: "Người thứ ba",
+  CO_LITIGANT: "Đồng khởi kiện",
+  AGENT: "Người đại diện",
+  WITNESS: "Nhân chứng",
+  OTHER: "Khác"
 };
 
 export interface MatterInfo {
@@ -45,15 +45,15 @@ export function MatterContext({ info, hit }: MatterContextProps) {
         <span className="min-w-0 truncate font-medium text-foreground">{info.title}</span>
       </div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-muted-foreground md:grid-cols-3">
-        <Field label="系统收案">{formatDate(info.intakeDate)}</Field>
-        <Field label="当前状态">{matterStatusLabel[info.status]}</Field>
-        <Field label="案由/类型">{causeOrCategory}</Field>
-        <Field label="主办律师">{info.ownerName ?? "—"}</Field>
-        <Field label="命中角色">
+        <Field label="Tiếp nhận hệ thống">{formatDate(info.intakeDate)}</Field>
+        <Field label="Trạng thái hiện tại">{matterStatusLabel[info.status]}</Field>
+        <Field label="Nguyên nhân/loại">{causeOrCategory}</Field>
+        <Field label="Luật sư chủ trì">{info.ownerName ?? "—"}</Field>
+        <Field label="Vai trò khớp">
           {partyRoleLabel[info.partyRole]}
           {info.partyStanding ? ` · ${litigationStandingLabel[info.partyStanding]}` : ""}
         </Field>
-        <Field label="命中主体">{hit.matchedName}</Field>
+        <Field label="Chủ thể khớp">{hit.matchedName}</Field>
       </div>
     </div>
   );

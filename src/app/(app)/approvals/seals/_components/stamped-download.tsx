@@ -12,7 +12,7 @@ export function StampedDownload({ stampedDoc }: StampedDownloadProps) {
       href={`/api/documents/${stampedDoc.id}/download`}
       className="text-[11px] text-muted-foreground hover:text-foreground"
     >
-      下载
+      Tải xuống
     </a>
   );
 }

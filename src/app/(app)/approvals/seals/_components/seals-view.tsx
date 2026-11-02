@@ -67,7 +67,7 @@ export function SealsView(props: SealsViewProps) {
   const [actionTarget, setActionTarget] = useState<{ row: SealRequestRow; action: "detail" | "approve" | "reject" | "stamp" | "cancel" } | null>(null);
   useEffect(() => { if (presetFromQuery?.draftDocId) setSheetOpen(true); }, [presetFromQuery]);
   const rows = computeRows(tab, mine, toApprove, all);
-  const firmTabLabel = currentUser.role === "FINANCE" ? "财务章审批" : "全所审批";
+  const firmTabLabel = currentUser.role === "FINANCE" ? "duyệt dấu tài chính" : "duyệt toàn văn phòng";
   return (
     <div className="space-y-5">
       <SealsHeader onNewClick={() => setSheetOpen(true)} />

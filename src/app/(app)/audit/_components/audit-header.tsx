@@ -16,17 +16,17 @@ export function AuditHeader({ onCleaned }: AuditHeaderProps) {
   const [cleaning, startCleaning] = useTransition();
 
   function handleCleanup() {
-    if (!window.confirm("立刻清理超过保留期（默认 365 天，AUDIT_RETENTION_DAYS 环境变量可改）的审计记录？此操作不可撤销。")) {
+    if (!window.confirm("Dọn ngay các bản ghi audit quá thời hạn lưu (mặc định 365 ngày, biến môi trường AUDIT_RETENTION_DAYS có thể đổi)? Thao tác này không hoàn tác được.")) {
       return;
     }
     startCleaning(async () => {
       try {
         const r = await triggerAuditCleanupNow();
-        toast.success(`清理完成：保留 ${r.retentionDays} 天，删除 ${r.deleted} 条`);
+        toast.success(`Dọn xong: giữ ${r.retentionDays} ngày, đã xoá ${r.deleted} mục`);
         router.refresh();
         onCleaned?.();
       } catch (err) {
-        toast.error("清理失败", {
+        toast.error("Dọn dẹp thất bại", {
           description: err instanceof Error ? err.message : "",
         });
       }
@@ -38,16 +38,16 @@ export function AuditHeader({ onCleaned }: AuditHeaderProps) {
       <div>
         <h1 className="flex items-center gap-2 text-xl">
           <ShieldCheck className="h-5 w-5 text-primary" strokeWidth={1.8} />
-          审计日志
+          Log audit
         </h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          系统操作记录 · 全部用户 · 不可删除
+          Bản ghi thao tác hệ thống · mọi người dùng · không xoá được
         </p>
       </div>
       <Button variant="outline" size="sm" onClick={handleCleanup} disabled={cleaning} className="h-7 gap-1.5">
         {cleaning && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
         <Trash2 className="h-3.5 w-3.5" />
-        清理过期
+        Dọn bản quá hạn
       </Button>
     </header>
   );

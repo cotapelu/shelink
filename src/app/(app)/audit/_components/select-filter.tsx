@@ -14,7 +14,7 @@ interface SelectFilterProps {
   triggerClassName?: string;
 }
 
-export function SelectFilter({ label, value, options, onValueChange, placeholder = "全部", className = "", triggerClassName = "h-8 w-36 text-xs" }: SelectFilterProps) {
+export function SelectFilter({ label, value, options, onValueChange, placeholder = "Tất cả", className = "", triggerClassName = "h-8 w-36 text-xs" }: SelectFilterProps) {
   return (
     <div className={className}>
       <label className="text-[10px] text-muted-foreground">{label}</label>

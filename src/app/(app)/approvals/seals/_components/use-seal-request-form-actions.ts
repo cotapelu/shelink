@@ -35,11 +35,11 @@ async function performSealRequestSubmit(state: SealRequestFormState, preset: { d
   state.startTransition(async () => {
     try {
       const res = await createSealRequest(fd);
-      toast.success(`已提交 ${res.code}${state.alsoLegalRep && state.sealType !== "LEGAL_REP_SEAL" ? "（含法人章配套申请）" : ""}`);
+      toast.success(`Đã gửi ${res.code}${state.alsoLegalRep && state.sealType !== "LEGAL_REP_SEAL" ? " (kèm yêu cầu dấu người đại diện đi kèm)" : ""}`);
       resetSealRequestFormState(state, onOpenChange);
       router.refresh();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "提交失败");
+      toast.error(e instanceof Error ? e.message : "Gửi thất bại");
     }
   });
 }

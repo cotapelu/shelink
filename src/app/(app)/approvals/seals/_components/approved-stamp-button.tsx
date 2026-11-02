@@ -11,7 +11,7 @@ export function ApprovedStampButton({ onAction }: ApprovedStampButtonProps) {
       onClick={() => onAction("stamp")}
       className="text-[11px] text-primary hover:underline"
     >
-      回填盖章件
+      Bổ sung bản đóng dấu
     </button>
   );
 }

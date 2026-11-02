@@ -24,7 +24,7 @@ import {
 } from "@/server/finance/invoice-matter-search";
 
 describe("invoice matter search", () => {
-  it("空关键词返回本人可关联案件条件", () => {
+  it("Từ khoá rỗng trả về điều kiện vụ án có thể liên kết của mình", () => {
     expect(invoiceMatterSearchWhere("u1", "")).toEqual({
       deletedAt: null,
       OR: [
@@ -35,7 +35,7 @@ describe("invoice matter search", () => {
     expect(invoiceMatterSearchLimit("")).toBe(12);
   });
 
-  it("输入关键词后按案名、系统编号和所内案号筛选", () => {
+  it("Sau khi nhập từ khoá thì lọc theo tên vụ, mã hệ thống và mã nội bộ", () => {
     expect(invoiceMatterSearchWhere("u1", " 二审 ")).toEqual({
       deletedAt: null,
       AND: [

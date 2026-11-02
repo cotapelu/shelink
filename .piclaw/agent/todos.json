@@ -3,47 +3,27 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "I18N-15: Thay toàn bộ tiếng Trung → tiếng Việt",
+      "name": "I18N-15 (tiếp): UI-ADMIN + UI-OPS + cổng cuối",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Gói LIB + TESTS/lib (parent): utils/ics/ai/storage/auth/archive/imports/matters/legal-calc + tests",
-          "status": "completed"
-        },
-        {
-          "id": "task-2",
-          "content": "Gói SERVER (src/server trừ ai/yuandian) + tests/server: 57 file",
+          "content": "Gói UI-ADMIN (84 file): settings/approvals/contacts/conflicts/audit/announcements/inbox/archive/tools/seals",
           "status": "in_progress"
         },
         {
+          "id": "task-2",
+          "content": "Gói UI-OPS (~45 file): intakes/clients/finance/express/schedule/preservation/notifications/policy/dashboard/quotes/genealogy/sms + api/auth/actions/components/tests",
+          "status": "pending"
+        },
+        {
           "id": "task-3",
-          "content": "Gói SERVER/AI (src/server/ai + tests/server/ai): 12 file",
-          "status": "pending"
-        },
-        {
-          "id": "task-4",
-          "content": "Gói MATTERS ((app)/matters/**): ~46 file",
-          "status": "pending"
-        },
-        {
-          "id": "task-5",
-          "content": "Gói UI-ADMIN (settings/approvals/contacts/conflicts/audit/announcements/inbox/archive/tools/seals/reports/org-chart/erp/files)",
-          "status": "pending"
-        },
-        {
-          "id": "task-6",
-          "content": "Gói UI-OPS (intakes/clients/finance/express/schedule/preservation/notifications/policy/dashboard/quotes/genealogy/sms + api + auth + actions + components + tests/app)",
-          "status": "pending"
-        },
-        {
-          "id": "task-7",
-          "content": "Cổng chất lượng cuối: typecheck + test toàn bộ + lint không tăng + verify dev :3000 + cập nhật glossary",
+          "content": "Cổng chất lượng cuối: typecheck + test toàn bộ + lint không tăng + verify dev :3000 + cập nhật glossary + commit",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 8,
+  "nextTaskId": 4,
   "nextPhaseId": 2,
-  "updatedAt": "2026-11-02T00:28:42.403Z"
+  "updatedAt": "2026-11-02T02:20:56.588Z"
 }

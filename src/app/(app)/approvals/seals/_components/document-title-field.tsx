@@ -11,7 +11,7 @@ interface DocumentTitleFieldProps {
 export function DocumentTitleField({ documentTitle, setDocumentTitle }: DocumentTitleFieldProps) {
   return (
     <div className="md:col-span-2">
-      <Label className="text-[11px]">文件标题 *</Label>
+      <Label className="text-[11px]">Tiêu đề văn bản *</Label>
       <Input
         value={documentTitle}
         onChange={(e) => setDocumentTitle(e.target.value)}

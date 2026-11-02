@@ -19,7 +19,7 @@ export function PageCountCopies({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div>
-        <Label className="text-[11px]">页数</Label>
+        <Label className="text-[11px]">Số trang</Label>
         <Input
           type="number"
           min={1}
@@ -29,7 +29,7 @@ export function PageCountCopies({
         />
       </div>
       <div>
-        <Label className="text-[11px]">份数</Label>
+        <Label className="text-[11px]">Số bản</Label>
         <Input
           type="number"
           min={1}

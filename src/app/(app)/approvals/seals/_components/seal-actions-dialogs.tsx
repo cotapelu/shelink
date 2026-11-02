@@ -50,14 +50,14 @@ function isPdfFile(file: File) {
 
 function useStampSubmit(row: SealRequestRow, file: File | null, onClose: () => void, startTransition: (cb: () => void) => void): () => void {
   return () => {
-    if (!file) { toast.error("请上传盖章后扫描件"); return; }
-    if (!isPdfFile(file)) { toast.error("需上传 pdf 格式文件"); return; }
+    if (!file) { toast.error("Hãy tải lên bản scan sau đóng dấu"); return; }
+    if (!isPdfFile(file)) { toast.error("Cần tải tệp định dạng PDF"); return; }
     const fd = new FormData();
     fd.set("id", row.id);
     fd.set("stampedDoc", file);
     startTransition(async () => {
-      try { await stampSealRequest(fd); toast.success("已完成"); onClose(); }
-      catch (e) { toast.error(e instanceof Error ? e.message : "提交失败"); }
+      try { await stampSealRequest(fd); toast.success("Đã hoàn tất"); onClose(); }
+      catch (e) { toast.error(e instanceof Error ? e.message : "Gửi thất bại"); }
     });
   };
 }
@@ -80,9 +80,9 @@ function SealDetailDialog({ row, onClose }: { row: SealRequestRow; onClose: () =
   return (
     <Dialog open onOpenChange={o => !o && onClose()}>
       <DialogContent className="max-h-[88vh] w-[92vw] max-w-2xl overflow-y-auto">
-        <DialogHeader><DialogTitle>用章申请详情</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Chi tiết yêu cầu dùng dấu</DialogTitle></DialogHeader>
         <SealDetailFields row={row} />
-        <DialogFooter><Button variant="outline" onClick={onClose}>关闭</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" onClick={onClose}>Đóng</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -95,21 +95,21 @@ function StampDialog({ row, onClose }: { row: SealRequestRow; onClose: () => voi
   return (
     <Dialog open onOpenChange={o => !o && onClose()}>
       <DialogContent className="max-w-md">
-        <DialogHeader><DialogTitle>回填盖章后扫描件</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Bổ sung bản scan sau đóng dấu</DialogTitle></DialogHeader>
         <p className="text-[12px] text-muted-foreground">{row.code} · {SEAL_TYPE_CN[row.sealType]} · {row.documentTitle}</p>
         <label className="mt-3 flex cursor-pointer items-center gap-2 rounded border border-dashed border-border px-3 py-4 text-[12px] text-muted-foreground hover:bg-muted/30">
           <Paperclip className="h-3.5 w-3.5" />
-          {file ? (<span className="flex items-center gap-1 text-foreground"><FileText className="h-3 w-3" />{file.name}</span>) : "选择 PDF 文件"}
+          {file ? (<span className="flex items-center gap-1 text-foreground"><FileText className="h-3 w-3" />{file.name}</span>) : "Chọn tệp PDF"}
           <input type="file" accept="application/pdf,.pdf" className="hidden" onChange={e => {
             const picked = e.target.files?.[0] ?? null;
-            if (picked && !isPdfFile(picked)) { toast.error("需上传 pdf 格式文件"); e.target.value = ""; setFile(null); return; }
+            if (picked && !isPdfFile(picked)) { toast.error("Cần tải tệp định dạng PDF"); e.target.value = ""; setFile(null); return; }
             setFile(picked);
           }}
           />
         </label>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>取消</Button>
-          <Button onClick={submit} disabled={pending || !file}>{pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}提交</Button>
+          <Button variant="outline" onClick={onClose}>Huỷ</Button>
+          <Button onClick={submit} disabled={pending || !file}>{pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}Gửi</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -119,17 +119,17 @@ function StampDialog({ row, onClose }: { row: SealRequestRow; onClose: () => voi
 function CancelDialog({ row, onClose }: { row: SealRequestRow; onClose: () => void }) {
   const [pending, startTransition] = useTransition();
   const submit = () => startTransition(async () => {
-    try { await cancelSealRequest({ id: row.id }); toast.success("已撤销"); onClose(); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "撤销失败"); }
+    try { await cancelSealRequest({ id: row.id }); toast.success("Đã thu hồi"); onClose(); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Thu hồi thất bại"); }
   });
   return (
     <Dialog open onOpenChange={o => !o && onClose()}>
       <DialogContent className="max-w-sm">
-        <DialogHeader><DialogTitle>撤销用章申请</DialogTitle></DialogHeader>
-        <p className="text-[12px] text-muted-foreground">确定撤销 {row.code} ？</p>
+        <DialogHeader><DialogTitle>Thu hồi yêu cầu dùng dấu</DialogTitle></DialogHeader>
+        <p className="text-[12px] text-muted-foreground">Xác nhận thu hồi {row.code}?</p>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>取消</Button>
-          <Button variant="destructive" onClick={submit} disabled={pending}>{pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}确定撤销</Button>
+          <Button variant="outline" onClick={onClose}>Huỷ</Button>
+          <Button variant="destructive" onClick={submit} disabled={pending}>{pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}Xác nhận thu hồi</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

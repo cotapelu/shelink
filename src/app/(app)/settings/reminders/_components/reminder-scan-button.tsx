@@ -33,11 +33,11 @@ export function ReminderScanButton() {
       try {
         const r = await triggerDueReminderScan();
         const total = r.deadlineNotified + r.hearingNotified;
-        toast.success(`扫描完成：新推送 ${total} 条`, {
-          description: `期限 ${r.deadlineNotified}·开庭 ${r.hearingNotified}（去重跳过 ${r.suppressed}）`
+        toast.success(`Quét xong: đẩy mới ${total} mục`, {
+          description: `Thời hạn ${r.deadlineNotified}·Phiên tòa ${r.hearingNotified} (khử trùng bỏ qua ${r.suppressed})`
         });
       } catch (err) {
-        toast.error("扫描失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Quét thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -49,7 +49,7 @@ export function ReminderScanButton() {
       ) : (
         <RefreshCw className="h-3.5 w-3.5" />
       )}
-      立即扫描
+      Quét ngay
     </Button>
   );
 }

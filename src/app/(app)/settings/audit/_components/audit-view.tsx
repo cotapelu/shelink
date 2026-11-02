@@ -114,7 +114,7 @@ export function AuditView({
       <header className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-base font-semibold">
           <ScrollText className="h-4 w-4 text-primary" />
-          审计日志{" "}
+          Log audit{" "}
           <span className="text-muted-foreground">({items.length})</span>
         </h2>
       </header>
@@ -128,10 +128,10 @@ export function AuditView({
           }}
         >
           <SelectTrigger className="h-9 w-44 bg-background">
-            <SelectValue placeholder="动作" />
+            <SelectValue placeholder="Hành động" />
           </SelectTrigger>
           <SelectContent className="max-h-80">
-            <SelectItem value="ALL">全部动作</SelectItem>
+            <SelectItem value="ALL">Mọi hành động</SelectItem>
             {distinctActions.map((a) => (
               <SelectItem key={a} value={a}>
                 {a}
@@ -148,10 +148,10 @@ export function AuditView({
           }}
         >
           <SelectTrigger className="h-9 w-40 bg-background">
-            <SelectValue placeholder="用户" />
+            <SelectValue placeholder="Người dùng" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">全部用户</SelectItem>
+            <SelectItem value="ALL">Mọi người dùng</SelectItem>
             {userOptions.map((u) => (
               <SelectItem key={u.id} value={u.id}>
                 {u.name}
@@ -171,24 +171,24 @@ export function AuditView({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="7">近 7 天</SelectItem>
-            <SelectItem value="30">近 30 天</SelectItem>
-            <SelectItem value="90">近 90 天</SelectItem>
-            <SelectItem value="365">近 1 年</SelectItem>
+            <SelectItem value="7">7 ngày qua</SelectItem>
+            <SelectItem value="30">30 ngày qua</SelectItem>
+            <SelectItem value="90">90 ngày qua</SelectItem>
+            <SelectItem value="365">1 năm qua</SelectItem>
           </SelectContent>
         </Select>
 
         {(action !== "ALL" || userId !== "ALL" || days !== "30") && (
           <Button variant="ghost" size="sm" onClick={reset} className="gap-1">
             <RotateCcw className="h-3.5 w-3.5" />
-            重置
+          Đặt lại
           </Button>
         )}
       </div>
 
       {items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-card py-16 text-center">
-          <p className="text-sm text-muted-foreground">没有匹配的审计记录</p>
+          <p className="text-sm text-muted-foreground">Không có bản ghi audit nào khớp</p>
         </div>
       ) : (
         <ul className="space-y-1.5">

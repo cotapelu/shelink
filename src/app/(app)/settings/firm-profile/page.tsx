@@ -35,7 +35,7 @@ export default async function FirmProfilePage() {
 
   const profile = await getFirmProfile();
   const keys = Object.keys(CATEGORY_WORD_DEFAULTS) as MatterCategory[];
-  // 服务端构造类别清单（label/简称/当前词）传给客户端表单，避免 client 直接 import 含 prisma 的模块
+  // Phía server dựng danh mục loại (nhãn/viết tắt/từ hiện tại) truyền cho form client, tránh client import trực tiếp module chứa prisma
   const categories = keys.map((key) => ({
     key,
     label: matterCategoryLabel[key],

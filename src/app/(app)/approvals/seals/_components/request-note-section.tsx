@@ -30,7 +30,7 @@ interface RequestNoteSectionProps {
 export function RequestNoteSection({ requestNote, setRequestNote }: RequestNoteSectionProps) {
   return (
     <div className="md:col-span-2">
-      <Label className="text-[11px]">备注</Label>
+      <Label className="text-[11px]">Ghi chú</Label>
       <Textarea
         value={requestNote}
         onChange={(e) => setRequestNote(e.target.value)}

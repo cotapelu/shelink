@@ -18,19 +18,19 @@ export function SealsKpi({
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       <KpiCard
         icon={<CheckCircle2 className="h-3.5 w-3.5" />}
-        label="本月已盖章"
+        label="Đã đóng dấu tháng này"
         value={monthStamped}
         accent="rgb(22 163 74)"
       />
       <KpiCard
         icon={<AlertOctagon className="h-3.5 w-3.5" />}
-        label="待审批"
+        label="Chờ duyệt"
         value={pendingApprovalCount}
         accent="rgb(180 130 0)"
       />
       <KpiCard
         icon={<Stamp className="h-3.5 w-3.5" />}
-        label="待盖章"
+        label="Chờ đóng dấu"
         value={waitingStampCount}
         accent="rgb(37 99 235)"
       />

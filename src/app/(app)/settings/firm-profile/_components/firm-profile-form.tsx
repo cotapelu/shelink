@@ -57,7 +57,7 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const year = new Date().getFullYear();
-  const sample = initial.categories[0]; // 以第一个类别（民商诉讼）做示例
+  const sample = initial.categories[0]; // Lấy loại đầu tiên (tố tụng dân sự-thương mại) làm ví dụ
   const caseNoPreview = sample
     ? renderCaseNoTemplate(template, {
         year,
@@ -71,16 +71,16 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
   const onPickLogo = (file: File | undefined) => {
     if (!file) return;
     if (!/^image\//.test(file.type)) {
-      toast.error("请选择图片文件（PNG / JPG / WebP / SVG）");
+      toast.error("Hãy chọn tệp ảnh (PNG / JPG / WebP / SVG)");
       return;
     }
     if (file.size > LOGO_MAX_BYTES) {
-      toast.error("Logo 过大，请控制在约 180KB 以内");
+      toast.error("Logo quá lớn, hãy giữ trong khoảng ~180KB");
       return;
     }
     const reader = new FileReader();
     reader.onload = () => setLogoDataUrl(reader.result as string);
-    reader.onerror = () => toast.error("读取图片失败");
+    reader.onerror = () => toast.error("Đọc ảnh thất bại");
     reader.readAsDataURL(file);
   };
 
@@ -96,34 +96,34 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
           logoDataUrl,
           categoryWords: words
         });
-        toast.success("律所信息已保存");
+        toast.success("Đã lưu thông tin văn phòng");
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "保存失败");
+        toast.error(e instanceof Error ? e.message : "Lưu thất bại");
       }
     });
   };
 
   return (
     <div className="space-y-5">
-      {/* —— 律所品牌 —— */}
+      {/* —— Thương hiệu văn phòng —— */}
       <section className="ll-surface rounded-lg border border-border p-5">
         <header className="mb-3 flex items-center gap-2">
           <Building2 className="h-4 w-4 text-primary" />
-          <h2 className="text-lg">律所品牌</h2>
+          <h2 className="text-lg">Thương hiệu văn phòng</h2>
         </header>
         <p className="mb-4 text-[12px] text-muted-foreground">
-          侧边栏顶部显示的名称、副标题与 Logo。留空名称将回退默认「LawLink」。
+          Tên, phụ đề và Logo hiện ở đầu sidebar. Để trống tên sẽ quay về mặc định「LawLink」.
         </p>
 
         <div className="flex items-start gap-5">
-          {/* Logo 预览 + 上传 */}
+          {/* Xem trước Logo + tải lên */}
           <div className="flex flex-col items-center gap-2">
             <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-md border border-border bg-muted/30">
               {logoDataUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={logoDataUrl} alt="Logo 预览" className="h-full w-full object-contain" />
+                <img src={logoDataUrl} alt="Xem trước Logo" className="h-full w-full object-contain" />
               ) : (
-                <span className="text-[10px] text-muted-foreground">无 Logo</span>
+                <span className="text-[10px] text-muted-foreground">Không có Logo</span>
               )}
             </div>
             <input
@@ -140,7 +140,7 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
                 className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
               >
                 <ImageUp className="h-3 w-3" />
-                上传
+                Tải lên
               </button>
               {logoDataUrl && (
                 <button
@@ -152,7 +152,7 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
                   className="inline-flex items-center gap-1 text-[11px] text-destructive hover:underline"
                 >
                   <Trash2 className="h-3 w-3" />
-                  清除
+                  Xoá
                 </button>
               )}
             </div>
@@ -160,20 +160,20 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
 
           <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <Label className="text-[11px]">律所名称</Label>
+              <Label className="text-[11px]">Tên văn phòng</Label>
               <Input
                 value={firmName}
                 onChange={(e) => setFirmName(e.target.value)}
-                placeholder="如：星澜律师事务所"
+                placeholder="vd: Văn phòng luật Tinh Lan"
                 className="mt-1"
               />
             </div>
             <div>
-              <Label className="text-[11px]">副标题</Label>
+              <Label className="text-[11px]">Phụ đề</Label>
               <Input
                 value={firmSubtitle}
                 onChange={(e) => setFirmSubtitle(e.target.value)}
-                placeholder="如：律师工作台"
+                placeholder="vd: Bàn làm việc luật sư"
                 className="mt-1"
               />
             </div>
@@ -181,19 +181,19 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
         </div>
       </section>
 
-      {/* —— 内部编号前缀 —— */}
+      {/* —— Tiền tố mã nội bộ —— */}
       <section className="ll-surface rounded-lg border border-border p-5">
         <header className="mb-3 flex items-center gap-2">
           <Hash className="h-4 w-4 text-primary" />
-          <h2 className="text-lg">系统内部编号</h2>
+          <h2 className="text-lg">Mã nội bộ hệ thống</h2>
         </header>
         <p className="mb-4 text-[12px] text-muted-foreground">
-          每个案件自动生成的系统编号前缀。格式固定为
-          <span className="mx-1 font-mono">前缀-年份-类别-流水</span>，仅前缀可改。
+          Tiền tố của mã hệ thống tự sinh cho mỗi vụ án. Định dạng cố định là
+          <span className="mx-1 font-mono">tiền tố-năm-loại-số thứ tự</span>, chỉ tiền tố sửa được.
         </p>
         <div className="flex items-end gap-4">
           <div className="w-40">
-            <Label className="text-[11px]">编号前缀</Label>
+            <Label className="text-[11px]">Tiền tố mã</Label>
             <Input
               value={prefix}
               onChange={(e) => setPrefix(e.target.value)}
@@ -202,7 +202,7 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
             />
           </div>
           <div className="pb-2 text-[12px] text-muted-foreground">
-            示例：
+            Ví dụ:
             <span className="ml-1 font-mono text-foreground/85">
               {(prefix.trim() || "LL")}-{year}-CC-0001
             </span>
@@ -210,14 +210,14 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
         </div>
       </section>
 
-      {/* —— 所内案号 —— */}
+      {/* —— Mã nội bộ văn phòng —— */}
       <section className="ll-surface rounded-lg border border-border p-5">
         <header className="mb-3 flex items-center gap-2">
           <Hash className="h-4 w-4 text-primary" />
-          <h2 className="text-lg">所内案号（自定义模板）</h2>
+          <h2 className="text-lg">Mã nội bộ văn phòng (mẫu tuỳ chỉnh)</h2>
         </header>
         <p className="mb-4 text-[12px] text-muted-foreground">
-          律所习惯的案号，转化收案时按模板自动生成。可用占位符：
+          Mã số theo thói quen văn phòng, tự sinh theo mẫu khi chuyển hoá tiếp nhận. Các placeholder dùng được:
           <code className="mx-0.5">{"{年}"}</code>
           <code className="mx-0.5">{"{年2}"}</code>
           <code className="mx-0.5">{"{所}"}</code>
@@ -225,21 +225,21 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
           <code className="mx-0.5">{"{类词}"}</code>
           <code className="mx-0.5">{"{序3}"}</code>
           <code className="mx-0.5">{"{序4}"}</code>
-          （流水按「年+类别」独立计数）。
+          (số thứ tự đếm độc lập theo「năm + loại」).
         </p>
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div>
-            <Label className="text-[11px]">所简称（{"{所}"}）</Label>
+            <Label className="text-[11px]">Viết tắt văn phòng ({"{所}"})</Label>
             <Input
               value={shortName}
               onChange={(e) => setShortName(e.target.value)}
-              placeholder="如：普"
+              placeholder="vd: VP"
               className="mt-1"
             />
           </div>
           <div>
-            <Label className="text-[11px]">案号模板</Label>
+            <Label className="text-[11px]">Mẫu mã số</Label>
             <Input
               value={template}
               onChange={(e) => setTemplate(e.target.value)}
@@ -250,12 +250,12 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
         </div>
 
         <div className="mt-3 rounded-md border border-border bg-muted/20 px-3 py-2 text-[12px]">
-          示例（{sample?.label ?? "民商诉讼"}）：
+          Ví dụ ({sample?.label ?? "Tố tụng dân sự-thương mại"}):
           <span className="ml-1 font-mono text-foreground/90">{caseNoPreview || "—"}</span>
         </div>
 
         <div className="mt-4">
-          <Label className="text-[11px] text-muted-foreground">类别词（{"{类词}"}）映射</Label>
+          <Label className="text-[11px] text-muted-foreground">Map từ loại ({"{类词}"})</Label>
           <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-4">
             {initial.categories.map((c) => (
               <div key={c.key} className="rounded-md border border-border bg-card p-2">
@@ -277,11 +277,11 @@ export function FirmProfileForm({ initial }: { initial: Initial }) {
 
       <div className="flex items-center justify-between">
         <p className="text-[11px] text-muted-foreground">
-          修改前缀 / 模板不影响已生成的历史编号；仅对之后新建的案件生效。
+          Sửa tiền tố / mẫu không ảnh hưởng mã lịch sử đã sinh; chỉ có hiệu lực với vụ án tạo mới sau này.
         </p>
         <Button onClick={save} disabled={pending} className="gap-1.5">
           {pending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          保存
+          Lưu
         </Button>
       </div>
     </div>

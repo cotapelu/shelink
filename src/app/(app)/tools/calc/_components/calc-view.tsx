@@ -30,9 +30,9 @@ import { DaysCalc } from "./days-calc";
 type Tab = "courtFee" | "lateInterest" | "days";
 
 const TABS: { key: Tab; label: string; icon: typeof Scale }[] = [
-  { key: "courtFee", label: "诉讼费", icon: Scale },
-  { key: "lateInterest", label: "迟延履行金", icon: Coins },
-  { key: "days", label: "天数计算", icon: CalendarDays }
+  { key: "courtFee", label: "Lệ phí tố tụng", icon: Scale },
+  { key: "lateInterest", label: "Tiền chậm thi hành", icon: Coins },
+  { key: "days", label: "Tính số ngày", icon: CalendarDays }
 ];
 
 export function CalcView({ hideHeader }: { hideHeader?: boolean } = {}) {
@@ -40,15 +40,15 @@ export function CalcView({ hideHeader }: { hideHeader?: boolean } = {}) {
 
   return (
     <div className="space-y-5">
-      {/* 标题（应用页内嵌时由 tab 标注，隐藏）*/}
+      {/* Tiêu đề (khi nhúng trong trang ứng dụng thì do tab đánh dấu, ẩn) */}
       {!hideHeader && (
         <div>
           <h1 className="flex items-center gap-2 text-2xl">
             <Calculator className="h-5 w-5 text-primary" strokeWidth={1.6} />
-            实务工具
+            Công cụ thực hành
           </h1>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
-            诉讼费 / 迟延履行金 / 天数 —— 纯前端速算，无需联网
+            Lệ phí tố tụng / tiền chậm thi hành / số ngày —— tính nhanh thuần frontend, không cần mạng
           </p>
         </div>
       )}

@@ -31,36 +31,36 @@ describe("SealRowActions", () => {
 
   it("shows approve and cancel for PENDING when canApprove and owner", () => {
     render(<SealRowActions {...defaultProps} />);
-    expect(screen.getByText("审批")).toBeInTheDocument();
-    expect(screen.getByText("撤销")).toBeInTheDocument();
+    expect(screen.getByText("Duyệt")).toBeInTheDocument();
+    expect(screen.getByText("Thu hồi")).toBeInTheDocument();
   });
 
   it("calls onAction('approve') on approve click", () => {
     render(<SealRowActions {...defaultProps} />);
-    fireEvent.click(screen.getByText("审批"));
+    fireEvent.click(screen.getByText("Duyệt"));
     expect(defaultProps.onAction).toHaveBeenCalledWith("approve");
   });
 
   it("calls onAction('cancel') on cancel click", () => {
     render(<SealRowActions {...defaultProps} />);
-    fireEvent.click(screen.getByText("撤销"));
+    fireEvent.click(screen.getByText("Thu hồi"));
     expect(defaultProps.onAction).toHaveBeenCalledWith("cancel");
   });
 
   it("does not show cancel for non-owner", () => {
     render(<SealRowActions {...defaultProps} currentUser={{ id: "user2", role: "LAWYER" }} />);
-    expect(screen.queryByText("撤销")).not.toBeInTheDocument();
+    expect(screen.queryByText("Thu hồi")).not.toBeInTheDocument();
   });
 
   it("shows stamp button for APPROVED when canStamp", () => {
     const approvedRow = { ...defaultProps.row, status: "APPROVED" };
     render(<SealRowActions {...defaultProps} row={approvedRow} />);
-    expect(screen.getByText("回填盖章件")).toBeInTheDocument();
+    expect(screen.getByText("Bổ sung bản đóng dấu")).toBeInTheDocument();
   });
 
   it("shows download for STAMPED with stampedDoc", () => {
     const stampedRow = { ...defaultProps.row, status: "STAMPED", stampedDoc: { id: "doc1", name: "file.pdf", size: 123 } };
     render(<SealRowActions {...defaultProps} row={stampedRow} />);
-    expect(screen.getByText("下载")).toBeInTheDocument();
+    expect(screen.getByText("Tải xuống")).toBeInTheDocument();
   });
 });

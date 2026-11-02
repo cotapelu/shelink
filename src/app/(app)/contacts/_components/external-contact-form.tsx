@@ -18,14 +18,14 @@ import {
 import { AlertCircle } from "lucide-react";
 
 const CATEGORY_OPTIONS: { value: ExternalContactCategory; label: string }[] = [
-  { value: "COURT", label: "法院" },
-  { value: "PROSECUTOR", label: "检察院" },
-  { value: "POLICE", label: "公安" },
-  { value: "NOTARY", label: "公证处" },
-  { value: "ARBITRATION", label: "仲裁" },
-  { value: "OTHER_FIRM", label: "他所律师" },
-  { value: "EXPERT", label: "鉴定专家" },
-  { value: "OTHER", label: "其他" }
+  { value: "COURT", label: "Toà án" },
+  { value: "PROSECUTOR", label: "Viện kiểm sát" },
+  { value: "POLICE", label: "Công an" },
+  { value: "NOTARY", label: "Phòng công chứng" },
+  { value: "ARBITRATION", label: "Trọng tài" },
+  { value: "OTHER_FIRM", label: "Luật sư VP khác" },
+  { value: "EXPERT", label: "Chuyên gia giám định" },
+  { value: "OTHER", label: "Khác" }
 ];
 
 export interface FormState {

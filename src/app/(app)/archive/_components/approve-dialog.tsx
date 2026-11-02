@@ -49,11 +49,11 @@ function useApprove(record: PendingRecord, onSuccess: () => void) {
           archiveId: record.id,
           note: note.trim() || undefined,
         });
-        toast.success(`已通过归档申请（${record.archiveNo}）`);
+        toast.success(`Đã duyệt yêu cầu lưu trữ (${record.archiveNo})`);
         onSuccess();
         router.refresh();
       } catch (err) {
-        toast.error("审批失败", {
+        toast.error("Duyệt thất bại", {
           description: err instanceof Error ? err.message : "",
         });
       }
@@ -80,7 +80,7 @@ function MissingItemsAlert({ record }: { record: PendingRecord }) {
     <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700">
       <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
       <span>
-        此申请有 {record.missingItems.length} 项材料缺失，请确认知悉后再通过。
+        Yêu cầu này còn thiếu {record.missingItems.length} tài liệu, hãy xác nhận đã biết rồi duyệt.
       </span>
     </div>
   );
@@ -89,11 +89,11 @@ function MissingItemsAlert({ record }: { record: PendingRecord }) {
 function NoteInput({ note, setNote }: { note: string; setNote: (v: string) => void }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs">审批备注（可选）</Label>
+      <Label className="text-xs">Ghi chú duyệt (tuỳ chọn)</Label>
       <Textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="备注会写入归档记录与时间线，律师可见"
+        placeholder="Ghi chú sẽ ghi vào bản ghi lưu trữ và dòng thời gian, luật sư thấy được"
         rows={3}
       />
     </div>
@@ -106,8 +106,8 @@ export function ApproveDialog({ record, onClose }: { record: PendingRecord; onCl
     <Dialog open onOpenChange={o => !o && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Check className="h-5 w-5 text-emerald-500" />通过归档申请</DialogTitle>
-          <DialogDescription>通过后案件状态变为「已归档」，全部 server action 进入只读门禁。</DialogDescription>
+          <DialogTitle className="flex items-center gap-2"><Check className="h-5 w-5 text-emerald-500" />Duyệt yêu cầu lưu trữ</DialogTitle>
+          <DialogDescription>Sau khi duyệt, trạng thái vụ án thành「đã lưu trữ」, mọi server action vào cổng chỉ đọc.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <RecordInfo record={record} />
@@ -115,10 +115,10 @@ export function ApproveDialog({ record, onClose }: { record: PendingRecord; onCl
           <NoteInput note={note} setNote={setNote} />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isPending}>取消</Button>
+          <Button variant="outline" onClick={onClose} disabled={isPending}>Huỷ</Button>
           <Button onClick={submit} disabled={isPending} className="bg-emerald-600 text-white hover:bg-emerald-700">
             {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-            确认通过
+            Xác nhận duyệt
           </Button>
         </DialogFooter>
       </DialogContent>

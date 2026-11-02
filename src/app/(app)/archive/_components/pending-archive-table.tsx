@@ -27,7 +27,7 @@ export function PendingArchiveTable({ records }: PendingArchiveTableProps) {
   const { selected, selectedRecords, toggleAll, toggleOne, clear } = useSelection(records);
 
   if (records.length === 0) {
-    return <div className="rounded-lg border border-dashed border-border/60 py-16 text-center text-sm text-muted-foreground">当前没有待审批归档申请。律师提交归档后会出现在这里。</div>;
+    return <div className="rounded-lg border border-dashed border-border/60 py-16 text-center text-sm text-muted-foreground">Hiện không có yêu cầu lưu trữ nào chờ duyệt. Luật sư gửi lưu trữ sẽ xuất hiện ở đây.</div>;
   }
 
   return (

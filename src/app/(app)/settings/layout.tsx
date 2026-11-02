@@ -36,7 +36,7 @@ export default async function SettingsLayout({
       <header>
         <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
           <Settings className="h-5 w-5 text-primary" />
-          设置
+          Cài đặt
         </h1>
       </header>
 
@@ -47,7 +47,7 @@ export default async function SettingsLayout({
               href="/settings/profile"
               icon={<KeyRound className="h-3.5 w-3.5" />}
             >
-              个人 / 改密码
+              Cá nhân / Đổi mật khẩu
             </SettingsNavLink>
             {isManager && (
               <>
@@ -55,13 +55,13 @@ export default async function SettingsLayout({
                   href="/settings/reminders"
                   icon={<BellRing className="h-3.5 w-3.5" />}
                 >
-                  提醒维护
+                  Bảo trì nhắc nhở
                 </SettingsNavLink>
                 <SettingsNavLink
                   href="/settings/import"
                   icon={<FileUp className="h-3.5 w-3.5" />}
                 >
-                  批量导入
+                  Import hàng loạt
                 </SettingsNavLink>
               </>
             )}
@@ -79,37 +79,37 @@ export default async function SettingsLayout({
                   href="/settings/firm-profile"
                   icon={<Building2 className="h-3.5 w-3.5" />}
                 >
-                  律所信息
+                  Thông tin văn phòng
                 </SettingsNavLink>
                 <SettingsNavLink
                   href="/settings/users"
                   icon={<Users className="h-3.5 w-3.5" />}
                 >
-                  用户管理
+                  Quản lý người dùng
                 </SettingsNavLink>
                 <SettingsNavLink
                   href="/settings/templates"
                   icon={<Layers className="h-3.5 w-3.5" />}
                 >
-                  阶段模板
+                  Mẫu giai đoạn
                 </SettingsNavLink>
                 <SettingsNavLink
                   href="/settings/custom-fields"
                   icon={<ListChecks className="h-3.5 w-3.5" />}
                 >
-                  自定义字段
+                  Trường tuỳ chỉnh
                 </SettingsNavLink>
                 <SettingsNavLink
                   href="/settings/ai"
                   icon={<Sparkles className="h-3.5 w-3.5" />}
                 >
-                  AI 接入
+                  Tích hợp AI
                 </SettingsNavLink>
                 <SettingsNavLink
                   href="/settings/express"
                   icon={<Package className="h-3.5 w-3.5" />}
                 >
-                  快递接入
+                  Tích hợp chuyển phát
                 </SettingsNavLink>
                 <SettingsNavLink
                   href="/settings/email"
@@ -127,7 +127,7 @@ export default async function SettingsLayout({
                   href="/settings/audit"
                   icon={<ScrollText className="h-3.5 w-3.5" />}
                 >
-                  审计日志
+                  Log audit
                 </SettingsNavLink>
               </>
             )}

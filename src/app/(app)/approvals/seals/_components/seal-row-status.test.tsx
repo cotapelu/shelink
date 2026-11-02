@@ -4,6 +4,6 @@ import { SealRowStatus } from "./seal-row-status";
 describe("SealRowStatus", () => {
   it("renders status label", () => {
     render(<SealRowStatus status="PENDING" />);
-    expect(screen.getByText("待审批")).toBeInTheDocument();
+    expect(screen.getByText("Chờ duyệt")).toBeInTheDocument();
   });
 });

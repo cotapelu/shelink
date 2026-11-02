@@ -18,7 +18,7 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * /seals 页面共享类型（v0.8）
+ * Kiểu dùng chung cho trang /seals (v0.8)
  */
 import type { Prisma } from "@prisma/client";
 
@@ -42,19 +42,19 @@ export type MatterOption = {
 };
 
 export const SEAL_TYPE_CN: Record<string, string> = {
-  OFFICIAL_SEAL: "律所公章",
-  CONTRACT_SEAL: "合同专用章",
-  FINANCE_SEAL: "财务专用章",
-  LEGAL_REP_SEAL: "法定代表人章",
-  CONTRACT_REVIEW_SEAL: "合同审核章"
+  OFFICIAL_SEAL: "Dấu văn phòng",
+  CONTRACT_SEAL: "Dấu hợp đồng",
+  FINANCE_SEAL: "Dấu tài chính",
+  LEGAL_REP_SEAL: "Dấu người đại diện theo pháp luật",
+  CONTRACT_REVIEW_SEAL: "Dấu duyệt hợp đồng"
 };
 
 export const SEAL_STATUS_CN: Record<string, string> = {
-  PENDING: "待审批",
-  APPROVED: "待盖章",
-  STAMPED: "已完成",
-  REJECTED: "已驳回",
-  CANCELLED: "已撤销"
+  PENDING: "Chờ duyệt",
+  APPROVED: "Chờ đóng dấu",
+  STAMPED: "Đã hoàn tất",
+  REJECTED: "Đã từ chối",
+  CANCELLED: "Đã thu hồi"
 };
 
 export const SEAL_STATUS_COLOR: Record<

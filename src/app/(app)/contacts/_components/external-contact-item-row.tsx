@@ -16,20 +16,20 @@ export function ExternalContactItemRow({ contact, currentUserId, currentUserRole
   const canEdit = contact.createdBy.id === currentUserId || currentUserRole === "ADMIN" || currentUserRole === "PRINCIPAL_LAWYER";
   const canReview = canReviewContacts && contact.status === "PENDING_REVIEW";
   const handleApprove = async () => {
-    if (!confirm(`通过联系人"${contact.name}"？`)) return;
-    try { await approveExternalContact({ id: contact.id }); toast.success("已通过"); router.refresh(); }
-    catch (err: any) { toast.error("审核失败", { description: err.message || "" }); }
+    if (!confirm(`Duyệt liên hệ "${contact.name}"?`)) return;
+    try { await approveExternalContact({ id: contact.id }); toast.success("Đã duyệt"); router.refresh(); }
+    catch (err: any) { toast.error("Duyệt thất bại", { description: err.message || "" }); }
   };
   const handleReject = async () => {
-    const note = prompt(`驳回联系人"${contact.name}"的原因（可选）`);
+    const note = prompt(`Lý do từ chối liên hệ "${contact.name}" (tuỳ chọn)`);
     if (note === null) return;
-    try { await rejectExternalContact({ id: contact.id, note }); toast.success("已驳回"); router.refresh(); }
-    catch (err: any) { toast.error("审核失败", { description: err.message || "" }); }
+    try { await rejectExternalContact({ id: contact.id, note }); toast.success("Đã từ chối"); router.refresh(); }
+    catch (err: any) { toast.error("Duyệt thất bại", { description: err.message || "" }); }
   };
   const handleArchive = async () => {
-    if (!confirm(`归档联系人"${contact.name}"？`)) return;
-    try { await archiveExternalContact(contact.id); toast.success("已归档"); router.refresh(); }
-    catch (err: any) { toast.error("归档失败", { description: err.message || "" }); }
+    if (!confirm(`Lưu trữ liên hệ "${contact.name}"?`)) return;
+    try { await archiveExternalContact(contact.id); toast.success("Đã lưu trữ"); router.refresh(); }
+    catch (err: any) { toast.error("Lưu trữ thất bại", { description: err.message || "" }); }
   };
   return (
     <ExternalContactRowContent

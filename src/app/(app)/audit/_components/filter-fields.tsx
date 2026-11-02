@@ -13,40 +13,40 @@ export function FilterFields({ currentFilter, options, onNavigate }: FilterField
   return (
     <>
       <SelectFilter
-        label="操作人"
+        label="Người thao tác"
         value={currentFilter.userId || "__all__"}
         options={options.users.map(u => u.id)}
         onValueChange={(v) => onNavigate({ userId: v === "__all__" ? undefined : v })}
-        placeholder="全部"
+        placeholder="Tất cả"
         triggerClassName="h-8 w-36 text-xs"
       />
 
       <SelectFilter
-        label="动作"
+        label="Hành động"
         value={currentFilter.action || "__all__"}
         options={options.actions}
         onValueChange={(v) => onNavigate({ action: v === "__all__" ? undefined : v })}
-        placeholder="全部"
+        placeholder="Tất cả"
         triggerClassName="h-8 w-48 text-xs"
       />
 
       <SelectFilter
-        label="对象类型"
+        label="Loại đối tượng"
         value={currentFilter.targetType || "__all__"}
         options={options.targetTypes}
         onValueChange={(v) => onNavigate({ targetType: v === "__all__" ? undefined : v })}
-        placeholder="全部"
+        placeholder="Tất cả"
         triggerClassName="h-8 w-36 text-xs"
       />
 
       <DateRangeFilter
-        label="起始日"
+        label="Ngày bắt đầu"
         value={currentFilter.startStr}
         onChange={(start) => onNavigate({ start: start || undefined })}
       />
 
       <DateRangeFilter
-        label="结束日"
+        label="Ngày kết thúc"
         value={currentFilter.endStr}
         onChange={(end) => onNavigate({ end: end || undefined })}
       />

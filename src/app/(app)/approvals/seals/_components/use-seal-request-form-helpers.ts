@@ -6,7 +6,7 @@
 /**
  * Preset purposes for seal requests
  */
-export const PURPOSE_PRESETS = ["委托合同", "法律意见书", "所函", "证明", "其他"] as const;
+export const PURPOSE_PRESETS = ["Hợp đồng ủy quyền", "Ý kiến pháp lý", "Công văn văn phòng", "Chứng nhận", "Khác"] as const;
 export type PurposePreset = typeof PURPOSE_PRESETS[number];
 
 /**
@@ -51,9 +51,9 @@ export function computeResolvedPurpose(
   purposePreset: PurposePreset | "",
   purposeOther: string
 ): string {
-  if (purposePreset === "其他") {
+  if (purposePreset === "Khác") {
     const trimmed = purposeOther.trim();
-    return trimmed ? `其他：${trimmed}` : "";
+    return trimmed ? `Khác: ${trimmed}` : "";
   }
   return purposePreset;
 }
@@ -79,28 +79,28 @@ export function validateForm(
 }
 
 function validateSealType(sealType: string): string | null {
-  return sealType ? null : "请选择章种类";
+  return sealType ? null : "Hãy chọn loại dấu";
 }
 
 function validatePurpose(
   purposePreset: PurposePreset | "",
   purposeOther: string
 ): string | null {
-  if (!purposePreset) return "请选择用印事由";
-  if (purposePreset === "其他" && !purposeOther.trim()) {
-    return "请填写「其他」用印事由的具体说明";
+  if (!purposePreset) return "Hãy chọn lý do dùng dấu";
+  if (purposePreset === "Khác" && !purposeOther.trim()) {
+    return "Hãy nhập diễn giải cụ thể cho lý do dùng dấu「Khác」";
   }
   return null;
 }
 
 function validateDocumentTitle(documentTitle: string): string | null {
-  return documentTitle.trim() ? null : "请填写文件标题";
+  return documentTitle.trim() ? null : "Hãy nhập tiêu đề văn bản";
 }
 
 function validateFile(hasExisting: boolean, file: File | null): string | null {
   if (hasExisting) return null;
-  if (!file) return "请上传待盖章稿";
-  return isPdfFile(file) ? null : "需上传 pdf 格式文件";
+  if (!file) return "Hãy tải lên bản chờ đóng dấu";
+  return isPdfFile(file) ? null : "Cần tải tệp định dạng PDF";
 }
 
 /**

@@ -15,11 +15,11 @@ export function FormFooter({ pending, onCancel, onSubmit }: FormFooterProps) {
     <div className="mt-6 md:col-span-2">
       <DialogFooter>
         <Button variant="outline" onClick={onCancel}>
-          取消
+          Huỷ
         </Button>
         <Button onClick={onSubmit} disabled={pending}>
           {pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
-          提交申请
+          Gửi yêu cầu
         </Button>
       </DialogFooter>
     </div>

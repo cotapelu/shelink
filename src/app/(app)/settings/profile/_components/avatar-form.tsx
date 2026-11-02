@@ -37,11 +37,11 @@ export function AvatarForm({ name, initialAvatar }: { name: string; initialAvata
   const onPick = (file: File | undefined) => {
     if (!file) return;
     if (!/^image\//.test(file.type)) {
-      toast.error("请选择图片文件（PNG / JPG / WebP / SVG）");
+      toast.error("Hãy chọn tệp ảnh (PNG / JPG / WebP / SVG)");
       return;
     }
     if (file.size > AVATAR_MAX_BYTES) {
-      toast.error("头像过大，请控制在约 180KB 以内");
+      toast.error("Ảnh đại diện quá lớn, hãy giữ trong khoảng ~180KB");
       return;
     }
     const reader = new FileReader();
@@ -50,7 +50,7 @@ export function AvatarForm({ name, initialAvatar }: { name: string; initialAvata
       setAvatar(dataUrl);
       save(dataUrl);
     };
-    reader.onerror = () => toast.error("读取图片失败");
+    reader.onerror = () => toast.error("Đọc ảnh thất bại");
     reader.readAsDataURL(file);
   };
 
@@ -58,10 +58,10 @@ export function AvatarForm({ name, initialAvatar }: { name: string; initialAvata
     startTransition(async () => {
       try {
         await saveMyAvatar({ avatar: value });
-        toast.success(value ? "头像已更新" : "头像已清除");
+        toast.success(value ? "Đã cập nhật ảnh đại diện" : "Đã xoá ảnh đại diện");
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "保存失败");
+        toast.error(e instanceof Error ? e.message : "Lưu thất bại");
       }
     });
   };
@@ -92,7 +92,7 @@ export function AvatarForm({ name, initialAvatar }: { name: string; initialAvata
             className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-[12px] hover:bg-muted/60 disabled:opacity-50"
           >
             {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImageUp className="h-3 w-3" />}
-            上传头像
+            Tải ảnh đại diện
           </button>
           {avatar && (
             <button
@@ -106,12 +106,12 @@ export function AvatarForm({ name, initialAvatar }: { name: string; initialAvata
               className="inline-flex items-center gap-1 text-[12px] text-destructive hover:underline disabled:opacity-50"
             >
               <Trash2 className="h-3 w-3" />
-              清除
+              Xoá
             </button>
           )}
         </div>
         <p className="text-[11px] text-muted-foreground">
-          未上传时显示姓名首字「{initial}」。建议方形图片，≤ 180KB。
+          Khi chưa tải lên thì hiện chữ đầu của họ tên「{initial}」. Khuyên dùng ảnh vuông, ≤ 180KB.
         </p>
       </div>
     </div>

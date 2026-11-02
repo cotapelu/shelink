@@ -49,7 +49,7 @@ export function SmsPasteDialog({
   const [useAi, setUseAi] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  // 实时预览
+  // Xem trước thời gian thực
   const preview = useMemo(() => {
     const trimmed = text.trim();
     if (!trimmed) return [];
@@ -59,18 +59,18 @@ export function SmsPasteDialog({
 
   const submit = () => {
     if (!text.trim()) {
-      toast.error("请粘贴短信内容");
+      toast.error("Hãy dán nội dung tin nhắn");
       return;
     }
     startTransition(async () => {
       try {
         const res = await parseAndSaveSms({ rawText: text, batch, useAi });
-        const aiHint = useAi && res.aiEnrichedCount > 0 ? `，AI 增强 ${res.aiEnrichedCount} 条` : "";
-        toast.success(`已解析 ${res.count} 条${aiHint}`);
+        const aiHint = useAi && res.aiEnrichedCount > 0 ? `, AI tăng cường ${res.aiEnrichedCount} bản ghi` : "";
+        toast.success(`Đã phân tích ${res.count} bản ghi${aiHint}`);
         setText("");
         onOpenChange(false);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "保存失败");
+        toast.error(e instanceof Error ? e.message : "Lưu thất bại");
       }
     });
   };
@@ -87,10 +87,10 @@ export function SmsPasteDialog({
         <DialogHeader className="border-b border-border px-6 py-4">
           <DialogTitle className="flex items-center gap-2">
             <Inbox className="h-4 w-4 text-primary" />
-            粘贴法院短信
+            Dán tin nhắn toà án
           </DialogTitle>
           <DialogDescription className="text-xs">
-            将 12368 / 法院 / 电子送达短信粘贴进来。多条短信用空行分隔，勾选&ldquo;批量&rdquo;逐条解析。
+            Dán tin nhắn 12368 / toà án / tống đạt điện tử vào đây. Nhiều tin nhắn phân cách bằng dòng trống, tích&ldquo;hàng loạt&rdquo;để phân tích từng cái.
           </DialogDescription>
         </DialogHeader>
 
@@ -98,7 +98,7 @@ export function SmsPasteDialog({
           <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="原文粘贴在此..."
+            placeholder="Dán bản gốc vào đây..."
             rows={8}
             className="text-[12px] leading-relaxed"
             autoFocus
@@ -110,7 +110,7 @@ export function SmsPasteDialog({
                 checked={batch}
                 onCheckedChange={(v) => setBatch(v === true)}
               />
-              <span>多条短信（按空行分隔）—— 一次提交，逐条解析与匹配</span>
+              <span>Nhiều tin nhắn (phân cách bằng dòng trống) —— gửi một lần, phân tích và khớp từng cái</span>
             </label>
             <label className="flex items-center gap-2 text-[12px] text-muted-foreground">
               <Checkbox
@@ -118,9 +118,9 @@ export function SmsPasteDialog({
                 onCheckedChange={(v) => setUseAi(v === true)}
               />
               <span>
-                用 AI 增强解析 <Sparkles className="inline h-3 w-3 text-primary" /> ——
-                补 <span className="text-foreground/80">摘要 / 律师动作 / 紧急程度</span>
-                （需先到 设置 → AI 接入 配置）
+                Dùng AI tăng cường phân tích <Sparkles className="inline h-3 w-3 text-primary" /> ——
+                Bù <span className="text-foreground/80">tóm tắt / hành động luật sư / mức khẩn</span>
+                (cần vào Cài đặt → Tích hợp AI cấu hình trước)
               </span>
             </label>
           </div>
@@ -129,7 +129,7 @@ export function SmsPasteDialog({
             <div className="rounded-md border border-border bg-muted/20 p-3">
               <div className="mb-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <Sparkles className="h-3 w-3 text-primary" />
-                解析预览（前 {preview.length} 条）
+                Xem trước phân tích ({preview.length} bản ghi đầu)
               </div>
               <ul className="space-y-2">
                 {preview.map((p, i) => {
@@ -161,11 +161,11 @@ export function SmsPasteDialog({
                         </p>
                       )}
                       <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-muted-foreground/80">
-                        {p.parsed.hearingDate && <span>开庭：{p.parsed.hearingDate}</span>}
+                        {p.parsed.hearingDate && <span>Phiên tòa: {p.parsed.hearingDate}</span>}
                         {p.parsed.courtRoom && <span>{p.parsed.courtRoom}</span>}
-                        {p.parsed.judge && <span>法官：{p.parsed.judge}</span>}
+                        {p.parsed.judge && <span>Thẩm phán: {p.parsed.judge}</span>}
                         {p.parsed.urls.length > 0 && (
-                          <span>{p.parsed.urls.length} 个链接</span>
+                          <span>{p.parsed.urls.length} liên kết</span>
                         )}
                       </div>
                     </li>
@@ -178,11 +178,11 @@ export function SmsPasteDialog({
 
         <DialogFooter className="border-t border-border px-6 py-4">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={pending || !text.trim()}>
             {pending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-            解析并保存
+            Phân tích và lưu
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -20,10 +20,10 @@ export function AuditPagination({ result }: AuditPaginationProps) {
 
   return (
     <div className="flex items-end justify-between text-xs text-muted-foreground mt-3">
-      <span>本页 {result.items.length} 条</span>
+      <span>Trang này {result.items.length} mục</span>
       {result.nextCursor && (
         <Button size="sm" variant="outline" onClick={nextPage}>
-          下一页 →
+          Trang sau →
         </Button>
       )}
     </div>

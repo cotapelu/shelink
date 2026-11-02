@@ -44,7 +44,7 @@ function useReject(record: PendingRecord, onSuccess: () => void) {
 
   function submit() {
     if (!note.trim()) {
-      toast.warning("请填写驳回原因");
+      toast.warning("Hãy nhập lý do từ chối");
       return;
     }
     startTransition(async () => {
@@ -53,11 +53,11 @@ function useReject(record: PendingRecord, onSuccess: () => void) {
           archiveId: record.id,
           note: note.trim()
         });
-        toast.success(`已驳回（${record.archiveNo}）`);
+        toast.success(`Đã từ chối (${record.archiveNo})`);
         onSuccess();
         router.refresh();
       } catch (err) {
-        toast.error("驳回失败", {
+        toast.error("Từ chối thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -82,12 +82,12 @@ function NoteInput({ note, setNote }: { note: string; setNote: (v: string) => vo
   return (
     <div className="space-y-1.5">
       <Label className="text-xs">
-        驳回原因 <span className="text-destructive">*</span>
+        Lý do từ chối <span className="text-destructive">*</span>
       </Label>
       <Textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="如：缺关键证据材料；办案小结过于简略；裁判文书未上传等"
+        placeholder="vd: thiếu tài liệu chứng cứ then chốt; tóm tắt xử lý quá sơ sài; chưa tải văn bản quyết định..."
         rows={4}
       />
     </div>
@@ -106,16 +106,16 @@ export function RejectDialog({
     <Dialog open onOpenChange={o => !o && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><X className="h-5 w-5 text-destructive" />驳回归档申请</DialogTitle>
-          <DialogDescription>驳回后该归档申请失效，律师需根据原因调整后重新提交。</DialogDescription>
+          <DialogTitle className="flex items-center gap-2"><X className="h-5 w-5 text-destructive" />Từ chối yêu cầu lưu trữ</DialogTitle>
+          <DialogDescription>Sau khi từ chối, yêu cầu lưu trữ này hết hiệu lực, luật sư cần điều chỉnh theo lý do rồi gửi lại.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <RecordInfo record={record} />
           <NoteInput note={note} setNote={setNote} />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isPending}>取消</Button>
-          <Button variant="destructive" onClick={submit} disabled={isPending}>{isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}确认驳回</Button>
+          <Button variant="outline" onClick={onClose} disabled={isPending}>Huỷ</Button>
+          <Button variant="destructive" onClick={submit} disabled={isPending}>{isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}Xác nhận từ chối</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

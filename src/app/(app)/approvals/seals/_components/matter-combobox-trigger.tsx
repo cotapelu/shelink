@@ -41,7 +41,7 @@ export function MatterComboboxTrigger({
           <span
             role="button"
             tabIndex={0}
-            aria-label="清空"
+            aria-label="Xoá"
             onClick={onClear}
             onKeyDown={onKeyClear}
             className="rounded p-0.5 text-muted-foreground transition-colors hover:text-destructive"

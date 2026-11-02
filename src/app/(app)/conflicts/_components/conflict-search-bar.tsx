@@ -25,10 +25,10 @@ export function ConflictSearchBar({
   return (
     <section className="rounded-xl border border-border bg-card p-5">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold">检索项</h2>
+        <h2 className="text-sm font-semibold">Mục tra</h2>
         <Button variant="outline" size="sm" onClick={addQuery} className="h-7 gap-1">
           <Plus className="h-3.5 w-3.5" />
-          添加检索项
+          Thêm mục tra
         </Button>
       </div>
 
@@ -56,7 +56,7 @@ export function ConflictSearchBar({
           ) : (
             <Search className="h-4 w-4" />
           )}
-          开始检索
+          Bắt đầu tra
         </Button>
       </div>
     </section>

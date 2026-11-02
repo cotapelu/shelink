@@ -21,7 +21,7 @@ export function ExternalContactList({
   if (externalContacts.length === 0) {
     return (
       <p className="rounded-md border border-dashed border-border bg-background py-8 text-center text-xs text-muted-foreground">
-        暂无匹配联系人
+        Chưa có liên hệ khớp
       </p>
     );
   }

@@ -31,7 +31,7 @@ export function ArchiveTabs({ active, pendingCount }: Props) {
   return (
     <div className="border-b border-border/60 flex items-end gap-1 text-sm">
       <Tab href="/archive?tab=pending" active={active === "pending"}>
-        待审批
+        Chờ duyệt
         {pendingCount > 0 && (
           <span
             className={cn(
@@ -46,7 +46,7 @@ export function ArchiveTabs({ active, pendingCount }: Props) {
         )}
       </Tab>
       <Tab href="/archive" active={active === "approved"}>
-        已归档
+        Đã lưu trữ
       </Tab>
     </div>
   );

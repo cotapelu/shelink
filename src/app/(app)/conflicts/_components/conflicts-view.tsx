@@ -21,7 +21,7 @@ export function ConflictsView() {
       .map(q => ({ role: q.role, name: q.name.trim(), idNumber: q.idNumber.trim() }))
       .filter(q => q.name || q.idNumber);
     if (cleaned.length === 0) {
-      toast.warning("请至少填写一个姓名或证件号");
+      toast.warning("Hãy điền ít nhất một họ tên hoặc số giấy tờ");
       return;
     }
     startTransition(async () => {
@@ -29,9 +29,9 @@ export function ConflictsView() {
         const res = await runCheckAndSave({ queries: cleaned });
         setResults(res.hits);
         setHasRun(true);
-        toast.success(`检索完成，命中 ${res.hits.length} 条`);
+        toast.success(`Tra xong, khớp ${res.hits.length} mục`);
       } catch (err) {
-        toast.error("检索失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Tra thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }

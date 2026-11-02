@@ -39,14 +39,14 @@ export function SealsTable({
           <table className="w-full text-[12px]">
             <thead className="bg-muted/30 text-[10px] uppercase tracking-wider text-muted-foreground">
               <tr>
-                <th className="px-3 py-2 text-left font-normal">流水号</th>
-                <th className="px-3 py-2 text-left font-normal">章种类</th>
-                <th className="px-3 py-2 text-left font-normal">申请人</th>
-                <th className="px-3 py-2 text-left font-normal">关联案件</th>
-                <th className="px-3 py-2 text-left font-normal">用章事由</th>
-                <th className="px-3 py-2 text-left font-normal">状态</th>
-                <th className="px-3 py-2 text-left font-normal">提交时间</th>
-                <th className="px-3 py-2 text-right font-normal">操作</th>
+                <th className="px-3 py-2 text-left font-normal">Số thứ tự</th>
+                <th className="px-3 py-2 text-left font-normal">Loại dấu</th>
+                <th className="px-3 py-2 text-left font-normal">Người yêu cầu</th>
+                <th className="px-3 py-2 text-left font-normal">Vụ án liên kết</th>
+                <th className="px-3 py-2 text-left font-normal">Lý do dùng dấu</th>
+                <th className="px-3 py-2 text-left font-normal">Trạng thái</th>
+                <th className="px-3 py-2 text-left font-normal">Thời gian gửi</th>
+                <th className="px-3 py-2 text-right font-normal">Thao tác</th>
               </tr>
             </thead>
             <tbody>

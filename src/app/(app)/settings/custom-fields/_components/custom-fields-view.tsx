@@ -49,10 +49,10 @@ import {
 } from "@/server/custom-fields/actions";
 
 const TYPE_LABEL: Record<CustomFieldDef["fieldType"], string> = {
-  TEXT: "文本",
-  NUMBER: "数字",
-  DATE: "日期",
-  SELECT: "下拉"
+  TEXT: "Văn bản",
+  NUMBER: "Số",
+  DATE: "Ngày",
+  SELECT: "Dropdown"
 };
 
 export function CustomFieldsView({ matterFields }: { matterFields: CustomFieldDef[] }) {
@@ -61,13 +61,13 @@ export function CustomFieldsView({ matterFields }: { matterFields: CustomFieldDe
   const [pending, startTransition] = useTransition();
 
   function handleDelete(id: string, label: string) {
-    if (!confirm(`删除自定义字段「${label}」？已录入的对应值将不再显示。`)) return;
+    if (!confirm(`Xoá trường tuỳ chỉnh "${label}"? Giá trị tương ứng đã nhập sẽ không còn hiển thị.`)) return;
     startTransition(async () => {
       try {
         await deleteCustomFieldDef(id);
-        toast.success("已删除");
+        toast.success("Đã xoá");
       } catch (err) {
-        toast.error("删除失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Xoá thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -77,7 +77,7 @@ export function CustomFieldsView({ matterFields }: { matterFields: CustomFieldDe
       try {
         await toggleCustomFieldDef(id, enabled);
       } catch (err) {
-        toast.error("操作失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Thao tác thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -88,15 +88,15 @@ export function CustomFieldsView({ matterFields }: { matterFields: CustomFieldDe
         <div>
           <h2 className="flex items-center gap-2 text-lg font-medium">
             <ListChecks className="h-4 w-4 text-primary" />
-            案件自定义字段
+            Trường tuỳ chỉnh của vụ án
           </h2>
           <p className="mt-1 text-[13px] text-muted-foreground">
-            为案件添加机构特有的字段，新建/编辑案件详情时填写。
+            Thêm trường đặc thù của tổ chức cho vụ án, điền khi tạo/sửa chi tiết vụ án.
           </p>
         </div>
         <Button onClick={() => setCreateOpen(true)} size="sm" className="gap-1">
           <Plus className="h-4 w-4" />
-          添加字段
+          Thêm trường
         </Button>
       </header>
 
@@ -104,19 +104,19 @@ export function CustomFieldsView({ matterFields }: { matterFields: CustomFieldDe
         <table className="w-full text-[13px]">
           <thead>
             <tr className="border-b border-border text-left text-[12px] text-muted-foreground">
-              <th className="px-4 py-2 font-medium">字段名称</th>
-              <th className="px-4 py-2 font-medium">类型</th>
-              <th className="px-4 py-2 font-medium">必填</th>
-              <th className="px-4 py-2 font-medium">选项值</th>
-              <th className="px-4 py-2 font-medium">启用</th>
-              <th className="px-4 py-2 text-right font-medium">操作</th>
+              <th className="px-4 py-2 font-medium">Tên trường</th>
+              <th className="px-4 py-2 font-medium">Loại</th>
+              <th className="px-4 py-2 font-medium">Bắt buộc</th>
+              <th className="px-4 py-2 font-medium">Giá trị tuỳ chọn</th>
+              <th className="px-4 py-2 font-medium">Bật</th>
+              <th className="px-4 py-2 text-right font-medium">Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {matterFields.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
-                  还没有自定义字段，点击右上角「添加字段」
+                  Chưa có trường tuỳ chỉnh nào, bấm「Thêm trường」ở góc phải
                 </td>
               </tr>
             ) : (
@@ -124,7 +124,7 @@ export function CustomFieldsView({ matterFields }: { matterFields: CustomFieldDe
                 <tr key={f.id} className="border-b border-border/60 last:border-0">
                   <td className="px-4 py-2.5 font-medium text-foreground">{f.label}</td>
                   <td className="px-4 py-2.5 text-muted-foreground">{TYPE_LABEL[f.fieldType]}</td>
-                  <td className="px-4 py-2.5 text-muted-foreground">{f.required ? "是" : "—"}</td>
+                  <td className="px-4 py-2.5 text-muted-foreground">{f.required ? "Có" : "—"}</td>
                   <td className="px-4 py-2.5 text-muted-foreground">
                     {f.fieldType === "SELECT" && f.options.length > 0
                       ? f.options.join(" / ")
@@ -197,7 +197,7 @@ function FieldFormDialog({
 
   function submit() {
     if (!label.trim()) {
-      toast.warning("请填写字段名称");
+      toast.warning("Hãy nhập tên trường");
       return;
     }
     const options =
@@ -208,7 +208,7 @@ function FieldFormDialog({
             .filter(Boolean)
         : [];
     if (fieldType === "SELECT" && options.length === 0) {
-      toast.warning("下拉类型请至少填写一个选项（每行一个）");
+      toast.warning("Loại dropdown hãy nhập ít nhất một tuỳ chọn (mỗi dòng một cái)");
       return;
     }
     startTransition(async () => {
@@ -218,10 +218,10 @@ function FieldFormDialog({
         } else {
           await createCustomFieldDef({ entityType: "MATTER", label, fieldType, required, options });
         }
-        toast.success(field ? "已更新" : "已添加");
+        toast.success(field ? "Đã cập nhật" : "Đã thêm");
         onClose();
       } catch (err) {
-        toast.error("保存失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Lưu thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
@@ -230,17 +230,17 @@ function FieldFormDialog({
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{field ? "编辑字段" : "添加字段"}</DialogTitle>
-          <DialogDescription>字段将出现在案件详情的「自定义信息」中。</DialogDescription>
+          <DialogTitle>{field ? "Sửa trường" : "Thêm trường"}</DialogTitle>
+          <DialogDescription>Trường sẽ xuất hiện trong「Thông tin tuỳ chỉnh」ở chi tiết vụ án.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">字段名称</label>
-            <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="如：内部承办编号" />
+            <label className="text-xs font-medium text-muted-foreground">Tên trường</label>
+            <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="vd: Mã nội bộ đảm nhận" />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">字段类型</label>
+            <label className="text-xs font-medium text-muted-foreground">Loại trường</label>
             <Select
               value={fieldType}
               onValueChange={(v) => setFieldType(v as CustomFieldDef["fieldType"])}
@@ -249,37 +249,37 @@ function FieldFormDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="TEXT">文本</SelectItem>
-                <SelectItem value="NUMBER">数字</SelectItem>
-                <SelectItem value="DATE">日期</SelectItem>
-                <SelectItem value="SELECT">下拉</SelectItem>
+                <SelectItem value="TEXT">Văn bản</SelectItem>
+                <SelectItem value="NUMBER">Số</SelectItem>
+                <SelectItem value="DATE">Ngày</SelectItem>
+                <SelectItem value="SELECT">Dropdown</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {fieldType === "SELECT" && (
             <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">选项值（每行一个）</label>
+              <label className="text-xs font-medium text-muted-foreground">Giá trị tuỳ chọn (mỗi dòng một cái)</label>
               <textarea
                 value={optionsText}
                 onChange={(e) => setOptionsText(e.target.value)}
                 rows={4}
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-                placeholder={"选项一\n选项二"}
+                placeholder={"Tuỳ chọn 1\nTuỳ chọn 2"}
               />
             </div>
           )}
           <label className="flex items-center gap-2 text-sm">
             <Switch checked={required} onCheckedChange={setRequired} />
-            必填
+            Bắt buộc
           </label>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={pending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={pending}>
-            {field ? "保存" : "添加"}
+            {field ? "Lưu" : "Thêm"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -4,7 +4,7 @@ import { SealRowType } from "./seal-row-type";
 describe("SealRowType", () => {
   it("renders mapped Chinese label", () => {
     render(<SealRowType type="FINANCE_SEAL" />);
-    expect(screen.getByText("财务专用章")).toBeInTheDocument();
+    expect(screen.getByText("Dấu tài chính")).toBeInTheDocument();
   });
 
   it("falls back to raw type when not mapped", () => {

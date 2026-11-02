@@ -54,11 +54,11 @@ function useBatchApprove(records: PendingRecord[]) {
           note: note.trim() || undefined,
         });
         setResult({ succeeded, failed });
-        if (failed.length === 0) toast.success(`已批量通过 ${succeeded.length} 条`);
-        else toast.warning(`部分成功：${succeeded.length} 成功，${failed.length} 失败`);
+        if (failed.length === 0) toast.success(`Đã duyệt hàng loạt ${succeeded.length} mục`);
+        else toast.warning(`Thành công một phần: ${succeeded.length} thành công, ${failed.length} thất bại`);
         router.refresh();
       } catch (err) {
-        toast.error("批量通过失败", {
+        toast.error("Duyệt hàng loạt thất bại", {
           description: err instanceof Error ? err.message : "",
         });
       }
@@ -72,9 +72,9 @@ function MissingItemsAlert({ withMissing }: { withMissing: PendingRecord[] }) {
     <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700">
       <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
       <span>
-        有 {withMissing.length} 条申请存在材料缺项（
+        Có {withMissing.length} yêu cầu còn thiếu tài liệu (
         {withMissing.slice(0, 3).map((r) => r.archiveNo).join("、")}
-        {withMissing.length > 3 ? "…" : ""}）。确认知悉后再通过。
+        {withMissing.length > 3 ? "…" : ""}). Xác nhận đã biết rồi hãy duyệt.
       </span>
     </div>
   );
@@ -83,11 +83,11 @@ function MissingItemsAlert({ withMissing }: { withMissing: PendingRecord[] }) {
 function ApproveNoteInput({ note, setNote }: { note: string; setNote: (v: string) => void }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs">统一审批备注（可选）</Label>
+      <Label className="text-xs">Ghi chú duyệt chung (tuỳ chọn)</Label>
       <Textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="备注会写入每条归档记录"
+        placeholder="Ghi chú sẽ ghi vào mỗi bản ghi lưu trữ"
         rows={2}
       />
     </div>
@@ -107,14 +107,14 @@ function ApproveActions({
 }) {
   return (
     <DialogFooter>
-      <Button variant="outline" onClick={onCancel} disabled={isPending}>取消</Button>
+      <Button variant="outline" onClick={onCancel} disabled={isPending}>Huỷ</Button>
       <Button
         onClick={onSubmit}
         disabled={isPending}
         className="bg-emerald-600 text-white hover:bg-emerald-700"
       >
         {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-        确认通过 {total} 条
+        Xác nhận duyệt {total} mục
       </Button>
     </DialogFooter>
   );
@@ -159,7 +159,7 @@ function ResultFooter({
 }) {
   return (
     <DialogFooter>
-      <Button variant="outline" onClick={() => onClose(true)}>完成</Button>
+      <Button variant="outline" onClick={() => onClose(true)}>Hoàn tất</Button>
       {result.failed.length > 0 && (
         <Button
           onClick={() => onSubmit(result.failed.map((f) => f.id))}
@@ -167,7 +167,7 @@ function ResultFooter({
           className="bg-emerald-600 text-white hover:bg-emerald-700"
         >
           {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-          重试失败的 {result.failed.length} 条
+          Thử lại {result.failed.length} mục thất bại
         </Button>
       )}
     </DialogFooter>
@@ -180,8 +180,8 @@ export function BatchApproveDialog({ records, onClose }: { records: PendingRecor
     <Dialog open onOpenChange={o => !o && onClose(false)}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Check className="h-5 w-5 text-emerald-500" />批量通过 {records.length} 条归档申请</DialogTitle>
-          <DialogDescription>通过后涉案件全部进入「已归档」只读状态，且通知申请人。</DialogDescription>
+          <DialogTitle className="flex items-center gap-2"><Check className="h-5 w-5 text-emerald-500" />Duyệt hàng loạt {records.length} yêu cầu lưu trữ</DialogTitle>
+          <DialogDescription>Sau khi duyệt, toàn bộ vụ án liên quan chuyển sang trạng thái chỉ đọc「đã lưu trữ」, và thông báo cho người yêu cầu.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           {result === null ? (

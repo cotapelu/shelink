@@ -65,22 +65,22 @@ export function YuandianSettingsForm({
     startTransition(async () => {
       try {
         await saveYuandianSettingsAction({ apiKey, baseUrl, caseDetailHost });
-        toast.success("元典配置已保存");
+        toast.success("Đã lưu cấu hình 元典");
         setApiKey("");
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "保存失败");
+        toast.error(e instanceof Error ? e.message : "Lưu thất bại");
       }
     });
   };
 
   const clearKey = () => {
-    if (!confirm("确认清除元典 API key？类案检索功能将停止工作。")) return;
+    if (!confirm("Xác nhận xoá API key 元典? Chức năng tra vụ án cùng loại sẽ ngừng hoạt động.")) return;
     startTransition(async () => {
       try {
         await clearYuandianKeyAction({ confirm: true });
-        toast.success("元典 API key 已清除");
+        toast.success("Đã xoá API key 元典");
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "失败");
+        toast.error(e instanceof Error ? e.message : "Thất bại");
       }
     });
   };
@@ -92,7 +92,7 @@ export function YuandianSettingsForm({
       const res = await testYuandianConnection();
       setTestResult({ ok: res.ok, msg: res.message ?? "" });
     } catch (e) {
-      setTestResult({ ok: false, msg: e instanceof Error ? e.message : "网络错误" });
+      setTestResult({ ok: false, msg: e instanceof Error ? e.message : "Lỗi mạng" });
     } finally {
       setTesting(false);
     }
@@ -102,18 +102,18 @@ export function YuandianSettingsForm({
     <section className="ll-surface rounded-lg border border-border p-5">
       <header className="mb-3 flex items-center gap-2">
         <Scale className="h-4 w-4 text-primary" strokeWidth={1.8} />
-        <h2 className="text-lg">元典案例库 API</h2>
+        <h2 className="text-lg">API kho án lệ 元典</h2>
         {initial.configured && (
           <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] text-emerald-700">
-            <CheckCircle2 className="h-3 w-3" /> 已配置
+            <CheckCircle2 className="h-3 w-3" /> Đã cấu hình
           </span>
         )}
       </header>
 
       <p className="mb-4 text-[12px] text-muted-foreground">
-        元典开放平台（chineselaw.com）法律案例检索 API，配置后启用：
-        <span className="text-foreground/85"> 案件详情 → 类案 tab 类案检索</span>。
-        按次计费（普通案例 10 POINT/次）。
+        API tra án lệ pháp luật của nền tảng mở 元典 (chineselaw.com), sau khi cấu hình sẽ bật:
+        <span className="text-foreground/85"> Chi tiết vụ án → tra vụ án cùng loại ở tab类案</span>.
+        Tính phí theo lượt (án lệ thường 10 POINT/lượt).
       </p>
 
       <div className="space-y-3">
@@ -122,7 +122,7 @@ export function YuandianSettingsForm({
             API Key
             {initial.configured && (
               <span className="ml-2 font-mono text-[10px] text-muted-foreground">
-                当前：{initial.apiKeyMasked}（留空保留原值）
+                Hiện tại: {initial.apiKeyMasked} (để trống thì giữ giá trị cũ)
               </span>
             )}
           </Label>
@@ -130,7 +130,7 @@ export function YuandianSettingsForm({
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder={initial.configured ? "如需更换粘贴新 key" : "粘贴元典 API key"}
+            placeholder={initial.configured ? "Cần đổi thì dán key mới" : "Dán API key 元典"}
             className="mt-1 font-mono"
             autoComplete="off"
           />
@@ -147,7 +147,7 @@ export function YuandianSettingsForm({
         </div>
 
         <div>
-          <Label className="text-[11px]">案例详情前端域名</Label>
+          <Label className="text-[11px]">Tên miền frontend chi tiết án lệ</Label>
           <Input
             value={caseDetailHost}
             onChange={(e) => setCaseDetailHost(e.target.value)}
@@ -155,7 +155,7 @@ export function YuandianSettingsForm({
             className="mt-1 font-mono text-[12px]"
           />
           <p className="mt-1 text-[10px] text-muted-foreground">
-            用于「查看全文」外跳，与接口 URL 区分
+            Dùng cho nhảy ngoài ở「xem toàn văn」, phân biệt với URL interface
           </p>
         </div>
       </div>
@@ -163,7 +163,7 @@ export function YuandianSettingsForm({
       <div className="mt-4 flex items-center gap-2">
         <Button onClick={save} disabled={pending} className="gap-1.5">
           {pending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          保存配置
+          Lưu cấu hình
         </Button>
         <Button
           variant="outline"
@@ -172,7 +172,7 @@ export function YuandianSettingsForm({
           className="gap-1.5"
         >
           {testing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          测试连接（扣 10 POINT）
+          Kiểm tra kết nối (trừ 10 POINT)
         </Button>
         {initial.configured && (
           <Button
@@ -182,7 +182,7 @@ export function YuandianSettingsForm({
             className="ml-auto gap-1 text-destructive"
           >
             <Trash2 className="h-3 w-3" />
-            清除 key
+            Xoá key
           </Button>
         )}
       </div>
@@ -206,14 +206,14 @@ export function YuandianSettingsForm({
       )}
 
       <p className="mt-4 text-[11px] text-muted-foreground">
-        申请 key：
+        Đăng ký key:
         <a
           href="https://open.chineselaw.com"
           target="_blank"
           rel="noreferrer"
           className="ml-1 inline-flex items-center gap-1 text-primary hover:underline"
         >
-          元典开放平台
+          Nền tảng mở 元典
           <ExternalLink className="h-3 w-3" />
         </a>
       </p>

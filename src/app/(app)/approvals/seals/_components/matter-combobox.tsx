@@ -34,7 +34,7 @@ export function MatterCombobox({
   matters,
   value,
   onChange,
-  placeholder = "搜索案件编号 / 名称"
+  placeholder = "Tìm mã / tên vụ án"
 }: {
   matters: MatterOption[];
   value: string;

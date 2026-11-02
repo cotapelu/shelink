@@ -67,15 +67,15 @@ export function LateInterestCalc() {
     <section className="ll-surface rounded-lg border border-border p-5">
       <header className="mb-4 flex items-center gap-2">
         <Coins className="h-4 w-4 text-primary" strokeWidth={1.8} />
-        <h2 className="text-lg">迟延履行金计算</h2>
+        <h2 className="text-lg">Tính tiền chậm thi hành</h2>
         <span className="ml-2 text-[10px] text-muted-foreground">
-          民诉法第 260 条 + 民诉法解释第 463 条
+          Điều 260 Bộ luật Tố tụng dân sự + Điều 463 Hướng dẫn giải thích Bộ luật Tố tụng dân sự
         </span>
       </header>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <div>
-          <Label className="text-[11px]">判决金额（元）</Label>
+          <Label className="text-[11px]">Số tiền bản án (VNĐ)</Label>
           <Input
             type="number"
             value={principal}
@@ -84,7 +84,7 @@ export function LateInterestCalc() {
           />
         </div>
         <div>
-          <Label className="text-[11px]">应履行日期</Label>
+          <Label className="text-[11px]">Ngày phải thi hành</Label>
           <Input
             type="date"
             value={dueDate}
@@ -93,7 +93,7 @@ export function LateInterestCalc() {
           />
         </div>
         <div>
-          <Label className="text-[11px]">实际履行日期（或截至日）</Label>
+          <Label className="text-[11px]">Ngày thi hành thực tế (hoặc ngày tính đến)</Label>
           <Input
             type="date"
             value={paidDate}
@@ -113,7 +113,7 @@ export function LateInterestCalc() {
             />
           </div>
           <div>
-            <Label className="text-[11px]">加成（%）</Label>
+            <Label className="text-[11px]">Cộng thêm (%)</Label>
             <Input
               type="number"
               step="0.5"
@@ -128,39 +128,39 @@ export function LateInterestCalc() {
       <div className="mt-4 flex justify-end">
         <Button onClick={compute} className="h-9 gap-1.5">
           <Calculator className="h-3.5 w-3.5" />
-          计算
+          Tính
         </Button>
       </div>
 
       {result && (
         <>
           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-            <ResultCard label="迟延天数" value={`${result.daysLate} 天`} accent="#737373" />
+            <ResultCard label="Số ngày chậm" value={`${result.daysLate} ngày`} accent="#737373" />
             <ResultCard
-              label="年利率"
+              label="Lãi suất năm"
               value={`${(result.yearlyRate * 100).toFixed(2)}%`}
               accent="#D97706"
             />
             <ResultCard
-              label="加倍利息（推荐采用）"
+              label="Lãi gấp đôi (khuyên dùng)"
               value={`¥${result.interest.toLocaleString()}`}
               accent="#DC2626"
             />
           </div>
           <div className="mt-3 rounded-md border border-border bg-muted/20 p-3 text-[12px]">
             <div className="flex items-baseline justify-between gap-3">
-              <span className="text-muted-foreground">本金 + 加倍利息合计</span>
+              <span className="text-muted-foreground">Tổng gốc + lãi gấp đôi</span>
               <span className="font-mono text-[16px] font-medium tabular text-foreground">
                 ¥{result.totalToPay.toLocaleString()}
               </span>
             </div>
             <p className="mt-1.5 text-[10px] text-muted-foreground">
-              大写：{numberToChinese(result.totalToPay)}
+              Bằng chữ: {numberToChinese(result.totalToPay)}
             </p>
           </div>
           <p className="mt-3 flex items-start gap-1.5 text-[11px] text-muted-foreground">
             <Info className="mt-0.5 h-3 w-3 shrink-0" />
-            算法：判决金额 × (LPR 1Y + {extraPercent}%) × 迟延天数 / 365。LPR 以中国人民银行公布为准，建议办案时确认当前值。
+            Thuật toán: số tiền bản án × (LPR 1Y + {extraPercent}%) × số ngày chậm / 365. LPR theo công bố của Ngân hàng Nhân dân Trung Quốc, khuyên xác nhận giá trị hiện tại khi xử lý.
           </p>
         </>
       )}

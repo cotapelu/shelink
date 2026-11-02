@@ -7,7 +7,7 @@ export function SealRowCode({ code, onDetail }: { code: string; onDetail: () => 
         type="button"
         onClick={onDetail}
         className="font-mono text-[11px] text-primary hover:underline"
-        title="查看用章申请详情"
+        title="Xem chi tiết yêu cầu dùng dấu"
       >
         {code}
       </button>

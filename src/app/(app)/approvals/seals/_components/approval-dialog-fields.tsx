@@ -14,25 +14,25 @@ export function ApprovalDialogFields({ row }: ApprovalDialogFieldsProps) {
 
   return (
     <div className="min-w-0 space-y-2 rounded border border-border bg-muted/20 p-3 text-[12px]">
-      <Field k="流水号" v={row.code} mono />
-      <Field k="章种类" v={SEAL_TYPE_CN[row.sealType] ?? row.sealType} />
-      <Field k="申请人" v={row.requestedBy.name} />
+      <Field k="Số thứ tự" v={row.code} mono />
+      <Field k="Loại dấu" v={SEAL_TYPE_CN[row.sealType] ?? row.sealType} />
+      <Field k="Người yêu cầu" v={row.requestedBy.name} />
       {row.matter && (
-        <Field k="关联案件" v={`${row.matter.internalCode} ${row.matter.title}`} />
+        <Field k="Vụ án liên kết" v={`${row.matter.internalCode} ${row.matter.title}`} />
       )}
-      <Field k="文件标题" v={row.documentTitle} />
-      <Field k="事由" v={row.purpose} />
-      <Field k="页数 / 份数" v={`${row.pageCount} 页 × ${row.copies} 份`} />
-      {row.requireCrossPageSeal && <Field k="骑缝章" v="是" />}
+      <Field k="Tiêu đề văn bản" v={row.documentTitle} />
+      <Field k="Lý do" v={row.purpose} />
+      <Field k="Số trang / Số bản" v={`${row.pageCount} trang × ${row.copies} bản`} />
+      {row.requireCrossPageSeal && <Field k="Dấu kẽ trang" v="Có" />}
       {row.urgency === "URGENT" && (
         <p className="flex items-center gap-1 text-destructive">
           <AlertOctagon className="h-3 w-3" />
-          紧急
+          Khẩn cấp
         </p>
       )}
       {row.draftDoc && (
         <DocumentLink
-          label="待盖章稿"
+          label="Bản chờ đóng dấu"
           docId={row.draftDoc.id}
           name={draftDocName}
         />

@@ -20,7 +20,7 @@ export function PendingActions({ row, currentUser, canApprove, onAction }: Pendi
           onClick={() => onAction("approve")}
           className="text-[11px] text-primary hover:underline"
         >
-          审批
+          Duyệt
         </button>
       )}
       {isOwner && (
@@ -31,7 +31,7 @@ export function PendingActions({ row, currentUser, canApprove, onAction }: Pendi
             onClick={() => onAction("cancel")}
             className="text-[11px] text-muted-foreground hover:text-destructive"
           >
-            撤销
+            Thu hồi
           </button>
         </>
       )}

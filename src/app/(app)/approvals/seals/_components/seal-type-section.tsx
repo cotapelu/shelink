@@ -23,7 +23,7 @@ export function SealTypeSection({
 }: SealTypeSectionProps) {
   return (
     <div className="md:col-span-2">
-      <Label className="text-[11px]">章种类 *</Label>
+      <Label className="text-[11px]">Loại dấu *</Label>
       <RadioChips
         className="mt-2"
         items={enabledConfigs.map((c) => ({
@@ -45,9 +45,9 @@ export function SealTypeSection({
             checked={alsoLegalRep}
             onCheckedChange={(v) => setAlsoLegalRep(v === true)}
           />
-          <span>同时加盖 <strong className="text-foreground">法定代表人章</strong></span>
+          <span>Đóng đồng thời <strong className="text-foreground">dấu người đại diện theo pháp luật</strong></span>
           <span className="text-[10px] text-muted-foreground">
-            会自动建一条配套的法人章审批，与本章并行
+            Tự tạo một lượt duyệt dấu người đại diện đi kèm, chạy song song với lượt này
           </span>
         </label>
       )}

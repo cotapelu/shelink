@@ -93,14 +93,14 @@ export function InboxView({
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl">收件箱</h1>
+          <h1 className="text-2xl">Hộp thư đến</h1>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
-            粘贴 12368 / 法院短信 → 自动解析 → 一键生成开庭 / 期限
+            Dán tin nhắn 12368 / toà án → tự phân tích → sinh phiên tòa / thời hạn một bấm
           </p>
         </div>
         <Button onClick={() => setPasteOpen(true)} className="gap-1.5">
           <Plus className="h-3.5 w-3.5" />
-          粘贴短信
+          Dán tin nhắn
         </Button>
       </div>
 
@@ -108,11 +108,11 @@ export function InboxView({
       <div className="border-b border-border">
         <div className="flex gap-5">
           <TabBtn active={tab === "unprocessed"} onClick={() => setTab("unprocessed")}>
-            待处理
+            Chờ xử lý
             <Count n={unprocessed.length} hot={unprocessed.length > 0} />
           </TabBtn>
           <TabBtn active={tab === "processed"} onClick={() => setTab("processed")}>
-            已处理
+            Đã xử lý
             <Count n={processed.length} />
           </TabBtn>
         </div>
@@ -127,7 +127,7 @@ export function InboxView({
         {rows.length === 0 ? (
           <div className="ll-surface rounded-lg border border-border p-12 text-center text-sm text-muted-foreground">
             <Inbox className="mx-auto mb-2 h-6 w-6 opacity-40" />
-            {tab === "unprocessed" ? "无待处理短信" : "暂无已处理记录"}
+            {tab === "unprocessed" ? "Không có tin nhắn chờ xử lý" : "Chưa có bản ghi đã xử lý"}
           </div>
         ) : (
           rows.map((sms) => (
@@ -228,27 +228,27 @@ function SmsCard({
     startTransition(async () => {
       try {
         await markSmsProcessed({ id: sms.id });
-        toast.success("已标记处理");
+        toast.success("Đã đánh dấu xử lý");
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "失败");
+        toast.error(e instanceof Error ? e.message : "Thất bại");
       }
     });
 
   const onDelete = () => {
-    if (!confirm("确认删除这条短信记录？")) return;
+    if (!confirm("Xác nhận xoá bản ghi tin nhắn này?")) return;
     startTransition(async () => {
       try {
         await deleteSms({ id: sms.id });
-        toast.success("已删除");
+        toast.success("Đã xoá");
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "失败");
+        toast.error(e instanceof Error ? e.message : "Thất bại");
       }
     });
   };
 
   return (
     <div className="ll-surface rounded-lg border border-border p-4">
-      {/* 头：类型徽 + 法院 + 案号 + 时间 + 来源标 */}
+      {/* Đầu: huy hiệu loại + toà án + số án + thời gian + nhãn nguồn */}
       <div className="flex flex-wrap items-center gap-2 text-[11px]">
         <span
           className="rounded-full px-2 py-0.5 text-[10px] font-medium"
@@ -267,13 +267,13 @@ function SmsCard({
         </span>
       </div>
 
-      {/* 摘要 + AI 增强字段 */}
+      {/* Tóm tắt + trường tăng cường AI */}
       <div className="mt-2 space-y-1">
         <div className="flex items-start gap-2">
           {parsed.aiEnriched && (
             <span
               className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary"
-              title="AI 增强解析"
+              title="Phân tích tăng cường AI"
             >
               <Sparkles className="h-3 w-3" />
               AI
@@ -284,21 +284,21 @@ function SmsCard({
         {parsed.action && (
           <div className="flex items-baseline gap-1.5 text-[12px]">
             <ArrowRight className="h-3 w-3 shrink-0 text-primary/70" />
-            <span className="text-muted-foreground">应对：</span>
+            <span className="text-muted-foreground">Xử lý:</span>
             <span className="text-foreground/90">{parsed.action}</span>
             {parsed.urgency && <UrgencyBadge level={parsed.urgency} />}
           </div>
         )}
       </div>
 
-      {/* 字段栏 */}
+      {/* Thanh trường */}
       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
         {parsed.hearingDate && (
-          <Field icon={<Gavel className="h-3 w-3" />}>开庭：{parsed.hearingDate}</Field>
+          <Field icon={<Gavel className="h-3 w-3" />}>Phiên tòa: {parsed.hearingDate}</Field>
         )}
         {parsed.courtRoom && <Field>{parsed.courtRoom}</Field>}
-        {parsed.judge && <Field>法官：{parsed.judge}</Field>}
-        {parsed.clerk && <Field>书记员：{parsed.clerk}</Field>}
+        {parsed.judge && <Field>Thẩm phán: {parsed.judge}</Field>}
+        {parsed.clerk && <Field>Thư ký toà: {parsed.clerk}</Field>}
         {parsed.phones.map((p) => (
           <Field key={p} icon={<Phone className="h-3 w-3" />}>
             <a href={`tel:${p}`} className="hover:text-foreground">
@@ -306,8 +306,8 @@ function SmsCard({
             </a>
           </Field>
         ))}
-        {parsed.appealDeadline && <Field>上诉期：{parsed.appealDeadline}</Field>}
-        {parsed.judgmentDate && <Field>判决日：{parsed.judgmentDate}</Field>}
+        {parsed.appealDeadline && <Field>Thời hiệu kháng cáo: {parsed.appealDeadline}</Field>}
+        {parsed.judgmentDate && <Field>Ngày tuyên án: {parsed.judgmentDate}</Field>}
         {parsed.urls.length > 0 &&
           parsed.urls.map((u, i) => (
             <Field key={u} icon={<ExternalLink className="h-3 w-3" />}>
@@ -317,13 +317,13 @@ function SmsCard({
                 rel="noreferrer"
                 className="text-primary hover:underline"
               >
-                {parsed.platforms[i] ?? `链接 ${i + 1}`}
+                {parsed.platforms[i] ?? `Liên kết ${i + 1}`}
               </a>
             </Field>
           ))}
       </div>
 
-      {/* 关联案件 + 操作行 */}
+      {/* Vụ án liên kết + hàng thao tác */}
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
         {sms.matchedMatter ? (
           <Link
@@ -337,7 +337,7 @@ function SmsCard({
             <span className="truncate font-medium">{sms.matchedMatter.title}</span>
             {sms.matchedBy === "AUTO_CASE_NUMBER" && (
               <span className="ml-0.5 rounded bg-muted/60 px-1 text-[9px] text-muted-foreground">
-                自动
+                Tự động
               </span>
             )}
           </Link>
@@ -350,7 +350,7 @@ function SmsCard({
           onClick={() => setShowRaw((v) => !v)}
           className="text-[11px] text-muted-foreground hover:text-foreground"
         >
-          {showRaw ? "收起原文" : "查看原文"}
+          {showRaw ? "Thu gọn bản gốc" : "Xem bản gốc"}
         </button>
 
         <div className="ml-auto flex items-center gap-2">
@@ -364,7 +364,7 @@ function SmsCard({
                   className="h-7 gap-1 text-[11px]"
                 >
                   <Gavel className="h-3 w-3" />
-                  生成开庭
+                  Sinh phiên tòa
                 </Button>
               )}
               <Button
@@ -374,7 +374,7 @@ function SmsCard({
                 className="h-7 gap-1 text-[11px]"
               >
                 <Clock className="h-3 w-3" />
-                生成期限
+                Sinh thời hạn
               </Button>
             </>
           )}
@@ -387,7 +387,7 @@ function SmsCard({
               className="h-7 gap-1 text-[11px]"
             >
               <CheckCircle2 className="h-3 w-3" />
-              标为已处理
+              Đánh dấu đã xử lý
             </Button>
           )}
           <button
@@ -395,7 +395,7 @@ function SmsCard({
             onClick={onDelete}
             disabled={pending}
             className="text-muted-foreground hover:text-destructive"
-            title="删除"
+            title="Xoá"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -422,9 +422,9 @@ function Field({ icon, children }: { icon?: React.ReactNode; children: React.Rea
 
 function UrgencyBadge({ level }: { level: "HIGH" | "MEDIUM" | "LOW" }) {
   const meta = {
-    HIGH: { label: "紧急", color: "#DC2626", bg: "rgb(248 113 113 / 0.12)" },
-    MEDIUM: { label: "本周", color: "#D97706", bg: "rgb(252 211 77 / 0.15)" },
-    LOW: { label: "知悉", color: "#737373", bg: "rgb(229 229 229 / 0.5)" }
+    HIGH: { label: "Khẩn cấp", color: "#DC2626", bg: "rgb(248 113 113 / 0.12)" },
+    MEDIUM: { label: "Tuần này", color: "#D97706", bg: "rgb(252 211 77 / 0.15)" },
+    LOW: { label: "Biết", color: "#737373", bg: "rgb(229 229 229 / 0.5)" }
   }[level];
   return (
     <span
@@ -437,7 +437,7 @@ function UrgencyBadge({ level }: { level: "HIGH" | "MEDIUM" | "LOW" }) {
   );
 }
 
-// 行内小 Combobox：手动指派 Matter
+// Combobox nhỏ nội dòng: gán Matter thủ công
 function MatterPicker({ sms, matters }: { sms: SmsRow; matters: MatterOption[] }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -446,10 +446,10 @@ function MatterPicker({ sms, matters }: { sms: SmsRow; matters: MatterOption[] }
     startTransition(async () => {
       try {
         await matchSmsToMatter({ smsId: sms.id, matterId });
-        toast.success("已关联案件");
+        toast.success("Đã liên kết vụ án");
         setOpen(false);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "失败");
+        toast.error(e instanceof Error ? e.message : "Thất bại");
       }
     });
   };
@@ -463,14 +463,14 @@ function MatterPicker({ sms, matters }: { sms: SmsRow; matters: MatterOption[] }
           className="inline-flex items-center gap-1 rounded border border-dashed border-border px-2 py-1 text-[11px] text-muted-foreground hover:border-primary/40 hover:text-foreground"
         >
           {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <LinkIcon className="h-3 w-3" />}
-          指派案件
+          Gán vụ án
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="start">
         <Command>
-          <CommandInput placeholder="搜索编号或案件名..." />
+          <CommandInput placeholder="Tìm mã hoặc tên vụ án..." />
           <CommandList>
-            <CommandEmpty>未找到</CommandEmpty>
+            <CommandEmpty>Không tìm thấy</CommandEmpty>
             <CommandGroup>
               {matters.map((m) => (
                 <CommandItem

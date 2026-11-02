@@ -32,12 +32,12 @@ import { changeMyPassword } from "@/server/users/actions";
 
 const schema = z
   .object({
-    currentPassword: z.string().min(1, "请输入当前密码"),
-    newPassword: z.string().min(8, "新密码至少 8 位").max(128),
+    currentPassword: z.string().min(1, "Nhập mật khẩu hiện tại"),
+    newPassword: z.string().min(8, "Mật khẩu mới tối thiểu 8 ký tự").max(128),
     confirmPassword: z.string()
   })
   .refine((v) => v.newPassword === v.confirmPassword, {
-    message: "两次输入的新密码不一致",
+    message: "Mật khẩu mới nhập hai lần không khớp",
     path: ["confirmPassword"]
   });
 
@@ -62,28 +62,28 @@ export function ChangePasswordForm() {
           currentPassword: values.currentPassword,
           newPassword: values.newPassword
         });
-        toast.success("密码已修改");
+        toast.success("Đã đổi mật khẩu");
         reset();
       } catch (err) {
-        toast.error("修改失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Đổi thất bại", { description: err instanceof Error ? err.message : "" });
       }
     });
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-md space-y-4">
-      <Field label="当前密码" error={errors.currentPassword?.message}>
+      <Field label="Mật khẩu hiện tại" error={errors.currentPassword?.message}>
         <Input type="password" autoComplete="current-password" {...register("currentPassword")} />
       </Field>
-      <Field label="新密码（至少 8 位）" error={errors.newPassword?.message}>
+      <Field label="Mật khẩu mới (tối thiểu 8 ký tự)" error={errors.newPassword?.message}>
         <Input type="password" autoComplete="new-password" {...register("newPassword")} />
       </Field>
-      <Field label="确认新密码" error={errors.confirmPassword?.message}>
+      <Field label="Xác nhận mật khẩu mới" error={errors.confirmPassword?.message}>
         <Input type="password" autoComplete="new-password" {...register("confirmPassword")} />
       </Field>
       <Button type="submit" disabled={isPending} className="gap-1.5">
         {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-        修改密码
+        Đổi mật khẩu
       </Button>
     </form>
   );

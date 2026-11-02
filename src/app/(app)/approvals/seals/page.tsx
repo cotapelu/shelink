@@ -55,7 +55,7 @@ export default async function SealsPage({
     })
   ]);
 
-  // 卷宗联动：?new=1&draftDocId=...&matterId=...&documentTitle=...
+  // Liên động hồ sơ: ?new=1&draftDocId=...&matterId=...&documentTitle=...
   const presetFromQuery = searchParams?.new === "1"
     ? {
         draftDocId: searchParams.draftDocId,

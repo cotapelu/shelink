@@ -18,16 +18,16 @@ interface QueryRowFieldsProps {
 }
 
 const queryRoleOptions: { value: QueryRole; label: string }[] = [
-  { value: "CLIENT_PARTY", label: "拟委托方" },
-  { value: "OPPOSING_PARTY", label: "相对方" },
-  { value: "THIRD_PARTY", label: "第三人" }
+  { value: "CLIENT_PARTY", label: "Bên dự kiến ủy quyền" },
+  { value: "OPPOSING_PARTY", label: "Bên đối phương" },
+  { value: "THIRD_PARTY", label: "Người thứ ba" }
 ];
 
 export function QueryRowFields({ query, index, onUpdate }: QueryRowFieldsProps) {
   return (
     <>
       <div className="col-span-3">
-        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">主体身份</Label>
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Thân phận chủ thể</Label>
         <Select value={query.role} onValueChange={(value) => onUpdate(index, { role: value as QueryRole })}>
           <SelectTrigger className="mt-1 h-9 bg-background"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -36,12 +36,12 @@ export function QueryRowFields({ query, index, onUpdate }: QueryRowFieldsProps) 
         </Select>
       </div>
       <div className="col-span-4">
-        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">姓名 / 名称</Label>
-        <Input value={query.name} onChange={e => onUpdate(index, { name: e.target.value })} placeholder="如：华东置业集团有限公司" className="mt-1 h-9 bg-background" />
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Họ tên / Tên</Label>
+        <Input value={query.name} onChange={e => onUpdate(index, { name: e.target.value })} placeholder="vd: Công ty TNHH Hoa Đông Trí Nghiệp" className="mt-1 h-9 bg-background" />
       </div>
       <div className="col-span-4">
-        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">身份证 / 统一社会信用代码</Label>
-        <Input value={query.idNumber} onChange={e => onUpdate(index, { idNumber: e.target.value })} placeholder="与姓名至少填一项" className="mt-1 h-9 bg-background font-mono" />
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Số giấy tờ / Mã số doanh nghiệp</Label>
+        <Input value={query.idNumber} onChange={e => onUpdate(index, { idNumber: e.target.value })} placeholder="Với họ tên thì điền ít nhất một mục" className="mt-1 h-9 bg-background font-mono" />
       </div>
     </>
   );

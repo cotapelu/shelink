@@ -18,7 +18,7 @@ export function QueryRowEditor({ query, index, onUpdate, onRemove, showRemove }:
       <QueryRowFields query={query} index={index} onUpdate={(i, p) => onUpdate(i, p as Partial<QueryRow>)} />
       <div className="col-span-1 flex items-end justify-center">
         {showRemove && (
-          <Button variant="ghost" size="sm" onClick={() => onRemove(index)} className="h-9 w-9 p-0 text-destructive" aria-label="移除">
+          <Button variant="ghost" size="sm" onClick={() => onRemove(index)} className="h-9 w-9 p-0 text-destructive" aria-label="Xoá">
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
         )}

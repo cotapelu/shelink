@@ -93,7 +93,7 @@ export function AnnouncementDialog({
 
   function handleSave() {
     if (!title.trim() || !content.trim()) {
-      toast.error("标题和内容必填");
+      toast.error("Tiêu đề và nội dung bắt buộc nhập");
       return;
     }
     startTransition(async () => {
@@ -106,15 +106,15 @@ export function AnnouncementDialog({
         };
         if (editing) {
           await updateAnnouncement({ ...payload, id: editing.id });
-          toast.success("已更新");
+          toast.success("Đã cập nhật");
         } else {
           await createAnnouncement(payload);
-          toast.success("已发布");
+          toast.success("Đã đăng");
         }
         onOpenChange(false);
         router.refresh();
       } catch (err) {
-        toast.error("保存失败", {
+        toast.error("Lưu thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -125,25 +125,25 @@ export function AnnouncementDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{editing ? "编辑公告" : "发布公告"}</DialogTitle>
+          <DialogTitle>{editing ? "Sửa thông báo" : "Đăng thông báo"}</DialogTitle>
           <DialogDescription className="text-xs">
-            置顶公告会显示在全站顶部 banner，设置过期日期后 banner 自动消失（列表仍保留）。
+            Thông báo ghim sẽ hiện ở banner đầu toàn site, đặt ngày hết hạn xong banner tự biến mất (danh sách vẫn giữ).
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 py-2">
           <div className="space-y-1.5">
-            <Label className="text-xs">标题 *</Label>
+            <Label className="text-xs">Tiêu đề *</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">内容 *</Label>
+            <Label className="text-xs">Nội dung *</Label>
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={6}
-              placeholder="支持普通文本换行"
+              placeholder="Hỗ trợ xuống dòng văn bản thường"
             />
           </div>
 
@@ -153,10 +153,10 @@ export function AnnouncementDialog({
                 checked={pinned}
                 onCheckedChange={(c) => setPinned(c === true)}
               />
-              置顶（顶部 banner）
+              Ghim (banner đầu trang)
             </label>
             <div className="space-y-1.5">
-              <Label className="text-xs">过期日期（可选）</Label>
+              <Label className="text-xs">Ngày hết hạn (tuỳ chọn)</Label>
               <Input
                 type="date"
                 value={expiresAt}
@@ -168,11 +168,11 @@ export function AnnouncementDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={handleSave} disabled={isPending}>
             {isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
-            {editing ? "更新" : "发布"}
+            {editing ? "Cập nhật" : "Đăng"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -39,7 +39,7 @@ export function FileUploadSection({ file, onFileChange, hasExisting }: FileUploa
 
   return (
     <div className="md:col-span-2">
-      <Label className="text-[11px]">待盖章稿 *</Label>
+      <Label className="text-[11px]">Bản chờ đóng dấu *</Label>
       <div className="mt-1">
         <label className="flex cursor-pointer items-center gap-2 rounded border border-dashed border-border px-3 py-3 text-[12px] text-muted-foreground hover:bg-muted/30">
           <Paperclip className="h-3.5 w-3.5" />
@@ -49,7 +49,7 @@ export function FileUploadSection({ file, onFileChange, hasExisting }: FileUploa
               {file.name}
             </span>
           ) : (
-            "选择 PDF 文件"
+            "Chọn tệp PDF"
           )}
           <input
             type="file"
@@ -58,7 +58,7 @@ export function FileUploadSection({ file, onFileChange, hasExisting }: FileUploa
             onChange={(e) => {
               const picked = e.target.files?.[0] ?? null;
               if (picked && !isPdfFile(picked)) {
-                toast.error("需上传 pdf 格式文件");
+                toast.error("Cần tải tệp định dạng PDF");
                 e.target.value = "";
                 onFileChange(null);
                 return;

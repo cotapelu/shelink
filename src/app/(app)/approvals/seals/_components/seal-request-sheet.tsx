@@ -21,7 +21,7 @@ export function SealRequestSheet({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[88vh] w-[92vw] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>新建用章申请</DialogTitle>
+          <DialogTitle>Tạo yêu cầu dùng dấu</DialogTitle>
         </DialogHeader>
         <SealRequestForm
           configs={configs}

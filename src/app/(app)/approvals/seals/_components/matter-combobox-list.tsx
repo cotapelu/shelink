@@ -14,9 +14,9 @@ interface MatterComboboxListProps {
 export function MatterComboboxList({ matters, value, onSelect }: MatterComboboxListProps) {
   return (
     <Command>
-      <CommandInput placeholder="输入编号或案件名片段..." />
+      <CommandInput placeholder="Nhập đoạn mã hoặc tên vụ án..." />
       <CommandList>
-        <CommandEmpty>未找到匹配案件</CommandEmpty>
+        <CommandEmpty>Không tìm thấy vụ án khớp</CommandEmpty>
         <CommandGroup>
           {matters.map((m) => (
             <CommandItem

@@ -33,20 +33,20 @@ export function SealsTabBar({
     <div className="border-b border-border">
       <div className="flex gap-5">
         <TabBtn active={tab === "allMine"} onClick={() => setTab("allMine")}>
-          我的申请
+          Yêu cầu của tôi
           <Count n={mineCount} />
         </TabBtn>
         <TabBtn active={tab === "pending"} onClick={() => setTab("pending")}>
-          待审批
+          Chờ duyệt
           <Count n={pendingCount} hot={pendingCount > 0} />
         </TabBtn>
         <TabBtn active={tab === "processed"} onClick={() => setTab("processed")}>
-          已审批
+          Đã duyệt
           <Count n={processedCount} />
         </TabBtn>
         {canApprove && (
           <TabBtn active={tab === "toApprove"} onClick={() => setTab("toApprove")}>
-            待我审批
+            Chờ tôi duyệt
             <Count n={toApproveCount} hot={toApproveCount > 0} />
           </TabBtn>
         )}

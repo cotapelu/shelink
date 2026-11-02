@@ -8,16 +8,16 @@ import {
 import type { PurposePreset } from "@/app/(app)/approvals/seals/_components/use-seal-request-form-helpers";
 
 describe("computeResolvedPurpose", () => {
-  it("returns preset when not '其他'", () => {
-    expect(computeResolvedPurpose("委托合同" as PurposePreset, "")).toBe("委托合同");
+  it("returns preset when not 'Khác'", () => {
+    expect(computeResolvedPurpose("Hợp đồng ủy quyền" as PurposePreset, "")).toBe("Hợp đồng ủy quyền");
   });
 
-  it("returns '其他：<trimmed>' when preset is '其他' and other provided", () => {
-    expect(computeResolvedPurpose("其他" as PurposePreset, "  some reason  ")).toBe("其他：some reason");
+  it("returns 'Khác: <trimmed>' when preset is 'Khác' and other provided", () => {
+    expect(computeResolvedPurpose("Khác" as PurposePreset, "  some reason  ")).toBe("Khác: some reason");
   });
 
-  it("returns empty string when preset is '其他' and other empty", () => {
-    expect(computeResolvedPurpose("其他" as PurposePreset, "   ")).toBe("");
+  it("returns empty string when preset is 'Khác' and other empty", () => {
+    expect(computeResolvedPurpose("Khác" as PurposePreset, "   ")).toBe("");
   });
 });
 
@@ -38,7 +38,7 @@ describe("isPdfFile", () => {
 describe("validateForm", () => {
   const defaultState = {
     sealType: "test",
-    purposePreset: "委托合同" as PurposePreset,
+    purposePreset: "Hợp đồng ủy quyền" as PurposePreset,
     purposeOther: "",
     documentTitle: "Doc",
     hasExisting: false,
@@ -46,32 +46,32 @@ describe("validateForm", () => {
   };
 
   it("validates sealType", () => {
-    expect(validateForm("", "委托合同" as PurposePreset, "", "Doc", false, null)).toBe("请选择章种类");
+    expect(validateForm("", "Hợp đồng ủy quyền" as PurposePreset, "", "Doc", false, null)).toBe("Hãy chọn loại dấu");
   });
 
   it("validates purposePreset", () => {
-    expect(validateForm("test", "" as PurposePreset, "", "Doc", false, null)).toBe("请选择用印事由");
+    expect(validateForm("test", "" as PurposePreset, "", "Doc", false, null)).toBe("Hãy chọn lý do dùng dấu");
   });
 
-  it("validates purposeOther when preset is '其他'", () => {
-    expect(validateForm("test", "其他" as PurposePreset, "   ", "Doc", false, null)).toBe("请填写「其他」用印事由的具体说明");
+  it("validates purposeOther when preset is 'Khác'", () => {
+    expect(validateForm("test", "Khác" as PurposePreset, "   ", "Doc", false, null)).toBe("Hãy nhập diễn giải cụ thể cho lý do dùng dấu「Khác」");
   });
 
   it("validates documentTitle", () => {
-    expect(validateForm("test", "委托合同" as PurposePreset, "", "   ", false, null)).toBe("请填写文件标题");
+    expect(validateForm("test", "Hợp đồng ủy quyền" as PurposePreset, "", "   ", false, null)).toBe("Hãy nhập tiêu đề văn bản");
   });
 
   it("validates file for new submission", () => {
-    expect(validateForm("test", "委托合同" as PurposePreset, "", "Doc", false, null)).toBe("请上传待盖章稿");
+    expect(validateForm("test", "Hợp đồng ủy quyền" as PurposePreset, "", "Doc", false, null)).toBe("Hãy tải lên bản chờ đóng dấu");
   });
 
   it("rejects non-PDF file", () => {
     const file = { type: "image/png", name: "image.png" } as File;
-    expect(validateForm("test", "委托合同" as PurposePreset, "", "Doc", false, file)).toBe("需上传 pdf 格式文件");
+    expect(validateForm("test", "Hợp đồng ủy quyền" as PurposePreset, "", "Doc", false, file)).toBe("Cần tải tệp định dạng PDF");
   });
 
   it("passes when existing draft", () => {
-    expect(validateForm("test", "委托合同" as PurposePreset, "", "Doc", true, null)).toBeNull();
+    expect(validateForm("test", "Hợp đồng ủy quyền" as PurposePreset, "", "Doc", true, null)).toBeNull();
   });
 });
 
@@ -80,7 +80,7 @@ describe("buildFormData", () => {
     const fd = buildFormData(
       "test",
       "matter-1",
-      "测试用印目的",
+      "Mục đích dùng dấu để kiểm tra",
       "Document Title",
       5,
       true,
@@ -95,7 +95,7 @@ describe("buildFormData", () => {
 
     expect(fd.get("sealType")).toBe("test");
     expect(fd.get("matterId")).toBe("matter-1");
-    expect(fd.get("purpose")).toBe("测试用印目的");
+    expect(fd.get("purpose")).toBe("Mục đích dùng dấu để kiểm tra");
     expect(fd.get("documentTitle")).toBe("Document Title");
     expect(fd.get("pageCount")).toBe("5");
     expect(fd.get("requireCrossPageSeal")).toBe("true");

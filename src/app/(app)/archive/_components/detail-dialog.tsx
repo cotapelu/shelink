@@ -44,18 +44,18 @@ export function DetailDialog({
     <Dialog open onOpenChange={o => !o && onClose()}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><FileText className="h-5 w-5 text-[#9B7BF7]" />归档申请详情</DialogTitle>
-          <DialogDescription><span className="font-mono text-[#9B7BF7]">{record.archiveNo}</span><span className="text-muted-foreground"> · 申请人 {record.archivedBy}</span></DialogDescription>
+          <DialogTitle className="flex items-center gap-2"><FileText className="h-5 w-5 text-[#9B7BF7]" />Chi tiết yêu cầu lưu trữ</DialogTitle>
+          <DialogDescription><span className="font-mono text-[#9B7BF7]">{record.archiveNo}</span><span className="text-muted-foreground"> · Người yêu cầu {record.archivedBy}</span></DialogDescription>
         </DialogHeader>
         <div className="space-y-3 text-sm">
           <DetailFields record={record} />
-          {record.judgmentSummary && <DetailSection title="裁判结果摘要">{record.judgmentSummary}</DetailSection>}
-          <DetailSection title="结案小结">{record.summary}</DetailSection>
+          {record.judgmentSummary && <DetailSection title="Tóm tắt kết quả xét xử">{record.judgmentSummary}</DetailSection>}
+          <DetailSection title="Tóm tắt kết thúc">{record.summary}</DetailSection>
           {record.missingItems.length > 0 && <MissingItemsSection items={record.missingItems} />}
           <LinkSection matterId={record.matter.id} />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>关闭</Button>
+          <Button variant="outline" onClick={onClose}>Đóng</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -65,10 +65,10 @@ export function DetailDialog({
 function DetailFields({ record }: { record: PendingRecord }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-      <Field label="案件" value={`${record.matter.internalCode} · ${record.matter.title}`} />
-      <Field label="委托方" value={record.matter.primaryClient?.name ?? "—"} />
+      <Field label="Vụ án" value={`${record.matter.internalCode} · ${record.matter.title}`} />
+      <Field label="Bên ủy quyền" value={record.matter.primaryClient?.name ?? "—"} />
       <Field
-        label="结案方式"
+        label="Hình thức kết thúc"
         value={
           record.closedReason
             ? CLOSED_REASON_CN[record.closedReason as keyof typeof CLOSED_REASON_CN]
@@ -76,7 +76,7 @@ function DetailFields({ record }: { record: PendingRecord }) {
         }
       />
       <Field
-        label="结案日期"
+        label="Ngày kết thúc"
         value={record.completedAt ? record.completedAt.toISOString().slice(0, 10) : "—"}
       />
     </div>
@@ -110,7 +110,7 @@ function DetailSection({
 function MissingItemsSection({ items }: { items: string[] }) {
   return (
     <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2">
-      <div className="text-xs font-medium text-amber-700 mb-1">缺项材料（{items.length}）</div>
+      <div className="text-xs font-medium text-amber-700 mb-1">Tài liệu còn thiếu ({items.length})</div>
       <div className="text-xs text-amber-700/80 break-all">{items.join("、")}</div>
     </div>
   );
@@ -120,7 +120,7 @@ function LinkSection({ matterId }: { matterId: string }) {
   return (
     <div className="rounded-md border border-border/60 bg-muted/20 px-3 py-2">
       <Link href={`/matters/${matterId}`} target="_blank" className="text-xs text-[#5B8DEF] hover:underline">
-        → 打开案件详情查看完整材料与卷宗
+        → Mở chi tiết vụ án để xem đầy đủ tài liệu và hồ sơ
       </Link>
     </div>
   );

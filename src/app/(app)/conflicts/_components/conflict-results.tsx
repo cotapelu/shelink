@@ -20,7 +20,7 @@ export function ConflictResults({ results, hasRun }: ConflictResultsProps) {
       className="rounded-xl border border-border bg-card p-5"
     >
       <h2 className="mb-3 text-sm font-semibold">
-        检索结果{" "}
+        Kết quả tra{" "}
         <span className="font-mono text-xs text-muted-foreground tabular">({results?.length ?? 0})</span>
       </h2>
 
@@ -28,7 +28,7 @@ export function ConflictResults({ results, hasRun }: ConflictResultsProps) {
         <div className="rounded-md border border-[#4ADE80]/30 bg-[#4ADE80]/10 p-4 text-sm">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-[#4ADE80]" />
-            <span>未命中任何历史客户或案件</span>
+            <span>Không khớp khách hoặc vụ án lịch sử nào</span>
           </div>
         </div>
       ) : (

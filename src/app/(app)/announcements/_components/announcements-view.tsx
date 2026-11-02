@@ -26,15 +26,15 @@ function AnnouncementsHeader({ isManager, onCreate, activeCount }: { isManager: 
       <div>
         <h1 className="flex items-center gap-2 text-xl">
           <Megaphone className="h-5 w-5 text-primary" strokeWidth={1.8} />
-          公告指引
+          Hướng dẫn thông báo
         </h1>
         <p className="mt-0.5 text-[12px] text-muted-foreground">
-          共 {activeCount} 条公告 · 置顶公告会显示在全站顶部 banner
+          Tổng {activeCount} thông báo · Thông báo ghim sẽ hiện ở banner đầu toàn site
         </p>
       </div>
       {isManager && (
         <Button size="sm" onClick={onCreate} className="gap-1.5">
-          <Plus className="h-3.5 w-3.5" />发布公告
+          <Plus className="h-3.5 w-3.5" />Đăng thông báo
         </Button>
       )}
     </header>
@@ -49,12 +49,12 @@ function AnnouncementItem({ a, canEdit, onEdit, onArchive }: { a: AnnouncementIt
         <div className="flex items-center gap-2">
           {a.pinned && (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">
-              <Pin className="h-2.5 w-2.5" />置顶
+              <Pin className="h-2.5 w-2.5" />Ghim
             </span>
           )}
           <h3 className="text-sm font-medium">{a.title}</h3>
           {expired && (
-            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">已过期</span>
+            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">Đã hết hạn</span>
           )}
         </div>
         {canEdit && (
@@ -70,8 +70,8 @@ function AnnouncementItem({ a, canEdit, onEdit, onArchive }: { a: AnnouncementIt
       </header>
       <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-foreground/80">{a.content}</p>
       <div className="mt-2 text-[10px] text-muted-foreground">
-        {a.author.name} · 发布于 {formatDate(a.publishedAt)}
-        {a.expiresAt && ` · 过期于 ${formatDate(a.expiresAt)}`}
+        {a.author.name} · Đăng ngày {formatDate(a.publishedAt)}
+        {a.expiresAt && ` · Hết hạn ${formatDate(a.expiresAt)}`}
       </div>
     </li>
   );
@@ -91,13 +91,13 @@ export function AnnouncementsView({
   const router = useRouter();
 
   async function handleArchive(a: AnnouncementItem) {
-    if (!confirm(`归档公告"${a.title}"？归档后不再显示但保留历史。`)) return;
+    if (!confirm(`Lưu trữ thông báo "${a.title}"? Sau khi lưu trữ không hiện nữa nhưng vẫn giữ lịch sử.`)) return;
     try {
       await archiveAnnouncement(a.id);
-      toast.success("已归档");
+      toast.success("Đã lưu trữ");
       router.refresh();
     } catch (err) {
-      toast.error("归档失败", { description: err instanceof Error ? err.message : "" });
+      toast.error("Lưu trữ thất bại", { description: err instanceof Error ? err.message : "" });
     }
   }
 
@@ -107,7 +107,7 @@ export function AnnouncementsView({
     <div className="space-y-4">
       <AnnouncementsHeader isManager={isManager} onCreate={() => { setEditing(null); setDialogOpen(true); }} activeCount={active.length} />
       {active.length === 0 ? (
-        <p className="rounded-md border border-dashed border-border bg-background py-8 text-center text-xs text-muted-foreground">暂无公告</p>
+        <p className="rounded-md border border-dashed border-border bg-background py-8 text-center text-xs text-muted-foreground">Chưa có thông báo</p>
       ) : (
         <ul className="space-y-2">{active.map(a => { const canEdit = isManager || a.author.id === currentUserId; return <AnnouncementItem key={a.id} a={a} canEdit={canEdit} onEdit={() => { setEditing(a); setDialogOpen(true); }} onArchive={() => handleArchive(a)} />; })}</ul>
       )}
