@@ -237,3 +237,33 @@ Batch script lại rơi vào bẫy "件" (ngắn) thay trước "案件管理" (
 | 仅支持图片格式 / 超过 10MB | Chỉ hỗ trợ định dạng ảnh / Vượt quá 10MB |
 | 中文公司名 / 公司名 | Tên công ty / Tên công ty |
 | 工作台 mock 数据 | Dữ liệu mock bảng làm việc |
+
+## Bổ sung I18N-15→18 (2026-11-01) — Việt hóa toàn bộ phần còn lại (5 gói)
+
+**Kết quả**: từ 309 file chỉ còn comment license → **toàn bộ src/ trừ các cụm contract/data bên dưới đã là tiếng Việt**. Các gói: lib(23 file) + server(57) + server/ai(12) + matters(47) + ui-admin(84) + ui-ops(52).
+
+**Thay đổi hệ thống (không chỉ chuỗi)**:
+- `formatCurrency/formatDate` (`lib/utils.ts`): `zh-CN` + **CNY** → `vi-VN` + **VND**; compact `X万` → `X tr`.
+- Các chỗ hiển thị tiền hardcode `¥` trong dữ liệu app (clients/matters/finance) → `formatCurrency` (VND).
+- `generateTitle`/`buildAutoTitle`: bỏ `.replace(/\s+/g,"")` (nuốt khoảng trắng tiếng Việt), separator `与` → `và`, format `A và B - Nguyên nhân`.
+
+**Giữ nguyên — contract/API (đã ghi chú trong code)**:
+| Cụm | Giá trị giữ | Lý do |
+|---|---|---|
+| `lib/express/companies.ts`, `STATE_TONE` | tiếng Trung | hợp đồng API 快递鸟/快递100 |
+| `lib/china-regions.ts` + list `PROVINCES`/wszl trong `matters/.../keyword-search-form.tsx`, `case-search-panel.tsx` | tiếng Trung | dữ liệu/tham số tra cứu án lệ Trung Quốc — **chờ duyệt**: cần tỉnh/VN + nguồn tra VN |
+| `template-builder.ts`, `template-engine.ts`, `render.ts` nameMap (卷宗封皮/目录), `toCNDate`, `numberToChinese` | tiếng Trung | mẫu + chữ số văn bản pháp lý seed sẵn trong DB — **chờ duyệt dịch chuyên nghiệp** |
+| `lib/sms-parser*.ts` | tiếng Trung | từ khóa tin nhắn toà án — **chờ duyệt** |
+| `lib/yuandian/*`, `server/yuandian`, `server/settings/yuandian-actions`, tên hiển thị 元典 | tiếng Trung (tên dịch vụ) | prompt/API model ngoài — **chờ duyệt** |
+| `lib/ai/review-prompts.ts` | tiếng Trung | prompt model ngoài — **chờ duyệt** |
+| `archive-no.ts`/`firm-profile.ts` `CATEGORY_SHORT`, token案号 {年}/{所}/{类词}/{序3} | ký tự/token gốc | tương thích mã đã lưu DB + hợp đồng cấu hình |
+| `recommend-cause.ts` prompt: yêu cầu tên案由 tiếng Trung | tiếng Trung | tên nguyên nhân trong DB đang là tiếng Trung (prisma/seeds/causes-*) |
+| tên dịch vụ/thương hiệu: 通义千问, 智谱, 快递鸟, 快递100, 案件云 | tên riêng | tên thương hiệu, không dịch |
+- `mock-data.ts` — **code chết, không ai import** (GOAL §5.7.3: không xóa, chỉ báo) — chờ chủ sở hưởng quyết định xóa hay khôi phục.
+- `tools/calc` (诉讼费/迟延履行金): giữ `¥` + tên luật Trung trong nhãn — công cụ tính theo luật tố tụng TQ; **chờ duyệt**: giữ / thay bằng luật VN / bỏ.
+
+**Bẫy lặp lại (ghi nhận)**:
+1. Block comment có dòng trống ` *` bị grep ẩn → nhiều cặm thay trượt. Cách xử lý: grep context bằng python đọc cả block trước khi thay.
+2. Thay chuỗi ngắn trước chuỗi dài chứa nó tạo chuỗi lai (`hồ sơ对应文档`, `Xác nhận thu hồi销`, `Thêm加被保全人`) → luôn kiểm tra leftover sau mỗi batch.
+3. **STATE_TONE đã suýt dịch key** (key = giá trị trạng thái thô từ API) — đã khôi phục nguyên gốc + ghi chú. Bài học: với object map dữ liệu ngoài, phải xác định key có phải contract không TRƯỚC khi thay.
+4. Test co-located ngoài `src/tests` (`src/app/**/__tests__`, `*.test.tsx` cạnh component) — chạy `npm test` (không phải `vitest run src/tests`) mõi Full gate.
