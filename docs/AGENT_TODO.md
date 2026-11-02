@@ -439,3 +439,24 @@ Loại: Test. Ưu tiên: MEDIUM (điểm nghẽt branch → Health Score). ~35 p
 **GĐ1**: ✅ hoàn tất (AUTO-40 + AUTO-41). **Ghi chú**: `git commit/push` là đỏ-vạch §7 — **chưa commit**, chờ chủ sở hữu duyệt (AUTO-CONTINULE yêu cầu commit sau mỗi loop → xung đột, ưu tiên AGENTS).
 
 - **AUTO-38 (2026-10-24)**: sửa `rules-of-hooks` (bug tiềm ẩn), 3 `prefer-as-const`, 2 `no-unused-expressions`, 2 `exhaustive-deps`, 1 `no-img-element`, 16 `no-unused-vars`; trích 3 hàm (`useIntakeFormStates` 26, `DocCard` 53, `NewFolderDialog` 51). Lint 973→944; coverage hàm 77.15→79.52%; test 2079 pass; typecheck/build xanh; site /login 200.
+
+## [CYCLE-I18N-15..18] — 2026-11-01: Việt hoá TOÀN BỘ phần còn lại (5 gói) ✅
+
+Loại: I18N (de-zh) + chuẩn hoá VND/vi-VN + sửa test đồng bộ. Không đổi schema/migration.
+
+**Đã hoàn thành** (23 + 57 + 12 + 47 + 84 + 52 = **275 file**):
+- [x] Gói LIB: `utils.ts` (CNY→VND, zh-CN→vi-VN, compact 万→tr), ics/ai/storage/auth/archive/imports/matters/legal-calc + 7 test file.
+- [x] Gói SERVER (57) + SERVER/AI (12): message lỗi, prompt (giữ JSON key + tên hãng/案由 contract), test đồng bộ.
+- [x] Gói MATTERS (47): forms/panels/tables + tests (seals 7 file test).
+- [x] Gói UI-ADMIN (84): settings/seals/inbox/archive/tools/contacts/conflicts/audit/announcements.
+- [x] Gói UI-OPS (52): finance/preservation/intakes/express/notifications/schedule/clients/firm-resources/components/api routes/globals.css + tests co-located.
+- [x] Chuẩn hoá tiền: bỏ `¥` hardcode ở dữ liệu app (clients/matters/finance) → `formatCurrency` VND.
+- [x] `generateTitle`/`buildAutoTitle`: bỏ strip whitespace (nuốt dấu cách tiếng Việt), `与`→`và`.
+
+**Cổng chất lượng**: typecheck PASS; prisma:validate PASS; test **2368 pass / 1 skip / 0 fail** (đúng baseline đầu chu kỳ); lint **896 (744 lỗi) — không đổi**; dev :3000 `/login` 200, 12 route protected 307 đúng guard.
+
+**Giữ nguyên — chờ duyệt** (ghi docs/I18N-GLOSSARY.md §I18N-15→18): contract API (express/STATE_TONE/companies), dữ liệu Trung (china-regions, PROVINCES/wszl tra án lệ), văn bản pháp lý (template-builder/engine, numberToChinese, toCNDate), prompt model ngoài (yuandian/review-prompts/sms-parser),案由 seed DB, mã nội bộ (CATEGORY_SHORT/token案号), tên thương hiệu (通义千问/智谱/快递鸟/案件云), `mock-data.ts` (code chết — chờ quyết định xóa), tools/calc (luật tố tụng TQ — chờ quyết định giữ/thay/bỏ).
+
+**Bẫy ghi nhận** (PROFILE): (1) block comment có dòng trống bị grep ẩn → nhiều cặm thay trượt; (2) thay chuỗi ngắn trước dài tạo chuỗi lai (`hồ sơ对应文档`, `Thêm加被保全人`) — luôn kiểm leftover; (3) **STATE_TONE suýt dịch key** (key = contract API) — đã khôi phục + ghi chú; (4) test co-located ngoài `src/tests` — phải chạy `npm test` đầy đủ ở cổng cuối.
+
+**Tiếp theo (GĐ sau)**: quyết định của chủ sở hữn cho các cụm 🔴 ở glossary (dịch văn bản pháp lý, dữ liệu VN thay Trung, bỏ/giữ tools luật TQ, xoá mock-data); hoặc chuyển sang task roadmap TODO.md (TD-H1 tách vertical plugin, TD-H2 onboarding wizard).
