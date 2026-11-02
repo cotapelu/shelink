@@ -51,7 +51,7 @@ export function emptyToNull<T extends Record<string, unknown>>(obj: T): T {
 
 export function requireApprover(role: string) {
   if (role !== "ADMIN" && role !== "PRINCIPAL_LAWYER") {
-    throw new Error("仅管理员或主任律师可审批收案");
+    throw new Error("Chỉ quản trị viên hoặc luật sư chính được duyệt tiếp nhận");
   }
 }
 
@@ -60,10 +60,13 @@ export function generateTitle(
   opposingNames: string[],
   causeName: string | null
 ): string {
-  const left = clientName || "待补充委托方";
-  const right = opposingNames.length > 0 ? opposingNames.join("、") : "待补充对方";
-  const cause = causeName ?? "案件";
-  return `${left}与${right}${cause}`.replace(/\s+/g, "");
+  // Vietnamese: trim từng phần, giữ khoảng trắng bên trong tên (bản cũ xoá sạch \s để hợp tiếng Trung)
+  const left = (clientName ?? "").trim() || "Chưa có bên ủy quyền";
+  const right = opposingNames.length > 0
+    ? opposingNames.map((n) => n.trim()).join(", ")
+    : "Chưa có bên đối phương";
+  const cause = (causeName ?? "").trim() || "Vụ án";
+  return `${left} và ${right} - ${cause}`;
 }
 
 export function clientTypeToPartyType(type: "INDIVIDUAL" | "COMPANY" | string): PartyType {
@@ -92,11 +95,11 @@ export function conflictQueryKey(q: IntakeConflictQuery) {
 
 export function formatConflictQuery(q: IntakeConflictQuery) {
   const roleLabel: Record<IntakeConflictRole, string> = {
-    CLIENT_PARTY: "委托方",
-    OPPOSING_PARTY: "对方",
-    THIRD_PARTY: "第三人"
+    CLIENT_PARTY: "Bên ủy quyền",
+    OPPOSING_PARTY: "Bên đối phương",
+    THIRD_PARTY: "Người thứ ba"
   };
-  return `${roleLabel[q.role]}「${q.name || q.idNumber}」`;
+  return `${roleLabel[q.role]} "${q.name || q.idNumber}"`;
 }
 
 export function buildExpectedConflictQueries(intake: IntakeConflictGateInput) {
@@ -141,12 +144,12 @@ export function getCheckedConflictQueries(payload: Prisma.JsonValue) {
 export function assertConflictReviewAllowsConversion(intake: IntakeConflictGateInput) {
   const expectedQueries = buildExpectedConflictQueries(intake);
   if (expectedQueries.length === 0) {
-    throw new Error("请先补充委托方或相对方，再运行利益冲突检索");
+    throw new Error("Cần bổ sung bên ủy quyền hoặc bên đối phương trước khi tra kiểm xung đột lợi ích");
   }
 
   const latestCheck = intake.conflictChecks[0];
   if (!latestCheck) {
-    throw new Error("转为正式案件前必须先运行利益冲突检索");
+    throw new Error("Phải chạy kiểm tra xung đột lợi ích trước khi chuyển thành vụ án chính thức");
   }
 
   const checkedKeys = new Set(
@@ -155,29 +158,29 @@ export function assertConflictReviewAllowsConversion(intake: IntakeConflictGateI
   const missingQueries = expectedQueries.filter((q) => !checkedKeys.has(conflictQueryKey(q)));
   if (missingQueries.length > 0) {
     throw new Error(
-      `收案当事人已变更，请重新运行利益冲突检索。缺少：${missingQueries
+      `Các bên của tiếp nhận đã thay đổi, hãy chạy lại kiểm tra xung đột lợi ích. Thiếu: ${missingQueries
         .map(formatConflictQuery)
-        .join("、")}`
+        .join(", ")}`
     );
   }
 
   if (latestCheck.conclusion === "PENDING") {
-    throw new Error("利益冲突检索还没有结论，请先标记是否可承接");
+    throw new Error("Kiểm tra xung đột lợi ích chưa có kết luận, hãy đánh dấu có thể tiếp nhận hay không");
   }
   if (latestCheck.conclusion === "NEED_INFO") {
-    throw new Error("利益冲突检索结论为信息不足，不能转为正式案件");
+    throw new Error("Kết luận kiểm tra xung đột lợi ích là thông tin chưa đủ, không thể chuyển thành vụ án chính thức");
   }
   if (latestCheck.conclusion === "SAME_SUBJECT") {
-    throw new Error("已确认存在利益冲突，不能直接转为正式案件");
+    throw new Error("Đã xác nhận có xung đột lợi ích, không thể trực tiếp chuyển thành vụ án chính thức");
   }
   if (latestCheck.conclusion !== "DIFFERENT") {
-    throw new Error("利益冲突检索结论异常，请重新检索后再转为正式案件");
+    throw new Error("Kết luận kiểm tra xung đột lợi ích bất thường, hãy tra lại trước khi chuyển thành vụ án chính thức");
   }
 
   const hasHighRiskHit = latestCheck.hits.some(
     (h) => h.severity === "HIGH" || h.severity === "BLOCKING"
   );
   if (hasHighRiskHit && !latestCheck.note?.trim()) {
-    throw new Error("存在高风险或阻塞命中，请在冲突结论备注中写明排除理由或书面同意留痕");
+    throw new Error("Có kết quả khớp rủi ro cao hoặc chặn, hãy ghi rõ lý do loại trừ hoặc sự đồng ý bằng văn bản trong ghi chú kết luận xung đột");
   }
 }

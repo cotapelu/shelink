@@ -44,7 +44,7 @@ describe("ai-actions", () => {
       mockRequireSession.mockResolvedValue({
         user: { id: "u2", role: "LAWYER", name: "User" }
       } as any);
-      await expect(getAiSettingsPublic()).rejects.toThrow("仅管理员可修改 AI 配置");
+      await expect(getAiSettingsPublic()).rejects.toThrow("Chỉ quản trị viên được sửa cấu hình AI");
     });
   });
 
@@ -99,7 +99,7 @@ describe("ai-actions", () => {
       mockRequireSession.mockResolvedValue({
         user: { id: "u2", role: "LAWYER", name: "User" }
       } as any);
-      await expect(saveAiSettingsAction({} as any)).rejects.toThrow("仅管理员可修改 AI 配置");
+      await expect(saveAiSettingsAction({} as any)).rejects.toThrow("Chỉ quản trị viên được sửa cấu hình AI");
     });
   });
 
@@ -121,7 +121,7 @@ describe("ai-actions", () => {
       mockRequireSession.mockResolvedValue({
         user: { id: "u2", role: "LAWYER", name: "User" }
       } as any);
-      await expect(clearAiKeyAction({ confirm: true } as any)).rejects.toThrow("仅管理员可修改 AI 配置");
+      await expect(clearAiKeyAction({ confirm: true } as any)).rejects.toThrow("Chỉ quản trị viên được sửa cấu hình AI");
     });
   });
 
@@ -161,7 +161,7 @@ describe("ai-actions", () => {
       mockRequireSession.mockResolvedValue({
         user: { id: "u2", role: "LAWYER", name: "User" }
       } as any);
-      await expect(testAiConnection()).rejects.toThrow("仅管理员可修改 AI 配置");
+      await expect(testAiConnection()).rejects.toThrow("Chỉ quản trị viên được sửa cấu hình AI");
     });
   });
 });

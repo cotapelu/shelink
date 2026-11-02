@@ -48,7 +48,7 @@ export type ScheduleItem = {
   clientName: string | null;
   matterId: string | null;
   procedure?: string;
-  daysUntil: number; // 距今天数（0=今天）
+  daysUntil: number; // Số ngày tính từ hôm nay (0 = hôm nay)
 };
 
 export type HeroData = {
@@ -114,31 +114,31 @@ export async function getDashboardKpis(): Promise<KpiItem[]> {
   return [
     {
       key: "in_progress",
-      label: "办理中案件",
+      label: "Đang xử lý",
       value: inProgress,
-      trend: { direction: "up", text: `${inProgress} 件` },
+      trend: { direction: "up", text: `${inProgress} vụ` },
       sparkline: spark(inProgress)
     },
     {
       key: "pending",
-      label: "待确认收案",
+      label: "Tiếp nhận chờ xác nhận",
       value: pending,
-      trend: { direction: "warn", text: `${pending} 待处理` },
+      trend: { direction: "warn", text: `${pending} chờ xử lý` },
       sparkline: spark(pending)
     },
     {
       key: "deadline",
-      label: "近 7 天期限",
+      label: "Thời hạn trong 7 ngày",
       value: deadlines,
-      trend: { direction: "warn", text: `${deadlines} 项` },
+      trend: { direction: "warn", text: `${deadlines} hạn` },
       sparkline: spark(deadlines)
     },
     {
       key: "received",
-      label: "本月实收",
+      label: "Thu thực trong tháng",
       value: receivedTotal,
       valueFormat: "currency",
-      trend: { direction: "up", text: `¥${(receivedTotal / 10000).toFixed(1)}万` },
+      trend: { direction: "up", text: `${(receivedTotal / 10000).toFixed(0)} tr` },
       sparkline: spark(Math.round(receivedTotal / 1000))
     }
   ];
@@ -165,7 +165,7 @@ export async function getDashboardRevenueTrend(months = 6) {
   for (let i = 0; i < months; i++) {
     const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
     buckets.push({
-      month: `${d.getMonth() + 1}月`,
+      month: `Tháng ${d.getMonth() + 1}`,
       received: 0,
       receivable: 0
     });
@@ -175,7 +175,7 @@ export async function getDashboardRevenueTrend(months = 6) {
     const d = new Date(e.occurredAt);
     const idx = (d.getFullYear() - start.getFullYear()) * 12 + d.getMonth() - start.getMonth();
     if (idx < 0 || idx >= months) continue;
-    const val = Number(e.amount) / 10000; // display in 万
+    const val = Number(e.amount) / 10000; // hiển thị theo đơn vị triệu (vạn)
     if (e.type === "RECEIVED") buckets[idx].received += val;
     if (e.type === "RECEIVABLE") buckets[idx].receivable += val;
   }
@@ -220,7 +220,7 @@ export async function getDashboardCategoryDistribution() {
   return result;
 }
 
-// ============ Schedule (past 2 days to next 15 days：开庭 + 期限) ============
+// ============ Lịch (2 ngày qua tới 15 ngày tới: phiên tòa + thời hạn) ============
 
 export async function getDashboardSchedule(): Promise<ScheduleItem[]> {
   const session = await requireSession();
@@ -266,11 +266,11 @@ export async function getDashboardSchedule(): Promise<ScheduleItem[]> {
   ]);
 
   const itemsWithSort: { item: ScheduleItem; ts: number }[] = [];
-  const weekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+  const weekdays = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
   const DAY = 1000 * 60 * 60 * 24;
   const daysFrom = (d: Date) => Math.ceil((d.getTime() - now.getTime()) / DAY);
   const fmt = (d: Date) => ({
-    date: `${d.getMonth() + 1}月${d.getDate()}日`,
+    date: `${d.getDate()}/${d.getMonth() + 1}`,
     weekday: weekdays[d.getDay()],
     time: d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", hour12: false })
   });

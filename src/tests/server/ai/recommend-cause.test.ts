@@ -37,7 +37,7 @@ describe('recommendCause', () => {
 
   it('throws if situation too short', async () => {
     await expect(recommendCause({ category: 'CIVIL_COMMERCIAL', situation: 'abc' }))
-      .rejects.toThrow('案情描述太短，至少 5 个字');
+      .rejects.toThrow('Mô tả tình hình quá ngắn, cần ít nhất 5 chữ');
   });
 
   it('throws if AI returns non-array parsed content', async () => {
@@ -45,7 +45,7 @@ describe('recommendCause', () => {
     (extractJson as any).mockReturnValue({ not: 'array' });
 
     await expect(recommendCause({ category: 'CIVIL_COMMERCIAL', situation: 'This is a test situation that is long enough' }))
-      .rejects.toThrow('AI 返回内容无法解析为候选列表');
+      .rejects.toThrow('Không phân tích được nội dung AI trả về thành danh sách ứng viên');
   });
 
   it('throws if all resolved causes are null', async () => {
@@ -54,7 +54,7 @@ describe('recommendCause', () => {
     (searchCauses as any).mockResolvedValue([]); // all resolve to null
 
     await expect(recommendCause({ category: 'CIVIL_COMMERCIAL', situation: 'This is a test situation that is long enough' }))
-      .rejects.toThrow('AI 推荐的案由都不在案由库中');
+      .rejects.toThrow('Nguyên nhân AI gợi ý không có trong danh mục案由');
   });
 
   it('filters duplicates and respects max 3 results', async () => {
@@ -225,7 +225,7 @@ describe('recommendCause', () => {
     (extractJson as any).mockReturnValue([{ reason: 'r1', confidence: 'HIGH' }]); // no name
 
     await expect(recommendCause({ category: 'CIVIL_COMMERCIAL', situation: 'This is a test situation that is long enough' }))
-      .rejects.toThrow('AI 推荐的案由都不在案由库中');
+      .rejects.toThrow('Nguyên nhân AI gợi ý không có trong danh mục案由');
     expect(searchCauses).not.toHaveBeenCalled();
   });
 
@@ -260,17 +260,17 @@ describe('recommendCause', () => {
     (searchCauses as any).mockResolvedValue([]); // resolveCauseId returns null after trim
 
     await expect(recommendCause({ category: 'CIVIL_COMMERCIAL', situation: 'This is a test situation that is long enough' }))
-      .rejects.toThrow('AI 推荐的案由都不在案由库中');
+      .rejects.toThrow('Nguyên nhân AI gợi ý không có trong danh mục案由');
   });
 
   // Parameterized test to cover categoryHint for all MatterCategory values
   it.each([
-    ['CIVIL_COMMERCIAL', '民商事'],
-    ['CRIMINAL', '刑事'],
-    ['ADMINISTRATIVE', '行政'],
-    ['NON_LITIGATION', '非诉'],
-    ['LEGAL_COUNSEL', '常年法律顾问'],
-    ['SPECIAL_PROJECT', '专项'],
+    ['CIVIL_COMMERCIAL', 'Dân sự - Thương mại'],
+    ['CRIMINAL', 'Hình sự'],
+    ['ADMINISTRATIVE', 'Hành chính'],
+    ['NON_LITIGATION', 'Phi tố tụng'],
+    ['LEGAL_COUNSEL', 'Tư vấn thường xuyên'],
+    ['SPECIAL_PROJECT', 'Đặc biệt'],
     // LABOR_ARBITRATION and COMMERCIAL_ARBITRATION fall through to default
     ['LABOR_ARBITRATION', 'LABOR_ARBITRATION'],
     ['COMMERCIAL_ARBITRATION', 'COMMERCIAL_ARBITRATION']

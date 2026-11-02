@@ -59,7 +59,7 @@ async function getOpenableMatterIds(userId: string, matterIds: string[]) {
 
 const queryItemSchema = z
   .object({
-    // v0.4: 角色可选（顶栏快查不需要），server 端默认 OPPOSING_PARTY
+    // v0.4: vai trò tuỳ chọn (tra nhanh trên thanh top không cần), phía server mặc định OPPOSING_PARTY
     role: z
       .enum([
         "CLIENT_PARTY",
@@ -75,7 +75,7 @@ const queryItemSchema = z
     idNumber: z.string().max(50).optional().or(z.literal(""))
   })
   .refine((q) => (q.name && q.name.trim()) || (q.idNumber && q.idNumber.trim()), {
-    message: "姓名或证件号至少填写一项"
+    message: "Điền ít nhất một trong hai: họ tên hoặc số giấy tờ"
   });
 
 const runCheckSchema = z.object({
@@ -117,7 +117,7 @@ export async function runCheckAndSave(input: z.infer<typeof runCheckSchema>) {
       conclusion: noHits ? "DIFFERENT" : "PENDING",
       decidedById: noHits ? session.user.id : null,
       decidedAt: noHits ? new Date() : null,
-      note: noHits ? "系统自动标记：未命中历史案件冲突。" : null,
+      note: noHits ? "Hệ thống tự đánh dấu: không khớp xung đột lịch sử vụ án." : null,
       hits: {
         create: result.hits.map((h) => ({
           hitType: h.hitType,

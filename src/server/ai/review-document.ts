@@ -20,10 +20,10 @@
 "use server";
 
 /**
- * v0.19: 文书智能审查
+ * v0.19: Kiểm tra văn bản thông minh
  *
- * 从存储读文档 → 抽文本（PDF/DOCX/纯文本）→ 喂 AI → 结构化审查清单。
- * 目前覆盖通用文书（合同、起诉状、申请书、协议、书证等），不分文书类型走同一 prompt。
+ * Đọc tài liệu từ storage → trích văn bản (PDF/DOCX/văn bản thuần) → đưa vào AI → danh sách kiểm tra có cấu trúc.
+ * Hiện phủ văn bản chung (hợp đồng, đơn khởi kiện, đơn yêu cầu, thỏa thuận, chứng cứ văn bản...), mọi loại văn bản dùng chung một prompt.
  */
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
@@ -48,11 +48,11 @@ export type ReviewResult = {
   textPreviewChars: number;
   truncated: boolean;
   items: ReviewItem[];
-  /** v0.21: 落库后的 ReviewRecord.id；doc 不属于 Matter（如 intake 阶段）则为 null */
+  /** v0.21: ReviewRecord.id sau khi ghi DB; doc không thuộc Matter (vd giai đoạn intake) thì null */
   recordId: string | null;
 };
 
-// v0.26: prompt 按 Document.category 分流（src/lib/ai/review-prompts.ts）
+// v0.26: prompt phân nhánh theo Document.category (src/lib/ai/review-prompts.ts)
 
 const MAX_CHARS_FOR_AI = 6000;
 
@@ -68,7 +68,7 @@ async function extractDocxText(buf: Buffer): Promise<string> {
 }
 
 function extractDocText(): never {
-  throw new Error("不支持老 .doc 格式，请另存为 .docx 后重新上传");
+  throw new Error("Không hỗ trợ định dạng .doc cũ, hãy lưu lại thành .docx rồi tải lên");
 }
 
 function extractPlainText(buf: Buffer): string {
@@ -83,14 +83,14 @@ async function extractDocumentText(buf: Buffer, mimeType: string | null): Promis
   }
   if (mt === "application/msword") return extractDocText();
   if (mt.startsWith("text/")) return await extractPlainText(buf);
-  throw new Error(`不支持的文档类型 (${mimeType ?? "未知"})，目前仅支持 PDF / DOCX / 纯文本`);
+  throw new Error(`Loại tài liệu không hỗ trợ (${mimeType ?? "không rõ"}), hiện chỉ hỗ trợ PDF / DOCX / văn bản thuần`);
 }
 
 async function loadDocumentForReview(input: { documentId: string }, session: { user: { id: string; role: string } }) {
   const doc = await prisma.document.findFirst({
     where: { id: input.documentId, deletedAt: null }
   });
-  if (!doc) throw new Error("材料不存在");
+  if (!doc) throw new Error("Tài liệu không tồn tại");
   if (doc.matterId) {
     await assertCanAccessMatter(session.user.id, session.user.role, doc.matterId);
   }
@@ -100,7 +100,7 @@ async function loadDocumentForReview(input: { documentId: string }, session: { u
 async function prepareDocumentBuffer(doc: any) {
   const stored = await storage.readFile(doc.path);
   if (doc.encrypted) {
-    if (!doc.iv || !doc.authTag) throw new Error("加密元数据损坏");
+    if (!doc.iv || !doc.authTag) throw new Error("Siêu dữ liệu mã hoá bị hỏng");
     return decryptBuffer(stored, doc.iv, doc.authTag);
   }
   return stored;
@@ -109,7 +109,7 @@ async function prepareDocumentBuffer(doc: any) {
 async function prepareReviewText(buf: Buffer, mimeType: string | null, maxChars = MAX_CHARS_FOR_AI) {
   const raw = (await extractDocumentText(buf, mimeType)).trim();
   if (raw.length < 20) {
-    throw new Error("无可分析文本（可能是扫描件 PDF / 空文档），请用文本层 PDF 或 DOCX");
+    throw new Error("Không có văn bản để phân tích (có thể là PDF scan / tài liệu rỗng), hãy dùng PDF có lớp văn bản hoặc DOCX");
   }
   const truncated = raw.length > maxChars;
   const text = truncated ? raw.slice(0, maxChars) : raw;
@@ -119,7 +119,7 @@ async function prepareReviewText(buf: Buffer, mimeType: string | null, maxChars 
 function buildReviewPrompt(doc: any, text: string, truncated: boolean) {
   const systemPrompt = selectReviewPrompt(doc.category);
   const promptLabel = reviewPromptLabel(doc.category);
-  const userContent = `文书名称：${doc.name}\n审查类型：${promptLabel}\n\n文书正文：\n${text}${truncated ? "\n\n（注：原文较长，已截断前部分内容供审查）" : ""}`;
+  const userContent = `Tên văn bản: ${doc.name}\nLoại kiểm tra: ${promptLabel}\n\nNội dung văn bản:\n${text}${truncated ? "\n\n(Ghi chú: bản gốc dài, đã cắt phần đầu để kiểm tra)" : ""}`;
   return { systemPrompt, userContent };
 }
 
@@ -137,7 +137,7 @@ async function executeReviewAI(systemPrompt: string, userContent: string) {
     return res.content;
   } catch (err) {
     if (err instanceof AiNotConfiguredError) throw err;
-    throw new Error(err instanceof Error ? err.message : "AI 审查请求失败");
+    throw new Error(err instanceof Error ? err.message : "Yêu cầu kiểm tra AI thất bại");
   }
 }
 

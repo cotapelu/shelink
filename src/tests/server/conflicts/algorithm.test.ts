@@ -147,32 +147,32 @@ describe("bumpSeverity", () => {
 // ── roleLabel Tests ───────────────────────────────────────────────────────────────
 
 describe("roleLabel", () => {
-  it("should label CLIENT_PARTY as 委托方", () => {
-    expect(roleLabel("CLIENT_PARTY")).toBe("委托方");
+  it("should label CLIENT_PARTY as Bên ủy quyền", () => {
+    expect(roleLabel("CLIENT_PARTY")).toBe("Bên ủy quyền");
   });
 
-  it("should label OPPOSING_PARTY as 对方", () => {
-    expect(roleLabel("OPPOSING_PARTY")).toBe("对方");
+  it("should label OPPOSING_PARTY as Bên đối phương", () => {
+    expect(roleLabel("OPPOSING_PARTY")).toBe("Bên đối phương");
   });
 
-  it("should label THIRD_PARTY as 第三人", () => {
-    expect(roleLabel("THIRD_PARTY")).toBe("第三人");
+  it("should label THIRD_PARTY as Người thứ ba", () => {
+    expect(roleLabel("THIRD_PARTY")).toBe("Người thứ ba");
   });
 
-  it("should label CO_LITIGANT as 共同诉讼人", () => {
-    expect(roleLabel("CO_LITIGANT")).toBe("共同诉讼人");
+  it("should label CO_LITIGANT as Đồng khởi kiện", () => {
+    expect(roleLabel("CO_LITIGANT")).toBe("Đồng khởi kiện");
   });
 
-  it("should label AGENT as 代理人", () => {
-    expect(roleLabel("AGENT")).toBe("代理人");
+  it("should label AGENT as Người đại diện", () => {
+    expect(roleLabel("AGENT")).toBe("Người đại diện");
   });
 
-  it("should label WITNESS as 证人", () => {
-    expect(roleLabel("WITNESS")).toBe("证人");
+  it("should label WITNESS as Nhân chứng", () => {
+    expect(roleLabel("WITNESS")).toBe("Nhân chứng");
   });
 
-  it("should label unknown roles as 当事人", () => {
-    expect(roleLabel("UNKNOWN_ROLE" as any)).toBe("当事人");
+  it("should label unknown roles as Các bên liên quan", () => {
+    expect(roleLabel("UNKNOWN_ROLE" as any)).toBe("Các bên liên quan");
   });
 });
 
@@ -235,7 +235,7 @@ describe("runConflictCheck", () => {
       matchedField: "name",
       matchedValue: "Acme Corp",
       severity: "BLOCKING", // OPPOSING_PARTY vs CLIENT_PARTY
-      reason: expect.stringContaining("Trùng tên với 委托方「Acme Corp」trong案件「INT-2024-001」"),
+      reason: expect.stringContaining('Trùng tên với Bên ủy quyền "Acme Corp" trong vụ án "INT-2024-001"'),
     });
   });
 

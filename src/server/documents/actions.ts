@@ -43,8 +43,8 @@ const documentCategorySchema = z.enum([
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 /**
- * 上传材料。前端通过 Server Action 传 FormData，含 file（File）、metadata。
- * 加密分支：encrypted=true 时把文件用 AES-256-GCM 加密后写盘。
+ * Tải lên tài liệu. Frontend truyền FormData qua Server Action, gồm file (File), metadata.
+ * Nhánh mã hoá: khi encrypted=true thì mã hoá tệp bằng AES-256-GCM rồi ghi ra đĩa.
  */
 export async function uploadDocument(formData: FormData) {
   const session = await requireSession();
@@ -61,13 +61,13 @@ export async function uploadDocument(formData: FormData) {
   const sourcePartyRaw = formData.get("sourceParty");
   const file = formData.get("file");
 
-  if (!(file instanceof File)) throw new Error("缺少文件");
+  if (!(file instanceof File)) throw new Error("Thiếu tệp");
 
   const matterId = typeof matterIdRaw === "string" && matterIdRaw ? matterIdRaw : null;
   const intakeId = typeof intakeIdRaw === "string" && intakeIdRaw ? intakeIdRaw : null;
-  if (!matterId && !intakeId) throw new Error("matterId 或 intakeId 至少需要一个");
+  if (!matterId && !intakeId) throw new Error("Cần ít nhất một trong hai: matterId hoặc intakeId");
 
-  if (typeof name !== "string" || !name.trim()) throw new Error("材料名称必填");
+  if (typeof name !== "string" || !name.trim()) throw new Error("Tên tài liệu bắt buộc nhập");
   const parsedCategory = documentCategorySchema.parse(category || "OTHER");
   const tags =
     typeof tagsRaw === "string" && tagsRaw
@@ -78,14 +78,14 @@ export async function uploadDocument(formData: FormData) {
 
   const folderId = typeof folderIdRaw === "string" && folderIdRaw ? folderIdRaw : null;
 
-  // 校验归属对象存在
+  // Kiểm tra đối tượng sở hữu có tồn tại
   let folderName: string | null = null;
   if (matterId) {
     const matter = await prisma.matter.findUnique({
       where: { id: matterId, deletedAt: null },
       select: { id: true, status: true }
     });
-    if (!matter) throw new Error("案件不存在");
+    if (!matter) throw new Error("Vụ án không tồn tại");
     await assertCanAccessMatter(session.user.id, session.user.role, matterId);
 
     if (folderId) {
@@ -94,12 +94,12 @@ export async function uploadDocument(formData: FormData) {
         select: { matterId: true, name: true }
       });
       if (!folder || folder.matterId !== matterId) {
-        throw new Error("目标卷宗与案件不匹配");
+        throw new Error("Hồ sơ đích không khớp với vụ án");
       }
       folderName = folder.name;
     }
 
-    // 归档后仅允许补传到 ARCHIVE 卷宗（结案 / 归档），由 guard 判定
+    // Sau khi lưu trữ chỉ được bổ sung vào hồ sơ ARCHIVE (Kết thúc / Lưu trữ), do guard quyết định
     await assertDocumentWritable(matterId, { kind: "upload", folderName });
   }
   if (intakeId) {
@@ -107,8 +107,8 @@ export async function uploadDocument(formData: FormData) {
       where: { id: intakeId },
       select: { id: true, status: true, createdById: true, ownerUserId: true, coUserIds: true }
     });
-    if (!intake) throw new Error("收案记录不存在");
-    if (intake.status === "DECLINED") throw new Error("已拒绝的收案不可上传材料");
+    if (!intake) throw new Error("Bản ghi tiếp nhận không tồn tại");
+    if (intake.status === "DECLINED") throw new Error("Tiếp nhận đã từ chối thì không tải lên tài liệu được");
     const uid = session.user.id;
     if (
       !isManager(session.user.role) &&
@@ -116,7 +116,7 @@ export async function uploadDocument(formData: FormData) {
       intake.ownerUserId !== uid &&
       !intake.coUserIds.includes(uid)
     ) {
-      throw new Error("无权向该收案上传材料");
+      throw new Error("Không có quyền tải tài liệu lên tiếp nhận này");
     }
   }
 
@@ -179,13 +179,13 @@ export async function uploadDocument(formData: FormData) {
     detail: { matterId, intakeId, name, encrypted, size: file.size }
   });
 
-  // v0.43 项4：写入案件动态时间线（仅案件文档）
+  // v0.43 mục 4: ghi dòng thời gian động của vụ án (chỉ tài liệu của vụ án)
   if (matterId) {
     await prisma.timelineEvent.create({
       data: {
         matterId,
         eventType: "DOCUMENT_UPLOADED",
-        title: `上传材料：${name.trim()}`,
+        title: `Tải lên tài liệu: ${name.trim()}`,
         occurredAt: new Date(),
         refType: "Document",
         refId: created.id
@@ -206,17 +206,17 @@ export async function deleteDocument(id: string) {
   if (doc.matterId) {
     await assertDocumentWritable(doc.matterId, { kind: "modify" });
     if (doc.uploadedById !== session.user.id) {
-      await assertCanLeadMatter(session.user.id, doc.matterId, "只能删除自己上传的材料，或由本案主办/协办删除");
+      await assertCanLeadMatter(session.user.id, doc.matterId, "Chỉ xoá được tài liệu do mình tải lên, hoặc do chủ trì/cộng tác của vụ án xoá");
     }
   } else if (
     doc.uploadedById !== session.user.id &&
     session.user.role !== "ADMIN" &&
     session.user.role !== "PRINCIPAL_LAWYER"
   ) {
-    throw new Error("只能删除自己上传的材料");
+    throw new Error("Chỉ xoá được tài liệu do mình tải lên");
   }
 
-  // 软删除（保留文件以备审计），如需物理删除走单独脚本
+  // Xoá mềm (giữ tệp phục vụ audit), nếu cần xoá vật lý thì dùng script riêng
   await prisma.document.update({
     where: { id },
     data: { deletedAt: new Date() }
@@ -238,7 +238,7 @@ export async function deleteDocument(id: string) {
 export async function hardDeleteDocument(id: string) {
   const session = await requireSession();
   if (session.user.role !== "ADMIN") {
-    throw new Error("仅 ADMIN 可彻底删除材料");
+    throw new Error("Chỉ ADMIN mới xoá hẳn tài liệu");
   }
   const doc = await prisma.document.findUnique({ where: { id } });
   if (!doc) return { ok: false };
@@ -298,17 +298,17 @@ export async function listAllDocuments(input: Partial<z.infer<typeof docListQuer
   });
 }
 
-// ============ v0.10: 文书审批流程 ============
+// ============ v0.10: Luồng duyệt văn bản ============
 
 export async function submitDocumentForReview(id: string) {
   const session = await requireSession();
   const doc = await prisma.document.findUnique({ where: { id, deletedAt: null } });
-  if (!doc) throw new Error("材料不存在");
+  if (!doc) throw new Error("Tài liệu không tồn tại");
   if (doc.matterId) {
     await assertCanAccessMatter(session.user.id, session.user.role, doc.matterId);
     await assertDocumentWritable(doc.matterId, { kind: "modify" });
   }
-  if (doc.status !== "DRAFT") throw new Error("只有草稿状态的材料才能提交审核");
+  if (doc.status !== "DRAFT") throw new Error("Chỉ tài liệu ở trạng thái nháp mới gửi duyệt được");
 
   await prisma.document.update({
     where: { id },
@@ -330,11 +330,11 @@ export async function submitDocumentForReview(id: string) {
 export async function approveDocument(id: string) {
   const session = await requireSession();
   if (!isManager(session.user.role)) {
-    throw new Error("仅管理员或主办律师可审批文书");
+    throw new Error("Chỉ quản trị viên hoặc luật sư chủ trì được duyệt văn bản");
   }
   const doc = await prisma.document.findUnique({ where: { id, deletedAt: null } });
-  if (!doc) throw new Error("材料不存在");
-  if (doc.status !== "PENDING_REVIEW") throw new Error("材料不在待审核状态");
+  if (!doc) throw new Error("Tài liệu không tồn tại");
+  if (doc.status !== "PENDING_REVIEW") throw new Error("Tài liệu không ở trạng thái chờ duyệt");
 
   await prisma.document.update({
     where: { id },
@@ -360,11 +360,11 @@ export async function approveDocument(id: string) {
 export async function rejectDocument(id: string, reason?: string) {
   const session = await requireSession();
   if (!isManager(session.user.role)) {
-    throw new Error("仅管理员或主办律师可驳回文书");
+    throw new Error("Chỉ quản trị viên hoặc luật sư chủ trì được từ chối văn bản");
   }
   const doc = await prisma.document.findUnique({ where: { id, deletedAt: null } });
-  if (!doc) throw new Error("材料不存在");
-  if (doc.status !== "PENDING_REVIEW") throw new Error("材料不在待审核状态");
+  if (!doc) throw new Error("Tài liệu không tồn tại");
+  if (doc.status !== "PENDING_REVIEW") throw new Error("Tài liệu không ở trạng thái chờ duyệt");
 
   await prisma.document.update({
     where: { id },
@@ -390,10 +390,10 @@ export async function rejectDocument(id: string, reason?: string) {
 export async function fileDocument(id: string) {
   const session = await requireSession();
   const doc = await prisma.document.findUnique({ where: { id, deletedAt: null } });
-  if (!doc) throw new Error("材料不存在");
+  if (!doc) throw new Error("Tài liệu không tồn tại");
   if (doc.matterId)
     await assertCanAccessMatter(session.user.id, session.user.role, doc.matterId);
-  if (doc.status !== "APPROVED") throw new Error("只有已审批的材料才能归档");
+  if (doc.status !== "APPROVED") throw new Error("Chỉ tài liệu đã duyệt mới lưu trữ được");
 
   await prisma.document.update({
     where: { id },

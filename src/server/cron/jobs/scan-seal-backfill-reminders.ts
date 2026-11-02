@@ -72,14 +72,14 @@ export async function scanSealBackfillReminders(): Promise<SealBackfillReminderS
     }
 
     const matterText = seal.matter
-      ? `案件 ${seal.matter.internalCode}·${seal.matter.title}`
-      : "未关联案件";
+      ? `Vụ án ${seal.matter.internalCode}·${seal.matter.title}`
+      : "Không liên kết vụ án";
 
     await createNotification({
       userId: seal.requestedById,
       type: "SEAL_STATUS_CHANGE",
       priority: "HIGH",
-      title: `请回填盖章件：${seal.code}`,
+      title: `Hãy bổ sung bản đóng dấu: ${seal.code}`,
       content: `${seal.documentTitle} · ${matterText}`,
       href: `/approvals/seals?id=${seal.id}`,
       refType: REMINDER_REF_TYPE,

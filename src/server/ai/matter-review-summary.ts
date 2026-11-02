@@ -18,9 +18,9 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.22: 案件级 AI 审查总览（聚合本案全部 ReviewRecord）
+ * v0.22: Tổng quan kiểm tra AI cấp vụ án (gộp toàn bộ ReviewRecord của vụ)
  *
- * read-only，无 "use server"，server component 直接调用。
+ * chỉ đọc, không có "use server", server component gọi trực tiếp.
  */
 import { prisma } from "@/lib/prisma";
 import type {
@@ -44,7 +44,7 @@ export type MatterReviewSummary = {
   documentCount: number;
   totalItems: number;
   bySeverity: Record<ReviewSeverity, number>;
-  topHighItems: MatterReviewTopItem[]; // 最多 3 条
+  topHighItems: MatterReviewTopItem[]; // Tối đa 3 mục
   latestReviewedAt: Date | null;
 };
 
@@ -66,7 +66,7 @@ export async function getMatterReviewSummary(
   const docSet = new Set<string>();
   const bySeverity: Record<ReviewSeverity, number> = { HIGH: 0, MEDIUM: 0, LOW: 0 };
   let totalItems = 0;
-  // 收集所有 HIGH，按 reviewedAt 倒序（records 已倒序），取最近 3 条不重复 title
+  // Gom mọi mục HIGH, theo reviewedAt giảm dần (records đã giảm dần), lấy 3 mục gần nhất không trùng title
   const seenTitles = new Set<string>();
   const topHigh: MatterReviewTopItem[] = [];
   let latest: Date | null = null;

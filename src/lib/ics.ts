@@ -18,23 +18,23 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.9.3 ICS 日历文件生成（RFC 5545 简化版）
+ * v0.9.3 Sinh tệp lịch ICS (bản rút gọn RFC 5545)
  *
- * 用于：保全到期 / 开庭 / 期限 一键导出 .ics，拖进 Apple 日历 / Google
- * Calendar / Outlook 即可在手机原生日历看到提醒。
+ * Dùng cho: hết hạn bảo toàn / phiên tòa / thời hạn — xuất .ics một bấm,
+ * kéo vào Apple Calendar / Google Calendar / Outlook là thấy nhắc trên lịch gốc của điện thoại.
  *
- * 不依赖第三方库；纯字符串拼接。
+ * Không phụ thuộc thư viện ngoài; thuần nối chuỗi.
  */
 
 export interface IcsEvent {
   uid: string;
   title: string;
   start: Date;
-  end?: Date;       // 不传 = 1 小时事件；如果是 allDay 用 startAllDay
-  allDay?: boolean; // true → 用 DTSTART;VALUE=DATE
+  end?: Date;       // Không truyền = sự kiện 1 giờ; nếu allDay dùng startAllDay
+  allDay?: boolean; // true → dùng DTSTART;VALUE=DATE
   description?: string;
   location?: string;
-  reminderMinutes?: number[]; // 提前多少分钟提醒（多个）
+  reminderMinutes?: number[]; // Nhắc trước bao nhiêu phút (nhiều giá trị)
 }
 
 function pad(n: number) {
@@ -54,7 +54,7 @@ function fmtDate(d: Date): string {
   return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
 }
 
-// ICS 文本要做的转义：\, ; , \n
+// Escape cần thiết cho văn bản ICS: \\, ; , \n
 function esc(s: string): string {
   return s
     .replace(/\\/g, "\\\\")
@@ -63,7 +63,7 @@ function esc(s: string): string {
     .replace(/\n/g, "\\n");
 }
 
-// 长行折叠（>75 字节按 ICS 规范折行）
+// Gấp dòng dài (>75 ký tự theo đặc tả ICS)
 function fold(line: string): string {
   if (line.length <= 75) return line;
   const out: string[] = [];

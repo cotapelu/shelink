@@ -34,7 +34,7 @@ const noteCreateSchema = z.object({
   channel: noteChannelSchema.default("OTHER"),
   withWhom: z.string().max(80).optional().or(z.literal("")),
   occurredAt: z.coerce.date().default(() => new Date()),
-  content: z.string().min(1, "内容不能为空").max(5000),
+  content: z.string().min(1, "Nội dung không được rỗng").max(5000),
   tags: z.array(z.string().max(20)).default([])
 });
 
@@ -80,9 +80,9 @@ export async function updateNote(input: NoteUpdateInput) {
   const data = noteUpdateSchema.parse(input);
 
   const existing = await prisma.note.findUnique({ where: { id: data.id } });
-  if (!existing) throw new Error("沟通记录不存在");
+  if (!existing) throw new Error("Bản ghi giao tiếp không tồn tại");
   if (existing.authorId !== session.user.id && session.user.role !== "ADMIN") {
-    throw new Error("只能编辑自己的沟通记录");
+    throw new Error("Chỉ sửa được bản ghi giao tiếp của mình");
   }
   await assertMatterWritable(existing.matterId);
 
@@ -113,7 +113,7 @@ export async function deleteNote(id: string) {
   const existing = await prisma.note.findUnique({ where: { id } });
   if (!existing) return { ok: false };
   if (existing.authorId !== session.user.id && session.user.role !== "ADMIN") {
-    throw new Error("只能删除自己的沟通记录");
+    throw new Error("Chỉ xoá được bản ghi giao tiếp của mình");
   }
   await assertMatterWritable(existing.matterId);
 

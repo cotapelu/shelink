@@ -18,15 +18,16 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.42 批F（项6）案件批量导入 —— 纯逻辑（无 DB / 无 exceljs 依赖，便于单测）。
- * 列定义、文本→枚举映射、标题生成、首程序推断、单行结构校验都在这里；
- * 律师邮箱 / 案由的 DB 查找放在 server/imports/actions.ts。
+ * v0.42 Import hàng loạt vụ án (mục F-6) —— logic thuần (không DB / không phụ thuộc exceljs, dễ viết test).
+ * Định nghĩa cột, map text→enum, sinh tiêu đề, suy luận thủ tục đầu, kiểm tra cấu trúc một dòng đều ở đây;
+ * Tra DB email luật sư / nguyên nhân (cause) đặt ở server/imports/actions.ts.
+ * LƯU Ý: các khoá map tiếng Trung (结案/企业/公司/单位/元) giữ nguyên để nhận dữ liệu Excel cũ.
  */
 import type { MatterCategory, MatterStatus, ClientType, PartyType, ProcedureType } from "@prisma/client";
 
 import { matterCategoryLabel, matterStatusLabel } from "@/lib/enums";
 
-/** 导入列定义（key = 内部字段，header = Excel 表头） */
+/** Định nghĩa cột import (key = field nội bộ, header = tiêu đề cột Excel) */
 export interface ImportColumn {
   key: string;
   header: string;
@@ -71,7 +72,7 @@ export interface NormalizedRow {
   jurisdiction: string | null;
 }
 
-/** 文本反查案件类型（按 matterCategoryLabel） */
+/** Tra ngược text → loại vụ án (theo matterCategoryLabel) */
 export function parseCategoryLabel(text: string): MatterCategory | null {
   const t = text.trim();
   for (const [key, label] of Object.entries(matterCategoryLabel)) {
@@ -80,7 +81,7 @@ export function parseCategoryLabel(text: string): MatterCategory | null {
   return null;
 }
 
-/** 文本反查案件状态（兼容「结案」/「已结案」/「Kết thúc」=「Đã kết thúc」） */
+/** Tra ngược text → trạng thái vụ án (tương thích dữ liệu cũ: 结案/已结案 = "Đã kết thúc") */
 export function parseStatusLabel(text: string): MatterStatus | null {
   const t = text.trim();
   if (t === "结案" || t === "已结案" || t === "Kết thúc") return "CLOSED";
@@ -90,21 +91,21 @@ export function parseStatusLabel(text: string): MatterStatus | null {
   return null;
 }
 
-/** 个人 / 企业 → ClientType（默认个人） */
+/** Cá nhân / Công ty → ClientType (mặc định cá nhân) */
 export function parseClientType(text: string | undefined): ClientType {
   const t = (text ?? "").trim();
   if (t === "Công ty" || t === "企业" || t === "公司" || t === "单位") return "COMPANY";
   return "INDIVIDUAL";
 }
 
-/** 个人 / 企业 → PartyType（默认自然人） */
+/** Cá nhân / Công ty → PartyType (mặc định cá nhân) */
 export function parsePartyType(text: string | undefined): PartyType {
   const t = (text ?? "").trim();
   if (t === "Công ty" || t === "企业" || t === "公司" || t === "单位") return "COMPANY";
   return "NATURAL_PERSON";
 }
 
-/** 收案日期解析：接受 YYYY-MM-DD / YYYY/MM/DD（已由调用方把 Excel 日期格式化为字符串） */
+/** Phân tích ngày nhận vụ án: nhận YYYY-MM-DD / YYYY/MM/DD (bên gọi đã định dạng ngày Excel thành chuỗi) */
 export function parseImportDate(text: string | undefined): Date | null {
   const t = (text ?? "").trim();
   if (!t) return null;
@@ -116,7 +117,7 @@ export function parseImportDate(text: string | undefined): Date | null {
   return date;
 }
 
-/** 标的额解析：去掉逗号/￥/元，转数字 */
+/** Phân tích giá trị: bỏ dấu phẩy/￥/元 rồi đổi thành số (giữ ký tự cũ để nhận dữ liệu Excel cũ) */
 export function parseAmount(text: string | undefined): number | null {
   const t = (text ?? "").trim().replace(/[,¥￥\s元]/g, "");
   if (!t) return null;
@@ -124,14 +125,14 @@ export function parseAmount(text: string | undefined): number | null {
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
 
-/** 案件标题：`客户 与 相对方 案由`（无重复空格） */
+/** Tiêu đề vụ án: `Khách hàng và Bên đối phương Nguyên nhân` (không lặp khoảng trắng) */
 export function buildMatterTitle(clientName: string, opposingName: string, cause: string | null): string {
-  const base = `${clientName.trim()} 与 ${opposingName.trim()}`;
+  const base = `${clientName.trim()} và ${opposingName.trim()}`;
   const c = (cause ?? "").trim();
   return c ? `${base} ${c}` : base;
 }
 
-/** 首程序类型：与收案转化（convertIntakeToMatter）一致的推断 */
+/** Thủ tục đầu tiên: suy luận nhất quán với chuyển đổi tiếp nhận (convertIntakeToMatter) */
 export function firstProcedureTypeFor(category: MatterCategory): ProcedureType {
   return category === "CIVIL_COMMERCIAL" ||
     category === "CRIMINAL" ||
@@ -145,7 +146,7 @@ export interface RowValidation {
   normalized: NormalizedRow | null;
 }
 
-/** 单行结构校验 + 枚举/数值/日期归一化（不含 DB 查找） */
+/** Kiểm tra cấu trúc một dòng + chuẩn hoá enum/số/ngày (không gồm tra DB) */
 export function validateRow(raw: RawRow): RowValidation {
   const errors: string[] = [];
   const get = (k: string) => (raw[k] ?? "").trim();

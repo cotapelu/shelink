@@ -31,7 +31,7 @@ export const billingStatusSchema = z.enum(["DRAFT", "ACTIVE", "CLOSED"]);
 
 export const billingCreateSchema = z.object({
   matterId: z.string().cuid(),
-  title: z.string().min(1, "合同名称必填").max(120),
+  title: z.string().min(1, "Tên hợp đồng bắt buộc nhập").max(120),
   contractAmount: z.coerce.number().nonnegative(),
   schedule: z.string().max(1000).optional().or(z.literal("")),
   status: billingStatusSchema.default("DRAFT"),

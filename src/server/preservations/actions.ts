@@ -115,7 +115,7 @@ async function assertCanAccessPreservationRecord(userId: string, record: Preserv
     await assertCanAssociateMatter(userId, record.matterId);
     return;
   }
-  if (record.ownerId !== userId) throw new Error("无权操作此保全记录");
+  if (record.ownerId !== userId) throw new Error("Không có quyền thao tác bản ghi bảo toàn này");
 }
 
 async function assertCanAccessPreservation(userId: string, id: string) {
@@ -123,12 +123,12 @@ async function assertCanAccessPreservation(userId: string, id: string) {
     where: { id },
     select: { id: true, matterId: true, ownerId: true }
   });
-  if (!record) throw new Error("保全记录不存在");
+  if (!record) throw new Error("Bản ghi bảo toàn không tồn tại");
   await assertCanAccessPreservationRecord(userId, record);
   return record;
 }
 
-// 用于 dashboard 预警
+// Dùng cho cảnh báo dashboard
 export async function listExpiringPreservations(daysAhead = 60) {
   const session = await requireSession();
   const end = new Date();
@@ -157,14 +157,14 @@ export async function createPreservation(input: z.infer<typeof preservationCreat
   const data = preservationCreateSchema.parse(input);
 
   if (data.expiryDate <= data.startDate) {
-    throw new Error("到期日期必须晚于生效日期");
+    throw new Error("Ngày đến hạn phải sau ngày có hiệu lực");
   }
   if (data.matterId) {
     const m = await prisma.matter.findUnique({
       where: { id: data.matterId },
       select: { id: true }
     });
-    if (!m) throw new Error("关联案件不存在");
+    if (!m) throw new Error("Vụ án liên kết không tồn tại");
     await assertCanAssociateMatter(session.user.id, data.matterId);
     await assertMatterWritable(data.matterId);
   }
@@ -214,7 +214,7 @@ export async function updatePreservation(input: z.infer<typeof preservationUpdat
     where: { id },
     select: { id: true, matterId: true }
   });
-  if (!existing) throw new Error("保全记录不存在");
+  if (!existing) throw new Error("Bản ghi bảo toàn không tồn tại");
   if (existing.matterId) {
     await assertCanAssociateMatter(session.user.id, existing.matterId);
     await assertMatterWritable(existing.matterId);
@@ -227,7 +227,7 @@ export async function updatePreservation(input: z.infer<typeof preservationUpdat
   }
 
   if (rest.startDate && rest.expiryDate && rest.expiryDate <= rest.startDate) {
-    throw new Error("到期日期必须晚于生效日期");
+    throw new Error("Ngày đến hạn phải sau ngày có hiệu lực");
   }
 
   const patch: Prisma.PreservationUpdateInput = { ...rest };
@@ -266,14 +266,14 @@ export async function renewPreservation(input: z.infer<typeof preservationRenewS
     where: { id: data.id },
     select: { id: true, expiryDate: true, matterId: true, ownerId: true, status: true }
   });
-  if (!pres) throw new Error("保全记录不存在");
+  if (!pres) throw new Error("Bản ghi bảo toàn không tồn tại");
   await assertCanAccessPreservationRecord(session.user.id, pres);
-  if (pres.status === "LIFTED") throw new Error("已解除的保全不可续保");
+  if (pres.status === "LIFTED") throw new Error("Bảo toàn đã gỡ bỏ thì không gia hạn được");
   if (pres.matterId) {
     await assertMatterWritable(pres.matterId);
   }
   if (data.newExpiryDate <= pres.expiryDate) {
-    throw new Error(`新到期日必须晚于原到期日（${pres.expiryDate.toISOString().slice(0, 10)}）`);
+    throw new Error(`Ngày đến hạn mới phải sau ngày đến hạn cũ (${pres.expiryDate.toISOString().slice(0, 10)})`);
   }
 
   await prisma.$transaction([
@@ -318,7 +318,7 @@ export async function liftPreservation(input: z.infer<typeof preservationLiftSch
     where: { id: data.id },
     select: { id: true, matterId: true, ownerId: true, note: true }
   });
-  if (!pres) throw new Error("保全记录不存在");
+  if (!pres) throw new Error("Bản ghi bảo toàn không tồn tại");
   await assertCanAccessPreservationRecord(session.user.id, pres);
   if (pres.matterId) {
     await assertMatterWritable(pres.matterId);
@@ -328,7 +328,7 @@ export async function liftPreservation(input: z.infer<typeof preservationLiftSch
     where: { id: data.id },
     data: {
       status: "LIFTED",
-      note: data.note ? `${pres.note ? pres.note + "\n" : ""}【解除】${data.note}` : pres.note
+      note: data.note ? `${pres.note ? pres.note + "\n" : ""}[Gỡ bỏ] ${data.note}` : pres.note
     }
   });
 
@@ -349,14 +349,14 @@ export async function deletePreservation(input: z.infer<typeof preservationIdSch
   const session = await requireSession();
   const data = preservationIdSchema.parse(input);
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
-    throw new Error("仅管理员或主任律师可删除保全记录");
+    throw new Error("Chỉ quản trị viên hoặc luật sư chính được xoá bản ghi bảo toàn");
   }
 
   const pres = await prisma.preservation.findUnique({
     where: { id: data.id },
     select: { id: true, matterId: true, ownerId: true }
   });
-  if (!pres) throw new Error("保全记录不存在");
+  if (!pres) throw new Error("Bản ghi bảo toàn không tồn tại");
   await assertCanAccessPreservationRecord(session.user.id, pres);
   if (pres.matterId) {
     await assertMatterWritable(pres.matterId);

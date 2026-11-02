@@ -26,12 +26,15 @@ describe("cn", () => {
 });
 
 describe("formatCurrency", () => {
+  // Intl.NumberFormat("vi-VN") dùng NBSP (\u00A0) trước ký hiệu tiền tệ
+  const NB = "\u00A0";
+
   it("formats positive amounts", () => {
-    expect(formatCurrency(1234)).toBe("¥1,234");
+    expect(formatCurrency(1234)).toBe(`1.234${NB}₫`);
   });
 
   it("formats zero", () => {
-    expect(formatCurrency(0)).toBe("¥0");
+    expect(formatCurrency(0)).toBe(`0${NB}₫`);
   });
 
   it("formats negative amounts", () => {
@@ -39,19 +42,19 @@ describe("formatCurrency", () => {
   });
 
   it("uses compact format for large amounts when requested", () => {
-    expect(formatCurrency(12345, { compact: true })).toBe("¥1.2万");
-    expect(formatCurrency(1234567, { compact: true })).toBe("¥123.5万");
-    expect(formatCurrency(10000, { compact: true })).toBe("¥1.0万");
-    expect(formatCurrency(9999, { compact: true })).toBe("¥9,999"); // below threshold
+    expect(formatCurrency(12345, { compact: true })).toBe("1,2 tr");
+    expect(formatCurrency(1234567, { compact: true })).toBe("123,5 tr");
+    expect(formatCurrency(10000, { compact: true })).toBe("1,0 tr");
+    expect(formatCurrency(9999, { compact: true })).toBe(`9.999${NB}₫`); // below threshold
   });
 
   it("does not use compact format by default", () => {
-    expect(formatCurrency(12345)).toBe("¥12,345");
+    expect(formatCurrency(12345)).toBe(`12.345${NB}₫`);
   });
 
   it("handles very large amounts", () => {
     const result = formatCurrency(123456789012);
-    expect(result).toBe("¥123,456,789,012");
+    expect(result).toBe(`123.456.789.012${NB}₫`);
   });
 });
 
@@ -60,7 +63,7 @@ describe("formatDate", () => {
 
   it("formats short date", () => {
     const d = new Date("2025-06-15");
-    expect(formatDate(d, "short")).toBe("2025/6/15");
+    expect(formatDate(d, "short")).toBe("15/6/2025");
   });
 
   it("formats full date with weekday", () => {
@@ -73,11 +76,11 @@ describe("formatDate", () => {
 
   it("formats month-day", () => {
     const d = new Date("2025-06-15");
-    expect(formatDate(d, "month-day")).toBe("6月15日");
+    expect(formatDate(d, "month-day")).toBe("15 tháng 6");
   });
 
   it("accepts string date", () => {
-    expect(formatDate("2025-06-15", "short")).toBe("2025/6/15");
+    expect(formatDate("2025-06-15", "short")).toBe("15/6/2025");
   });
 
   it("handles invalid date gracefully", () => {
@@ -89,7 +92,7 @@ describe("formatDate", () => {
 
   it("defaults to short when fmt unspecified", () => {
     const d = new Date("2025-06-15");
-    expect(formatDate(d)).toBe("2025/6/15");
+    expect(formatDate(d)).toBe("15/6/2025");
   });
 });
 

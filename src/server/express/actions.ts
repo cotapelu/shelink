@@ -40,7 +40,7 @@ import {
 } from "./schemas";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 列表 / 查询
+// Danh sách / tra cứu
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export async function listExpress(input?: z.input<typeof expressListFilterSchema>) {
@@ -99,24 +99,24 @@ async function assertCanAccessExpressRecord(userId: string, id: string) {
     where: { id },
     select: { id: true, matterId: true, createdById: true }
   });
-  if (!record) throw new Error("快递记录不存在");
+  if (!record) throw new Error("Bản ghi chuyển phát không tồn tại");
   if (record.matterId) {
     await assertCanAssociateMatter(userId, record.matterId);
     return record;
   }
-  if (record.createdById !== userId) throw new Error("无权操作此快递记录");
+  if (record.createdById !== userId) throw new Error("Không có quyền thao tác bản ghi chuyển phát này");
   return record;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 创建 + 首次查询
+// Tạo + tra cứu lần đầu
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export async function createExpress(input: z.infer<typeof expressCreateSchema>) {
   const session = await requireSession();
   const data = expressCreateSchema.parse(input);
 
-  // 自动识别公司（如未指定）
+  // Tự nhận diện hãng (nếu chưa chỉ định)
   let companyCode = data.companyCode?.trim() || null;
   if (!companyCode) companyCode = detectCompany(data.trackingNo);
 
@@ -125,12 +125,12 @@ export async function createExpress(input: z.infer<typeof expressCreateSchema>) 
       where: { id: data.matterId },
       select: { id: true }
     });
-    if (!m) throw new Error("关联案件不存在");
+    if (!m) throw new Error("Vụ án liên kết không tồn tại");
     await assertCanAssociateMatter(session.user.id, data.matterId);
     await assertMatterWritable(data.matterId);
   }
 
-  // 先尝试一次跟踪（失败不阻塞）
+  // Thử tra cứu một lần (lỗi không chặn)
   let lastState: string | null = null;
   let tracesJson: Prisma.InputJsonValue | undefined = undefined;
   let lastUpdateAt: Date | null = null;
@@ -142,7 +142,7 @@ export async function createExpress(input: z.infer<typeof expressCreateSchema>) 
       lastUpdateAt = new Date();
     }
   } catch {
-    // 静默：用户可以稍后手动刷新
+    // Im lặng: người dùng có thể tự làm mới sau
   }
 
   const created = await prisma.expressTracking.create({
@@ -176,7 +176,7 @@ export async function createExpress(input: z.infer<typeof expressCreateSchema>) 
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 刷新
+// Làm mới
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export async function refreshExpress(input: z.infer<typeof expressIdSchema>) {
@@ -238,13 +238,13 @@ export async function deleteExpress(input: z.infer<typeof expressIdSchema>) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 配置（仅 ADMIN）
+// Cấu hình (chỉ ADMIN)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 async function requireAdmin() {
   const session = await requireSession();
   if (session.user.role !== "ADMIN") {
-    throw new Error("仅管理员可修改快递接入配置");
+    throw new Error("Chỉ quản trị viên được sửa cấu hình tích hợp chuyển phát");
   }
   return session;
 }

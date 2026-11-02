@@ -55,7 +55,7 @@ describe("declineIntake", () => {
 
   it("requires approver role", async () => {
     (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
-    await expect(declineIntake({ id: "i1", reason: "x" })).rejects.toThrow("仅管理员或主任律师可审批收案");
+    await expect(declineIntake({ id: "i1", reason: "x" })).rejects.toThrow("Chỉ quản trị viên hoặc luật sư chính");
   });
 
   it("declines intake and audits", async () => {
@@ -84,12 +84,12 @@ describe("markIntakeNeedsRevision", () => {
 
   it("throws if reason empty", async () => {
     (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
-    await expect(markIntakeNeedsRevision({ id: "i1", reason: "   " })).rejects.toThrow("请填写补正原因");
+    await expect(markIntakeNeedsRevision({ id: "i1", reason: "   " })).rejects.toThrow("Nhập lý do bổ sung");
   });
 
   it("requires approver role", async () => {
     (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
-    await expect(markIntakeNeedsRevision({ id: "i1", reason: "need" })).rejects.toThrow("仅管理员或主任律师可审批收案");
+    await expect(markIntakeNeedsRevision({ id: "i1", reason: "need" })).rejects.toThrow("Chỉ quản trị viên hoặc luật sư chính");
   });
 
   it("sets NEEDS_REVISION and audits", async () => {
@@ -123,13 +123,13 @@ describe("resubmitIntake", () => {
   it("throws if intake not found", async () => {
     (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
     (prisma.intake.findUnique as any).mockResolvedValue(null);
-    await expect(resubmitIntake("i1")).rejects.toThrow("收案不存在");
+    await expect(resubmitIntake("i1")).rejects.toThrow("Tiếp nhận không tồn tại");
   });
 
   it("throws if status not NEEDS_REVISION", async () => {
     (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
     (prisma.intake.findUnique as any).mockResolvedValue({ status: "PENDING", title: "T", createdById: "u1", ownerUserId: "u1" });
-    await expect(resubmitIntake("i1")).rejects.toThrow("只有待补正状态可重新提交");
+    await expect(resubmitIntake("i1")).rejects.toThrow("Chỉ trạng thái chờ bổ sung mới gửi lại được");
   });
 
   it("resets status and notifies", async () => {

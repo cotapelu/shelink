@@ -104,7 +104,7 @@ describe('aiChat', () => {
 
     await expect(
       aiChat({ messages: [{ role: 'user', content: 'hi' }] })
-    ).rejects.toThrow('AI 请求失败 (401): Invalid API key');
+    ).rejects.toThrow('Yêu cầu AI thất bại (401): Invalid API key');
   });
 
   it('throws on network error', async () => {

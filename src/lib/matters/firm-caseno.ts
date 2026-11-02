@@ -18,14 +18,14 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.42 所内案号模板渲染（纯函数，无 DB 依赖，便于单测）
+ * v0.42 Render mẫu mã nội bộ (hàm thuần, không phụ thuộc DB, dễ viết test)
  *
- * 支持 token：
- *   {年}   四位年份        {年2}  两位年份
- *   {所}   律所简称        {类}   类别单字（民/刑…）  {类词}  类别词（民诉/刑辩…）
- *   {序3}  三位流水         {序4}  四位流水
+ * Các token hỗ trợ (giữ nguyên tên token — là hợp đồng cấu hình trong Settings):
+ *   {年}   năm 4 chữ số       {年2}  năm 2 chữ số
+ *   {所}   viết tắt văn phòng {类}   ký tự loại  {类词} từ loại
+ *   {序3}  số thứ tự 3 chữ số  {序4} số thứ tự 4 chữ số
  *
- * 默认模板 `{年}-{所}{类词}-{序3}` + 所简称「普」+ 类词「民诉」→ `2026-普民诉-001`。
+ * Mẫu mặc định `{年}-{所}{类词}-{序3}` + viết tắt văn phòng + từ loại → `2026-...-001`.
  */
 export interface CaseNoTokens {
   year: number;

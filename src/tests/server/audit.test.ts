@@ -53,7 +53,7 @@ describe("server/audit", () => {
 
     await expect(audit(params)).resolves.toBeUndefined();
 
-    expect(consoleError).toHaveBeenCalledWith("[audit] 写入失败：", expect.any(Error));
+    expect(consoleError).toHaveBeenCalledWith("[audit] Ghi thất bại:", expect.any(Error));
     consoleError.mockRestore();
   });
 

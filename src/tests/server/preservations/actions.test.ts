@@ -222,7 +222,7 @@ describe('getPreservation', () => {
     vi.mocked(requireSession).mockResolvedValue(session);
     vi.mocked(prisma.preservation.findUnique).mockResolvedValue(null);
 
-    await expect(getPreservation(ID.preservation)).rejects.toThrow('保全记录不存在');
+    await expect(getPreservation(ID.preservation)).rejects.toThrow('Bản ghi bảo toàn không tồn tại');
   });
 
   it('should throw when access denied (record belongs to other owner)', async () => {
@@ -233,7 +233,7 @@ describe('getPreservation', () => {
       .mockResolvedValueOnce({ id: ID.preservation, matterId: null, ownerId: ID.owner }) // permission check fails
       .mockResolvedValueOnce(mockPreservation()); // second call won't happen
 
-    await expect(getPreservation(ID.preservation)).rejects.toThrow('无权操作此保全记录');
+    await expect(getPreservation(ID.preservation)).rejects.toThrow('Không có quyền thao tác bản ghi bảo toàn này');
   });
 });
 
@@ -335,7 +335,7 @@ describe('createPreservation', () => {
       expiryDate: new Date('2024-12-31'), // before startDate
     };
 
-    await expect(createPreservation(invalidInput)).rejects.toThrow('到期日期必须晚于生效日期');
+    await expect(createPreservation(invalidInput)).rejects.toThrow('Ngày đến hạn phải sau ngày có hiệu lực');
   });
 
   it('should throw when matterId not found', async () => {
@@ -345,7 +345,7 @@ describe('createPreservation', () => {
 
     const inputWithMatter = { ...validInput, matterId: ID.preservation };
 
-    await expect(createPreservation(inputWithMatter)).rejects.toThrow('关联案件不存在');
+    await expect(createPreservation(inputWithMatter)).rejects.toThrow('Vụ án liên kết không tồn tại');
   });
 
   it('should call assertCanAssociateMatter when matterId provided', async () => {
@@ -427,7 +427,7 @@ describe('updatePreservation', () => {
     vi.mocked(requireSession).mockResolvedValue(session);
     vi.mocked(prisma.preservation.findUnique).mockResolvedValue(null);
 
-    await expect(updatePreservation({ id: ID.preservation })).rejects.toThrow('保全记录不存在');
+    await expect(updatePreservation({ id: ID.preservation })).rejects.toThrow('Bản ghi bảo toàn không tồn tại');
   });
 
   it('should validate date order when both dates provided', async () => {
@@ -443,7 +443,7 @@ describe('updatePreservation', () => {
       expiryDate: new Date('2025-05-01'), // before startDate
     };
 
-    await expect(updatePreservation(updateData)).rejects.toThrow('到期日期必须晚于生效日期');
+    await expect(updatePreservation(updateData)).rejects.toThrow('Ngày đến hạn phải sau ngày có hiệu lực');
   });
 
   it('should disconnect matter when matterId is null', async () => {
@@ -519,7 +519,7 @@ describe('renewPreservation', () => {
     vi.mocked(requireSession).mockResolvedValue(session);
     vi.mocked(prisma.preservation.findUnique).mockResolvedValue(null);
 
-    await expect(renewPreservation({ id: ID.preservation, newExpiryDate: new Date(), renewalDuration: 30 })).rejects.toThrow('保全记录不存在');
+    await expect(renewPreservation({ id: ID.preservation, newExpiryDate: new Date(), renewalDuration: 30 })).rejects.toThrow('Bản ghi bảo toàn không tồn tại');
   });
 
   it('should throw when status is LIFTED', async () => {
@@ -529,7 +529,7 @@ describe('renewPreservation', () => {
     const pres = mockPreservation({ status: 'LIFTED' });
     vi.mocked(prisma.preservation.findUnique).mockResolvedValue(pres as any);
 
-    await expect(renewPreservation({ id: ID.preservation, newExpiryDate: new Date(), renewalDuration: 30 })).rejects.toThrow('已解除的保全不可续保');
+    await expect(renewPreservation({ id: ID.preservation, newExpiryDate: new Date(), renewalDuration: 30 })).rejects.toThrow('Bảo toàn đã gỡ bỏ thì không gia hạn được');
   });
 
   it('should throw when newExpiryDate <= old expiryDate', async () => {
@@ -545,7 +545,7 @@ describe('renewPreservation', () => {
         newExpiryDate: new Date('2025-06-30'), // before
         renewalDuration: 30,
       })
-    ).rejects.toThrow('新到期日必须晚于原到期日');
+    ).rejects.toThrow('Ngày đến hạn mới phải sau ngày đến hạn cũ');
   });
 });
 
@@ -570,7 +570,7 @@ describe('liftPreservation', () => {
         where: { id: ID.preservation },
         data: {
           status: 'LIFTED',
-          note: `Original note\n【解除】Lifted reason`,
+          note: `Original note\n[Gỡ bỏ] Lifted reason`,
         },
       })
     );
@@ -603,7 +603,7 @@ describe('liftPreservation', () => {
     vi.mocked(requireSession).mockResolvedValue(session);
     vi.mocked(prisma.preservation.findUnique).mockResolvedValue(null);
 
-    await expect(liftPreservation({ id: ID.preservation })).rejects.toThrow('保全记录不存在');
+    await expect(liftPreservation({ id: ID.preservation })).rejects.toThrow('Bản ghi bảo toàn không tồn tại');
   });
 });
 
@@ -648,7 +648,7 @@ describe('deletePreservation', () => {
     const session = mockSession({ role: 'LAWYER' });
     vi.mocked(requireSession).mockResolvedValue(session);
 
-    await expect(deletePreservation({ id: ID.preservation })).rejects.toThrow('仅管理员或主任律师可删除保全记录');
+    await expect(deletePreservation({ id: ID.preservation })).rejects.toThrow('Chỉ quản trị viên hoặc luật sư chính được xoá bản ghi bảo toàn');
   });
 
   it('should throw when preservation not found', async () => {
@@ -656,6 +656,6 @@ describe('deletePreservation', () => {
     vi.mocked(requireSession).mockResolvedValue(session);
     vi.mocked(prisma.preservation.findUnique).mockResolvedValue(null);
 
-    await expect(deletePreservation({ id: ID.preservation })).rejects.toThrow('保全记录不存在');
+    await expect(deletePreservation({ id: ID.preservation })).rejects.toThrow('Bản ghi bảo toàn không tồn tại');
   });
 });

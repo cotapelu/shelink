@@ -163,21 +163,21 @@ describe("parseAmount", () => {
 describe("buildMatterTitle", () => {
   it("builds title with cause", () => {
     expect(buildMatterTitle("Client A", "Opp B", "Contract Dispute"))
-      .toBe("Client A 与 Opp B Contract Dispute");
+      .toBe("Client A và Opp B Contract Dispute");
   });
 
   it("builds title without cause", () => {
     expect(buildMatterTitle("Client A", "Opp B", null))
-      .toBe("Client A 与 Opp B");
+      .toBe("Client A và Opp B");
   });
 
   it("trims whitespace", () => {
     expect(buildMatterTitle("  Client A  ", "  Opp B  ", "  Dispute  "))
-      .toBe("Client A 与 Opp B Dispute");
+      .toBe("Client A và Opp B Dispute");
   });
 
   it("handles empty cause", () => {
-    expect(buildMatterTitle("Client", "Opp", "")).toBe("Client 与 Opp");
+    expect(buildMatterTitle("Client", "Opp", "")).toBe("Client và Opp");
   });
 });
 

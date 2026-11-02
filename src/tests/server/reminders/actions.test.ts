@@ -62,7 +62,7 @@ describe("reminders/actions", () => {
     } as any);
 
     await expect(triggerDueReminderScan()).rejects.toThrow(
-      "仅管理员 / 主任律师可手动触发到期提醒扫描"
+      "Chỉ quản trị viên / luật sư chính được kích hoạt thủ công quét nhắc đến hạn"
     );
     expect(mockScanDueReminders).not.toHaveBeenCalled();
   });

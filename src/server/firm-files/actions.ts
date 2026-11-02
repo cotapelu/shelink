@@ -20,9 +20,9 @@
 "use server";
 
 /**
- * v0.22: Thư viện tài liệu律所 (FirmFile)
+ * v0.22: Thư viện tài liệu văn phòng (FirmFile)
  *
- * Chia sẻ toàn律所: Tất cả active users đọc được; admin / PRINCIPAL_LAWYER upload / thay thế / xóa.
+ * Chia sẻ toàn văn phòng: mọi user active đọc được; admin / PRINCIPAL_LAWYER tải lên / thay thế / xoá.
  * 4 phân loại: Chế độ / Hướng dẫn / Template tham khảo / Tệp khác.
  * Phiên bản: supersededById liên kết cũ → mới; danh sách mặc định chỉ hiển thị "mới nhất".
  * Tìm kiếm: ILIKE name + description + tags nhiều trường fuzzy match (không dùng tsvector).
@@ -55,7 +55,7 @@ export type FirmFileEntry = {
 async function requireUploader() {
   const session = await requireSession();
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
-    throw new Error("Chỉ admin / Principal Lawyer được quản lý tài liệu律所");
+    throw new Error("Chỉ admin / Luật sư chính được quản lý tài liệu văn phòng");
   }
   return session;
 }
@@ -185,8 +185,8 @@ export async function uploadFirmFile(formData: FormData): Promise<{
   const tags = parseTags(formData.get("tags"));
   const supersedesRaw = formData.get("supersedesId");
 
-  if (!(file instanceof File)) throw new Error("缺少文件");
-  if (file.size === 0) throw new Error("空文件");
+  if (!(file instanceof File)) throw new Error("Thiếu tệp");
+  if (file.size === 0) throw new Error("Tệp rỗng");
   if (file.size > FIRM_FILE_MAX_BYTES)
     throw new Error(`File vượt quá ${Math.round(FIRM_FILE_MAX_BYTES / 1024 / 1024)}MB`);
   if (typeof name !== "string" || !name.trim()) throw new Error("Tên bắt buộc");
@@ -194,7 +194,7 @@ export async function uploadFirmFile(formData: FormData): Promise<{
   const supersedesId =
     typeof supersedesRaw === "string" && supersedesRaw ? supersedesRaw : null;
 
-  // 替代旧版的合法性
+  // Tính hợp lệ của việc thay thế bản cũ
   if (supersedesId) {
     const old = await prisma.firmFile.findUnique({
       where: { id: supersedesId },
@@ -270,8 +270,8 @@ export async function updateFirmFile(input: {
     where: { id: input.id },
     select: { id: true, archivedAt: true }
   });
-  if (!existing) throw new Error("资料不存在");
-  if (existing.archivedAt) throw new Error("已删除的资料不可编辑");
+  if (!existing) throw new Error("Tài liệu không tồn tại");
+  if (existing.archivedAt) throw new Error("Tài liệu đã xoá thì không sửa được");
 
   const data: Prisma.FirmFileUpdateInput = {};
   if (input.name !== undefined) data.name = input.name.trim().slice(0, 200);

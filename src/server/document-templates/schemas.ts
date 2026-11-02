@@ -51,11 +51,11 @@ export const templateToggleSchema = z.object({
 });
 
 /**
- * 渲染模板生成文书并归档（段 3 模板引擎实现）。
- * - matterId: 目标案件
- * - templateId: 选定模板
- * - folderId: 目标卷宗（可空 = 散件）
- * - overrides: 行内补全的变量（路径化键值，如 {"client.idNumber": "320..."})；行内补全会回写源表
+ * Render mẫu sinh văn bản và lưu trữ (định nghĩa ở phần 3 của engine mẫu).
+ * - matterId: vụ án đích
+ * - templateId: mẫu đã chọn
+ * - folderId: hồ sơ đích (rỗng = tài liệu rời)
+ * - overrides: biến điền nội tuyến (khóa theo đường dẫn, vd {"client.idNumber": "320..."}); điền nội tuyến sẽ ghi lại bảng nguồn
  */
 export const templateRenderSchema = z.object({
   matterId: z.string().cuid(),

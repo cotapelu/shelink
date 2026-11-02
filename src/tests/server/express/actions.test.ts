@@ -221,7 +221,7 @@ describe("express/actions", () => {
       };
 
       await expect(createExpress(input)).rejects.toThrow(
-        "关联案件不存在"
+        "Vụ án liên kết không tồn tại"
       );
     });
   });
@@ -251,7 +251,7 @@ describe("express/actions", () => {
     it("should throw when not found", async () => {
       const id = CUID(1);
       mockPrisma.expressTracking.findUnique.mockResolvedValue(null as any);
-      await expect(getExpress(id)).rejects.toThrow("快递记录不存在");
+      await expect(getExpress(id)).rejects.toThrow("Bản ghi chuyển phát không tồn tại");
     });
   });
 

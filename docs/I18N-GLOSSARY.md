@@ -195,3 +195,45 @@ Batch script lại rơi vào bẫy "件" (ngắn) thay trước "案件管理" (
 
 ### ⚠️ Code-string ↔ seed-data coupling (I18N-12b)
 `ARCHIVE_FOLDER_NAMES` trong documents-panel khớp với **tên hồ s do seed tạo**. Đổi chuỗi code mà không đổi seed → lệch. **Nguyên tắc: khi đổi chuỗi khớp dữ liệu, phải sửa CẢ HAI + UPDATE DB dev.**
+
+## Bổ sung I18N-15 (2026-11-01) — "thay toàn bộ", 4 gói song song
+
+**Bối cảnh đo lại**: 702 file có chữ Hán → **309 file chỉ còn comment license** (tên tác giả, giữ nguyên) → **393 file / 4596 dòng thực**. Trong đó ~642 dòng là comment (an toàn) và ~3954 dòng là chuỗi UI/lỗi/test/seed.
+
+**Gói công việc (file set KHÔNG chồng lấn, mỗi gói 1 agent)**:
+
+| Gói | Phạm vi | Số file |
+|---|---|---|
+| A backend | `src/server/**` (trừ `ai/`, `yuandian/`) + `src/tests/server/**` (trừ `ai/`, `yuandian/`) | 90 |
+| B matters | `src/app/(app)/matters/**` | 46 |
+| C ui-admin | `src/app/(app)/{settings,approvals,contacts,conflicts,audit,announcements,inbox,archive,tools}/**` | 99 |
+| D ui-ops | `src/app/{api,layout.tsx,(app)/page.tsx,globals.css}` + `(app)/{intakes,clients,firm-resources,schedule,preservation,finance,express,notifications,policy}` + `src/components/**` + `src/tests/app/**` | 91 |
+| E lib (parent) | `src/lib/**` (trừ blocked) + `src/tests/lib/**` (trừ blocked) + `src/server/ai/**` + `src/tests/server/ai/**` | 52 |
+| 🔴 blocked (giữ/chờ duyệt) | `lib/{express,template-builder,ai/review-prompts,china-regions,sms-parser*,yuandian}`, `server/yuandian`, `server/settings/yuandian-actions` | 15 |
+
+**Quy tắc bất biến khi chạy song song**:
+1. Chỉ sửa file trong gói mình — KHÔNG đụng file gói khác (tránh xung đột).
+2. KHÔNG chạy `npm run typecheck` / `npm run build` / `next typegen` (ghi đè `.next/types` lẫn nhau) — parent chạy tuần tự sau cùng. Chỉ chạy `npx vitest run <path-test-của-gói>` và `npx eslint <file-đã-sửa>`.
+3. KHÔNG chạy git (parent commit).
+4. Sắp cặm thay theo độ dài GIẢM DẦN (bẫy I18N-7/8); khi phát sinh chuỗi lai → sửa bằng cặm chính xác, KHÔNG regex toàn file.
+5. Chuỗi test đổi cùng luồng với source (đỏ–xanh).
+6. Comment license `Copyright 2026 叶森 (Sen Ye)` / COTAPELU **giữ nguyên**.
+7. Dịch: nhãn UI, message lỗi, toast, placeholder, cột bảng, comment, tên hiển thị mẫu. **Không** dịch: identifier, key JSON, enum value, tên route, tên biến, khóa API.
+8. `toLocaleString/toLocaleDateString("zh-CN")` → `"vi-VN"`; `<html lang="zh-CN">` → `"vi"`.
+
+| Tiếng Trung | Tiếng Việt |
+|---|---|
+| 合同 / 新增合同 / 合同名称 / 合同金额 / 生效中 / 草稿 | Hợp đồng / Thêm hợp đồng / Tên hợp đồng / Giá trị hợp đồng / Đang hiệu lực / Nháp |
+| 案件 / 案件名称必填 | Vụ án / Tên vụ án bắt buộc nhập |
+| 材料 / 上传材料 / 材料名称必填 / 加密 | Tài liệu / Tải lên tài liệu / Tên tài liệu bắt buộc nhập / Mã hóa |
+| 用户管理 / 新增用户 / 姓名 / 邮箱 / 角色 / 案件 / 最近登录 | Quản lý người dùng / Thêm người dùng / Họ tên / Email / Vai trò / Vụ án / Đăng nhập gần nhất |
+| 收件箱 / 粘贴短信 / 待处理 / 已处理 / 无待处理短信 / 暂无已处理记录 | Hộp thư đến / Dán tin nhắn / Chờ xử lý / Đã xử lý / Không có tin nhắn chờ xử lý / Chưa có bản ghi đã xử lý |
+| 日程 / 未来 90 天的开庭与期限 | Lịch làm việc / Phiên tòa & thời hạn trong 90 ngày tới |
+| 开庭 / 期限 / 事项 | phiên tòa / thời hạn / công việc |
+| 单号至少 6 位 / 用途必填 / 快递记录不存在 / 关联案件不存在 | Mã vận đơn tối thiểu 6 ký tự / Mục đích bắt buộc nhập / Không tìm thấy bản ghi chuyển phát / Vụ án liên kết không tồn tại |
+| 缺少文件 / 解析并保存（支持批量） | Thiếu tệp / Phân tích và lưu (hỗ trợ nhiều bản ghi) |
+| 归档 / 卷宗封皮 / 封皮和目录 | Lưu trữ / Bìa hồ sơ / Bìa và mục lục |
+| 收到新法院短信 / 案件收到新的法院短信 | Nhận tin nhắn mới từ toà án / Vụ án có tin nhắn mới từ toà án |
+| 仅支持图片格式 / 超过 10MB | Chỉ hỗ trợ định dạng ảnh / Vượt quá 10MB |
+| 中文公司名 / 公司名 | Tên công ty / Tên công ty |
+| 工作台 mock 数据 | Dữ liệu mock bảng làm việc |

@@ -77,10 +77,10 @@ describe("parseReviewItems", () => {
   });
 
   it("非数组（对象）抛错", () => {
-    expect(() => parseReviewItems('{"items": []}')).toThrow(/无法解析/);
+    expect(() => parseReviewItems('{"items": []}')).toThrow(/Không phân tích được/);
   });
 
   it("无 JSON 抛错", () => {
-    expect(() => parseReviewItems("抱歉，无法处理")).toThrow(/无法解析/);
+    expect(() => parseReviewItems("Xin lỗi, không xử lý được")).toThrow(/Không phân tích được/);
   });
 });

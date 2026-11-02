@@ -28,7 +28,7 @@ export function extractClientIdHits(c: any, candidateRole: PartyRole, queryIdNum
       hitType: "HISTORICAL_PARTY", targetType: "Matter", targetId: m.id,
       matchedName: c.name, matchedField: 'idNumber', matchedValue: queryIdNumber,
       matchedRatio: 1, severity: sev,
-      reason: `Số ID card / mã số thuế trùng với khách hàng「${c.name}」của案件「${m.internalCode}」`,
+      reason: `Số ID card / mã số thuế trùng với khách hàng "${c.name}" của vụ án "${m.internalCode}"`,
       matterInfo
     });
   }
@@ -48,7 +48,7 @@ export function collectClientExactNameHits(c: any, candidateRole: PartyRole, que
       hitType: "HISTORICAL_PARTY", targetType: "Matter", targetId: m.id,
       matchedName: c.name, matchedField: 'name', matchedValue: queryName,
       matchedRatio: 1, severity: sev,
-      reason: `Trùng tên với khách hàng「${c.name}」của案件「${m.internalCode}」`,
+      reason: `Trùng tên với khách hàng "${c.name}" của vụ án "${m.internalCode}"`,
       matterInfo
     });
   }
@@ -69,7 +69,7 @@ export function collectClientFuzzyNameHits(c: any, candidateRole: PartyRole, que
       hitType: "HISTORICAL_PARTY", targetType: "Matter", targetId: m.id,
       matchedName: c.name, matchedField: 'name', matchedValue: queryName,
       matchedRatio: ratio, severity: 'LOW',
-      reason: `Tên tương tự với khách hàng「${c.name}」của案件「${m.internalCode}」`,
+      reason: `Tên tương tự với khách hàng "${c.name}" của vụ án "${m.internalCode}"`,
       matterInfo
     });
   }

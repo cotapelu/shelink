@@ -73,7 +73,7 @@ describe("firm-profile-actions", () => {
 
   it("should reject non-admin", async () => {
     mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER", name: "Lawyer" } } as any);
-    await expect(saveFirmProfileAction({} as any)).rejects.toThrow("仅管理员可修改律所信息配置");
+    await expect(saveFirmProfileAction({} as any)).rejects.toThrow("Chỉ quản trị viên được sửa cấu hình thông tin văn phòng");
   });
 
   it("should validate logo data URL format", async () => {
@@ -84,12 +84,12 @@ describe("firm-profile-actions", () => {
 
   it("should reject invalid logo mime type", async () => {
     const input = { logoDataUrl: "data:text/plain;base64,abc" } as any;
-    await expect(saveFirmProfileAction(input)).rejects.toThrow("Logo 必须是 PNG / JPG / WebP / SVG 图片");
+    await expect(saveFirmProfileAction(input)).rejects.toThrow("Logo phải là ảnh PNG / JPG / WebP / SVG");
   });
 
   it("should reject oversized logo", async () => {
     const bigBase64 = "data:image/png;base64," + "a".repeat(300 * 1024);
     const input = { logoDataUrl: bigBase64 } as any;
-    await expect(saveFirmProfileAction(input)).rejects.toThrow("Logo 体积过大");
+    await expect(saveFirmProfileAction(input)).rejects.toThrow("Logo quá lớn");
   });
 });

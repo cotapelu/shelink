@@ -18,14 +18,14 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.9.1 AI 配置读写（OpenAI 兼容协议）
+ * v0.9.1 Đọc/ghi cấu hình AI (giao thức tương thích OpenAI)
  *
- * SystemSetting 单 key `aiSettings`，value 是加密后的 JSON：
+ * SystemSetting một key `aiSettings`, value là JSON đã mã hoá:
  *   { apiKeyCipher, baseUrl, textModel, visionModel }
- * apiKey 用 storage/crypto 同密钥（STORAGE_ENCRYPTION_KEY）加密存。
+ * apiKey mã hoá bằng cùng khoá với storage/crypto (STORAGE_ENCRYPTION_KEY).
  *
- * 默认 provider：通义千问（决策 PRD §13.8.2 阿里云百炼免费额度大）。
- * 但用户可改任何 OpenAI 兼容 endpoint：DeepSeek / Kimi / 智谱 / OpenAI / OpenRouter / Ollama。
+ * Provider mặc định: 通义千问 / Qwen (quyết định PRD §13.8.2 — hạn mức miễn phí Alibaba Bailian lớn).
+ * Người dùng có thể đổi sang bất kỳ endpoint tương thích OpenAI nào: DeepSeek / Kimi / 智谱 / OpenAI / OpenRouter / Ollama.
  */
 import { prisma } from "@/lib/prisma";
 import { encryptBuffer, decryptBuffer } from "@/lib/storage/crypto";
@@ -46,7 +46,7 @@ export interface StoredAiSettings {
 }
 
 export interface ResolvedAiSettings {
-  apiKey: string; // 已解密，仅 server 内部用
+  apiKey: string; // Đã giải mã, chỉ dùng nội bộ server
   baseUrl: string;
   textModel: string;
   visionModel: string;
@@ -80,7 +80,7 @@ export async function readStoredAiSettings(): Promise<StoredAiSettings> {
   };
 }
 
-/** 给 UI 用：脱敏 + 是否已配置 */
+/** Cho UI dùng: che mẫn + đã cấu hình chưa */
 export async function readPublicAiSettings(): Promise<{
   configured: boolean;
   baseUrl: string;
@@ -99,7 +99,7 @@ export async function readPublicAiSettings(): Promise<{
   };
 }
 
-/** 给 server 内部调用：拿解密后的可用配置 */
+/** Cho server gọi nội bộ: lấy cấu hình dùng được đã giải mã */
 export async function getAiSettings(): Promise<ResolvedAiSettings> {
   const s = await readStoredAiSettings();
   const apiKey = decryptKey(s.apiKeyCipher);
@@ -113,7 +113,7 @@ export async function getAiSettings(): Promise<ResolvedAiSettings> {
 }
 
 export async function saveAiSettings(input: {
-  apiKey?: string; // 留空则保留原值；显式传 null 清除
+  apiKey?: string; // Để trống = giữ giá trị cũ; truyền null tường minh = xoá
   baseUrl?: string;
   textModel?: string;
   visionModel?: string;

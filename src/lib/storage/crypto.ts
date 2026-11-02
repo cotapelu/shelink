@@ -30,12 +30,12 @@ function getKey(): Buffer {
   if (cachedKey) return cachedKey;
   const raw = process.env.STORAGE_ENCRYPTION_KEY;
   if (!raw) {
-    throw new Error("STORAGE_ENCRYPTION_KEY 未设置。在 .env 用 openssl rand -base64 32 生成");
+    throw new Error("Chưa đặt STORAGE_ENCRYPTION_KEY. Tạo trong .env bằng: openssl rand -base64 32");
   }
   const buf = Buffer.from(raw, "base64");
   if (buf.length !== KEY_LENGTH) {
     throw new Error(
-      `STORAGE_ENCRYPTION_KEY 长度错误：期望 32 字节（base64 编码后约 44 字符），实际 ${buf.length}`
+      `STORAGE_ENCRYPTION_KEY sai độ dài: cần 32 byte (sau base64 ~44 ký tự), thực tế ${buf.length}`
     );
   }
   cachedKey = buf;
@@ -43,7 +43,7 @@ function getKey(): Buffer {
 }
 
 /**
- * 加密一个 Buffer，返回 ciphertext / iv / authTag（均为 Buffer，调用者负责 base64）。
+ * Mã hoá một Buffer, trả về ciphertext / iv / authTag (đều là Buffer, bên gọi tự base64).
  */
 export function encryptBuffer(plain: Buffer): {
   ciphertext: Buffer;
@@ -61,7 +61,7 @@ export function encryptBuffer(plain: Buffer): {
 }
 
 /**
- * 解密。iv / authTag 是 base64。
+ * Giải mã. iv / authTag ở dạng base64.
  */
 export function decryptBuffer(
   ciphertext: Buffer,

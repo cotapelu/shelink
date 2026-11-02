@@ -18,10 +18,10 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * AuditLog 保留策略：每天 03:00 删超过 N 天的旧记录。
+ * Chính sách lưu AuditLog: mỗi ngày 03:00 xoá bản ghi cũ quá N ngày.
  *
- * 默认 365 天；环境变量 AUDIT_RETENTION_DAYS 可覆盖（如设 90 = 3 个月）。
- * AuditLog 表无 FK 反向引用，安全 hard delete。
+ * Mặc định 365 ngày; biến môi trường AUDIT_RETENTION_DAYS có thể ghi đè (vd 90 = 3 tháng).
+ * Bảng AuditLog không có FK nào tham chiếu ngược, hard delete an toàn.
  */
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/server/audit";
@@ -44,7 +44,7 @@ export async function runAuditCleanup(): Promise<AuditCleanupResult> {
     where: { createdAt: { lt: cutoff } }
   });
 
-  // 自己写一条 audit 留痕（这条 365 天后又会被自己删，但短期内可查）
+  // Tự ghi một dấu vết audit (dòng này 365 ngày sau lại bị chính nó xoá, nhưng trong ngắn hạn tra được)
   await audit({
     userId: null,
     action: "AUDIT_CLEANUP_CRON",

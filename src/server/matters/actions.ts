@@ -257,7 +257,7 @@ export async function updateMatterTeam(input: MatterTeamUpdateInput) {
   return { ok: true };
 }
 
-// v0.27: Chỉnh sửa thông tin cơ bản vụ án (system编号 + ngày nhận readonly, status đi qua lifecycle)
+// v0.27: Chỉnh sửa thông tin cơ bản của vụ án (mã hệ thống + ngày nhận readonly, status đi qua lifecycle)
 export async function updateMatterBasicInfo(input: MatterUpdateBasicInput) {
   const session = await requireSession();
   const data = matterUpdateBasicSchema.parse(input);

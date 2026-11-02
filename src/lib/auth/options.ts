@@ -48,10 +48,10 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     CredentialsProvider({
-      name: "邮箱密码",
+      name: "Email & mật khẩu",
       credentials: {
-        email: { label: "邮箱", type: "email" },
-        password: { label: "密码", type: "password" }
+        email: { label: "Email", type: "email" },
+        password: { label: "Mật khẩu", type: "password" }
       },
       async authorize(credentials) {
         const parsed = credentialsSchema.safeParse(credentials);
@@ -65,12 +65,12 @@ export const authOptions: NextAuthOptions = {
         const matches = await bcrypt.compare(parsed.data.password, user.passwordHash);
         if (!matches) return null;
 
-        // 更新最后登录时间（异步，不阻塞）
+        // Cập nhật thời gian đăng nhập cuối (bất đồng bộ, không chặn)
         prisma.user.update({
           where: { id: user.id },
           data: { lastLoginAt: new Date() }
         }).catch(() => {
-          // 忽略更新失败
+          // Bỏ qua lỗi cập nhật
         });
 
         return {

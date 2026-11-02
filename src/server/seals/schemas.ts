@@ -30,8 +30,8 @@ const sealTypes = [
 export const sealCreateSchema = z.object({
   sealType: z.enum(sealTypes),
   matterId: z.string().cuid().optional().nullable(),
-  purpose: z.string().min(1, "用章事由必填").max(500),
-  documentTitle: z.string().min(1, "文件标题必填").max(200),
+  purpose: z.string().min(1, "Lý do dùng dấu bắt buộc nhập").max(500),
+  documentTitle: z.string().min(1, "Tiêu đề văn bản bắt buộc nhập").max(200),
   pageCount: z.coerce.number().int().positive().default(1),
   requireCrossPageSeal: z.coerce.boolean().default(false),
   copies: z.coerce.number().int().positive().default(1),
@@ -47,7 +47,7 @@ export const sealApproveSchema = z.object({
 
 export const sealRejectSchema = z.object({
   id: z.string().cuid(),
-  reason: z.string().min(1, "请说明驳回原因").max(500)
+  reason: z.string().min(1, "Nêu rõ lý do từ chối").max(500)
 });
 
 export const sealCancelSchema = z.object({

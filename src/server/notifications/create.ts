@@ -33,7 +33,7 @@ type CreateNotificationInput = {
   refId?: string;
 };
 
-/** 通用通知创建 helper，被其他 server action 调用 */
+/** Helper tạo thông báo chung, được các server action khác gọi */
 export async function createNotification(input: CreateNotificationInput) {
   return prisma.notification.create({
     data: {

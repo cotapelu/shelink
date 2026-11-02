@@ -26,11 +26,12 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatCurrency(amount: number, options?: { compact?: boolean }) {
   if (options?.compact && Math.abs(amount) >= 10000) {
-    return `¥${(amount / 10000).toFixed(1)}万`;
+    // Triệu (10^6): 1,2 tr — theo cấu hình tiền tệ mặc định VND của hệ thống
+    return `${(amount / 10000).toFixed(1).replace(".", ",")} tr`;
   }
-  return new Intl.NumberFormat("zh-CN", {
+  return new Intl.NumberFormat("vi-VN", {
     style: "currency",
-    currency: "CNY",
+    currency: "VND",
     maximumFractionDigits: 0
   }).format(amount);
 }
@@ -38,7 +39,7 @@ export function formatCurrency(amount: number, options?: { compact?: boolean }) 
 export function formatDate(date: Date | string, fmt: "full" | "short" | "month-day" = "short") {
   const d = typeof date === "string" ? new Date(date) : date;
   if (fmt === "full") {
-    return d.toLocaleDateString("zh-CN", {
+    return d.toLocaleDateString("vi-VN", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -46,9 +47,9 @@ export function formatDate(date: Date | string, fmt: "full" | "short" | "month-d
     });
   }
   if (fmt === "month-day") {
-    return d.toLocaleDateString("zh-CN", { month: "long", day: "numeric" });
+    return d.toLocaleDateString("vi-VN", { month: "long", day: "numeric" });
   }
-  return d.toLocaleDateString("zh-CN");
+  return d.toLocaleDateString("vi-VN");
 }
 
 export function daysUntil(date: Date | string): number {

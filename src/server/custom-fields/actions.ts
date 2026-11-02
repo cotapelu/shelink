@@ -20,9 +20,9 @@
 "use server";
 
 /**
- * v0.28: 自定义字段（JSON 列方案）
- * - 字段定义存 CustomFieldDef 表，管理限 ADMIN
- * - 字段值存于实体的 customValues JSON（本期落地 MATTER）
+ * v0.28: Trường tuỳ chỉnh (giải pháp cột JSON)
+ * - Định nghĩa trường lưu bảng CustomFieldDef, quản lý giới hạn ADMIN
+ * - Giá trị trường lưu trong customValues JSON của thực thể (kỳ này áp dụng MATTER)
  */
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
@@ -39,7 +39,7 @@ const typeSchema = z.enum(["TEXT", "NUMBER", "DATE", "SELECT"]);
 
 const defCreateSchema = z.object({
   entityType: entitySchema,
-  label: z.string().min(1, "字段名称必填").max(40),
+  label: z.string().min(1, "Tên trường bắt buộc nhập").max(40),
   fieldType: typeSchema.default("TEXT"),
   options: z.array(z.string().min(1).max(40)).max(50).default([]),
   required: z.boolean().default(false)
@@ -52,12 +52,12 @@ const defUpdateSchema = defCreateSchema.partial().extend({
 async function requireAdmin() {
   const session = await requireSession();
   if (session.user.role !== "ADMIN") {
-    throw new Error("仅管理员可管理自定义字段");
+    throw new Error("Chỉ quản trị viên được quản lý trường tuỳ chỉnh");
   }
   return session;
 }
 
-/** 列出某实体的字段定义（admin 视图含禁用项；onlyEnabled=true 用于表单渲染） */
+/** Liệt kê định nghĩa trường của một thực thể (góc nhìn admin gồm mục đã tắt; onlyEnabled=true dùng để render form) */
 export async function listCustomFieldDefs(
   entityType: CustomFieldEntity,
   onlyEnabled = false
@@ -73,7 +73,7 @@ export async function createCustomFieldDef(input: z.input<typeof defCreateSchema
   const session = await requireAdmin();
   const data = defCreateSchema.parse(input);
   if (data.fieldType === "SELECT" && data.options.length === 0) {
-    throw new Error("下拉类型至少需要一个选项值");
+    throw new Error("Loại dropdown cần ít nhất một giá trị tuỳ chọn");
   }
   const max = await prisma.customFieldDef.aggregate({
     where: { entityType: data.entityType },
@@ -105,7 +105,7 @@ export async function updateCustomFieldDef(input: z.input<typeof defUpdateSchema
   await requireAdmin();
   const { id, ...rest } = defUpdateSchema.parse(input);
   if (rest.fieldType === "SELECT" && rest.options && rest.options.length === 0) {
-    throw new Error("下拉类型至少需要一个选项值");
+    throw new Error("Loại dropdown cần ít nhất một giá trị tuỳ chọn");
   }
   await prisma.customFieldDef.update({
     where: { id },
@@ -136,16 +136,16 @@ export async function deleteCustomFieldDef(id: string) {
   return { ok: true as const };
 }
 
-/** 保存案件的自定义字段值 */
+/** Lưu giá trị trường tuỳ chỉnh của vụ án */
 export async function saveMatterCustomValues(
   matterId: string,
   values: Record<string, string>
 ) {
   const session = await requireSession();
   await assertMatterWritable(matterId);
-  await assertCanLeadMatter(session.user.id, matterId, "仅案件主办/协办可编辑");
+  await assertCanLeadMatter(session.user.id, matterId, "Chỉ chủ trì/cộng tác của vụ án được sửa");
 
-  // 仅保留当前已启用字段定义的键，避免脏数据
+  // Chỉ giữ key của định nghĩa trường đang bật, tránh dữ liệu bẩn
   const defs = await prisma.customFieldDef.findMany({
     where: { entityType: "MATTER", enabled: true },
     select: { key: true, label: true, required: true }
@@ -155,7 +155,7 @@ export async function saveMatterCustomValues(
     const v = values[d.key];
     if (typeof v === "string" && v.trim() !== "") clean[d.key] = v.trim();
     if (d.required && !clean[d.key]) {
-      throw new Error(`「${d.label}」为必填项`);
+      throw new Error(`"${d.label}" là bắt buộc`);
     }
   }
 

@@ -47,9 +47,9 @@ export type CauseSearchResult = {
   shortName: string | null;
   level: number;
   parentId: string | null;
-  /** 二级分类名（用于 UI 显示"X / Y"路径） */
+  /** Tên phân loại cấp 2 (dùng cho UI hiển thị đường dẫn "X / Y") */
   l2Name: string | null;
-  /** 一级分类名 */
+  /** Tên phân loại cấp 1 */
   l1Name: string | null;
 };
 
@@ -67,7 +67,7 @@ function flatten(c: {
     parent: { id: string; name: string; level: number } | null;
   } | null;
 }): CauseSearchResult {
-  // 找 l1 / l2：本节点 + 链向上的祖先里按 level 取
+  // Tìm l1 / l2: lay theo level tu chinh node nay + cac to tien phia tren
   const chain: { name: string; level: number }[] = [{ name: c.name, level: c.level }];
   if (c.parent) chain.push({ name: c.parent.name, level: c.parent.level });
   if (c.parent?.parent) chain.push({ name: c.parent.parent.name, level: c.parent.parent.level });
@@ -86,15 +86,15 @@ function flatten(c: {
 }
 
 /**
- * 搜索规范案由库。
+ * Tra kho nguyên nhân chuẩn hoá.
  *
- * - 必传 category
- * - 空 query 时返回该 category 下二级案由（让用户先看分类）+ 部分三级
- * - 模糊匹配 name / shortName / keywords / pinyin
- * - 结果带 parent 链，UI 可显示"二级 / 三级"路径
+ * - Bắt buộc truyền category
+ * - Khi query rỗng: trả về nguyên nhân cấp 2 của category (cho người dùng xem phân loại trước) + một phần cấp 3
+ * - Khớp mờ trên name / shortName / keywords / pinyin
+ * - Kết quả kèm chuỗi parent, UI có thể hiển thị đường dẫn "cấp 2 / cấp 3"
  */
-// v0.34: 仲裁类案件共用民商案由库，但按《仲裁法》第三条限定可仲裁范围
-// 劳动仲裁 → 仅劳动争议(CC-7)；商事仲裁 → 合同+财产权益(CC-3/4/5/6/8/9，排除人格权/婚姻继承/劳动/侵权/非讼/特殊程序)
+// v0.34: vụ án trọng tài dùng chung kho nguyên nhân dân sự-thương mại, nhưng giới hạn phạm vi có thể trọng tài theo Điều 3 Luật Trọng tài
+// Trọng tài lao động → chỉ tranh chấp lao động (CC-7); trọng tài thương mại → hợp đồng + quyền lợi tài sản (CC-3/4/5/6/8/9, loại trừ nhân phẩm/hôn nhân thừa kế/lao động/nguyên hại/phi tố tụng/thủ tục đặc biệt)
 function causeScope(category: MatterCategory): {
   dbCategory: MatterCategory;
   codePrefixes: string[] | null;
@@ -110,7 +110,7 @@ function causeScope(category: MatterCategory): {
 }
 
 function codeFilter(prefixes: string[]) {
-  // 一级 code 形如 CC-7，其子级形如 CC-7-...；用前缀区分（CC-1 不会误命中 CC-10）
+  // Code cấp 1 dạng CC-7, con dạng CC-7-...; phân biệt bằng tiền tố (CC-1 không khớp nhầm CC-10)
   return {
     OR: prefixes.flatMap((p) => [
       { code: p },
@@ -125,13 +125,13 @@ export async function searchCauses(params: {
   limit?: number;
 }): Promise<CauseSearchResult[]> {
   await requireSession();
-  // v0.16: cap 提到 2000 以支持级联 UI 一次性拉全（民事 1055 / 刑事 511）
+  // v0.16: nâng cap lên 2000 để UI cấp dẫn kéo toàn bộ một lần (dân sự 1055 / hình sự 511)
   const limit = Math.min(params.limit ?? 50, 2000);
   const q = params.query?.trim();
   const { dbCategory, codePrefixes } = causeScope(params.category);
 
   if (!q) {
-    // 空查询：返回该 category 下全部 4 级（级联 UI 需要 level=1）
+    // Query rỗng: trả về toàn bộ 4 cấp của category (UI cấp dẫn cần level=1)
     const list = await prisma.causeOfAction.findMany({
       where: {
         category: dbCategory,
@@ -149,7 +149,7 @@ export async function searchCauses(params: {
     where: {
       category: dbCategory,
       active: true,
-      level: { gte: 2 }, // 至少二级才可选
+      level: { gte: 2 }, // Từ cấp 2 trở lên mới chọn được
       AND: [
         ...(codePrefixes ? [codeFilter(codePrefixes)] : []),
         {
@@ -180,7 +180,7 @@ export async function getCauseById(id: string) {
 }
 
 /**
- * v0.13: 列出某 category 下所有二级分类（用于级联第一步）
+ * v0.13: liệt kê toàn bộ phân loại cấp 2 của một category (dùng cho bước đầu của UI cấp dẫn)
  */
 export async function listCauseL2(category: MatterCategory) {
   await requireSession();

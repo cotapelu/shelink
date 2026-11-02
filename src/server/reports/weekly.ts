@@ -18,15 +18,15 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.21: 律师周报数据聚合（per-user 视角）
+ * v0.21: Tổng hợp dữ liệu báo cáo tuần của luật sư (góc nhìn per-user)
  *
- * 周定义：周一 00:00:00 → 下周一 00:00:00（半开区间）
+ * Định nghĩa tuần: Thứ Hai 00:00:00 → Thứ Hai tuần sau 00:00:00 (khoảng nửa mở)
  */
 import { prisma } from "@/lib/prisma";
 import type { ReportPeriod } from "./queries";
 
 export function weekPeriod(now = new Date()): ReportPeriod {
-  // 周一 = 0
+  // Thứ Hai = 0
   const dow = (now.getDay() + 6) % 7;
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
   const nextMonday = new Date(monday);
@@ -51,7 +51,7 @@ export type LawyerWeeklyDigest = {
 };
 
 /**
- * 单个律师本周摘要。复用单条查询，调用方循环。
+ * Tóm tắt tuần của một luật sư. Tái sử dụng một truy vấn, bên gọi lặp.
  */
 export async function getLawyerWeeklyDigest(input: {
   userId: string;
@@ -105,10 +105,10 @@ export async function getLawyerWeeklyDigest(input: {
 
 export function formatWeeklyDigestContent(d: LawyerWeeklyDigest): string {
   const parts = [
-    `新收 ${d.newIntake} 件`,
-    `已结 ${d.closed} 件`,
-    `已归档 ${d.archived} 件`,
-    `收款 ${d.receivedAmount.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} 元`
+    `Tiếp nhận mới ${d.newIntake} vụ`,
+    `Đã kết thúc ${d.closed} vụ`,
+    `Đã lưu trữ ${d.archived} vụ`,
+    `Thu ${d.receivedAmount.toLocaleString("vi-VN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₫`
   ];
   return parts.join(" · ");
 }

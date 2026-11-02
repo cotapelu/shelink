@@ -21,7 +21,7 @@ import { z } from "zod";
 
 export const folderCreateSchema = z.object({
   matterId: z.string().cuid(),
-  name: z.string().min(1, "卷宗名必填").max(40, "卷宗名最长 40 字")
+  name: z.string().min(1, "Tên hồ sơ bắt buộc nhập").max(40, "Tên hồ sơ tối đa 40 ký tự")
 });
 
 export const folderRenameSchema = z.object({

@@ -99,7 +99,7 @@ describe("getIntakeById", () => {
     (requireSession as any).mockResolvedValue({ user: { id: "u4", role: "LAWYER" } });
     (prisma.intake.findFirst as any).mockResolvedValue(null);
 
-    await expect(getIntakeById("i1")).rejects.toThrow("收案记录不存在");
+    await expect(getIntakeById("i1")).rejects.toThrow("Bản ghi tiếp nhận không tồn tại");
   });
 
   it("includes correct relations", async () => {

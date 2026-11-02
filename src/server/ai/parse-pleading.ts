@@ -20,12 +20,12 @@
 "use server";
 
 /**
- * v0.11: 起诉状 / 申请书 OCR 骨架（v0.27 扩展：支持扫描版 PDF）
+ * v0.11: Khung OCR đơn khởi kiện / đơn yêu cầu (v0.27 mở rộng: hỗ trợ PDF bản scan)
  *
- * 支持图片（jpg/png/webp）和 PDF。
- * - 图片走 aiVision 视觉识别
- * - PDF 优先走 unpdf 文本抽取 + aiChat（成本低、速度快）
- * - PDF 文本层为空（扫描件）时 fallback：unpdf renderPageAsImage 渲染前 3 页 → 逐页 aiVision → 合并结果
+ * Hỗ trợ ảnh (jpg/png/webp) và PDF.
+ * - Ảnh đi qua nhận diện thị giác aiVision
+ * - PDF ưu tiên trích văn bản unpdf + aiChat (chi phí thấp, nhanh)
+ * - Khi lớp văn bản PDF rỗng (bản scan) thì fallback: unpdf renderPageAsImage render 3 trang đầu → aiVision từng trang → gộp kết quả
  */
 import { requireSession } from "@/lib/auth/session";
 import { aiChat, aiVision, extractJson, AiNotConfiguredError } from "@/lib/ai/client";
@@ -40,8 +40,8 @@ export type PleadingPartyHint = {
 };
 
 export type ParsedPleading = {
-  plaintiffs: PleadingPartyHint[]; // 起诉方/申请方
-  thirdParties: PleadingPartyHint[]; // 第三人
+  plaintiffs: PleadingPartyHint[]; // Bên khởi kiện/bên yêu cầu
+  thirdParties: PleadingPartyHint[]; // Người thứ ba
   cause?: string;
   claimAmount?: number;
   claimDescription?: string;
@@ -51,24 +51,24 @@ export type ParsedPleading = {
 const SUPPORTED_IMAGE_MIME = ["image/jpeg", "image/png", "image/webp"];
 const SUPPORTED_PDF_MIME = ["application/pdf"];
 
-const SYSTEM_PROMPT = `你是法律文书解析助手。下方图片是一份起诉状 / 申请书 / 仲裁申请书。
-请严格按以下 JSON 模式返回（仅 JSON，不要任何解释）：
+const SYSTEM_PROMPT = `Bạn là trợ lý phân tích văn bản pháp lý. Ảnh dưới đây là một đơn khởi kiện / đơn yêu cầu / đơn yêu cầu trọng tài.
+Hãy trả về nghiêm ngặt theo mẫu JSON sau (chỉ JSON, không giải thích):
 {
-  "plaintiffs": [{"name": "全名", "idNumber": "身份证或统一社会信用代码（可选）", "address": "可选", "legalRep": "法定代表人（公司适用，可选）", "phone": "可选"}],
-  "thirdParties": [{"name": "全名", "idNumber": "可选", "address": "可选"}],
-  "cause": "案由（如：买卖合同纠纷）",
-  "claimAmount": 数字（元，仅金钱标的；非金钱填 null）,
-  "claimDescription": "诉讼请求/申请事项要点",
-  "court": "管辖法院/仲裁机构全称"
+  "plaintiffs": [{"name": "Họ tên đầy đủ", "idNumber": "Số giấy tờ hoặc mã số thuế (tuỳ chọn)", "address": "tuỳ chọn", "legalRep": "Người đại diện theo pháp luật (áp dụng công ty, tuỳ chọn)", "phone": "tuỳ chọn"}],
+  "thirdParties": [{"name": "Họ tên đầy đủ", "idNumber": "tuỳ chọn", "address": "tuỳ chọn"}],
+  "cause": "Nguyên nhân (vd: tranh chấp hợp đồng mua bán)",
+  "claimAmount": số (VNĐ, chỉ khi là giá trị tiền; không phải tiền thì điền null),
+  "claimDescription": "Luận điểm yêu cầu khởi kiện / nội dung yêu cầu",
+  "court": "Tên đầy đủ toà án / cơ quan trọng tài có thẩm quyền"
 }
-规则：
-- 找不到的字段返回空数组 [] 或 null，不要编造
-- 起诉方包含原告 / 申请人 / 申请执行人 / 上诉人，统一放 plaintiffs
-- 不要返回被告 / 被申请人 / 被上诉人（那是用户自己）
-- 金额单位统一为人民币元`;
+Quy tắc:
+- Trường không tìm thấy trả về mảng rỗng [] hoặc null, không được bịa
+- Bên khởi kiện gồm nguyên đơn / người yêu cầu / người yêu cầu thi hành / người kháng cáo, đều để vào plaintiffs
+- Không trả về bị đơn / người bị yêu cầu / bị kháng cáo (đó là người dùng)
+- Đơn vị tiền thống nhất là VNĐ`;
 
 function normalizeResult(parsed: Partial<ParsedPleading> | null | undefined): ParsedPleading {
-  if (!parsed) throw new Error("AI 返回结果无法解析为 JSON");
+  if (!parsed) throw new Error("Không phân tích được kết quả AI trả về thành JSON");
   return {
     plaintiffs: Array.isArray(parsed.plaintiffs) ? parsed.plaintiffs : [],
     thirdParties: Array.isArray(parsed.thirdParties) ? parsed.thirdParties : [],
@@ -79,7 +79,7 @@ function normalizeResult(parsed: Partial<ParsedPleading> | null | undefined): Pa
   };
 }
 
-// 合并多页扫描结果：当事人列表按 name 去重，标量字段取第一个非空
+// Gộp kết quả scan nhiều trang: danh sách các bên khử trùng theo name, trường vô hướng lấy giá trị không rỗng đầu tiên
 function mergeResults(results: ParsedPleading[]): ParsedPleading {
   const seen = new Set<string>();
   const dedupe = (list: PleadingPartyHint[]) => {
@@ -105,14 +105,14 @@ function mergeResults(results: ParsedPleading[]): ParsedPleading {
 export async function parsePleading(form: FormData): Promise<ParsedPleading> {
   await requireSession();
   const file = form.get("file");
-  if (!(file instanceof File)) throw new Error("缺少文件");
+  if (!(file instanceof File)) throw new Error("Thiếu tệp");
 
   const isImage = SUPPORTED_IMAGE_MIME.includes(file.type);
   const isPdf = SUPPORTED_PDF_MIME.includes(file.type);
   if (!isImage && !isPdf) {
-    throw new Error(`仅支持 JPG / PNG / WebP / PDF，当前 ${file.type || "未知"}`);
+    throw new Error(`Chỉ hỗ trợ JPG / PNG / WebP / PDF, hiện ${file.type || "không rõ"}`);
   }
-  if (file.size > 20 * 1024 * 1024) throw new Error("文件超过 20MB");
+  if (file.size > 20 * 1024 * 1024) throw new Error("Tệp vượt quá 20MB");
 
   const buf = Buffer.from(await file.arrayBuffer());
 
@@ -127,7 +127,7 @@ export async function parsePleading(form: FormData): Promise<ParsedPleading> {
       return normalizeResult(extractJson<ParsedPleading>(content));
     }
 
-    // PDF：先试文本层抽取（成本低）
+    // PDF: thử trích lớp văn bản trước (chi phí thấp)
     const pdf = await getDocumentProxy(new Uint8Array(buf));
     const { text } = await extractText(pdf, { mergePages: true });
     const cleaned = (Array.isArray(text) ? text.join("\n") : text).trim();
@@ -136,14 +136,14 @@ export async function parsePleading(form: FormData): Promise<ParsedPleading> {
       const { content } = await aiChat({
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: `下方为起诉状 / 申请书的全文：\n\n${cleaned.slice(0, 12000)}` }
+          { role: "user", content: `Dưới đây là toàn văn đơn khởi kiện / đơn yêu cầu:\n\n${cleaned.slice(0, 12000)}` }
         ],
         maxTokens: 1500
       });
       return normalizeResult(extractJson<ParsedPleading>(content));
     }
 
-    // v0.27: 文本层为空（扫描版 PDF）→ 渲染前 3 页为 PNG，逐页 vision 识别后合并
+    // v0.27: lớp văn bản rỗng (PDF scan) → render 3 trang đầu ra PNG, nhận diện vision từng trang rồi gộp
     const totalPages = pdf.numPages;
     const pagesToRender = Math.min(totalPages, 3);
     const canvasImport = () => import("@napi-rs/canvas") as Promise<any>;
@@ -157,7 +157,7 @@ export async function parsePleading(form: FormData): Promise<ParsedPleading> {
       const dataUrl = `data:image/png;base64,${Buffer.from(arrayBuf).toString("base64")}`;
       const { content } = await aiVision({
         image: { dataUrl },
-        prompt: `${SYSTEM_PROMPT}\n\n（这是扫描版起诉状 / 申请书第 ${i}/${pagesToRender} 页）`,
+        prompt: `${SYSTEM_PROMPT}\n\n(Đây là trang ${i}/${pagesToRender} của bản scan đơn khởi kiện / đơn yêu cầu)`,
         maxTokens: 1500
       });
       const parsed = extractJson<ParsedPleading>(content);
@@ -165,11 +165,11 @@ export async function parsePleading(form: FormData): Promise<ParsedPleading> {
     }
 
     if (pageResults.length === 0) {
-      throw new Error("扫描版 PDF 识别失败，请改传图片或检查文件");
+      throw new Error("Nhận diện PDF bản scan thất bại, hãy gửi ảnh hoặc kiểm tra tệp");
     }
     return mergeResults(pageResults);
   } catch (err) {
     if (err instanceof AiNotConfiguredError) throw err;
-    throw new Error(err instanceof Error ? err.message : "OCR 识别失败");
+    throw new Error(err instanceof Error ? err.message : "Nhận diện OCR thất bại");
   }
 }

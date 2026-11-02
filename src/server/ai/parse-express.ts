@@ -20,36 +20,37 @@
 "use server";
 
 /**
- * v0.27: 快递单号 OCR
+ * v0.27: OCR mã vận đơn chuyển phát
  *
- * 律师上传快递单照片 → aiVision 提取快递单号 + 公司名（如能识别）
- * 失败时返回空，让律师手动输入
+ * Luật sư tải ảnh phiếu gửi → aiVision trích mã vận đơn + tên hãng (nếu nhận diện được)
+ * Thất bại thì trả về rỗng, để luật sư nhập thủ công
  */
 import { requireSession } from "@/lib/auth/session";
 import { aiVision, extractJson, AiNotConfiguredError } from "@/lib/ai/client";
 
 export type ParsedExpressLabel = {
   trackingNo: string | null;
-  companyCode: string | null; // 中文公司名（顺丰速运 / 中通快递 等）
+  companyCode: string | null; // Tên hãng tiếng Trung — GIỮ NGUYÊN: key khớp lib/express/companies.ts (hợp đồng API 快递100)
 };
 
 const SUPPORTED = new Set(["image/jpeg", "image/png", "image/webp", "image/heic"]);
 
-const PROMPT = `下方图片是一张快递面单 / 快递单照片。请严格返回 JSON：
-{"trackingNo": "单号", "companyCode": "中文快递公司名（如：顺丰速运 / 中通快递 / 京东快递）"}
-规则：
-- trackingNo 是面单上最显眼的运单号，10-30 位字母数字组合
-- 找不到任何一项返回 null，不要编造
-- 仅 JSON，不要解释`;
+const PROMPT = `Ảnh dưới đây là một phiếu gửi / ảnh vận đơn chuyển phát. Hãy trả về JSON nghiêm ngặt:
+{"trackingNo": "Số vận đơn", "companyCode": "Tên hãng chuyển phát tiếng Trung (vd: 顺丰速运 / 中通快递 / 京东快递)"}
+Quy tắc:
+- trackingNo là mã vận đơn nổi bật nhất trên phiếu, tổ hợp chữ-số 10-30 ký tự
+- Không tìm thấy mục nào thì trả về null, không được bịa
+- companyCode giữ tên hãng tiếng Trung (hợp đồng API bên ngoài, không dịch)
+- Chỉ JSON, không giải thích`;
 
 export async function parseExpressLabel(form: FormData): Promise<ParsedExpressLabel> {
   await requireSession();
   const file = form.get("file");
-  if (!(file instanceof File)) throw new Error("缺少文件");
+  if (!(file instanceof File)) throw new Error("Thiếu tệp");
   if (!SUPPORTED.has(file.type)) {
-    throw new Error(`仅支持图片格式（JPG/PNG/WebP），当前 ${file.type || "未知"}`);
+    throw new Error(`Chỉ hỗ trợ định dạng ảnh (JPG/PNG/WebP), hiện ${file.type || "không rõ"}`);
   }
-  if (file.size > 10 * 1024 * 1024) throw new Error("文件超过 10MB");
+  if (file.size > 10 * 1024 * 1024) throw new Error("Tệp vượt quá 10MB");
 
   const buf = Buffer.from(await file.arrayBuffer());
   const dataUrl = `data:${file.type};base64,${buf.toString("base64")}`;
@@ -67,6 +68,6 @@ export async function parseExpressLabel(form: FormData): Promise<ParsedExpressLa
     };
   } catch (err) {
     if (err instanceof AiNotConfiguredError) throw err;
-    throw new Error(err instanceof Error ? err.message : "快递单识别失败");
+    throw new Error(err instanceof Error ? err.message : "Nhận diện vận đơn thất bại");
   }
 }

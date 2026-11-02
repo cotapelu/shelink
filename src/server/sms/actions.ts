@@ -40,7 +40,7 @@ import {
 } from "./schemas";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 解析并保存（支持批量）
+// Phân tích và lưu (hỗ trợ nhiều bản ghi)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 async function findMatchingMatter(caseNumbers: string[]): Promise<string | null> {
@@ -60,7 +60,7 @@ export async function parseAndSaveSms(input: z.infer<typeof smsParseAndSaveSchem
   const data = smsParseAndSaveSchema.parse(input);
 
   const messages = data.batch ? splitSmsBatch(data.rawText) : [data.rawText.trim()];
-  if (messages.length === 0) throw new Error("没有可解析的内容");
+  if (messages.length === 0) throw new Error("Không có nội dung nào để phân tích");
 
   const createdIds: string[] = [];
 
@@ -86,7 +86,7 @@ export async function parseAndSaveSms(input: z.infer<typeof smsParseAndSaveSchem
     });
     createdIds.push(created.id);
 
-    // 通知关联案件的负责人
+    // Thông báo cho người phụ trách vụ án liên kết
     if (matchedMatterId) {
       const matter = await prisma.matter.findUnique({
         where: { id: matchedMatterId },
@@ -96,8 +96,8 @@ export async function parseAndSaveSms(input: z.infer<typeof smsParseAndSaveSchem
         await createNotification({
           userId: matter.ownerId,
           type: "SMS_ARRIVAL",
-          title: "收到新法院短信",
-          content: `案件收到新的法院短信，类型：${parsed.smsType ?? "未知"}`,
+          title: "Nhận tin nhắn mới từ toà án",
+          content: `Vụ án có tin nhắn mới từ toà án, loại: ${parsed.smsType ?? "Không rõ"}`,
           href: "/inbox",
           refType: "SmsMessage",
           refId: created.id
@@ -119,7 +119,7 @@ export async function parseAndSaveSms(input: z.infer<typeof smsParseAndSaveSchem
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 列表
+// Danh sách
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export async function listSmsMessages(input?: z.input<typeof smsListFilterSchema>) {
@@ -176,7 +176,7 @@ export async function getSmsMessage(id: string) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 手动指派 Matter
+// Gán Matter thủ công
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export async function matchSmsToMatter(input: z.infer<typeof smsMatchToMatterSchema>) {
@@ -208,7 +208,7 @@ export async function matchSmsToMatter(input: z.infer<typeof smsMatchToMatterSch
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 一键生成 Hearing
+// Sinh Hearing một bấm
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export async function generateHearingFromSms(input: z.infer<typeof smsGenerateHearingSchema>) {
@@ -219,7 +219,7 @@ export async function generateHearingFromSms(input: z.infer<typeof smsGenerateHe
     where: { id: data.procedureId },
     select: { id: true, matterId: true }
   });
-  if (!proc) throw new Error("程序不存在");
+  if (!proc) throw new Error("Thủ tục không tồn tại");
   await assertCanAccessMatter(session.user.id, session.user.role, proc.matterId);
   await assertMatterWritable(proc.matterId);
 
@@ -257,7 +257,7 @@ export async function generateHearingFromSms(input: z.infer<typeof smsGenerateHe
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 一键生成 Deadline
+// Sinh Deadline một bấm
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export async function generateDeadlineFromSms(input: z.infer<typeof smsGenerateDeadlineSchema>) {
@@ -268,7 +268,7 @@ export async function generateDeadlineFromSms(input: z.infer<typeof smsGenerateD
     where: { id: data.procedureId },
     select: { id: true, matterId: true }
   });
-  if (!proc) throw new Error("程序不存在");
+  if (!proc) throw new Error("Thủ tục không tồn tại");
   await assertCanAccessMatter(session.user.id, session.user.role, proc.matterId);
   await assertMatterWritable(proc.matterId);
 
@@ -306,7 +306,7 @@ export async function generateDeadlineFromSms(input: z.infer<typeof smsGenerateD
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 标记已处理
+// Đánh dấu đã xử lý
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export async function markSmsProcessed(input: z.infer<typeof smsIdSchema>) {
@@ -337,9 +337,9 @@ export async function deleteSms(input: z.infer<typeof smsIdSchema>) {
     where: { id: data.id },
     select: { receivedById: true }
   });
-  if (!sms) throw new Error("短信不存在");
+  if (!sms) throw new Error("Tin nhắn không tồn tại");
   if (sms.receivedById !== session.user.id && session.user.role !== "ADMIN") {
-    throw new Error("仅收件人或管理员可删除");
+    throw new Error("Chỉ người nhận hoặc quản trị viên được xoá");
   }
 
   await prisma.smsMessage.delete({ where: { id: data.id } });
@@ -355,7 +355,7 @@ export async function deleteSms(input: z.infer<typeof smsIdSchema>) {
   return { ok: true };
 }
 
-// 把解析出的字符串日期尽量转 JS Date（UI 预填用）
+// Chuyển chuỗi ngày phân tích được sang JS Date (dùng để UI điền sẵn)
 export async function parseDateString(s: string) {
   await requireSession();
   const d = toDate(s);

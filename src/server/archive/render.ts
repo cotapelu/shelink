@@ -18,13 +18,14 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.9.4 归档专用渲染：卷宗封皮 + 卷宗目录
+ * v0.9.4 Render riêng cho lưu trữ: Bìa hồ sơ + Mục lục hồ sơ
  *
- * 复用 docxtemplater 管道，但比通用 renderTemplate 多两件事：
- *   1. 注入 archive.* 上下文（归档号、结案方式、归档日期等）
- *   2. 卷宗目录额外注入 documents[] 数组用于行循环
+ * Tái sử dụng pipeline docxtemplater, nhưng so với renderTemplate chung có thêm hai việc:
+ *   1. Chèn ngữ cảnh archive.* (mã lưu trữ, hình thức kết thúc, ngày lưu trữ...)
+ *   2. Mục lục hồ sơ chèn thêm mảng documents[] để lặp dòng
  *
- * 渲染产物落到 ARCHIVE/结案/归档 卷宗，category=PROCEDURE，绑定模板 ID（用于审计）。
+ * Sản phẩm render rơi vào hồ sơ ARCHIVE/Kết thúc/Lưu trữ, category=PROCEDURE, gắn ID mẫu (phục vụ audit).
+ * LƯU Ý: nameMap + toCNDate giữ nguyên — mẫu nguồn là văn bản pháp lý tiếng Trung (cụm template-builder, chờ duyệt dịch).
  */
 import { Prisma, type PrismaClient, type MatterCategory } from "@prisma/client";
 import { storage } from "@/lib/storage";
@@ -35,14 +36,16 @@ import { CLOSED_REASON_CN } from "./schemas";
 import type { ArchiveClosedReason } from "@prisma/client";
 
 const CATEGORY_CN_DOC: Record<string, string> = {
-  EVIDENCE: "证据",
-  PLEADING: "诉讼文书",
-  PROCEDURE: "程序文书",
-  JUDGMENT: "裁判文书",
-  CONTRACT: "合同",
-  OTHER: "其他"
+  EVIDENCE: "Tài liệu chứng cứ",
+  PLEADING: "Văn bản tố tụng",
+  PROCEDURE: "Tài liệu thủ tục",
+  JUDGMENT: "Văn bản quyết định",
+  CONTRACT: "Hợp đồng",
+  OTHER: "Khác"
 };
 
+// Ngày dạng chữ số Hán cho mẫu văn bản pháp lý — CỤM CHỜ DUYỆT DỊCH (cùng template-builder.ts,
+// xem docs/I18N-GLOSSARY.md): mẫu nguồn 卷宗封皮/卷宗目录 là văn bản pháp lý tiếng Trung seed sẵn trong DB.
 function toCNDate(d: Date): string {
   const cnDigits = "〇一二三四五六七八九";
   const y = String(d.getFullYear()).split("").map((c) => cnDigits[+c]).join("");
@@ -66,7 +69,7 @@ interface ArchiveExtras {
 }
 
 async function loadBuiltinTemplate(prisma: PrismaClient, key: "archive_cover" | "archive_catalog") {
-  // 用 name 找内置模板（key 没存 DB，name 由 BUILTIN_TEMPLATES 决定）
+  // Tìm mẫu built-in theo name (key không lưu DB, name do BUILTIN_TEMPLATES quyết định)
   const nameMap: Record<string, string> = {
     archive_cover: "卷宗封皮",
     archive_catalog: "卷宗目录"
@@ -76,7 +79,7 @@ async function loadBuiltinTemplate(prisma: PrismaClient, key: "archive_cover" | 
     include: { docxBlob: true }
   });
   if (!tmpl || !tmpl.docxBlob) {
-    throw new Error(`内置模板 ${nameMap[key]} 缺失，请运行 npx prisma db seed`);
+    throw new Error(`Thiếu mẫu built-in ${nameMap[key]}, hãy chạy npx prisma db seed`);
   }
   const raw = await storage.readFile(tmpl.docxBlob.path);
   const buffer = tmpl.docxBlob.encrypted
@@ -90,7 +93,7 @@ async function findOrCreateArchiveFolder(
   matterId: string,
   matterCategory: MatterCategory
 ): Promise<string> {
-  const suggestedName = suggestFolderByTemplateCategory("ARCHIVE", matterCategory) ?? "归档";
+  const suggestedName = suggestFolderByTemplateCategory("ARCHIVE", matterCategory) ?? "Lưu trữ";
   const existing = await prisma.documentFolder.findFirst({
     where: { matterId, name: suggestedName },
     select: { id: true }
@@ -103,7 +106,7 @@ async function findOrCreateArchiveFolder(
 }
 
 /**
- * 渲染卷宗封皮 → 返回 Document.id
+ * Render bìa hồ sơ → trả về Document.id
  */
 export async function renderArchiveCover(
   prisma: PrismaClient,
@@ -120,7 +123,7 @@ export async function renderArchiveCover(
     where: { id: opts.matterId },
     select: { internalCode: true, category: true }
   });
-  if (!matter) throw new Error("案件不存在");
+  if (!matter) throw new Error("Vụ án không tồn tại");
 
   const ctx: RenderContext = {
     ...baseCtx,
@@ -139,7 +142,7 @@ export async function renderArchiveCover(
 
   const folderId = await findOrCreateArchiveFolder(prisma, opts.matterId, matter.category);
 
-  const fileName = `卷宗封皮_${opts.extras.archiveNo}.docx`;
+  const fileName = `Bìa hồ sơ_${opts.extras.archiveNo}.docx`;
   const doc = await prisma.document.create({
     data: {
       matterId: opts.matterId,
@@ -156,7 +159,7 @@ export async function renderArchiveCover(
       algorithm: enc.algorithm,
       iv: enc.iv.toString("base64"),
       authTag: enc.authTag.toString("base64"),
-      tags: ["归档", "卷宗封皮", opts.extras.archiveNo],
+      tags: ["Lưu trữ", "Bìa hồ sơ", opts.extras.archiveNo],
       uploadedById: opts.userId
     }
   });
@@ -173,10 +176,10 @@ interface CatalogDocEntry {
 }
 
 /**
- * 渲染卷宗目录 → 返回 Document.id
+ * Render mục lục hồ sơ → trả về Document.id
  *
- * documents 数组从案件下所有 Document 取（按 createdAt 升序）；
- * 排除自身（封皮 + 目录尚未生成）+ 已删除（deletedAt）。
+ * Mảng documents lấy từ toàn bộ Document của vụ án (theo createdAt tăng dần);
+ * loại trừ chính nó (bìa + mục lục chưa sinh) + đã xoá mềm (deletedAt).
  */
 export async function renderArchiveCatalog(
   prisma: PrismaClient,
@@ -184,7 +187,7 @@ export async function renderArchiveCatalog(
     matterId: string;
     userId: string;
     extras: ArchiveExtras;
-    excludeDocIds?: string[]; // 通常传入封皮 doc id
+    excludeDocIds?: string[]; // Thường truyền id doc bìa hồ sơ
   }
 ): Promise<string> {
   const { tmpl, templateBuffer } = await loadBuiltinTemplate(prisma, "archive_catalog");
@@ -194,7 +197,7 @@ export async function renderArchiveCatalog(
     where: { id: opts.matterId },
     select: { internalCode: true, category: true }
   });
-  if (!matter) throw new Error("案件不存在");
+  if (!matter) throw new Error("Vụ án không tồn tại");
 
   const docs = await prisma.document.findMany({
     where: {
@@ -235,7 +238,7 @@ export async function renderArchiveCatalog(
 
   const folderId = await findOrCreateArchiveFolder(prisma, opts.matterId, matter.category);
 
-  const fileName = `卷宗目录_${opts.extras.archiveNo}.docx`;
+  const fileName = `Mục lục hồ sơ_${opts.extras.archiveNo}.docx`;
   const doc = await prisma.document.create({
     data: {
       matterId: opts.matterId,
@@ -252,7 +255,7 @@ export async function renderArchiveCatalog(
       algorithm: enc.algorithm,
       iv: enc.iv.toString("base64"),
       authTag: enc.authTag.toString("base64"),
-      tags: ["归档", "卷宗目录", opts.extras.archiveNo],
+      tags: ["Lưu trữ", "Mục lục hồ sơ", opts.extras.archiveNo],
       uploadedById: opts.userId
     }
   });

@@ -20,7 +20,7 @@
 "use server";
 
 /**
- * v0.21: 文书 AI 审查历史查询
+ * v0.21: Tra lịch sử kiểm tra AI văn bản
  */
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
@@ -37,7 +37,7 @@ export type ReviewHistoryEntry = {
   itemCount: number;
   truncated: boolean;
   textPreviewChars: number;
-  /** 按 severity 统计：{ HIGH: 2, MEDIUM: 3, LOW: 0 } */
+  /** Thống kê theo severity: { HIGH: 2, MEDIUM: 3, LOW: 0 } */
   severityCounts: Record<ReviewSeverity, number>;
 };
 

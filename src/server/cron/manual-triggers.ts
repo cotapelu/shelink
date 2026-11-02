@@ -20,9 +20,9 @@
 "use server";
 
 /**
- * v0.22: cron 定时作业的手动触发入口（admin only）
+ * v0.22: Cửa vào kích hoạt thủ công cho job cron (chỉ admin)
  *
- * 用于测试 / 应急触发，不等到定时点。
+ * Dùng để kiểm thử / kích hoạt khẩn cấp, không phải đợi tới thời điểm hẹn.
  */
 import { requireSession } from "@/lib/auth/session";
 import { runWeeklyReportPush } from "@/server/reports/push-weekly";
@@ -32,7 +32,7 @@ import { runAuditCleanup } from "./jobs/audit-cleanup";
 async function requireAdmin() {
   const session = await requireSession();
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
-    throw new Error("仅管理员 / 主任律师可触发");
+    throw new Error("Chỉ quản trị viên / luật sư chính được kích hoạt");
   }
   return session;
 }

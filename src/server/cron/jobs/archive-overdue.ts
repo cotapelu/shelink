@@ -18,12 +18,12 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * 归档逾期预警：扫描已结案但超过 30 天未提交归档的案件，给主办律师发通知。
+ * Cảnh báo quá hạn lưu trữ: quét các vụ đã kết thúc nhưng quá 30 ngày chưa nộp lưu trữ, gửi thông báo cho luật sư chủ trì.
  *
- * 业务逻辑：
- * - status = CLOSED 且 closedAt < now - 30 天
- * - 未生成 ArchiveRecord（或都被 REJECTED）
- * - 同一案件 30 天内不重复发预警（refId 唯一性）
+ * Logic nghiệp vụ:
+ * - status = CLOSED và closedAt < now - 30 ngày
+ * - Chưa sinh ArchiveRecord (hoặc đều bị REJECTED)
+ * - Cùng một vụ án không gửi lại cảnh báo trong 30 ngày (tính duy nhất theo refId)
  */
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/server/notifications/create";
@@ -61,10 +61,10 @@ export async function scanArchiveOverdue(): Promise<OverdueScanResult> {
     }
   });
 
-  // 排除已有进行中或已通过的归档
+  // Loại trừ các bản ghi lưu trữ đang chờ hoặc đã duyệt
   const target = candidates.filter((m) => m.archiveRecords.length === 0);
 
-  // 防重：拉最近 30 天已发过的"ARCHIVE_OVERDUE"通知（refId = matterId）
+  // Chống trùng: lấy thông báo "ARCHIVE_OVERDUE" đã gửi trong 30 ngày qua (refId = matterId)
   const repeatCutoff = new Date(Date.now() - REPEAT_SUPPRESS_DAYS * 86400_000);
   const matterIds = target.map((m) => m.id);
   const recentNotified = await prisma.notification.findMany({
@@ -90,8 +90,8 @@ export async function scanArchiveOverdue(): Promise<OverdueScanResult> {
       userId: m.ownerId,
       type: "SYSTEM",
       priority: "HIGH",
-      title: `归档逾期：${m.internalCode}·${m.title}`,
-      content: `案件已结 ${days} 天但未提交归档，请尽快补全材料后提交归档申请。`,
+      title: `Quá hạn lưu trữ: ${m.internalCode}·${m.title}`,
+      content: `Vụ án đã kết thúc ${days} ngày nhưng chưa nộp lưu trữ, hãy bổ sung đủ tài liệu rồi nộp yêu cầu lưu trữ.`,
       href: `/matters/${m.id}`,
       refType: "ArchiveOverdue",
       refId: m.id

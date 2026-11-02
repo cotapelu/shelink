@@ -135,7 +135,7 @@ describe("procedures/actions", () => {
           data: expect.objectContaining({
             matterId: CUID(1),
             eventType: "PROCEDURE_ADDED",
-            title: `新增程序：Test Procedure`,
+            title: `Thêm thủ tục: Test Procedure`,
             occurredAt: expect.any(Date),
             refType: "MatterProcedure",
             refId: CUID(2),
@@ -250,7 +250,7 @@ describe("procedures/actions", () => {
       };
       mockPrisma.matterProcedure.findUnique.mockResolvedValue(null);
 
-      await expect(updateProcedure(input as any)).rejects.toThrow("程序不存在");
+      await expect(updateProcedure(input as any)).rejects.toThrow("Thủ tục không tồn tại");
     });
   });
 
@@ -329,7 +329,7 @@ describe("procedures/actions", () => {
           data: expect.objectContaining({
             matterId: CUID(2),
             eventType: "DEADLINE_ADDED",
-            title: `新增期限：${input.title}`,
+            title: `Thêm thời hạn: ${input.title}`,
             occurredAt: expect.any(Date),
             refType: "Deadline",
             refId: CUID(3),
@@ -358,7 +358,7 @@ describe("procedures/actions", () => {
         remindDays: 3,
       };
       mockPrisma.matterProcedure.findUnique.mockResolvedValue(null);
-      await expect(addDeadline(input as any)).rejects.toThrow("程序不存在");
+      await expect(addDeadline(input as any)).rejects.toThrow("Thủ tục không tồn tại");
     });
   });
 
@@ -528,7 +528,7 @@ describe("procedures/actions", () => {
           data: expect.objectContaining({
             matterId: CUID(2),
             eventType: "HEARING_SCHEDULED",
-            title: `开庭：Opening Hearing`,
+            title: `Phiên tòa: Opening Hearing`,
             occurredAt: input.startsAt,
             refType: "Hearing",
             refId: CUID(3),
@@ -555,7 +555,7 @@ describe("procedures/actions", () => {
         startsAt: new Date(),
       };
       mockPrisma.matterProcedure.findUnique.mockResolvedValue(null);
-      await expect(addHearing(input as any)).rejects.toThrow("程序不存在");
+      await expect(addHearing(input as any)).rejects.toThrow("Thủ tục không tồn tại");
     });
   });
 
@@ -639,7 +639,7 @@ describe("procedures/actions", () => {
         matterId: CUID(2),
       });
 
-      await expect(addProcedureMemo(input as any)).rejects.toThrow("备忘内容不能为空");
+      await expect(addProcedureMemo(input as any)).rejects.toThrow("Nội dung ghi nhớ không được rỗng");
     });
 
     it("should throw if content too long", async () => {
@@ -652,7 +652,7 @@ describe("procedures/actions", () => {
         matterId: CUID(2),
       });
 
-      await expect(addProcedureMemo(input as any)).rejects.toThrow("备忘内容过长（≤1000字）");
+      await expect(addProcedureMemo(input as any)).rejects.toThrow("Nội dung ghi nhớ quá dài (≤1000 ký tự)");
     });
 
     it("should throw if procedure does not exist", async () => {
@@ -661,7 +661,7 @@ describe("procedures/actions", () => {
         content: "Memo",
       };
       mockPrisma.matterProcedure.findUnique.mockResolvedValue(null);
-      await expect(addProcedureMemo(input as any)).rejects.toThrow("程序不存在");
+      await expect(addProcedureMemo(input as any)).rejects.toThrow("Thủ tục không tồn tại");
     });
   });
 

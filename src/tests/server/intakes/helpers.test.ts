@@ -49,29 +49,29 @@ describe("emptyToNull", () => {
 describe("requireApprover", () => {
   it("allows ADMIN", () => expect(() => requireApprover("ADMIN")).not.toThrow());
   it("allows PRINCIPAL_LAWYER", () => expect(() => requireApprover("PRINCIPAL_LAWYER")).not.toThrow());
-  it("denies LAWYER", () => expect(() => requireApprover("LAWYER")).toThrow("仅管理员或主任律师可审批收案"));
-  it("denies ASSISTANT", () => expect(() => requireApprover("ASSISTANT")).toThrow("仅管理员或主任律师可审批收案"));
+  it("denies LAWYER", () => expect(() => requireApprover("LAWYER")).toThrow("Chỉ quản trị viên hoặc luật sư chính"));
+  it("denies ASSISTANT", () => expect(() => requireApprover("ASSISTANT")).toThrow("Chỉ quản trị viên hoặc luật sư chính"));
 });
 
 describe("generateTitle", () => {
   it("generates title with client and opposing", () => {
-    expect(generateTitle("ABC公司", ["XYZ个人"], "合同纠纷")).toBe("ABC公司与XYZ个人合同纠纷");
+    expect(generateTitle("Công ty ABC", ["Cá nhân XYZ"], "Tranh chấp hợp đồng")).toBe("Công ty ABC và Cá nhân XYZ - Tranh chấp hợp đồng");
   });
 
   it("uses placeholder for null client", () => {
-    expect(generateTitle(null, ["对方"], "案件")).toBe("待补充委托方与对方案件");
+    expect(generateTitle(null, ["Bên đối phương"], "Vụ án")).toBe("Chưa có bên ủy quyền và Bên đối phương - Vụ án");
   });
 
   it("uses placeholder for empty opposing", () => {
-    expect(generateTitle("委托方", [], "案由")).toBe("委托方与待补充对方案由");
+    expect(generateTitle("Bên ủy quyền", [], "Nguyên nhân")).toBe("Bên ủy quyền và Chưa có bên đối phương - Nguyên nhân");
   });
 
   it("handles both nulls", () => {
-    expect(generateTitle(null, [], "案件")).toBe("待补充委托方与待补充对方案件");
+    expect(generateTitle(null, [], "Vụ án")).toBe("Chưa có bên ủy quyền và Chưa có bên đối phương - Vụ án");
   });
 
   it("trims whitespace from all parts", () => {
-    expect(generateTitle("  client  ", ["  opp  "], "  cause  ")).toBe("client与oppcause");
+    expect(generateTitle("  client  ", ["  opp  "], "  cause  ")).toBe("client và opp - cause");
   });
 });
 
@@ -127,8 +127,8 @@ describe("conflict query utilities", () => {
   describe("conflictQueryKey & formatConflictQuery", () => {
     it("generates key", () => expect(conflictQueryKey({ role: "CLIENT_PARTY", name: "a", idNumber: "1" })).toBe("CLIENT_PARTY|a|1"));
     it("formats", () => {
-      expect(formatConflictQuery({ role: "CLIENT_PARTY", name: "client", idNumber: "123" })).toBe("委托方「client」");
-      expect(formatConflictQuery({ role: "OPPOSING_PARTY", name: "opp", idNumber: "" })).toBe("对方「opp」");
+      expect(formatConflictQuery({ role: "CLIENT_PARTY", name: "client", idNumber: "123" })).toBe('Bên ủy quyền "client"');
+      expect(formatConflictQuery({ role: "OPPOSING_PARTY", name: "opp", idNumber: "" })).toBe('Bên đối phương "opp"');
     });
   });
 
@@ -147,21 +147,21 @@ describe("conflict query utilities", () => {
     });
 
     it("throws if no expected queries", () => {
-      expect(() => assertConflictReviewAllowsConversion(makeIntake(null, []))).toThrow("请先补充委托方或相对方");
+      expect(() => assertConflictReviewAllowsConversion(makeIntake(null, []))).toThrow("Cần bổ sung bên ủy quyền hoặc bên đối phương");
     });
 
     it("throws if no checks", () => {
-      expect(() => assertConflictReviewAllowsConversion(makeIntake({ name: "c", idNumber: "123" }, []))).toThrow("必须先运行利益冲突检索");
+      expect(() => assertConflictReviewAllowsConversion(makeIntake({ name: "c", idNumber: "123" }, []))).toThrow("Phải chạy kiểm tra xung đột lợi ích");
     });
 
     it("throws if missing query", () => {
       const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({ queryPayload: { queries: [{ role: "OPPOSING_PARTY", name: "o", idNumber: "456" }] }})]);
-      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("缺少：委托方");
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("Thiếu: Bên ủy quyền");
     });
 
     it("throws if conclusion not DIFFERENT", () => {
       const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({ conclusion: "PENDING", queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] }})]);
-      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("还没有结论");
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("chưa có kết luận");
     });
 
     it("throws if high risk without note", () => {
@@ -170,7 +170,7 @@ describe("conflict query utilities", () => {
         queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] },
         hits: [{ severity: "HIGH" }]
       })]);
-      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("高风险");
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("rủi ro cao hoặc chặn");
     });
 
     it("allows when ok", () => {
@@ -188,22 +188,22 @@ describe("conflict query utilities", () => {
 
     it("throws if conclusion is PENDING", () => {
       const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({ conclusion: "PENDING", queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] }})]);
-      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("还没有结论");
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("chưa có kết luận");
     });
 
     it("throws if conclusion is NEED_INFO", () => {
       const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({ conclusion: "NEED_INFO", queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] }})]);
-      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("信息不足");
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("thông tin chưa đủ");
     });
 
     it("throws if conclusion is SAME_SUBJECT", () => {
       const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({ conclusion: "SAME_SUBJECT", queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] }})]);
-      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("存在利益冲突");
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("Đã xác nhận có xung đột lợi ích");
     });
 
     it("throws if conclusion is unknown value", () => {
       const intake = makeIntake({ name: "c", idNumber: "123" }, [], [baseCheck({ conclusion: "UNKNOWN" as any, queryPayload: { queries: [{ role: "CLIENT_PARTY", name: "c", idNumber: "123" }] }})]);
-      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("结论异常");
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("bất thường");
     });
 
     it("throws if high risk with whitespace-only note (trim to empty)", () => {
@@ -213,7 +213,7 @@ describe("conflict query utilities", () => {
         hits: [{ severity: "HIGH" }],
         note: "   "
       })]);
-      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("高风险");
+      expect(() => assertConflictReviewAllowsConversion(intake)).toThrow("rủi ro cao hoặc chặn");
     });
   });
 

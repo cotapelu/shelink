@@ -20,7 +20,7 @@
 "use server";
 
 /**
- * v0.22: AuditLog 查询（admin-only 审计回放）
+ * v0.22: Tra AuditLog (phát lại audit, chỉ admin)
  */
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
@@ -32,7 +32,7 @@ export type AuditFilter = {
   startStr?: string; // yyyy-MM-dd
   endStr?: string;
   limit?: number;
-  cursor?: string; // 上一页最后一条 id
+  cursor?: string; // id bản ghi cuối của trang trước
 };
 
 export type AuditEntry = {
@@ -54,7 +54,7 @@ export type AuditListResult = {
 async function requireAdmin() {
   const session = await requireSession();
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
-    throw new Error("仅管理员 / 主任律师可访问审计日志");
+    throw new Error("Chỉ quản trị viên / luật sư chính được xem log audit");
   }
   return session;
 }
@@ -114,8 +114,8 @@ export async function listAuditLogs(filter: AuditFilter): Promise<AuditListResul
 }
 
 /**
- * 拉所有出现过的 action / targetType / user，用于前端筛选下拉。
- * 直接 distinct 查询，结果数有限（业务里 action 类型有限）。
+ * Lấy mọi action / targetType / user đã xuất hiện, dùng cho dropdown lọc ở frontend.
+ * Truy vấn distinct trực tiếp, số kết quả có hạn (trong nghiệp vụ loại action có hạn).
  */
 export async function getAuditFilterOptions(): Promise<{
   actions: string[];

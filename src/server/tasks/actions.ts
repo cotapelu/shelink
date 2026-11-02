@@ -30,7 +30,7 @@ import { assertMatterWritable } from "@/lib/archive/guard";
 
 const taskCreateSchema = z.object({
   matterId: z.string().cuid(),
-  title: z.string().min(1, "事项标题必填").max(200),
+  title: z.string().min(1, "Tiêu đề công việc bắt buộc nhập").max(200),
   description: z.string().max(2000).optional().or(z.literal("")),
   assigneeId: z.string().cuid().optional().or(z.literal("")),
   dueAt: z.coerce.date().optional(),
@@ -75,7 +75,7 @@ export async function createTask(input: TaskCreateInput) {
     data: {
       matterId: data.matterId,
       eventType: "TASK_ADDED",
-      title: `新增事项：${created.title}`,
+      title: `Thêm công việc: ${created.title}`,
       occurredAt: new Date(),
       refType: "LegalTask",
       refId: created.id
@@ -86,8 +86,8 @@ export async function createTask(input: TaskCreateInput) {
     await createNotification({
       userId: data.assigneeId,
       type: "TASK_ASSIGNED",
-      title: "您有新事项",
-      content: `事项「${created.title}」已指派给您`,
+      title: "Bạn có công việc mới",
+      content: `Công việc "${created.title}" đã được giao cho bạn`,
       href: `/matters/${data.matterId}`,
       refType: "LegalTask",
       refId: created.id

@@ -18,16 +18,16 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * 上传文件类型校验
+ * Kiểm tra loại tệp tải lên
  *
- * 三道闸：
- *   1. 文件名扩展名必须在白名单内（不区分大小写）
- *   2. MIME 不为空时也要在白名单内（浏览器可伪造但作为辅助）
- *   3. 文件大小 ≤ maxBytes
+ * Ba cổng:
+ *   1. Đuôi tên tệp phải nằm trong whitelist (không phân biệt hoa/thường)
+ *   2. Khi MIME không rỗng cũng phải nằm trong whitelist (trình duyệt có thể giả mạo nhưng chỉ mang tính phụ trợ)
+ *   3. Kích thước tệp ≤ maxBytes
  *
- * 故意不读 magic bytes：sniffing 增加复杂度但绕过门槛只是稍微提高，
- * 投入产出比不高。本系统假设是律所内部使用，主要防止意外（误传 .exe）
- * 而非对抗主动攻击。
+ * Cố ý không đọc magic bytes: sniffing tăng độ phức tạp nhưng chỉ nâng ngưỡng vượt qua một chút,
+ * hiệu quả đầu tư không cao. Hệ thống giả định dùng nội bộ văn phòng, chủ yếu phòng sự cố (tải nhầm .exe)
+ * hơn là chống tấn công chủ động.
  */
 
 export type UploadPurpose = "document" | "invoice" | "seal" | "stamp";
@@ -44,14 +44,14 @@ const DOC_EXT = [
   "mp4", "mov", "avi"
 ];
 
-// 发票 / 用章场景更窄：仅图片或 PDF
+// Hoá đơn / dùng dấu hẹp hơn: chỉ ảnh hoặc PDF
 const NARROW_EXT = ["pdf", "jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"];
 
 const ALLOWED: Record<UploadPurpose, Set<string>> = {
   document: new Set(DOC_EXT),
   invoice: new Set(NARROW_EXT),
-  seal: new Set(DOC_EXT), // 待盖章稿允许 docx/pdf
-  stamp: new Set(NARROW_EXT) // 盖章后扫描件只允许图片 / PDF
+  seal: new Set(DOC_EXT), // Bản chờ đóng dấu cho phép docx/pdf
+  stamp: new Set(NARROW_EXT) // Bản scan sau đóng dấu chỉ cho ảnh / PDF
 };
 
 const MIME_PREFIX_OK: Record<UploadPurpose, RegExp> = {
@@ -72,28 +72,28 @@ export interface FileValidationOptions {
 }
 
 /**
- * 抛中文异常（前端 toast 直接显示）；通过返回归一化的 ext 给上层用作存储路径或日志。
+ * Ném lỗi tiếng Việt (frontend hiện toast trực tiếp); khi hợp lệ trả về ext chuẩn hoá để tầng trên dùng làm đường dẫn lưu trữ hoặc log.
  */
 export function validateUploadedFile(
   file: File,
   opts: FileValidationOptions
 ): { ext: string } {
-  if (file.size === 0) throw new Error("文件为空");
+  if (file.size === 0) throw new Error("Tệp rỗng");
   if (file.size > opts.maxBytes) {
     throw new Error(
-      `文件超过 ${Math.round(opts.maxBytes / 1024 / 1024)}MB 限制`
+      `Tệp vượt quá giới hạn ${Math.round(opts.maxBytes / 1024 / 1024)}MB`
     );
   }
   const ext = getExt(file.name);
-  if (!ext) throw new Error(`文件名缺少扩展名：${file.name}`);
+  if (!ext) throw new Error(`Tên tệp thiếu phần mở rộng: ${file.name}`);
   if (!ALLOWED[opts.purpose].has(ext)) {
     throw new Error(
-      `不允许的文件类型：.${ext}（${opts.purpose}）`
+      `Loại tệp không được phép: .${ext} (${opts.purpose})`
     );
   }
   if (file.type && !MIME_PREFIX_OK[opts.purpose].test(file.type)) {
     throw new Error(
-      `MIME 类型与扩展名不一致或不在白名单：${file.type}`
+      `Loại MIME không khớp đuôi tệp hoặc không có trong whitelist: ${file.type}`
     );
   }
   return { ext };

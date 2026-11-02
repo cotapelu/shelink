@@ -63,7 +63,7 @@ export const caseUpdateSchema = z.object({
 
 export const targetCreateSchema = z.object({
   caseId: z.string().cuid(),
-  name: z.string().min(1, "被保全人名称必填").max(200),
+  name: z.string().min(1, "Tên bên bị bảo toàn bắt buộc nhập").max(200),
   note: z.string().max(300).optional().or(z.literal("")),
 });
 

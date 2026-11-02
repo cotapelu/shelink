@@ -24,7 +24,7 @@ describe("saveExpressSettingsAction", () => {
     mockRequireSession.mockResolvedValue({ user: { role: "LAWYER" } } as any);
 
     await expect(saveExpressSettingsAction({})).rejects.toThrow(
-      "仅管理员可修改快递接入配置"
+      "Chỉ quản trị viên được sửa cấu hình tích hợp chuyển phát"
     );
   });
 

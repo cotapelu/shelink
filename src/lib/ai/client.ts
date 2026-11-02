@@ -18,12 +18,12 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.9.1 OpenAI 兼容协议封装
+ * v0.9.1 Bọc giao thức tương thích OpenAI
  *
- * 所有调用走 {baseUrl}/chat/completions。
- * 支持 OpenAI / 通义 / DeepSeek / Kimi / 智谱 / OpenRouter / Ollama 等。
+ * Mọi cuộc gọi đi qua {baseUrl}/chat/completions.
+ * Hỗ trợ OpenAI / 通义 (Qwen) / DeepSeek / Kimi / 智谱 / OpenRouter / Ollama...
  *
- * server-side only（直接读 SystemSetting）。
+ * Chỉ dùng phía server (đọc trực tiếp SystemSetting).
  */
 import { getAiSettings } from "./settings";
 
@@ -39,7 +39,7 @@ export type ChatMessage =
 
 export interface AiChatOptions {
   messages: ChatMessage[];
-  model?: string; // 覆盖默认 textModel
+  model?: string; // Ghi đè textModel mặc định
   maxTokens?: number;
   temperature?: number;
   timeoutMs?: number;
@@ -52,7 +52,7 @@ export interface AiChatResult {
 
 export class AiNotConfiguredError extends Error {
   constructor() {
-    super("AI 未配置，请先到 设置 → AI 接入 填写 API key");
+    super("Chưa cấu hình AI — vào Cài đặt → Tích hợp AI để điền API key");
     this.name = "AiNotConfiguredError";
   }
 }
@@ -77,7 +77,7 @@ async function callOpenAiCompatible(opts: {
     });
     if (!res.ok) {
       const body = await res.text();
-      throw new Error(`AI 请求失败 (${res.status}): ${body.slice(0, 200)}`);
+      throw new Error(`Yêu cầu AI thất bại (${res.status}): ${body.slice(0, 200)}`);
     }
     return res.json();
   } finally {
@@ -110,7 +110,7 @@ export async function aiChat(input: AiChatOptions): Promise<AiChatResult> {
 }
 
 /**
- * 视觉识别：传 base64 / dataURL / URL 三选一，prompt 引导模型抽字段。
+ * Nhận diện hình ảnh: truyền base64 / dataURL / URL (chọn một), prompt hướng dẫn model trích xuất trường.
  */
 export async function aiVision(input: {
   image: { dataUrl: string } | { url: string };
@@ -143,7 +143,7 @@ export async function aiVision(input: {
 }
 
 /**
- * 从 AI 返回文本中提取 JSON（容错：``` 包裹、前后有解释文字均能抽出）。
+ * Trích JSON từ văn bản AI trả về (chấp nhận lỗi: bọc ```, có chữ giải thích trước/sau đều trích được).
  */
 export function extractJson<T = unknown>(content: string): T | null {
   const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/);

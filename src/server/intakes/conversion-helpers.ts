@@ -50,8 +50,8 @@ export async function fetchIntakeWithDetails(intakeId: string) {
 }
 
 export function validateIntakeForConversion(intake: Intake | null): asserts intake is Intake {
-  if (!intake) throw new Error("Intake 不存在");
-  if (intake.status === "CONVERTED") throw new Error("此 Intake 已转化");
+  if (!intake) throw new Error("Intake không tồn tại");
+  if (intake.status === "CONVERTED") throw new Error("Intake này đã chuyển đổi");
 }
 
 export async function generateCodes(category: MatterCategory): Promise<{ internalCode: string; firmCaseNo: string }> {
@@ -105,7 +105,7 @@ function buildMemberships(ownerId: string, coUserIds: string[]) {
 }
 
 function buildClientLink(clientId: string) {
-  return { create: { clientId, isPrimary: true, label: "主要委托方" } };
+  return { create: { clientId, isPrimary: true, label: "Bên ủy quyền chính" } };
 }
 
 function buildClientPartyData(intake: any, matterId: string) {
@@ -125,7 +125,7 @@ function buildClientPartyData(intake: any, matterId: string) {
     contactName: intake.contactName,
     enterpriseSocialCode: intake.client.type === "INDIVIDUAL" ? null : intake.client.idNumber,
     enterpriseName: intake.client.type === "INDIVIDUAL" ? null : intake.client.name,
-    notes: "由收案委托方自动带入首程序"
+    notes: "Tự động đưa bên ủy quyền từ tiếp nhận vào thủ tục đầu"
   };
 }
 
@@ -205,13 +205,13 @@ function buildProcedurePartyRows(
 async function maybeCreateBilling(tx: any, matterId: string, intake: Intake): Promise<void> {
   if (!intake.feeAmount || !intake.feeType) return;
   const feeTypeLabel: Record<string, string> = {
-    FIXED: "固定收费",
-    CONTINGENCY: "风险代理"
+    FIXED: "Phí cố định",
+    CONTINGENCY: "Theo kết quả"
   };
   await tx.billing.create({
     data: {
       matterId,
-      title: `委托代理合同 - ${feeTypeLabel[intake.feeType] ?? intake.feeType}`,
+      title: `Hợp đồng ủy quyền - ${feeTypeLabel[intake.feeType] ?? intake.feeType}`,
       contractAmount: intake.feeAmount,
       schedule: intake.feeSchedule,
       status: "ACTIVE"
@@ -238,7 +238,7 @@ async function createTimelineEvent(tx: any, matterId: string): Promise<void> {
     data: {
       matterId,
       eventType: "MATTER_CREATED",
-      title: "案件已创建（来自 Intake）",
+      title: "Vụ án đã tạo (từ Intake)",
       occurredAt: new Date()
     }
   });

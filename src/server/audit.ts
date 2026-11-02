@@ -59,6 +59,6 @@ export async function audit(params: {
       }
     });
   } catch (err) {
-    console.error("[audit] 写入失败：", err);
+    console.error("[audit] Ghi thất bại:", err);
   }
 }

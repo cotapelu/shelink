@@ -106,7 +106,7 @@ describe("tasks/actions", () => {
         data: {
           matterId: CUID1,
           eventType: "TASK_ADDED",
-          title: "新增事项：Created",
+          title: "Thêm công việc: Created",
           occurredAt: expect.any(Date),
           refType: "LegalTask",
           refId: CUID1,
@@ -134,8 +134,8 @@ describe("tasks/actions", () => {
       expect(mockCreateNotification).toHaveBeenCalledWith({
         userId: CUID2,
         type: "TASK_ASSIGNED",
-        title: "您有新事项",
-        content: `事项「Assign test」已指派给您`,
+        title: "Bạn có công việc mới",
+        content: `Công việc "Assign test" đã được giao cho bạn`,
         href: expect.stringContaining(`/matters/${CUID1}`),
         refType: "LegalTask",
         refId: CUID1,

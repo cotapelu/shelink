@@ -54,7 +54,7 @@ describe("parseReviewItems", () => {
 
   it("throws if extracted data is not an array", () => {
     (extractJson as any).mockReturnValue({ error: "not array" });
-    expect(() => parseReviewItems("content")).toThrow("AI 返回内容无法解析为审查清单");
+    expect(() => parseReviewItems("content")).toThrow("Không phân tích được nội dung AI trả về thành danh sách kiểm tra");
   });
 
   it("filters out items with empty title or detail", () => {

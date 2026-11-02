@@ -48,7 +48,7 @@ export async function markNotificationRead(id: string) {
   const notif = await prisma.notification.findFirst({
     where: { id, userId: session.user.id },
   });
-  if (!notif) throw new Error("通知不存在");
+  if (!notif) throw new Error("Thông báo không tồn tại");
 
   return prisma.notification.update({
     where: { id },

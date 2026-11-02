@@ -118,7 +118,7 @@ describe("custom-fields actions", () => {
 
     it("should reject non-ADMIN", async () => {
       await expect(createCustomFieldDef(validInput as any)).rejects.toThrow(
-        "仅管理员可管理自定义字段"
+        "Chỉ quản trị viên được quản lý trường tuỳ chỉnh"
       );
     });
 
@@ -128,7 +128,7 @@ describe("custom-fields actions", () => {
       } as any);
       const input = { ...validInput, fieldType: "SELECT", options: [] };
       await expect(createCustomFieldDef(input as any)).rejects.toThrow(
-        "下拉类型至少需要一个选项值"
+        "Loại dropdown cần ít nhất một giá trị tuỳ chọn"
       );
     });
   });
@@ -247,7 +247,7 @@ describe("custom-fields actions", () => {
 
       await expect(
         saveMatterCustomValues("m123", { cf1: "" })
-      ).rejects.toThrow("「Field 1」为必填项");
+      ).rejects.toThrow("\"Field 1\" là bắt buộc");
     });
 
     it("should filter out non-enabled defs keys", async () => {

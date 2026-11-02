@@ -43,7 +43,7 @@ const CUID = (n: number) => `c${n.toString().padStart(24, "0")}`;
 describe("settings/actions", () => {
   describe("listStageTemplates", () => {
     it("should require admin", async () => {
-      await expect(listStageTemplates()).rejects.toThrow("仅管理员可执行");
+      await expect(listStageTemplates()).rejects.toThrow("Chỉ quản trị viên được thực hiện");
     });
 
     it("should list all templates ordered by procedureType", async () => {
@@ -75,7 +75,7 @@ describe("settings/actions", () => {
     };
 
     it("should require admin", async () => {
-      await expect(upsertStageTemplate(baseInput as any)).rejects.toThrow("仅管理员可执行");
+      await expect(upsertStageTemplate(baseInput as any)).rejects.toThrow("Chỉ quản trị viên được thực hiện");
     });
 
     it("should create new default template", async () => {
@@ -208,7 +208,7 @@ describe("settings/actions", () => {
     ];
 
     it("should require admin", async () => {
-      await expect(listAuditLogs()).rejects.toThrow("仅管理员可执行");
+      await expect(listAuditLogs()).rejects.toThrow("Chỉ quản trị viên được thực hiện");
     });
 
     it("should list default logs with distinct actions", async () => {

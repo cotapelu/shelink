@@ -17,7 +17,7 @@
  * This file is part of a derivative work based on the original MIT-licensed project.
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
-// MIME → 扩展名映射，用于历史数据没有扩展名时回填，避免下载件无扩展名打不开
+// MIME → ánh xạ phần mở rộng, dùng để lấp khi dữ liệu cũ không có đuôi tệp, tránh tệp tải về không mở được
 const MIME_EXT: Record<string, string> = {
   "application/pdf": ".pdf",
   "image/png": ".png",
@@ -70,10 +70,10 @@ const XLSX_MIME =
 const XLS_MIME = "application/vnd.ms-excel";
 
 /**
- * v0.42: 服务端可转 HTML 预览的 Office 文档类型。
- * docx → mammoth；xlsx/xls → exceljs。
- * 老 .doc(application/msword) 无法可靠转换 → 归 null（降级下载）。
- * mime 可能不准，故同时看文件名扩展。
+ * v0.42: Các loại tài liệu Office server có thể chuyển sang preview HTML.
+ * docx → mammoth; xlsx/xls → exceljs.
+ * .doc cũ (application/msword) không chuyển đáng tin được → trả null (hạ xuống tải về).
+ * mime có thể không chính xác nên kiểm tra cả đuôi tên tệp.
  */
 export function officePreviewKind(
   mimeType: string | null | undefined,
@@ -87,7 +87,7 @@ export function officePreviewKind(
   return null;
 }
 
-/** 能在线打开查阅（内嵌 inline 或服务端转 HTML），用于前端决定是否给"打开"入口 */
+/** Có thể mở xem trực tiếp (nhúng inline hoặc server chuyển HTML), dùng để frontend quyết định có hiện lối "Mở" */
 export function canPreview(
   mimeType: string | null | undefined,
   name?: string | null

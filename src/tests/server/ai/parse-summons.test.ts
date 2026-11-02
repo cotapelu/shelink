@@ -88,7 +88,7 @@ describe("parseSummons", () => {
     const form = new FormData();
     form.append("file", file);
 
-    await expect(parseSummons(form)).rejects.toThrow(/仅支持图片/);
+    await expect(parseSummons(form)).rejects.toThrow(/Chỉ hỗ trợ định dạng ảnh/);
   });
 
   it("should throw error for file too large", async () => {
@@ -97,7 +97,7 @@ describe("parseSummons", () => {
     const form = new FormData();
     form.append("file", file);
 
-    await expect(parseSummons(form)).rejects.toThrow("超过 10MB");
+    await expect(parseSummons(form)).rejects.toThrow("vượt quá 10MB");
   });
 
   it("should throw AiNotConfiguredError when AI not configured", async () => {

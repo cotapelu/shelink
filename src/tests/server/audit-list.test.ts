@@ -33,7 +33,7 @@ describe("audit-list", () => {
       mockRequireSession.mockResolvedValue({
         user: { id: "u1", role: "LAWYER" },
       } as any);
-      await expect(listAuditLogs({})).rejects.toThrow("仅管理员 / 主任律师可访问审计日志");
+      await expect(listAuditLogs({})).rejects.toThrow("Chỉ quản trị viên / luật sư chính được xem log audit");
     });
 
     it("should return items and null nextCursor when within limit", async () => {
@@ -92,7 +92,7 @@ describe("audit-list", () => {
       mockRequireSession.mockResolvedValue({
         user: { id: "u1", role: "LAWYER" },
       } as any);
-      await expect(getAuditFilterOptions()).rejects.toThrow("仅管理员 / 主任律师可访问审计日志");
+      await expect(getAuditFilterOptions()).rejects.toThrow("Chỉ quản trị viên / luật sư chính được xem log audit");
     });
 
     it("should return distinct actions, targetTypes and active users", async () => {

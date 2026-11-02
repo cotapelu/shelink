@@ -18,17 +18,17 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.9 财产保全期限默认值（民诉法第 244 条）
+ * v0.9 Giá trị mặc định thời hạn bảo toàn tài sản (Điều 244 Bộ luật Tố tụng dân sự)
  */
 import type { PropertyType } from "@prisma/client";
 
 export const PRESERVATION_DURATION_DAYS: Record<PropertyType, number> = {
-  BANK_DEPOSIT: 365,        // 银行存款 1 年
-  VEHICLE: 730,             // 车辆 / 动产 2 年
+  BANK_DEPOSIT: 365,        // Tiền gửi ngân hàng 1 năm
+  VEHICLE: 730,             // Phương tiện / động sản 2 năm
   OTHER: 730,
-  REAL_ESTATE: 1095,        // 房产 3 年
-  EQUITY: 1095,             // 股权 3 年
-  IP: 1095                  // 知识产权 3 年
+  REAL_ESTATE: 1095,        // Bất động sản 3 năm
+  EQUITY: 1095,             // Cổ phần 3 năm
+  IP: 1095                  // Sở hữu trí tuệ 3 năm
 };
 
 export function defaultExpiryDate(startDate: Date, propertyType: PropertyType): Date {

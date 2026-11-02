@@ -25,7 +25,7 @@
  *  - Lãi chậm trả: Số tiền án × (LPR + 5%) × số ngày chậm / 365
  *  - Ngày: tính ngày làm việc giữa hai ngày, cộng/trừ N ngày
  *
- * Chữ số lớn: numberToChinese (hỗ trợ vạn / ức / tỷ)
+ * Chữ số lớn: numberToChinese (sinh chữ số Hán cho văn bản pháp lý)
  *
  * Không phụ thuộc mạng, không phụ thuộc server.
  */
@@ -69,9 +69,9 @@ function feePropertyTiers(amount: number): number {
 
 export interface CourtFeeResult {
   caseType: CourtFeeCaseType;
-  amount: number; // 输入标的额
-  fee: number; // 普通程序
-  feeSimplified: number; // 简易程序（减半）
+  amount: number; // Giá trị tranh chấp đầu vào
+  fee: number; // Thủ tục thường
+  feeSimplified: number; // Thủ tục rút gọn (giảm một nửa)
   note: string;
 }
 
@@ -90,7 +90,7 @@ export function calcCourtFee(input: { caseType: CourtFeeCaseType; amount?: numbe
       };
     }
     case "DIVORCE": {
-      // 离婚：每件 50-300 元；涉及财产分割 > 20 万 部分 × 0.5%
+      // Ly hôn: mỗi vụ 50-300 tệ; phần chia tài sản > 20 vạn × 0.5%
       const base = 300;
       const extra = amount > 200_000 ? (amount - 200_000) * 0.005 : 0;
       const fee = Math.round(base + extra);
@@ -114,7 +114,7 @@ export function calcCourtFee(input: { caseType: CourtFeeCaseType; amount?: numbe
         note: "Tranh chấp lao động mỗi vụ 10 (giản lạo 5)"
       };
     case "IP":
-      // 50 元 ≤ X ≤ 100 元；案件复杂 100-500 元；区间给中位
+      // 50 tệ ≤ X ≤ 100 tệ; vụ phức tạp 100-500 tệ; lấy giữa khoảng
       return {
         caseType: "IP",
         amount: 0,
@@ -153,16 +153,16 @@ export interface LateInterestResult {
   principal: number;
   daysLate: number;
   yearlyRate: number;       // LPR + 5%
-  interest: number;         // 加倍部分（推荐采用值）
-  totalToPay: number;       // 本金 + 加倍利息
+  interest: number;         // Phần lãi gấp đôi (giá trị khuyên dùng)
+  totalToPay: number;       // Gốc + lãi gấp đôi
 }
 
 export function calcLateInterest(input: {
   principal: number;
   dueDate: Date;
   paidDate: Date;
-  lprPercent?: number; // LPR 1 年期，默认 3.45
-  extraPercent?: number; // 加成，默认 5
+  lprPercent?: number; // LPR kỳ hạn 1 năm, mặc định 3.45
+  extraPercent?: number; // Cộng thêm, mặc định 5
 }): LateInterestResult {
   const lpr = input.lprPercent ?? 3.45;
   const extra = input.extraPercent ?? 5;
@@ -193,7 +193,7 @@ export function daysBetween(a: Date, b: Date, excludeWeekend = false): number {
   if (!excludeWeekend) {
     return Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   }
-  // 排除周末（工作日数）
+  // Loại cuối tuần (số ngày làm việc)
   const sign = end >= start ? 1 : -1;
   let count = 0;
   const cur = new Date(start);
@@ -246,7 +246,7 @@ export function numberToChinese(n: number): string {
   const [intStr, decStrRaw = ""] = String(abs).split(".");
   const decStr = decStrRaw.padEnd(2, "0").slice(0, 2);
 
-  // 整数部分：按 4 位分段
+  // Phần nguyên: chia nhóm theo 4 chữ số
   const segs: string[] = [];
   let t = intStr;
   while (t.length > 0) {

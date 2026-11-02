@@ -22,16 +22,16 @@ import { redirect } from "next/navigation";
 import { authOptions } from "./options";
 
 /**
- * Server Component / Server Action 中读取当前 session。
- * 未登录返回 null。
+ * Đọc session hiện tại trong Server Component / Server Action.
+ * Chưa đăng nhập trả về null.
  */
 export async function getSession() {
   return getServerSession(authOptions);
 }
 
 /**
- * 要求登录，未登录强制跳 /login。
- * 在 Server Component / Server Action 中使用。
+ * Bắt buộc đăng nhập, chưa đăng nhập thì chuyển về /login.
+ * Dùng trong Server Component / Server Action.
  */
 export async function requireSession() {
   const session = await getSession();

@@ -36,7 +36,7 @@ export const preservationCreateSchema = z.object({
   type: z.enum(presTypes),
   propertyType: z.enum(propertyTypes),
   amount: z.coerce.number().nonnegative().optional().nullable(),
-  respondent: z.string().min(1, "被保全人必填").max(200),
+  respondent: z.string().min(1, "Bên bị bảo toàn bắt buộc nhập").max(200),
   guaranteeType: z.enum(guaranteeTypes).optional().nullable(),
 
   appliedAt: z.coerce.date().optional().nullable(),

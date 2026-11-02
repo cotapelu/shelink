@@ -42,26 +42,26 @@ export interface RecognizedInvoice {
   remark?: string;
 }
 
-const PROMPT = `请识别这张中国增值税发票图片中的信息，输出 JSON：
+const PROMPT = `Hãy nhận diện thông tin trong ảnh hóa đơn GTGT Việt Nam này, xuất JSON:
 
 {
-  "invoiceType": "发票类型（如：增值税普通发票、增值税专用发票、电子发票）",
-  "invoiceCode": "发票代码（如有）",
-  "invoiceNumber": "发票号码（8 位或 20 位）",
-  "invoiceDate": "开票日期 YYYY-MM-DD",
-  "sellerName": "销售方名称",
-  "sellerTaxId": "销售方纳税人识别号",
-  "buyerName": "购买方名称",
-  "buyerTaxId": "购买方纳税人识别号",
-  "totalAmount": "合计金额（数字）",
-  "taxAmount": "税额（数字）",
-  "totalWithTax": "价税合计（数字）",
-  "items": [{"name": "项目名称", "amount": 金额数字, "taxRate": "税率字符串"}],
-  "checkCode": "校验码（后 6 位）",
-  "remark": "备注"
+  "invoiceType": "Loại hóa đơn (vd: hóa đơn GTGT, hóa đơn thường, hóa đơn điện tử)",
+  "invoiceCode": "Mã số hóa đơn (nếu có)",
+  "invoiceNumber": "Số hóa đơn (8 hoặc 20 chữ số)",
+  "invoiceDate": "Ngày lập hóa đơn YYYY-MM-DD",
+  "sellerName": "Tên bên bán",
+  "sellerTaxId": "Mã số thuế bên bán",
+  "buyerName": "Tên bên mua",
+  "buyerTaxId": "Mã số thuế bên mua",
+  "totalAmount": "Tổng tiền (số)",
+  "taxAmount": "Tiền thuế (số)",
+  "totalWithTax": "Tổng cộng tiền thuế (số)",
+  "items": [{"name": "Tên hàng mục", "amount": số tiền, "taxRate": "chuỗi thuế suất"}],
+  "checkCode": "Mã kiểm tra (6 chữ số cuối)",
+  "remark": "Ghi chú"
 }
 
-只回复 JSON，不要其他文字。无法识别的字段填空字符串或省略。`;
+Chỉ trả lời JSON, không thêm chữ khác. Trường không nhận diện được thì để chuỗi rỗng hoặc bỏ qua.`;
 
 export async function recognizeInvoiceFromImage(formData: FormData): Promise<
   | { ok: true; data: RecognizedInvoice; raw: string }
@@ -71,17 +71,17 @@ export async function recognizeInvoiceFromImage(formData: FormData): Promise<
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "请上传发票图片" };
+    return { ok: false, message: "Hãy tải lên ảnh hóa đơn" };
   }
   if (file.size > MAX_IMAGE_SIZE) {
-    return { ok: false, message: `图片超过 ${MAX_IMAGE_SIZE / 1024 / 1024}MB` };
+    return { ok: false, message: `Ảnh vượt quá ${MAX_IMAGE_SIZE / 1024 / 1024}MB` };
   }
-  // v0.11: PDF 也允许上传，但识别效果取决于 vision 模型是否原生支持 PDF
-  // 若模型不认 PDF，aiVision 会失败并返回明确错误
+  // v0.11: PDF cũng cho tải lên, nhưng kết quả nhận diện phụ thuộc model vision có hỗ trợ PDF gốc không
+  // Nếu model không đọc được PDF, aiVision sẽ thất bại và trả lỗi rõ ràng
   const isImage = file.type.startsWith("image/");
   const isPdf = file.type === "application/pdf";
   if (!isImage && !isPdf) {
-    return { ok: false, message: "仅支持图片或 PDF" };
+    return { ok: false, message: "Chỉ hỗ trợ ảnh hoặc PDF" };
   }
 
   const buf = Buffer.from(await file.arrayBuffer());
@@ -114,6 +114,6 @@ export async function recognizeInvoiceFromImage(formData: FormData): Promise<
     if (e instanceof AiNotConfiguredError) {
       return { ok: false, message: e.message };
     }
-    return { ok: false, message: e instanceof Error ? e.message : "识别失败" };
+    return { ok: false, message: e instanceof Error ? e.message : "Nhận diện thất bại" };
   }
 }

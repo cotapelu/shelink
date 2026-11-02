@@ -46,12 +46,12 @@ export async function getCaseCycleAnalysis(period: ReportPeriod): Promise<CycleS
     where: {
       closedAt: { gte: period.start, lt: period.end },
       deletedAt: null,
-      createdAt: { lt: period.end } // 防御性：createdAt 应当 <= closedAt
+      createdAt: { lt: period.end } // Phòng ngựa: createdAt phải <= closedAt
     },
     select: { category: true, createdAt: true, closedAt: true }
   });
 
-  // 按 category 聚合 days 数组
+  // Tổng hợp mảng days theo category
   const byCat = new Map<MatterCategory, number[]>();
   for (const m of closed) {
     if (!m.closedAt) continue;
@@ -101,7 +101,7 @@ export type ReviewIssueAnalysis = {
 };
 
 /**
- * Tổng hợp跨案件 AI review trong kỳ.
+ * Tổng hợp AI review xuyên vụ án trong kỳ.
  * Lấy dữ liệu từ ReviewRecord.itemsJson và tập hợp bằng JS (PG jsonb functions khó dùng với prisma).
  */
 export async function getReviewIssueAnalysis(period: ReportPeriod): Promise<ReviewIssueAnalysis> {
@@ -118,7 +118,7 @@ export async function getReviewIssueAnalysis(period: ReportPeriod): Promise<Revi
     ISSUE: 0,
     SUGGESTION: 0
   };
-  // title → 累加
+  // title → cộng dồn
   const titleMap = new Map<
     string,
     { type: ReviewType; occurrences: number; severityCounts: Record<ReviewSeverity, number> }

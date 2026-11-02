@@ -22,9 +22,9 @@ import { intakeCreateSchema } from "@/server/intakes/schemas";
 
 const baseLitigationIntake = {
   category: "CIVIL_COMMERCIAL",
-  title: "甲与乙合同纠纷",
+  title: "Tranh chấp hợp đồng giữa甲 và乙",
   firstProcedureType: "FIRST_INSTANCE",
-  clientName: "甲",
+  clientName: "Nguyên đơn",
   clientType: "INDIVIDUAL",
   clientIdNumber: "330100199001010000",
   parties: [
@@ -46,7 +46,7 @@ const baseLitigationIntake = {
 };
 
 describe("intakeCreateSchema", () => {
-  it("诉讼/仲裁类收案必须填写委托方和案件当事人的诉讼地位", () => {
+  it("Tiếp nhận loại tố tụng/trọng tài bắt buộc điền lập trường của bên ủy quyền và các bên", () => {
     const result = intakeCreateSchema.safeParse(baseLitigationIntake);
 
     expect(result.success).toBe(false);
@@ -57,16 +57,16 @@ describe("intakeCreateSchema", () => {
       }));
       expect(issues).toContainEqual({
         path: "ourStanding",
-        message: "请选择委托方诉讼地位"
+        message: "Chọn lập trường tố tụng cho bên ủy quyền"
       });
       expect(issues).toContainEqual({
         path: "parties.0.standing",
-        message: "请选择诉讼地位"
+        message: "Chọn lập trường tố tụng"
       });
     }
   });
 
-  it("诉讼/仲裁类收案填写诉讼地位后通过", () => {
+  it("Tiếp nhận tố tụng/trọng tài điền lập trường tố tụng thì hợp lệ", () => {
     const result = intakeCreateSchema.safeParse({
       ...baseLitigationIntake,
       ourStanding: "PLAINTIFF",
@@ -81,7 +81,7 @@ describe("intakeCreateSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("非诉/顾问/专项不强制诉讼地位", () => {
+  it("Phi tố tụng/tư vấn/đặc biệt không bắt buộc lập trường tố tụng", () => {
     const result = intakeCreateSchema.safeParse({
       ...baseLitigationIntake,
       category: "NON_LITIGATION",

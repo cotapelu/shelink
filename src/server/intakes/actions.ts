@@ -71,7 +71,7 @@ function buildClientCreateInput(name: string, data: IntakeCreateInput): Prisma.C
 function buildContactCreateInput(clientId: string, data: IntakeCreateInput, clientName: string): Prisma.ContactCreateInput {
   return {
     client: { connect: { id: clientId } },
-    name: (data.contactName || clientName || "联系人").trim(),
+    name: (data.contactName || clientName || "Người liên hệ").trim(),
     phone: data.contactPhone?.trim() || null,
     isPrimary: false
   };
@@ -331,8 +331,8 @@ async function notifyIntakeApproversWrapper(created: any, session: any, content:
   await notifyRoleApprovers({
     roles: ["ADMIN", "PRINCIPAL_LAWYER"],
     excludeUserId: session.user.id,
-    title: "新的案件审批待处理",
-    content: `${session.user.name ?? "有用户"} 提交了案件审批：${content}`,
+    title: "Duyệt tiếp nhận mới chờ xử lý",
+    content: `${session.user.name ?? "Người dùng"} đã gửi duyệt tiếp nhận: ${content}`,
     href: `/intakes/${created.id}`,
     refType: "Intake",
     refId: created.id,
@@ -442,7 +442,7 @@ export const listIntakes = withMetrics('listIntakes', async function listIntakes
  */
 export async function getIntakeById(id: string) {
   const session = await requireSession();
-  // 单条收案权限检查：manager 看全部，其他人只能看自己参与或创建的
+  // Kiểm tra quyền một bản ghi tiếp nhận: quản lý xem tất cả, người khác chỉ xem bản ghi mình tham gia hoặc tạo
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
     const owned = await prisma.intake.findFirst({
       where: {
@@ -455,7 +455,7 @@ export async function getIntakeById(id: string) {
       },
       select: { id: true }
     });
-    if (!owned) throw new Error("收案记录不存在");
+    if (!owned) throw new Error("Bản ghi tiếp nhận không tồn tại");
   }
   const intake = await prisma.intake.findUnique({
     where: { id },
@@ -558,7 +558,7 @@ export async function declineIntake(input: DeclineIntakeInput) {
 export async function markIntakeNeedsRevision(input: { id: string; reason: string }) {
   const session = await requireSession();
   helpers.requireApprover(session.user.role);
-  if (!input.reason.trim()) throw new Error("请填写补正原因");
+  if (!input.reason.trim()) throw new Error("Nhập lý do bổ sung");
 
   await prisma.intake.update({
     where: { id: input.id },
@@ -596,8 +596,8 @@ export async function resubmitIntake(id: string) {
     where: { id },
     select: { status: true, title: true, createdById: true, ownerUserId: true }
   });
-  if (!intake) throw new Error("收案不存在");
-  if (intake.status !== "NEEDS_REVISION") throw new Error("只有待补正状态可重新提交");
+  if (!intake) throw new Error("Tiếp nhận không tồn tại");
+  if (intake.status !== "NEEDS_REVISION") throw new Error("Chỉ trạng thái chờ bổ sung mới gửi lại được");
 
   await prisma.intake.update({
     where: { id },
@@ -618,8 +618,8 @@ export async function resubmitIntake(id: string) {
   await notifyRoleApprovers({
     roles: ["ADMIN", "PRINCIPAL_LAWYER"],
     excludeUserId: session.user.id,
-    title: "案件审批已重新提交",
-    content: `${session.user.name ?? "有用户"} 重新提交了案件审批：${intake.title}`,
+    title: "Duyệt tiếp nhận đã gửi lại",
+    content: `${session.user.name ?? "Người dùng"} đã gửi lại duyệt tiếp nhận: ${intake.title}`,
     href: `/intakes/${id}`,
     refType: "Intake",
     refId: id,

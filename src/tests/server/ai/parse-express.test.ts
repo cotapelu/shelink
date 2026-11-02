@@ -65,7 +65,7 @@ describe("parseExpressLabel", () => {
     const form = new FormData();
     form.append("file", file);
 
-    await expect(parseExpressLabel(form)).rejects.toThrow("仅支持图片格式");
+    await expect(parseExpressLabel(form)).rejects.toThrow("Chỉ hỗ trợ định dạng ảnh");
   });
 
   it("should throw error for file too large", async () => {
@@ -74,7 +74,7 @@ describe("parseExpressLabel", () => {
     const form = new FormData();
     form.append("file", file);
 
-    await expect(parseExpressLabel(form)).rejects.toThrow("超过 10MB");
+    await expect(parseExpressLabel(form)).rejects.toThrow("vượt quá 10MB");
   });
 
   it("should throw AiNotConfiguredError when AI not configured", async () => {

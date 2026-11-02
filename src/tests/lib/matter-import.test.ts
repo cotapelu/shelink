@@ -72,11 +72,11 @@ describe("批量导入 — 文本映射", () => {
   });
 
   it("标题生成无重复空格", () => {
-    expect(buildMatterTitle("张三", "某公司", "买卖合同纠纷")).toBe("张三 与 某公司 买卖合同纠纷");
-    expect(buildMatterTitle("张三", "某公司", null)).toBe("张三 与 某公司");
+    expect(buildMatterTitle("张三", "某公司", "买卖合同纠纷")).toBe("张三 và 某公司 买卖合同纠纷");
+    expect(buildMatterTitle("张三", "某公司", null)).toBe("张三 và 某公司");
   });
 
-  it("首程序类型推断与收案转化一致", () => {
+  it("Suy luận thủ tục đầu nhất quán với chuyển đổi tiếp nhận", () => {
     expect(firstProcedureTypeFor("CIVIL_COMMERCIAL")).toBe("FIRST_INSTANCE");
     expect(firstProcedureTypeFor("CRIMINAL")).toBe("FIRST_INSTANCE");
     expect(firstProcedureTypeFor("NON_LITIGATION")).toBe("NON_LITIGATION_PHASE");

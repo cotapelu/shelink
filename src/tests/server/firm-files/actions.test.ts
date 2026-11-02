@@ -189,7 +189,7 @@ describe("firm-files/actions", () => {
       formData.append("category", "GUIDE");
 
       await expect(uploadFirmFile(formData)).rejects.toThrow(
-        "Chỉ admin / Principal Lawyer được quản lý tài liệu律所"
+        "Chỉ admin / Luật sư chính được quản lý tài liệu văn phòng"
       );
     });
 
@@ -198,7 +198,7 @@ describe("firm-files/actions", () => {
       formData.append("name", "Test");
       formData.append("category", "GUIDE");
 
-      await expect(uploadFirmFile(formData)).rejects.toThrow("缺少文件");
+      await expect(uploadFirmFile(formData)).rejects.toThrow("Thiếu tệp");
     });
 
     it("should reject empty file", async () => {
@@ -207,7 +207,7 @@ describe("firm-files/actions", () => {
       formData.append("name", "Test");
       formData.append("category", "GUIDE");
 
-      await expect(uploadFirmFile(formData)).rejects.toThrow("空文件");
+      await expect(uploadFirmFile(formData)).rejects.toThrow("Tệp rỗng");
     });
 
     it("should reject file exceeding max size (50MB)", async () => {
@@ -414,14 +414,14 @@ describe("firm-files/actions", () => {
       await expect(
         updateFirmFile({ id: "f1", name: "New name" })
       ).rejects.toThrow(
-        "Chỉ admin / Principal Lawyer được quản lý tài liệu律所"
+        "Chỉ admin / Luật sư chính được quản lý tài liệu văn phòng"
       );
     });
 
     it("should reject if file not found", async () => {
       mockPrisma.firmFile.findUnique.mockResolvedValue(null);
       await expect(updateFirmFile({ id: "missing" })).rejects.toThrow(
-        "资料不存在"
+        "Tài liệu không tồn tại"
       );
     });
 
@@ -431,7 +431,7 @@ describe("firm-files/actions", () => {
         archivedAt: new Date(),
       } as any);
       await expect(updateFirmFile({ id: "f1" })).rejects.toThrow(
-        "已删除的资料不可编辑"
+        "Tài liệu đã xoá thì không sửa được"
       );
     });
 
@@ -484,7 +484,7 @@ describe("firm-files/actions", () => {
         user: { id: "u1", role: "LAWYER" },
       } as any);
       await expect(deleteFirmFile({ id: "f1" })).rejects.toThrow(
-        "Chỉ admin / Principal Lawyer được quản lý tài liệu律所"
+        "Chỉ admin / Luật sư chính được quản lý tài liệu văn phòng"
       );
     });
 

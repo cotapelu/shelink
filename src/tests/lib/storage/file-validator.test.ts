@@ -14,7 +14,7 @@ describe("file-validator", () => {
 
     it("rejects disallowed extension for document", () => {
       const file = makeFile("malware.exe", 1024, "application/octet-stream");
-      expect(() => validateUploadedFile(file, { purpose: "document", maxBytes: 10 * 1024 * 1024 })).toThrow("不允许");
+      expect(() => validateUploadedFile(file, { purpose: "document", maxBytes: 10 * 1024 * 1024 })).toThrow("không được phép");
     });
 
     it("accepts image for invoice purpose", () => {
@@ -24,7 +24,7 @@ describe("file-validator", () => {
 
     it("rejects file too large", () => {
       const file = makeFile("big.pdf", 2 * 1024 * 1024 + 1, "application/pdf");
-      expect(() => validateUploadedFile(file, { purpose: "document", maxBytes: 2 * 1024 * 1024 })).toThrow("限制");
+      expect(() => validateUploadedFile(file, { purpose: "document", maxBytes: 2 * 1024 * 1024 })).toThrow("vượt quá giới hạn");
     });
 
     it("accepts narrow ext for stamp", () => {
@@ -34,7 +34,7 @@ describe("file-validator", () => {
 
     it("rejects MIME not matching allowed pattern for invoice", () => {
       const file = makeFile("inv.jpg", 500, "application/octet-stream");
-      expect(() => validateUploadedFile(file, { purpose: "invoice", maxBytes: 1 * 1024 * 1024 })).toThrow("MIME 类型");
+      expect(() => validateUploadedFile(file, { purpose: "invoice", maxBytes: 1 * 1024 * 1024 })).toThrow("Loại MIME");
     });
   });
 });

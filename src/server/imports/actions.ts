@@ -73,7 +73,7 @@ async function readSheet(file: File): Promise<{ rowNo: number; raw: RawRow }[]> 
   const sheet = wb.worksheets[0];
   if (!sheet) throw new Error("File không có worksheet");
 
-  // 表头 → 列索引（去掉必填星号，匹配 IMPORT_COLUMNS.header）
+  // Tiêu đề cột → chỉ mục cột (bỏ dấu sao bắt buộc, khớp IMPORT_COLUMNS.header)
   const headerByIndex = new Map<number, string>(); // colIndex → field key
   const headerRow = sheet.getRow(1);
   headerRow.eachCell((cell, colNumber) => {
@@ -114,18 +114,18 @@ export interface ImportPreview {
   validCount: number;
 }
 
-/** 解析 + 校验（不写库），返回预览表 */
+/** Phân tích + kiểm tra (không ghi DB), trả về bảng xem trước */
 export async function parseMatterImportAction(formData: FormData): Promise<ImportPreview> {
   await requireManager();
   const file = formData.get("file");
-  if (!(file instanceof File)) throw new Error("缺少文件");
+  if (!(file instanceof File)) throw new Error("Thiếu tệp");
 
   const parsed = await readSheet(file);
   if (parsed.length === 0) {
-    throw new Error("未读取到数据行（请在模板第 2 行起填写，并删除示例行）");
+    throw new Error("Chưa đọc được dòng dữ liệu nào (điền từ dòng thứ 2 của mẫu, và xoá dòng ví dụ)");
   }
 
-  // 预取主办律师邮箱，用于校验
+  // Lấy trước email luật sư chủ trì, dùng để kiểm tra
   const emails = [
     ...new Set(parsed.map((p) => (p.raw.ownerEmail ?? "").trim().toLowerCase()).filter(Boolean))
   ];
@@ -138,7 +138,7 @@ export async function parseMatterImportAction(formData: FormData): Promise<Impor
     const { errors, normalized } = validateRow(raw);
     const errs = [...errors];
     if (normalized?.ownerEmail && !knownEmails.has(normalized.ownerEmail.toLowerCase())) {
-      errs.push(`主办律师邮箱「${normalized.ownerEmail}」未匹配到用户`);
+      errs.push(`Email luật sư chủ trì "${normalized.ownerEmail}" không khớp người dùng nào`);
     }
     return { rowNo, raw, errors: errs, valid: errs.length === 0 };
   });
@@ -151,20 +151,20 @@ export async function parseMatterImportAction(formData: FormData): Promise<Impor
   };
 }
 
-/** 落库单行：find-or-create 客户 → 建案件(+编号+主办+当事人+首程序+卷宗) */
+/** Ghi DB một dòng: find-or-create khách hàng → tạo vụ án (+mã số+chủ trì+các bên+thủ tục đầu+hồ sơ) */
 async function createOneMatter(n: NormalizedRow, currentUserId: string) {
-  // 主办律师
+  // Luật sư chủ trì
   let ownerId = currentUserId;
   if (n.ownerEmail) {
     const lawyer = await prisma.user.findFirst({
       where: { email: { equals: n.ownerEmail, mode: "insensitive" } },
       select: { id: true }
     });
-    if (!lawyer) throw new Error(`主办律师邮箱「${n.ownerEmail}」未匹配到用户`);
+    if (!lawyer) throw new Error(`Email luật sư chủ trì "${n.ownerEmail}" không khớp người dùng nào`);
     ownerId = lawyer.id;
   }
 
-  // 案由：精确匹配案由库，否则作为自由文本
+  // Nguyên nhân: khớp chính xác kho nguyên nhân, nếu không thì coi là text tự do
   let causeId: string | null = null;
   let causeFreeText: string | null = null;
   if (n.causeText) {
@@ -179,7 +179,7 @@ async function createOneMatter(n: NormalizedRow, currentUserId: string) {
   const internalCode = await generateInternalCode(n.category);
   const firmCaseNo = await generateFirmCaseNo(n.category);
 
-  // find-or-create 客户（名称 + 证件号）
+  // find-or-create khách hàng (tên + số giấy tờ)
   const existingClient = await prisma.client.findFirst({
     where: { name: n.clientName, idNumber: n.clientIdNumber, deletedAt: null },
     select: { id: true }
@@ -245,7 +245,7 @@ async function createOneMatter(n: NormalizedRow, currentUserId: string) {
         members: { create: { userId: ownerId, role: "LEAD" } },
         clientLinks: { create: { clientId, isPrimary: true, label: "Khách hàng chính" } },
         parties: { create: [clientParty, opposingParty] },
-        // Trạng thái IN_PROGRESS tự động tạo首程序 theo category (giống intake convert); trạng thái CLOSED/ARCHIVED không tạo
+        // Trạng thái IN_PROGRESS tự động tạo thủ tục đầu theo category (như intake convert); trạng thái CLOSED/ARCHIVED không tạo
         ...(n.status === "IN_PROGRESS"
           ? {
               procedures: {

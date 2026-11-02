@@ -21,7 +21,7 @@ describe("express/actions - getExpressSettingsPublic", () => {
     mockRequireSession.mockResolvedValue({ user: { role: "LAWYER" } } as any);
 
     await expect(getExpressSettingsPublic()).rejects.toThrow(
-      "仅管理员可修改快递接入配置"
+      "Chỉ quản trị viên được sửa cấu hình tích hợp chuyển phát"
     );
   });
 

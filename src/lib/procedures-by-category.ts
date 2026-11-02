@@ -62,7 +62,7 @@ export const proceduresByCategory: Record<MatterCategory, ProcedureType[]> = {
     "PROSECUTORIAL_SUPERVISION",
     "CUSTOM"
   ],
-  // 劳动仲裁前置，裁后不服可续一审/二审/再审/执行
+  // Trọng tài lao động xét trước; không phục có thể tiếp tục sơ thẩm/phúc thẩm/tái thẩm/thi hành
   LABOR_ARBITRATION: [
     "LABOR_ARBITRATION",
     "FIRST_INSTANCE",
@@ -72,7 +72,7 @@ export const proceduresByCategory: Record<MatterCategory, ProcedureType[]> = {
     "ENFORCEMENT",
     "CUSTOM"
   ],
-  // 商事仲裁一裁终局：只有商事仲裁一个程序
+  // Trọng tài thương mại xét xử cuối cùng: chỉ có một thủ tục
   COMMERCIAL_ARBITRATION: ["COMMERCIAL_ARBITRATION"],
   NON_LITIGATION: ["NON_LITIGATION_PHASE", "CUSTOM"],
   LEGAL_COUNSEL: ["NON_LITIGATION_PHASE", "CUSTOM"],
@@ -80,7 +80,7 @@ export const proceduresByCategory: Record<MatterCategory, ProcedureType[]> = {
 };
 
 /**
- * 各案件类别下可选的诉讼地位（我方角色）。
+ * Các lập trường tố tụng có thể chọn theo loại vụ án (vai trò phía ta).
  */
 export const standingsByCategory: Record<MatterCategory, LitigationStanding[]> = {
   CIVIL_COMMERCIAL: [

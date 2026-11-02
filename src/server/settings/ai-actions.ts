@@ -29,7 +29,7 @@ import {
 import { aiChat, AiNotConfiguredError } from "@/lib/ai/client";
 
 const saveSchema = z.object({
-  apiKey: z.string().optional().or(z.literal("")), // 留空 = 保留原值
+  apiKey: z.string().optional().or(z.literal("")), // Để trống = giữ giá trị cũ
   baseUrl: z.string().url().optional().or(z.literal("")),
   textModel: z.string().max(80).optional().or(z.literal("")),
   visionModel: z.string().max(80).optional().or(z.literal(""))
@@ -40,7 +40,7 @@ const clearSchema = z.object({ confirm: z.literal(true) });
 async function requireAdmin() {
   const session = await requireSession();
   if (session.user.role !== "ADMIN") {
-    throw new Error("仅管理员可修改 AI 配置");
+    throw new Error("Chỉ quản trị viên được sửa cấu hình AI");
   }
   return session;
 }
@@ -92,7 +92,7 @@ export async function clearAiKeyAction(input: z.infer<typeof clearSchema>) {
   return { ok: true };
 }
 
-/** 测试连接：发一个 ping，验证 base_url + key + text_model 可用 */
+/** Kiểm tra kết nối: gửi một ping, xác minh base_url + key + text_model dùng được */
 export async function testAiConnection() {
   await requireAdmin();
   try {
@@ -113,7 +113,7 @@ export async function testAiConnection() {
     }
     return {
       ok: false,
-      message: e instanceof Error ? e.message : "未知错误"
+      message: e instanceof Error ? e.message : "Lỗi không rõ"
     };
   }
 }

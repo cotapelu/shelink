@@ -32,8 +32,8 @@ const STORAGE_ROOT = process.env.APP_STORAGE_DIR
 
 export class LocalStorageProvider implements StorageProvider {
   /**
-   * 写入文件到 storage/<scope>/<yyyymm>/<uuid>.bin
-   * 返回相对 STORAGE_ROOT 的 path（存到数据库）
+   * Ghi tệp vào storage/<scope>/<yyyymm>/<uuid>.bin
+   * Trả về path tương đối STORAGE_ROOT (lưu vào DB)
    */
   async writeFile(scope: string, data: Buffer): Promise<string> {
     const now = new Date();
@@ -53,7 +53,7 @@ export class LocalStorageProvider implements StorageProvider {
     // 防止路径穿越
     const resolved = path.resolve(full);
     if (!resolved.startsWith(STORAGE_ROOT)) {
-      throw new Error("非法路径");
+      throw new Error("Đường dẫn không hợp lệ");
     }
     return fs.readFile(resolved);
   }
@@ -62,12 +62,12 @@ export class LocalStorageProvider implements StorageProvider {
     const full = path.join(STORAGE_ROOT, relPath);
     const resolved = path.resolve(full);
     if (!resolved.startsWith(STORAGE_ROOT)) {
-      throw new Error("非法路径");
+      throw new Error("Đường dẫn không hợp lệ");
     }
     try {
       await fs.unlink(resolved);
     } catch (err) {
-      // 容忍文件已不存在
+      // Bỏ qua lỗi khi tệp đã không còn tồn tại
       if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
     }
   }

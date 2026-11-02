@@ -103,7 +103,7 @@ async function assertCanAccessPreservationCaseRecord(
     await assertCanAssociateMatter(userId, record.matterId);
     return;
   }
-  if (record.ownerId !== userId) throw new Error("无权操作此保全记录");
+  if (record.ownerId !== userId) throw new Error("Không có quyền thao tác bản ghi bảo toàn này");
 }
 
 async function assertCanAccessPreservationCase(userId: string, id: string) {
@@ -111,7 +111,7 @@ async function assertCanAccessPreservationCase(userId: string, id: string) {
     where: { id },
     select: { id: true, matterId: true, ownerId: true }
   });
-  if (!record) throw new Error("保全案件不存在");
+  if (!record) throw new Error("Vụ án bảo toàn không tồn tại");
   await assertCanAccessPreservationCaseRecord(userId, record);
   return record;
 }
@@ -124,7 +124,7 @@ export async function createPreservationCase(input: z.infer<typeof caseCreateSch
 
   if (data.matterId) {
     const m = await prisma.matter.findUnique({ where: { id: data.matterId } });
-    if (!m) throw new Error("关联案件不存在");
+    if (!m) throw new Error("Vụ án liên kết không tồn tại");
     await assertCanAssociateMatter(session.user.id, data.matterId);
     await assertMatterWritable(data.matterId);
   }
@@ -213,7 +213,7 @@ export async function deletePreservationCase(input: z.infer<typeof deleteSchema>
   const session = await requireSession();
   const data = deleteSchema.parse(input);
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
-    throw new Error("仅管理员或主任律师可删除保全记录");
+    throw new Error("Chỉ quản trị viên hoặc luật sư chính được xoá bản ghi bảo toàn");
   }
 
   const cs = await assertCanAccessPreservationCase(session.user.id, data.id);
@@ -258,7 +258,7 @@ export async function updateTarget(input: z.infer<typeof targetUpdateSchema>) {
     where: { id: data.id },
     include: { case: { select: { id: true, matterId: true, ownerId: true } } }
   });
-  if (!target) throw new Error("被保全人不存在");
+  if (!target) throw new Error("Bên bị bảo toàn không tồn tại");
   await assertCanAccessPreservationCaseRecord(session.user.id, target.case);
   if (target.case.matterId) await assertMatterWritable(target.case.matterId);
 
@@ -276,7 +276,7 @@ export async function deleteTarget(id: string) {
     where: { id },
     include: { case: { select: { id: true, matterId: true, ownerId: true } } }
   });
-  if (!target) throw new Error("被保全人不存在");
+  if (!target) throw new Error("Bên bị bảo toàn không tồn tại");
   await assertCanAccessPreservationCaseRecord(session.user.id, target.case);
   if (target.case.matterId) await assertMatterWritable(target.case.matterId);
 
@@ -290,13 +290,13 @@ export async function deleteTarget(id: string) {
 export async function addProperty(input: z.infer<typeof propertyCreateSchema>) {
   const session = await requireSession();
   const data = propertyCreateSchema.parse(input);
-  if (data.expiryDate <= data.startDate) throw new Error("到期日期必须晚于生效日期");
+  if (data.expiryDate <= data.startDate) throw new Error("Ngày đến hạn phải sau ngày có hiệu lực");
 
   const target = await prisma.preservationTarget.findUnique({
     where: { id: data.targetId },
     include: { case: { select: { id: true, matterId: true, ownerId: true } } }
   });
-  if (!target) throw new Error("被保全人不存在");
+  if (!target) throw new Error("Bên bị bảo toàn không tồn tại");
   await assertCanAccessPreservationCaseRecord(session.user.id, target.case);
   if (target.case.matterId) await assertMatterWritable(target.case.matterId);
 
@@ -334,7 +334,7 @@ export async function updateProperty(input: z.infer<typeof propertyUpdateSchema>
     where: { id },
     include: { target: { include: { case: { select: { id: true, matterId: true, ownerId: true } } } } }
   });
-  if (!property) throw new Error("保全财产不存在");
+  if (!property) throw new Error("Tài sản bảo toàn không tồn tại");
   await assertCanAccessPreservationCaseRecord(session.user.id, property.target.case);
   if (property.target.case.matterId) await assertMatterWritable(property.target.case.matterId);
 
@@ -356,12 +356,12 @@ export async function renewProperty(input: z.infer<typeof propertyRenewSchema>) 
     where: { id: data.propertyId },
     include: { target: { include: { case: { select: { id: true, matterId: true, ownerId: true } } } } }
   });
-  if (!prop) throw new Error("保全财产不存在");
+  if (!prop) throw new Error("Tài sản bảo toàn không tồn tại");
   await assertCanAccessPreservationCaseRecord(session.user.id, prop.target.case);
-  if (prop.status === "LIFTED") throw new Error("已解除的保全不可续保");
+  if (prop.status === "LIFTED") throw new Error("Bảo toàn đã gỡ bỏ thì không gia hạn được");
   if (prop.target.case.matterId) await assertMatterWritable(prop.target.case.matterId);
   if (data.newExpiryDate <= prop.expiryDate) {
-    throw new Error("新到期日必须晚于原到期日");
+    throw new Error("Ngày đến hạn mới phải sau ngày đến hạn cũ");
   }
 
   await prisma.$transaction([
@@ -394,7 +394,7 @@ export async function liftProperty(propertyId: string, _note?: string) {
     where: { id: propertyId },
     include: { target: { include: { case: { select: { id: true, matterId: true, ownerId: true } } } } }
   });
-  if (!prop) throw new Error("保全财产不存在");
+  if (!prop) throw new Error("Tài sản bảo toàn không tồn tại");
   await assertCanAccessPreservationCaseRecord(session.user.id, prop.target.case);
   if (prop.target.case.matterId) await assertMatterWritable(prop.target.case.matterId);
 
@@ -416,7 +416,7 @@ export async function deleteProperty(id: string) {
     where: { id },
     include: { target: { include: { case: { select: { id: true, matterId: true, ownerId: true } } } } }
   });
-  if (!property) throw new Error("保全财产不存在");
+  if (!property) throw new Error("Tài sản bảo toàn không tồn tại");
   await assertCanAccessPreservationCaseRecord(session.user.id, property.target.case);
   if (property.target.case.matterId) await assertMatterWritable(property.target.case.matterId);
 

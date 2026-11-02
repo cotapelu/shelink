@@ -88,13 +88,13 @@ export function toMatterInfo(
 
 export function roleLabel(role: PartyRole) {
   switch (role) {
-    case "CLIENT_PARTY": return "委托方";
-    case "OPPOSING_PARTY": return "对方";
-    case "THIRD_PARTY": return "第三人";
-    case "CO_LITIGANT": return "共同诉讼人";
-    case "AGENT": return "代理人";
-    case "WITNESS": return "证人";
-    default: return "当事人";
+    case "CLIENT_PARTY": return "Bên ủy quyền";
+    case "OPPOSING_PARTY": return "Bên đối phương";
+    case "THIRD_PARTY": return "Người thứ ba";
+    case "CO_LITIGANT": return "Đồng khởi kiện";
+    case "AGENT": return "Người đại diện";
+    case "WITNESS": return "Nhân chứng";
+    default: return "Các bên liên quan";
   }
 }
 
@@ -163,14 +163,14 @@ function buildExactHitIdData(p: any, candidateRole: PartyRole): { matterInfo: Ma
   if (!p.matter || !p.idNumber) return null;
   const matterInfo = toMatterInfo(p.matter, p.role, p.standing);
   const sev = bumpSeverity(pickSeverity(candidateRole, p.role));
-  return { matterInfo, sev, matchedField: 'idNumber', matchedValue: p.idNumber, reason: `Số ID card / mã số thuế của案件「${p.matter.internalCode}」trong ${roleLabel(p.role)}「${p.name}」giống nhau` };
+  return { matterInfo, sev, matchedField: 'idNumber', matchedValue: p.idNumber, reason: `Số ID card / mã số thuế của vụ án "${p.matter.internalCode}" trong ${roleLabel(p.role)} "${p.name}" giống nhau` };
 }
 
 function buildExactHitNameData(p: any, candidateRole: PartyRole, queryName: string): { matterInfo: MatterInfoForHit; sev: ConflictHitDraft['severity']; matchedField: 'name'; matchedValue: string; reason: string } | null {
   if (!p.matter || p.name !== queryName) return null;
   const matterInfo = toMatterInfo(p.matter, p.role, p.standing);
   const sev = pickSeverity(candidateRole, p.role);
-  return { matterInfo, sev, matchedField: 'name', matchedValue: queryName, reason: `Trùng tên với ${roleLabel(p.role)}「${p.name}」trong案件「${p.matter.internalCode}」` };
+  return { matterInfo, sev, matchedField: 'name', matchedValue: queryName, reason: `Trùng tên với ${roleLabel(p.role)} "${p.name}" trong vụ án "${p.matter.internalCode}"` };
 }
 
 export function createExactHit(p: any, candidateRole: PartyRole, matchType: 'id' | 'name', queryName?: string): ConflictHitDraft | null {
@@ -183,7 +183,7 @@ export function createFuzzyHit(p: any, candidateRole: PartyRole, queryName: stri
   if (!p.matter) return null;
   const matterInfo = toMatterInfo(p.matter, p.role, p.standing);
   const ratio = queryName.length / p.name.length;
-  return { hitType: "HISTORICAL_PARTY", targetType: "Matter", targetId: p.matter.id, matchedName: p.name, matchedField: 'name', matchedValue: queryName, matchedRatio: ratio, severity: 'LOW', reason: `Tên tương tự với ${roleLabel(p.role)}「${p.name}」trong案件「${p.matter.internalCode}」`, matterInfo };
+  return { hitType: "HISTORICAL_PARTY", targetType: "Matter", targetId: p.matter.id, matchedName: p.name, matchedField: 'name', matchedValue: queryName, matchedRatio: ratio, severity: 'LOW', reason: `Tên tương tự với ${roleLabel(p.role)} "${p.name}" trong vụ án "${p.matter.internalCode}"`, matterInfo };
 }
 
 // ============== Party-level processors ==============

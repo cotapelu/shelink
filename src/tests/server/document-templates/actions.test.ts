@@ -149,7 +149,7 @@ describe("document-templates/actions", () => {
       mockRequireSession.mockResolvedValue({
         user: { id: CUID(1), role: "LAWYER" },
       } as any);
-      await expect(toggleTemplate({ id: CUID(1), enabled: true })).rejects.toThrow("仅管理员可启用/禁用模板");
+      await expect(toggleTemplate({ id: CUID(1), enabled: true })).rejects.toThrow("Chỉ quản trị viên được bật/tắt mẫu");
     });
 
     it("should enable/disable template and audit", async () => {
@@ -231,7 +231,7 @@ describe("document-templates/actions", () => {
             algorithm: "aes-256-gcm",
             iv: expect.any(String),
             authTag: expect.any(String),
-            tags: expect.arrayContaining(["模板生成", "Contract"]),
+            tags: expect.arrayContaining(["Sinh từ mẫu", "Contract"]),
           }),
         })
       );
@@ -318,9 +318,9 @@ describe("document-templates/actions", () => {
 
     it("should throw if template missing or disabled", async () => {
       mockPrisma.documentTemplate.findUnique.mockResolvedValue(null);
-      await expect(renderTemplate(baseInput as any)).rejects.toThrow("模板不存在或已禁用");
+      await expect(renderTemplate(baseInput as any)).rejects.toThrow("Mẫu không tồn tại hoặc đã tắt");
       mockPrisma.documentTemplate.findUnique.mockResolvedValue({ enabled: false } as any);
-      await expect(renderTemplate(baseInput as any)).rejects.toThrow("模板不存在或已禁用");
+      await expect(renderTemplate(baseInput as any)).rejects.toThrow("Mẫu không tồn tại hoặc đã tắt");
     });
 
     it("should throw if docxBlob missing", async () => {
@@ -329,7 +329,7 @@ describe("document-templates/actions", () => {
         enabled: true,
         docxBlob: null,
       } as any);
-      await expect(renderTemplate(baseInput as any)).rejects.toThrow("模板源文件缺失");
+      await expect(renderTemplate(baseInput as any)).rejects.toThrow("Thiếu tệp nguồn của mẫu");
     });
 
     it("should validate folder belongs to matter", async () => {
@@ -352,7 +352,7 @@ describe("document-templates/actions", () => {
       mockPrisma.documentFolder.findUnique.mockResolvedValue({ matterId: CUID(99) } as any); // mismatched matterId
       mockPrisma.document.create.mockResolvedValue({ id: CUID(5) } as any);
 
-      await expect(renderTemplate({ ...baseInput, folderId: CUID(10), matterId: CUID(2) } as any)).rejects.toThrow("目标卷宗与案件不匹配");
+      await expect(renderTemplate({ ...baseInput, folderId: CUID(10), matterId: CUID(2) } as any)).rejects.toThrow("Hồ sơ đích không khớp với vụ án");
     });
 
     it("should throw if matter does not exist", async () => {
@@ -374,7 +374,7 @@ describe("document-templates/actions", () => {
       mockRenderDocxBuffer.mockReturnValue(dummyBuffer());
       mockPrisma.document.create.mockResolvedValue({ id: CUID(6) } as any);
 
-      await expect(renderTemplate({ ...baseInput, matterId: CUID(2) } as any)).rejects.toThrow("案件不存在");
+      await expect(renderTemplate({ ...baseInput, matterId: CUID(2) } as any)).rejects.toThrow("Vụ án không tồn tại");
     });
 
     it("should include missing variables in result", async () => {

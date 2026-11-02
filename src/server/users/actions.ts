@@ -201,7 +201,7 @@ export async function resetUserPassword(input: ResetPasswordInput) {
 }
 
 /**
- * 当前用户改自己的密码（任何角色可用）。
+ * Người dùng hiện tại đổi mật khẩu của mình (mọi vai trò dùng được).
  */
 export async function changeMyPassword(input: ChangeMyPasswordInput) {
   const session = await requireSession();

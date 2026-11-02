@@ -172,7 +172,7 @@ describe("intakes actions", () => {
     it("should throw if not owned", async () => {
       mockRequireSession.mockResolvedValue({ user: { id: "u1", role: "LAWYER" } });
       mockPrisma.intake.findFirst.mockResolvedValue(null as any);
-      await expect(getIntakeById("i1")).rejects.toThrow("收案记录不存在");
+      await expect(getIntakeById("i1")).rejects.toThrow("Bản ghi tiếp nhận không tồn tại");
     });
 
     it("should return null if intake not found after ownership check", async () => {
@@ -241,12 +241,12 @@ describe("intakes actions", () => {
 
     it("should throw if intake not found", async () => {
       mockPrisma.intake.findUnique.mockResolvedValue(null as any);
-      await expect(resubmitIntake("i1")).rejects.toThrow("收案不存在");
+      await expect(resubmitIntake("i1")).rejects.toThrow("Tiếp nhận không tồn tại");
     });
 
     it("should throw if status not NEEDS_REVISION", async () => {
       mockPrisma.intake.findUnique.mockResolvedValue({ id: "i1", status: "PENDING" } as any);
-      await expect(resubmitIntake("i1")).rejects.toThrow("只有待补正状态可重新提交");
+      await expect(resubmitIntake("i1")).rejects.toThrow("Chỉ trạng thái chờ bổ sung mới gửi lại được");
     });
   });
 
@@ -331,7 +331,7 @@ describe("intakes actions", () => {
 
     it("should throw if intake not found", async () => {
       mockPrisma.intake.findUnique.mockResolvedValue(null as any);
-      await expect(convertIntakeToMatter("i1")).rejects.toThrow("Intake 不存在");
+      await expect(convertIntakeToMatter("i1")).rejects.toThrow("Intake không tồn tại");
     });
 
     it("should throw if intake already converted", async () => {
@@ -340,7 +340,7 @@ describe("intakes actions", () => {
         id: intakeId,
         status: "CONVERTED"
       } as any);
-      await expect(convertIntakeToMatter(intakeId)).rejects.toThrow("此 Intake 已转化");
+      await expect(convertIntakeToMatter(intakeId)).rejects.toThrow("Intake này đã chuyển đổi");
     });
   });
 

@@ -128,7 +128,7 @@ export function getChecklist(kind: ArchiveChecklistKind): ArchiveChecklist {
 }
 
 /**
- * 评估勾选状态：返回缺项 + 是否阻断警告
+ * Đánh giá trạng thái tích: trả về mục thiếu + có chặn cảnh báo không
  */
 export function evaluateChecklist(
   checklist: ArchiveChecklist,

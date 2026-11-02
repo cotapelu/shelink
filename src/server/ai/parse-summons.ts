@@ -20,10 +20,10 @@
 "use server";
 
 /**
- * v0.44: 法院传票 OCR
+ * v0.44: OCR giấy triệu tập toà án
  *
- * 律师上传传票图片 → aiVision 提取开庭日期、时间、法庭、案号、法官、当事人
- * 失败时返回 null 字段，让律师手动填写
+ * Luật sư tải ảnh giấy triệu tập → aiVision trích ngày mở phiên, giờ, phòng xét xử, số án, thẩm phán, các bên
+ * Khi thất bại trả về các trường null, để luật sư điền thủ công
  */
 import { requireSession } from "@/lib/auth/session";
 import { aiVision, extractJson, AiNotConfiguredError } from "@/lib/ai/client";
@@ -31,38 +31,38 @@ import { aiVision, extractJson, AiNotConfiguredError } from "@/lib/ai/client";
 export type ParsedSummons = {
   hearingDate: string | null;   // YYYY-MM-DD
   hearingTime: string | null;   // HH:mm
-  courtRoom: string | null;     // 法庭（如：第三法庭）
-  caseNumber: string | null;    // 案号（如：(2024)京0105民初1234号）
-  judge: string | null;         // 法官姓名
-  parties: string[] | null;     // 当事人列表
+  courtRoom: string | null;     // Phòng xét xử (vd: Phòng xét xử số 3)
+  caseNumber: string | null;    // Số án (vd: 01/2024/TLAT)
+  judge: string | null;         // Tên thẩm phán
+  parties: string[] | null;     // Danh sách các bên
 };
 
 const SUPPORTED = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "application/pdf"]);
 
-const PROMPT = `下方图片是一张中国法院传票（开庭传票）。请严格返回 JSON：
+const PROMPT = `Ảnh dưới đây là một giấy triệu tập toà án (giấy triệu tập mở phiên). Hãy trả về JSON nghiêm ngặt:
 {
-  "hearingDate": "开庭日期（YYYY-MM-DD）",
-  "hearingTime": "开庭时间（HH:mm，24小时制）",
-  "courtRoom": "开庭地点/法庭（如：本院第三法庭）",
-  "caseNumber": "案号（如：(2024)京0105民初1234号）",
-  "judge": "审判员/法官姓名",
-  "parties": ["原告/上诉人名称", "被告/被上诉人名称"]
+  "hearingDate": "Ngày mở phiên (YYYY-MM-DD)",
+  "hearingTime": "Giờ mở phiên (HH:mm, hệ 24 giờ)",
+  "courtRoom": "Địa điểm mở phiên / phòng xét xử (vd: Phòng xét xử số 3 của Toà)",
+  "caseNumber": "Số án (vd: 01/2024/TLAT)",
+  "judge": "Tên thẩm phán / chủ toà",
+  "parties": ["Tên nguyên đơn/người kháng cáo", "Tên bị đơn/bị kháng cáo"]
 }
-规则：
-- 严格按照传票上的内容提取，不确定的字段返回 null
-- hearingDate 格式必须为 YYYY-MM-DD，如原始日期为"二〇二四年六月十五日"则转为 2024-06-15
-- hearingTime 格式为 HH:mm，如"上午九时三十分"转为 09:30
-- parties 为数组，包含传票上列明的当事人
-- 仅 JSON，不要解释`;
+Quy tắc:
+- Trích chính xác theo nội dung trên giấy triệu tập, trường không chắc chắn trả về null
+- hearingDate bắt buộc định dạng YYYY-MM-DD, nếu ngày gốc dạng chữ thì đổi sang 2024-06-15
+- hearingTime định dạng HH:mm, nếu gốc dạng "09 giờ 30 phút" thì đổi sang 09:30
+- parties là mảng, gồm các bên ghi trên giấy triệu tập
+- Chỉ JSON, không giải thích`;
 
 export async function parseSummons(form: FormData): Promise<ParsedSummons> {
   await requireSession();
   const file = form.get("file");
-  if (!(file instanceof File)) throw new Error("缺少文件");
+  if (!(file instanceof File)) throw new Error("Thiếu tệp");
   if (!SUPPORTED.has(file.type)) {
-    throw new Error(`仅支持图片（JPG/PNG）格式，当前 ${file.type || "未知"}`);
+    throw new Error(`Chỉ hỗ trợ định dạng ảnh (JPG/PNG), hiện ${file.type || "không rõ"}`);
   }
-  if (file.size > 10 * 1024 * 1024) throw new Error("文件超过 10MB");
+  if (file.size > 10 * 1024 * 1024) throw new Error("Tệp vượt quá 10MB");
 
   const buf = Buffer.from(await file.arrayBuffer());
   const dataUrl = `data:${file.type};base64,${buf.toString("base64")}`;
@@ -84,6 +84,6 @@ export async function parseSummons(form: FormData): Promise<ParsedSummons> {
     };
   } catch (err) {
     if (err instanceof AiNotConfiguredError) throw err;
-    throw new Error(err instanceof Error ? err.message : "传票识别失败");
+    throw new Error(err instanceof Error ? err.message : "Nhận diện giấy triệu tập thất bại");
   }
 }

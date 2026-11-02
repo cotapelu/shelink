@@ -20,11 +20,11 @@
 "use server";
 
 /**
- * v0.27: 服务中心 - 律所公告
+ * v0.27: Trung tâm dịch vụ - thông báo văn phòng
  *
- * - ADMIN / 主任律师 可发布、编辑、置顶、归档
- * - 所有登录用户可读
- * - pinned + 未过期 + 未归档的公告显示为顶部 banner
+ * - ADMIN / luật sư chính được đăng, sửa, ghim, lưu trữ
+ * - Mọi người dùng đăng nhập đọc được
+ * - Thông báo pinned + chưa hết hạn + chưa lưu trữ hiển thị làm banner đầu trang
  */
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -34,13 +34,13 @@ import { audit } from "@/server/audit";
 
 function assertCanManage(role: string) {
   if (role !== "ADMIN" && role !== "PRINCIPAL_LAWYER") {
-    throw new Error("仅管理员 / 主任律师可发布公告");
+    throw new Error("Chỉ quản trị viên / luật sư chính được đăng thông báo");
   }
 }
 
 const announcementCreateSchema = z.object({
-  title: z.string().min(1, "标题必填").max(120),
-  content: z.string().min(1, "内容必填").max(20000),
+  title: z.string().min(1, "Tiêu đề bắt buộc nhập").max(120),
+  content: z.string().min(1, "Nội dung bắt buộc nhập").max(20000),
   pinned: z.boolean().default(false),
   expiresAt: z.coerce.date().optional().nullable()
 });
@@ -63,7 +63,7 @@ export async function listAnnouncements({
 }
 
 /**
- * 顶部 banner：pinned + 未归档 + 未过期
+ * Banner đầu trang: pinned + chưa lưu trữ + chưa hết hạn
  */
 export async function listActiveBanners() {
   await requireSession();
@@ -103,7 +103,7 @@ export async function createAnnouncement(input: z.infer<typeof announcementCreat
   });
 
   revalidatePath("/announcements");
-  revalidatePath("/", "layout"); // banner 在全站布局
+  revalidatePath("/", "layout"); // banner nằm ở layout toàn site
   return created;
 }
 

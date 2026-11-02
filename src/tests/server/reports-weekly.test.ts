@@ -62,10 +62,10 @@ describe("formatWeeklyDigestContent", () => {
       archived: 2,
       receivedAmount: 125000.5
     });
-    expect(text).toContain("新收 3 件");
-    expect(text).toContain("已结 1 件");
-    expect(text).toContain("已归档 2 件");
-    expect(text).toContain("125,000.50 元");
+    expect(text).toContain("Tiếp nhận mới 3 vụ");
+    expect(text).toContain("Đã kết thúc 1 vụ");
+    expect(text).toContain("Đã lưu trữ 2 vụ");
+    expect(text).toContain("125.000,50 ₫");
   });
 
   it("零值也照常拼", () => {
@@ -78,7 +78,7 @@ describe("formatWeeklyDigestContent", () => {
       archived: 0,
       receivedAmount: 0
     });
-    expect(text).toContain("0.00 元");
+    expect(text).toContain("0,00 ₫");
     expect(text.split("·")).toHaveLength(4);
   });
 });

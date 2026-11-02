@@ -20,52 +20,52 @@
 "use server";
 
 /**
- * v0.28: 引导式 AI 文书起草（对照"案件云"的填空式文书起草）
+ * v0.28: Soạn thảo văn bản bằng AI theo hướng dẫn (đối chiếu mẫu "điền chỗ trống" của 案件云)
  *
- * 用户在前端以"填空式"提供：文书类型 + 我方 / 对方 + 案件背景 + 诉讼请求，
- * 这里拼成结构化提示交给 aiChat，返回 Markdown 草稿，供前端预览 / 复制 / 下载。
+ * Người dùng cung cấp ở frontend dạng "điền chỗ trống": loại văn bản + phía ta / phía đối phương + bối cảnh vụ án + yêu cầu khởi kiện,
+ * ở đây ghép thành gợi ý có cấu trúc đưa cho aiChat, trả về bản nháp Markdown để frontend xem trước / copy / tải.
  *
- * 原则：仅依据用户提供的信息起草，不臆造事实、证据与具体法条编号；
- * 信息缺失处用【】占位提示补充。生成结果仅为草稿，需律师核校。
+ * Nguyên tắc: chỉ soạn dựa trên thông tin người dùng cung cấp, không bịa sự việc, chứng cứ và số điều luật cụ thể;
+ * chỗ thiếu thông tin dùng【】làm chỗ giữ chỗ và nhắc bổ sung. Kết quả sinh ra chỉ là bản nháp, cần luật sư hiệu đính.
  */
 import { requireSession } from "@/lib/auth/session";
 import { aiChat, AiNotConfiguredError } from "@/lib/ai/client";
 
 export type DraftInput = {
-  docType: string; // 文书类型，如"民事起诉状"
-  selfParty?: string; // 我方当事人
-  opposingParty?: string; // 对方当事人
-  background?: string; // 案件背景
-  claims?: string; // 诉讼请求 / 核心主张
-  extra?: string; // 其他补充
+  docType: string; // Loại văn bản, vd "Đơn khởi kiện dân sự"
+  selfParty?: string; // Bên phía ta
+  opposingParty?: string; // Bên phía đối phương
+  background?: string; // Bối cảnh vụ án
+  claims?: string; // Yêu cầu khởi kiện / luận điểm cốt lõi
+  extra?: string; // Bổ sung khác
 };
 
 export type DraftResult =
   | { ok: true; content: string }
   | { ok: false; reason: "not_configured" | "error"; message: string };
 
-const SYSTEM_PROMPT = `你是一名资深中国执业律师，擅长起草各类法律文书。
-请根据用户提供的信息，起草一份结构规范、用语专业的法律文书草稿，输出 Markdown 格式。
-要求：
-1. 严格遵循该类文书的通用格式（当事人信息栏、正文、诉讼请求/事实与理由、落款等）。
-2. 只依据用户提供的信息撰写，不得臆造当事人身份信息、证据、金额或具体法条编号；信息缺失处用【】占位并提示补充。
-3. 语言正式、逻辑清晰，事实与理由分点陈述。
-4. 文末注明这是 AI 生成的草稿，需律师核校后使用。`;
+const SYSTEM_PROMPT = `Bạn là luật sư đang hành nghề giàu kinh nghiệm, giỏi soạn mọi loại văn bản pháp lý.
+Dựa trên thông tin người dùng cung cấp, hãy soạn một bản nháp văn bản pháp lý có cấu trúc chuẩn, từ ngữ chuyên nghiệp, xuất dạng Markdown.
+Yêu cầu:
+1. Tuân thủ nghiêm ngặt định dạng chung của loại văn bản đó (mục thông tin các bên, thân bài, yêu cầu khởi kiện / luận điểm và căn cứ, chữ ký...).
+2. Chỉ viết dựa trên thông tin người dùng cung cấp, không được bịa thông tin danh tính các bên, chứng cứ, số tiền hoặc số điều luật cụ thể; chỗ thiếu thông tin dùng【】làm chỗ giữ chỗ và nhắc bổ sung.
+3. Ngôn ngữ trang trọng, logic rõ ràng, trình bày luận điểm và căn cứ theo từng điểm.
+4. Cuối văn bản ghi rõ đây là bản nháp do AI sinh ra, cần luật sư hiệu đính trước khi dùng.`;
 
 export async function draftDocument(input: DraftInput): Promise<DraftResult> {
   await requireSession();
 
   const docType = input.docType?.trim();
   if (!docType) {
-    return { ok: false, reason: "error", message: "请先选择或填写文书类型" };
+    return { ok: false, reason: "error", message: "Hãy chọn hoặc điền loại văn bản trước" };
   }
 
-  const lines = [`请起草一份「${docType}」。`];
-  if (input.selfParty?.trim()) lines.push(`我方当事人：${input.selfParty.trim()}`);
-  if (input.opposingParty?.trim()) lines.push(`对方当事人：${input.opposingParty.trim()}`);
-  if (input.background?.trim()) lines.push(`案件背景：\n${input.background.trim()}`);
-  if (input.claims?.trim()) lines.push(`诉讼请求 / 核心主张：\n${input.claims.trim()}`);
-  if (input.extra?.trim()) lines.push(`其他补充：\n${input.extra.trim()}`);
+  const lines = [`Hãy soạn một "${docType}".`];
+  if (input.selfParty?.trim()) lines.push(`Bên phía ta: ${input.selfParty.trim()}`);
+  if (input.opposingParty?.trim()) lines.push(`Bên phía đối phương: ${input.opposingParty.trim()}`);
+  if (input.background?.trim()) lines.push(`Bối cảnh vụ án:\n${input.background.trim()}`);
+  if (input.claims?.trim()) lines.push(`Yêu cầu khởi kiện / luận điểm cốt lõi:\n${input.claims.trim()}`);
+  if (input.extra?.trim()) lines.push(`Bổ sung khác:\n${input.extra.trim()}`);
 
   try {
     const { content } = await aiChat({
@@ -84,7 +84,7 @@ export async function draftDocument(input: DraftInput): Promise<DraftResult> {
     return {
       ok: false,
       reason: "error",
-      message: err instanceof Error ? err.message : "生成失败，请稍后重试"
+      message: err instanceof Error ? err.message : "Sinh thất bại, hãy thử lại sau"
     };
   }
 }

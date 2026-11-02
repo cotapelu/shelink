@@ -18,16 +18,17 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.9.4 归档编号生成
+ * v0.9.4 Sinh mã lưu trữ
  *
- * 格式：YYYY-类别-NNNN
- *   - YYYY = 归档年份（archivedAt 当年）
- *   - 类别简称 = 1 个汉字
- *   - NNNN = 年内同类别归档序号（零填 4 位，从 0001 起）
+ * Định dạng: YYYY-loại-NNNN
+ *   - YYYY = năm lưu trữ (theo archivedAt)
+ *   - loại = viết tắt của MatterCategory (1 ký tự)
+ *   - NNNN = số thứ tự lưu trữ cùng loại trong năm (đệm 0, 4 chữ số, từ 0001)
  *
- * 示例：2026-民-0017
+ * Ví dụ: 2026-民-0017
  *
- * 并发：依赖 @@unique(archiveNo)。重复时回到查 max 再 +1（最多重试 3 次）。
+ * Đồng thời: dựa vào @@unique(archiveNo). Khi trùng thì quay lại lấy max rồi +1 (thử lại tối đa 3 lần).
+ * LƯU Ý (quyết định giữ nguyên): giá trị CATEGORY_SHORT vẫn là ký tự gốc để tương thích mã đã lưu trong DB.
  */
 import type { MatterCategory } from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
@@ -56,7 +57,7 @@ export async function nextArchiveNo(
   const short = categoryShort(category);
   const prefix = `${year}-${short}-`;
 
-  // 取年内同前缀的最大 archiveNo
+  // Lấy archiveNo lớn nhất cùng tiền tố trong năm
   const existing = await tx.archiveRecord.findMany({
     where: { archiveNo: { startsWith: prefix } },
     select: { archiveNo: true },

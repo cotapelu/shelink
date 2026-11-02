@@ -35,9 +35,9 @@ import {
   moveDocumentToFolderSchema
 } from "./schemas";
 
-/** 判断当前用户是否能编辑该案件的卷宗结构（仅本案 LEAD / CO_LEAD） */
+/** Xác định người dùng hiện tại có sửa được cấu trúc hồ sơ của vụ án không (chỉ LEAD / CO_LEAD của vụ án) */
 async function requireFolderEditor(matterId: string, session: { user: { id: string; role: string } }) {
-  await assertCanLeadMatter(session.user.id, matterId, "仅案件主办/协办可管理卷宗");
+  await assertCanLeadMatter(session.user.id, matterId, "Chỉ chủ trì/cộng tác của vụ án được quản lý hồ sơ");
 }
 
 export async function listFoldersByMatter(matterId: string) {
@@ -58,7 +58,7 @@ export async function createFolder(input: z.infer<typeof folderCreateSchema>) {
   await requireFolderEditor(data.matterId, session);
   await assertMatterWritable(data.matterId);
 
-  // 计算 orderIndex（追加到末尾）
+  // Tính orderIndex (thêm vào cuối)
   const last = await prisma.documentFolder.findFirst({
     where: { matterId: data.matterId },
     orderBy: { orderIndex: "desc" },
@@ -78,7 +78,7 @@ export async function createFolder(input: z.infer<typeof folderCreateSchema>) {
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-      throw new Error(`已有同名卷宗「${data.name.trim()}」`);
+      throw new Error(`Đã có hồ sơ trùng tên "${data.name.trim()}"`);
     }
     throw e;
   }
@@ -103,7 +103,7 @@ export async function renameFolder(input: z.infer<typeof folderRenameSchema>) {
     where: { id: data.id },
     select: { id: true, matterId: true }
   });
-  if (!folder) throw new Error("卷宗不存在");
+  if (!folder) throw new Error("Hồ sơ không tồn tại");
   await requireFolderEditor(folder.matterId, session);
   await assertMatterWritable(folder.matterId);
 
@@ -114,7 +114,7 @@ export async function renameFolder(input: z.infer<typeof folderRenameSchema>) {
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-      throw new Error(`已有同名卷宗「${data.name.trim()}」`);
+      throw new Error(`Đã có hồ sơ trùng tên "${data.name.trim()}"`);
     }
     throw e;
   }
@@ -139,12 +139,12 @@ export async function deleteFolder(input: z.infer<typeof folderDeleteSchema>) {
     where: { id: data.id },
     select: { id: true, matterId: true, isDefault: true, _count: { select: { documents: true } } }
   });
-  if (!folder) throw new Error("卷宗不存在");
-  if (folder.isDefault) throw new Error("默认卷宗不可删除，只能改名");
+  if (!folder) throw new Error("Hồ sơ không tồn tại");
+  if (folder.isDefault) throw new Error("Hồ sơ mặc định không xoá được, chỉ đổi tên");
   await requireFolderEditor(folder.matterId, session);
   await assertMatterWritable(folder.matterId);
 
-  // 卷宗内的文档不删，移到"散件"（folderId = null）
+  // Tài liệu trong hồ sơ không xoá, chuyển sang "tài liệu rời" (folderId = null)
   await prisma.$transaction([
     prisma.document.updateMany({
       where: { folderId: data.id },
@@ -192,16 +192,16 @@ export async function moveDocumentToFolder(input: z.infer<typeof moveDocumentToF
     where: { id: data.documentId },
     select: { id: true, matterId: true }
   });
-  if (!doc || !doc.matterId) throw new Error("文档不存在或未归属案件");
+  if (!doc || !doc.matterId) throw new Error("Tài liệu không tồn tại hoặc chưa thuộc vụ án");
 
-  // 校验目标卷宗与文档同案件
+  // Kiểm tra hồ sơ đích cùng vụ án với tài liệu
   if (data.folderId) {
     const folder = await prisma.documentFolder.findUnique({
       where: { id: data.folderId },
       select: { matterId: true }
     });
     if (!folder || folder.matterId !== doc.matterId) {
-      throw new Error("目标卷宗与文档不属于同一案件");
+      throw new Error("Hồ sơ đích và tài liệu không cùng một vụ án");
     }
   }
   await requireFolderEditor(doc.matterId, session);

@@ -36,7 +36,7 @@ describe("ai/actions", () => {
 
     const result = await recognizeInvoiceFromImage(formData);
 
-    expect(result).toEqual({ ok: false, message: "请上传发票图片" });
+    expect(result).toEqual({ ok: false, message: "Hãy tải lên ảnh hóa đơn" });
     expect(mockAiVision).not.toHaveBeenCalled();
   });
 
@@ -47,7 +47,7 @@ describe("ai/actions", () => {
 
     const result = await recognizeInvoiceFromImage(formData);
 
-    expect(result).toEqual({ ok: false, message: "请上传发票图片" });
+    expect(result).toEqual({ ok: false, message: "Hãy tải lên ảnh hóa đơn" });
   });
 
   it("should reject if file size is 0", async () => {
@@ -58,7 +58,7 @@ describe("ai/actions", () => {
 
     const result = await recognizeInvoiceFromImage(formData);
 
-    expect(result).toEqual({ ok: false, message: "请上传发票图片" });
+    expect(result).toEqual({ ok: false, message: "Hãy tải lên ảnh hóa đơn" });
   });
 
   it("should reject if file exceeds max size", async () => {
@@ -71,7 +71,7 @@ describe("ai/actions", () => {
     const result = await recognizeInvoiceFromImage(formData);
 
     expect(result.ok).toBe(false);
-    expect(result.message).toMatch(/超过 6MB/);
+    expect(result.message).toMatch(/vượt quá 6MB/);
   });
 
   it("should reject if file type is not image or PDF", async () => {
@@ -82,7 +82,7 @@ describe("ai/actions", () => {
 
     const result = await recognizeInvoiceFromImage(formData);
 
-    expect(result).toEqual({ ok: false, message: "仅支持图片或 PDF" });
+    expect(result).toEqual({ ok: false, message: "Chỉ hỗ trợ ảnh hoặc PDF" });
   });
 
   it("should accept image file", async () => {

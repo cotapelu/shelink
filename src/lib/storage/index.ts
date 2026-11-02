@@ -43,8 +43,8 @@ export function getStorageProvider(): StorageProvider {
       return _instance;
     }
     case "s3": {
-      // v0.17: @aws-sdk/client-s3 已为正式依赖；按需 require 避免 local 模式
-      // 在启动时加载它的 ~47 个传递依赖。
+      // v0.17: @aws-sdk/client-s3 đã là dependency chính thức; require theo nhu cầu
+      // để chế độ local không phải tải ~47 dependency chuyển tiếp khi khởi động.
       const { S3StorageProvider } = require("./s3") as typeof import("./s3");
       _instance = new S3StorageProvider();
       return _instance;

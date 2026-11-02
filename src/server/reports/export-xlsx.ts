@@ -18,7 +18,7 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.20: Xuất báo cáo xlsx cho律所
+ * v0.20: Xuất báo cáo xlsx cho văn phòng
  *
  * 3 sheet: Danh sách vụ án (Nhận mới kỳ này) / Chi tiết thu (RECEIVED kỳ này) / Sản lượng luật sư (Tập hợp kỳ này)
  */
@@ -33,7 +33,7 @@ export async function buildReportWorkbook(period: ReportPeriod): Promise<Buffer>
   wb.creator = "LawLink";
   wb.created = new Date();
 
-  // Sheet 1: 案件清单（本期新收）
+  // Sheet 1: Danh sách vụ án (tiếp nhận mới kỳ này)
   const matters = await prisma.matter.findMany({
     where: {
       createdAt: { gte: period.start, lt: period.end },

@@ -74,7 +74,7 @@ describe("convertIntakeToMatter", () => {
   it("throws if intake not found", async () => {
     (requireSession as any).mockResolvedValue({ user: { id: "u1", role: "ADMIN" } });
     (prisma.intake.findUnique as any).mockResolvedValue(null);
-    await expect(convertIntakeToMatter("i1")).rejects.toThrow("Intake 不存在");
+    await expect(convertIntakeToMatter("i1")).rejects.toThrow("Intake không tồn tại");
   });
 
   it("throws if already converted", async () => {
@@ -87,7 +87,7 @@ describe("convertIntakeToMatter", () => {
       conflictChecks: [],
       documents: []
     });
-    await expect(convertIntakeToMatter("i1")).rejects.toThrow("此 Intake 已转化");
+    await expect(convertIntakeToMatter("i1")).rejects.toThrow("Intake này đã chuyển đổi");
   });
 
   it("creates matter inside transaction and revalidates", async () => {
@@ -204,7 +204,7 @@ describe("convertIntakeToMatter", () => {
     expect(capturedTx.billing.create).toHaveBeenCalledWith({
       data: {
         matterId: "m1",
-        title: "委托代理合同 - 固定收费",
+        title: "Hợp đồng ủy quyền - Phí cố định",
         contractAmount: 5000,
         schedule: undefined,
         status: "ACTIVE"
@@ -871,7 +871,7 @@ describe("convertIntakeToMatter", () => {
     expect(capturedTx.billing.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          title: `委托代理合同 - HOURLY`
+          title: `Hợp đồng ủy quyền - HOURLY`
         })
       })
     );

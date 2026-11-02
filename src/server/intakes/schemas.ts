@@ -68,8 +68,8 @@ const litigationIntakeCategories = new Set([
 ]);
 
 const intakeCreateBaseSchema = z.object({
-  // 基础
-  // 案件名称去除所有空白字符（产品要求，避免列表/详情显示空格）
+  // Cơ bản
+  // Tên vụ án loại bỏ mọi ký tự trắng (yêu cầu sản phẩm, tránh hiển thị khoảng trắng ở danh sách/chi tiết)
   title: z.preprocess(
     (v) => (typeof v === "string" ? v.replace(/\s+/g, "") : v),
     z.string().max(200).optional().or(z.literal(""))
@@ -80,7 +80,7 @@ const intakeCreateBaseSchema = z.object({
   description: z.string().max(2000).optional().or(z.literal("")),
   receivedAt: z.coerce.date().optional(),
 
-  // 程序 + 诉讼地位 + 机构 + 标的
+  // Thủ tục + lập trường tố tụng + cơ quan + giá trị
   firstProcedureType: procedureTypeSchema.optional(),
   firstAgency: z.string().max(120).optional().or(z.literal("")),
   jurisdiction: z.string().max(120).optional().or(z.literal("")),
@@ -88,11 +88,11 @@ const intakeCreateBaseSchema = z.object({
   claimAmount: z.coerce.number().nonnegative().optional(),
   claimDescription: z.string().max(500).optional().or(z.literal("")),
 
-  // v0.30: 律协备案 + 是否反诉
+  // v0.30: Ghi nhận Hiệp hội luật sư + có phản tố không
   barFiling: z.enum(["NONE", "COLLECTIVE", "SENSITIVE", "MAJOR", "OTHER"]).optional(),
   counterclaim: z.boolean().default(false),
 
-  // v0.31: 非诉 / 顾问 / 专项 专属
+  // v0.31: Riêng cho phi tố tụng / tư vấn / đặc biệt
   businessType: z.string().max(60).optional().or(z.literal("")),
   serviceScope: z.string().max(1000).optional().or(z.literal("")),
   deliverables: z.string().max(500).optional().or(z.literal("")),
@@ -100,30 +100,30 @@ const intakeCreateBaseSchema = z.object({
   serviceStart: z.coerce.date().optional(),
   serviceEnd: z.coerce.date().optional(),
 
-  // 委托方 + 联系人
+  // Bên ủy quyền + người liên hệ
   clientId: z.string().cuid().optional().or(z.literal("")),
   clientName: z.string().max(120).optional().or(z.literal("")),
   clientType: clientTypeSchema.optional(),
   contactName: z.string().max(40).optional().or(z.literal("")),
   contactPhone: z.string().max(30).optional().or(z.literal("")),
 
-  // 企业自动填充（元典查询结果，透传到 Client 创建）
+  // Tự động điền doanh nghiệp (kết quả tra Nguờn điện, chuyển tiếp khi tạo Client)
   clientIdNumber: z.string().max(50).optional().or(z.literal("")),
   clientAddress: z.string().max(200).optional().or(z.literal("")),
   clientLegalRep: z.string().max(40).optional().or(z.literal("")),
 
-  // 律师费
+  // Phí luật sư
   feeType: feeTypeSchema.optional(),
-  feeAmount: z.coerce.number().nonnegative().optional(), // FIXED: 总金额；CONTINGENCY: 基础办案费
-  contingencyTerms: z.string().max(1000).optional().or(z.literal("")), // CONTINGENCY 收费方式
+  feeAmount: z.coerce.number().nonnegative().optional(), // FIXED: tổng số tiền; CONTINGENCY: phí cơ bản
+  contingencyTerms: z.string().max(1000).optional().or(z.literal("")), // CONTINGENCY: cách tính phí
   feeSchedule: z.string().max(500).optional().or(z.literal("")),
   feeNote: z.string().max(500).optional().or(z.literal("")),
 
-  // 团队
+  // Đội ngũ
   ownerUserId: z.string().cuid().optional().or(z.literal("")),
   coUserIds: z.array(z.string().cuid()).default([]),
 
-  // 对方 / 第三人（其中可能有 standing）
+  // Bên đối phương / Người thứ ba (trong đó có thể có standing)
   parties: z.array(partyInputSchema).default([])
 });
 
@@ -137,7 +137,7 @@ function requireLitigationStandings(
     ctx.addIssue({
       path: ["ourStanding"],
       code: z.ZodIssueCode.custom,
-      message: "请选择委托方诉讼地位"
+      message: "Chọn lập trường tố tụng cho bên ủy quyền"
     });
   }
 
@@ -146,7 +146,7 @@ function requireLitigationStandings(
       ctx.addIssue({
         path: ["parties", index, "standing"],
         code: z.ZodIssueCode.custom,
-        message: "请选择诉讼地位"
+        message: "Chọn lập trường tố tụng"
       });
     }
   });
@@ -173,7 +173,7 @@ export const intakeListQuerySchema = z.object({
 
 export const declineIntakeSchema = z.object({
   id: z.string().cuid(),
-  reason: z.string().min(1, "请填写不接案原因").max(500)
+  reason: z.string().min(1, "Nhập lý do không tiếp nhận").max(500)
 });
 
 // Kéo-thả pipeline chỉ đổi giữa 2 giai đoạn đang xử lý; các chuyển cần lý do/duyệt (bổ sung/từ chối/chuyển) dùng luật riêng.

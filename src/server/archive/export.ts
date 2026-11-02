@@ -18,18 +18,18 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.9.4 归档 ZIP 导出
+ * v0.9.4 Xuất ZIP lưu trữ
  *
- * 结构：
+ * Cấu trúc:
  *   {archiveNo}/
- *     README.md                 — 归档说明 + 结构索引
- *     manifest.json             — 结构化全量数据（matter + parties + procedures + ...）
- *     封皮和目录/
- *       卷宗封皮.docx
- *       卷宗目录.docx
- *     材料/
+ *     README.md                 — Mô tả lưu trữ + chỉ mục cấu trúc
+ *     manifest.json             — Dữ liệu toàn bộ có cấu trúc (matter + parties + procedures + ...)
+ *     Bìa và mục lục/
+ *       Bìa hồ sơ.docx
+ *       Mục lục hồ sơ.docx
+ *     Tư liệu/
  *       {category}/
- *         {N}_{原文件名}
+ *         {N}_{tên tệp gốc}
  */
 import PizZip from "pizzip";
 import { prisma } from "@/lib/prisma";
@@ -44,12 +44,12 @@ interface ZipResult {
 }
 
 const CATEGORY_DIR: Record<string, string> = {
-  EVIDENCE: "证据",
-  PLEADING: "诉讼文书",
-  PROCEDURE: "程序文书",
-  JUDGMENT: "裁判文书",
-  CONTRACT: "合同",
-  OTHER: "其他"
+  EVIDENCE: "Tài liệu chứng cứ",
+  PLEADING: "Văn bản tố tụng",
+  PROCEDURE: "Tài liệu thủ tục",
+  JUDGMENT: "Văn bản quyết định",
+  CONTRACT: "Hợp đồng",
+  OTHER: "Khác"
 };
 
 function safeName(s: string): string {
@@ -64,7 +64,7 @@ async function readDocumentBuffer(doc: {
 }): Promise<Buffer> {
   const raw = await storage.readFile(doc.path);
   if (!doc.encrypted) return raw;
-  if (!doc.iv || !doc.authTag) throw new Error("加密元数据损坏");
+  if (!doc.iv || !doc.authTag) throw new Error("Siêu dữ liệu mã hoá bị hỏng");
   return decryptBuffer(raw, doc.iv, doc.authTag);
 }
 
@@ -85,8 +85,8 @@ export async function buildArchiveZip(matterId: string): Promise<ZipResult> {
       owner: { select: { id: true, name: true } }
     }
   });
-  if (!matter) throw new Error("案件不存在");
-  if (matter.archiveRecords.length === 0) throw new Error("案件尚未归档，无法导出");
+  if (!matter) throw new Error("Vụ án không tồn tại");
+  if (matter.archiveRecords.length === 0) throw new Error("Vụ án chưa lưu trữ, không thể xuất");
 
   const archive = matter.archiveRecords[0];
   const docs = await prisma.document.findMany({
@@ -110,7 +110,7 @@ export async function buildArchiveZip(matterId: string): Promise<ZipResult> {
   const zip = new PizZip();
   const root = safeName(archive.archiveNo);
 
-  // ===== manifest.json：结构化数据快照（脱敏：密码、apiKey、authTag 等不导出）
+  // ===== manifest.json: snapshot dữ liệu có cấu trúc (che: mật khẩu, apiKey, authTag... không xuất)
   const manifest = {
     archiveNo: archive.archiveNo,
     archivedAt: archive.archivedAt.toISOString(),
@@ -230,67 +230,67 @@ export async function buildArchiveZip(matterId: string): Promise<ZipResult> {
   const md = [
     `# ${matter.title}`,
     "",
-    `归档编号：**${archive.archiveNo}**  `,
-    `案件编号：${matter.internalCode}  `,
-    `归档日期：${archive.archivedAt.toISOString().slice(0, 10)}  `,
-    `归档人：${archive.archivedBy}  `,
-    archive.completedAt ? `结案日期：${archive.completedAt.toISOString().slice(0, 10)}` : "",
+    `Mã lưu trữ: **${archive.archiveNo}**  `,
+    `Mã vụ án: ${matter.internalCode}  `,
+    `Ngày lưu trữ: ${archive.archivedAt.toISOString().slice(0, 10)}  `,
+    `Người lưu trữ: ${archive.archivedBy}  `,
+    archive.completedAt ? `Ngày kết thúc: ${archive.completedAt.toISOString().slice(0, 10)}` : "",
     "",
-    "## 结案小结",
+    "## Tóm tắt kết thúc",
     "",
     archive.summary,
     "",
-    archive.judgmentSummary ? "## 裁判结果\n\n" + archive.judgmentSummary + "\n" : "",
-    "## 目录",
+    archive.judgmentSummary ? "## Kết quả xét xử\n\n" + archive.judgmentSummary + "\n" : "",
+    "## Mục lục",
     "",
-    "- `manifest.json` — 案件全量结构化数据（JSON 格式）",
-    "- `封皮和目录/` — 自动生成的卷宗封皮与卷宗目录",
-    "- `材料/` — 全部上传材料按类别分目录归档",
+    "- `manifest.json` — Dữ liệu có cấu trúc toàn bộ vụ án (định dạng JSON)",
+    "- `Bìa và mục lục/` — Bìa hồ sơ và Mục lục hồ sơ sinh tự động",
+    "- `Tư liệu/` — Toàn bộ tài liệu đã tải lên, xếp theo loại",
     "",
     archive.missingItems.length > 0
-      ? `⚠️ 归档时存在缺项：${archive.missingItems.length} 项（详见 manifest.json）`
+      ? `⚠️ Còn thiếu khi lưu trữ: ${archive.missingItems.length} mục (xem manifest.json)`
       : ""
   ]
     .filter(Boolean)
     .join("\n");
   zip.file(`${root}/README.md`, md);
 
-  // ===== 封皮和目录
+  // ===== Bìa và mục lục
   if (archive.coverDocId) {
     const cover = docs.find((d) => d.id === archive.coverDocId);
     if (cover) {
       const buf = await readDocumentBuffer(cover);
-      zip.file(`${root}/封皮和目录/卷宗封皮.docx`, buf);
+      zip.file(`${root}/Bìa và mục lục/Bìa hồ sơ.docx`, buf);
     }
   }
   if (archive.catalogDocId) {
     const catalog = docs.find((d) => d.id === archive.catalogDocId);
     if (catalog) {
       const buf = await readDocumentBuffer(catalog);
-      zip.file(`${root}/封皮和目录/卷宗目录.docx`, buf);
+      zip.file(`${root}/Bìa và mục lục/Mục lục hồ sơ.docx`, buf);
     }
   }
 
-  // ===== 材料：跳过已经放进"封皮和目录"的两份
+  // ===== Tư liệu: bỏ qua hai tệp đã nằm trong "Bìa và mục lục"
   const skipIds = new Set(
     [archive.coverDocId, archive.catalogDocId].filter((x): x is string => !!x)
   );
   const seqByCategory: Record<string, number> = {};
   for (const d of docs) {
     if (skipIds.has(d.id)) continue;
-    const dir = CATEGORY_DIR[d.category] ?? "其他";
+    const dir = CATEGORY_DIR[d.category] ?? "Khác";
     const n = (seqByCategory[dir] ?? 0) + 1;
     seqByCategory[dir] = n;
     try {
       const buf = await readDocumentBuffer(d);
       const seq = String(n).padStart(3, "0");
-      zip.file(`${root}/材料/${dir}/${seq}_${safeName(d.name)}`, buf);
+      zip.file(`${root}/Tư liệu/${dir}/${seq}_${safeName(d.name)}`, buf);
     } catch (err) {
-      console.error(`[archive-export] 材料读取失败：${d.id}`, err);
-      // 单文件失败不阻断；写一条说明
+      console.error(`[archive-export] Đọc tư liệu thất bại: ${d.id}`, err);
+      // Một tệp lỗi không chặn toàn bộ; ghi một dòng chú thích
       zip.file(
-        `${root}/材料/${dir}/_读取失败_${safeName(d.name)}.txt`,
-        `该文件读取失败：${err instanceof Error ? err.message : String(err)}`
+        `${root}/Tư liệu/${dir}/_loi_doc_${safeName(d.name)}.txt`,
+        `Tệp này đọc thất bại: ${err instanceof Error ? err.message : String(err)}`
       );
     }
   }

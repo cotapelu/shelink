@@ -20,7 +20,7 @@
 "use server";
 
 /**
- * v0.20: 文书 AI 审查结果保存为案件 Document（与 A3 类案存档对称的模式）
+ * v0.20: Lưu kết quả kiểm tra AI văn bản thành Document của vụ án (mẫu đối xứng với lưu trữ类案 (vụ án cùng loại) A3 — giữ thuật ngữ)
  */
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
@@ -36,16 +36,16 @@ import type {
 } from "@/lib/ai/review-parser";
 
 const TYPE_CN: Record<ReviewType, string> = {
-  MISSING: "缺失要素",
-  RISK: "法律风险",
-  ISSUE: "条款问题",
-  SUGGESTION: "优化建议"
+  MISSING: "Yếu tố còn thiếu",
+  RISK: "Rủi ro pháp lý",
+  ISSUE: "Vấn đề điều khoản",
+  SUGGESTION: "Đề xuất tối ưu"
 };
 
 const SEV_CN: Record<ReviewSeverity, string> = {
-  HIGH: "高",
-  MEDIUM: "中",
-  LOW: "低"
+  HIGH: "Cao",
+  MEDIUM: "Trung bình",
+  LOW: "Thấp"
 };
 
 function safeFileName(name: string): string {
@@ -58,19 +58,19 @@ function buildMarkdown(
 ): string {
   const now = new Date().toLocaleString("zh-CN");
   const lines: string[] = [
-    `# AI 审查结果：${reviewedDocName}`,
+    `# Kết quả kiểm tra AI: ${reviewedDocName}`,
     "",
-    `- **审查时间**：${now}`,
-    `- **审查条数**：${items.length}`,
+    `- **Thời gian kiểm tra**: ${now}`,
+    `- **Số mục kiểm tra**: ${items.length}`,
     "",
     "---",
     ""
   ];
   if (items.length === 0) {
-    lines.push("> AI 未发现明显问题。");
+    lines.push("> AI không phát hiện vấn đề rõ rệt nào.");
     return lines.join("\n");
   }
-  // 按 type 分组输出
+  // Xuất theo nhóm type
   const groups: ReviewType[] = ["MISSING", "RISK", "ISSUE", "SUGGESTION"];
   for (const t of groups) {
     const sub = items.filter((i) => i.type === t);
@@ -98,9 +98,9 @@ export async function saveReviewToMatter(input: {
     where: { id: input.matterId, deletedAt: null },
     select: { id: true, status: true }
   });
-  if (!matter) throw new Error("案件不存在");
+  if (!matter) throw new Error("Vụ án không tồn tại");
   if (matter.status === "ARCHIVED") {
-    throw new Error("案件已归档（只读），不能再保存审查结果");
+    throw new Error("Vụ án đã lưu trữ (chỉ đọc), không lưu được kết quả kiểm tra nữa");
   }
 
   const md = buildMarkdown(input.reviewedDocName, input.items);
@@ -108,7 +108,7 @@ export async function saveReviewToMatter(input: {
   const path = await storage.writeFile(`m_${input.matterId}`, buf);
   const hash = sha256(buf);
   const ts = new Date().toISOString().slice(0, 10);
-  const docName = `AI审查_${safeFileName(input.reviewedDocName)}_${ts}.md`;
+  const docName = `KiemTraAI_${safeFileName(input.reviewedDocName)}_${ts}.md`;
 
   const doc = await prisma.document.create({
     data: {
@@ -121,7 +121,7 @@ export async function saveReviewToMatter(input: {
       size: buf.byteLength,
       sha256: hash,
       encrypted: false,
-      tags: ["AI审查", "存档"]
+      tags: ["Kiểm tra AI", "Lưu trữ"]
     },
     select: { id: true, name: true }
   });

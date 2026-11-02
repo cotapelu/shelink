@@ -164,7 +164,7 @@ describe('archive guard', () => {
 
       await expect(
         assertDocumentWritable('matter-1', { kind: 'upload', folderName: 'Thường' })
-      ).rejects.toThrow('案件已归档，仅允许补传材料到「结案」或「归档」卷宗');
+      ).rejects.toThrow('Vụ án đã lưu trữ, chỉ được bổ sung tài liệu vào hồ sơ "Kết thúc" hoặc "Lưu trữ"');
     });
 
     it('rejects modify when archived', async () => {
@@ -179,7 +179,7 @@ describe('archive guard', () => {
 
       await expect(
         assertDocumentWritable('matter-1', { kind: 'modify' })
-      ).rejects.toThrow('案件已归档，材料不可修改或删除');
+      ).rejects.toThrow('Vụ án đã lưu trữ, không được sửa hoặc xoá tài liệu');
     });
 
     it('allows modify if matter not archived', async () => {

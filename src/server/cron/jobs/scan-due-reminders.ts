@@ -18,17 +18,17 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.27: 期限到期提醒扫描
- * v0.38: 增加开庭提醒（Hearing 表）
+ * v0.27: Quét nhắc thời hạn đến hạn
+ * v0.38: Thêm nhắc phiên tòa (bảng Hearing)
  *
- * 每天 09:00 跑一次（Asia/Shanghai），覆盖 Deadline / Hearing：
- * - Deadline：命中 dueAt 落在 T-3 / T-1 / T / T+1 的未完成项各发一条通知
- * - Hearing：命中 startsAt 落在 T-3 / T-1 / T（开庭过去不提醒，不含 T+1），文案带具体开庭时间
- * - 接收人：Deadline/Hearing → procedure.matter.ownerId
- * - 去重：refType="DueReminder:Deadline:-3" 等 + refId 实体 ID + 当日已发不再发
+ * Chạy mỗi ngày 09:00 (Asia/Ho_Chi_Minh), phủ Deadline / Hearing:
+ * - Deadline: mỗi mục chưa hoàn tất có dueAt rơi vào T-3 / T-1 / T / T+1 gửi một thông báo
+ * - Hearing: mục có startsAt rơi vào T-3 / T-1 / T (phiên tòa đã qua không nhắc, không gồm T+1), nội dung kèm giờ mở phiên cụ thể
+ * - Người nhận: Deadline/Hearing → procedure.matter.ownerId
+ * - Chống trùng: refType="DueReminder:Deadline:-3"... + refId ID thực thể + đã gửi trong ngày thì không gửi lại
  *
- * 业务原因：v0.26 之前没有"扫到期发提醒"机制，导致律师设的答辩期、举证期等到点不响；
- * v0.38 用户要求：凡有具体开庭时间，开庭前主动提醒（提前3天/1天/当天早上）。
+ * Lý do nghiệp vụ: trước v0.26 không có cơ chế "quét đến hạn gửi nhắc", khiến thời hạn trả lời, thời hạn chứng minh luật sư đặt đến lúc không réo;
+ * Yêu cầu người dùng v0.38: có giờ mở phiên cụ thể thì chủ động nhắc trước phiên (trước 3 ngày/1 ngày/sáng hôm đó).
  */
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/server/notifications/create";
@@ -69,17 +69,17 @@ function priorityFor(offset: Offset) {
 }
 
 function stateText(offset: Offset) {
-  if (offset > 0) return `逾期 ${offset} 天`;
-  if (offset === 0) return "今天到期";
-  return `还有 ${-offset} 天到期`;
+  if (offset > 0) return `Quá hạn ${offset} ngày`;
+  if (offset === 0) return "Đến hạn hôm nay";
+  return `Còn ${-offset} ngày nữa đến hạn`;
 }
 
-// 开庭专用：带"今天/明天/X天后"前缀 + 具体时分（开庭精确到时分，区别于只到天的期限）
+// Riêng phiên tòa: thêm tiền tố "hôm nay/ngày mai/X ngày nữa" + giờ phút cụ thể (phiên tòa chính xác tới phút, khác thời hạn chỉ tới ngày)
 function hearingWhenText(offset: Offset, startsAt: Date) {
   const hh = String(startsAt.getHours()).padStart(2, "0");
   const mm = String(startsAt.getMinutes()).padStart(2, "0");
-  const day = offset === 0 ? "今天" : offset === -1 ? "明天" : `${-offset} 天后`;
-  return `${day} ${hh}:${mm} 开庭`;
+  const day = offset === 0 ? "Hôm nay" : offset === -1 ? "Ngày mai" : `${-offset} ngày nữa`;
+  return `${day} ${hh}:${mm} mở phiên tòa`;
 }
 
 async function fetchDeadlines(offset: Offset, dayStart: Date, dayEnd: Date) {
@@ -105,7 +105,7 @@ async function notifySingleDeadline(d: any, offset: Offset, todayStart: Date): P
   const refTypeDL = `${offsetKey(offset)}:Deadline`;
   const dup = await prisma.notification.findFirst({ where: { refType: refTypeDL, refId: d.id, createdAt: { gte: todayStart } }, select: { id: true } });
   if (dup) return { notified: false, suppressed: true };
-  await createNotification({ userId, type: "DEADLINE_REMINDER", priority: priorityFor(offset), title: `${stateText(offset)}：${d.title}`, content: `案件 ${d.procedure.matter.internalCode}·${d.procedure.matter.title}`, href: `/matters/${d.procedure.matter.id}`, refType: refTypeDL, refId: d.id });
+  await createNotification({ userId, type: "DEADLINE_REMINDER", priority: priorityFor(offset), title: `${stateText(offset)}: ${d.title}`, content: `Vụ án ${d.procedure.matter.internalCode}·${d.procedure.matter.title}`, href: `/matters/${d.procedure.matter.id}`, refType: refTypeDL, refId: d.id });
   return { notified: true, suppressed: false };
 }
 
@@ -145,8 +145,8 @@ async function notifySingleHearing(h: any, offset: Offset, todayStart: Date): Pr
   const refTypeHearing = `${offsetKey(offset)}:Hearing`;
   const dup = await prisma.notification.findFirst({ where: { refType: refTypeHearing, refId: h.id, createdAt: { gte: todayStart } }, select: { id: true } });
   if (dup) return { notified: false, suppressed: true };
-  const place = [h.room && `${h.room}`, h.judge && `审判员 ${h.judge}`].filter(Boolean).join(" · ");
-  await createNotification({ userId, type: "HEARING_REMINDER", priority: priorityFor(offset), title: `${hearingWhenText(offset, h.startsAt)}：${h.title}`, content: `案件 ${h.procedure.matter.internalCode}·${h.procedure.matter.title}${place ? ` · ${place}` : ""}`, href: `/matters/${h.procedure.matter.id}`, refType: refTypeHearing, refId: h.id });
+  const place = [h.room && `${h.room}`, h.judge && `Thẩm phán ${h.judge}`].filter(Boolean).join(" · ");
+  await createNotification({ userId, type: "HEARING_REMINDER", priority: priorityFor(offset), title: `${hearingWhenText(offset, h.startsAt)}: ${h.title}`, content: `Vụ án ${h.procedure.matter.internalCode}·${h.procedure.matter.title}${place ? ` · ${place}` : ""}`, href: `/matters/${h.procedure.matter.id}`, refType: refTypeHearing, refId: h.id });
   return { notified: true, suppressed: false };
 }
 

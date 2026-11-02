@@ -82,7 +82,7 @@ export async function addProcedure(input: ProcedureCreateInput) {
     data: {
       matterId: data.matterId,
       eventType: "PROCEDURE_ADDED",
-      title: `新增程序：${created.customLabel ?? created.type}`,
+      title: `Thêm thủ tục: ${created.customLabel ?? created.type}`,
       occurredAt: new Date(),
       refType: "MatterProcedure",
       refId: created.id
@@ -113,7 +113,7 @@ export async function updateProcedure(input: ProcedureUpdateInput) {
     where: { id },
     select: { matterId: true }
   });
-  if (!existing) throw new Error("程序不存在");
+  if (!existing) throw new Error("Thủ tục không tồn tại");
   await assertCanAccessMatter(session.user.id, session.user.role, existing.matterId);
   await assertMatterWritable(existing.matterId);
 
@@ -140,7 +140,7 @@ export async function deleteProcedure(id: string) {
 
   await assertCanAccessMatter(session.user.id, session.user.role, procedure.matterId);
   await assertMatterWritable(procedure.matterId);
-  await assertCanLeadMatter(session.user.id, procedure.matterId, "仅案件主办/协办可以删除程序");
+  await assertCanLeadMatter(session.user.id, procedure.matterId, "Chỉ chủ trì/cộng tác của vụ án được xoá thủ tục");
 
   await prisma.matterProcedure.delete({ where: { id } });
   await audit({
@@ -165,7 +165,7 @@ export async function addDeadline(input: DeadlineCreateInput) {
     where: { id: data.procedureId },
     select: { matterId: true }
   });
-  if (!procedureForGuard) throw new Error("程序不存在");
+  if (!procedureForGuard) throw new Error("Thủ tục không tồn tại");
   await assertCanAccessMatter(session.user.id, session.user.role, procedureForGuard.matterId);
   await assertMatterWritable(procedureForGuard.matterId);
 
@@ -193,12 +193,12 @@ export async function addDeadline(input: DeadlineCreateInput) {
       targetId: created.id,
       detail: { matterId: procedure.matterId, procedureId: data.procedureId }
     });
-    // v0.43 项4：写入案件动态时间线
+    // v0.43 mục 4: ghi dòng thời gian động của vụ án
     await prisma.timelineEvent.create({
       data: {
         matterId: procedure.matterId,
         eventType: "DEADLINE_ADDED",
-        title: `新增期限：${data.title}`,
+        title: `Thêm thời hạn: ${data.title}`,
         occurredAt: new Date(),
         refType: "Deadline",
         refId: created.id
@@ -271,7 +271,7 @@ export async function addHearing(input: HearingCreateInput) {
     where: { id: data.procedureId },
     select: { matterId: true }
   });
-  if (!procedureForGuard) throw new Error("程序不存在");
+  if (!procedureForGuard) throw new Error("Thủ tục không tồn tại");
   await assertCanAccessMatter(session.user.id, session.user.role, procedureForGuard.matterId);
   await assertMatterWritable(procedureForGuard.matterId);
 
@@ -299,7 +299,7 @@ export async function addHearing(input: HearingCreateInput) {
       data: {
         matterId: procedure.matterId,
         eventType: "HEARING_SCHEDULED",
-        title: `开庭：${data.title}`,
+        title: `Phiên tòa: ${data.title}`,
         occurredAt: data.startsAt,
         refType: "Hearing",
         refId: created.id
@@ -340,7 +340,7 @@ export async function deleteHearing(id: string) {
   return { ok: true };
 }
 
-// ============ ProcedureMemo（v0.42 备忘录）============
+// ============ ProcedureMemo (v0.42 ghi nhớ) ============
 
 export async function addProcedureMemo(input: {
   procedureId: string;
@@ -348,14 +348,14 @@ export async function addProcedureMemo(input: {
 }) {
   const session = await requireSession();
   const content = input.content.trim();
-  if (!content) throw new Error("备忘内容不能为空");
-  if (content.length > 1000) throw new Error("备忘内容过长（≤1000字）");
+  if (!content) throw new Error("Nội dung ghi nhớ không được rỗng");
+  if (content.length > 1000) throw new Error("Nội dung ghi nhớ quá dài (≤1000 ký tự)");
 
   const proc = await prisma.matterProcedure.findUnique({
     where: { id: input.procedureId },
     select: { matterId: true }
   });
-  if (!proc) throw new Error("程序不存在");
+  if (!proc) throw new Error("Thủ tục không tồn tại");
   await assertCanAccessMatter(session.user.id, session.user.role, proc.matterId);
   await assertMatterWritable(proc.matterId);
 

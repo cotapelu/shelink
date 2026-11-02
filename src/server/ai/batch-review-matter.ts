@@ -20,12 +20,12 @@
 "use server";
 
 /**
- * v0.22: 一键扫描案件全部未审查文档
+ * v0.22: Quét một bấm toàn bộ tài liệu chưa kiểm tra của vụ án
  *
- * - 取本案中 mime 支持的（PDF / DOCX / text）且 7 天内没审查过的 documents
- * - 硬上限单次 5 个文档（防 token 爆）
- * - 循环调 reviewDocument；单条失败不阻断
- * - 返回 { reviewed, skipped, errors[] }
+ * - Lấy documents của vụ mà mime hỗ trợ (PDF / DOCX / text) và chưa kiểm tra trong 7 ngày
+ * - Trần cứng mỗi lần 5 tài liệu (chống nổ token)
+ * - Lặp gọi reviewDocument; một mục lỗi không chặn các mục khác
+ * - Trả về { reviewed, skipped, errors[] }
  */
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
@@ -61,7 +61,7 @@ export async function batchReviewMatterDocuments(input: {
   const session = await requireSession();
   await assertCanAccessMatter(session.user.id, session.user.role, input.matterId);
 
-  // 拿本案 documents 当中可审查的
+  // Lấy các documents của vụ có thể kiểm tra
   const docs = await prisma.document.findMany({
     where: { matterId: input.matterId, deletedAt: null },
     orderBy: { createdAt: "desc" },
@@ -69,7 +69,7 @@ export async function batchReviewMatterDocuments(input: {
   });
   const reviewable = docs.filter((d) => isReviewable(d.mimeType));
 
-  // 拉最近 7 天内已审查的 documentId 集合
+  // Lấy tập documentId đã kiểm tra trong 7 ngày qua
   const cutoff = new Date(Date.now() - RECENT_HOURS * 3600_000);
   const recent = await prisma.reviewRecord.findMany({
     where: {
@@ -88,7 +88,7 @@ export async function batchReviewMatterDocuments(input: {
       skipped.push({
         documentId: d.id,
         documentName: d.name,
-        reason: `不支持的格式：${d.mimeType ?? "未知"}`
+        reason: `Định dạng không hỗ trợ: ${d.mimeType ?? "không rõ"}`
       });
       continue;
     }
@@ -96,7 +96,7 @@ export async function batchReviewMatterDocuments(input: {
       skipped.push({
         documentId: d.id,
         documentName: d.name,
-        reason: "7 天内已审查过"
+        reason: "Đã kiểm tra trong 7 ngày qua"
       });
       continue;
     }
@@ -110,7 +110,7 @@ export async function batchReviewMatterDocuments(input: {
       skipped.push({
         documentId: d.id,
         documentName: d.name,
-        reason: `本次跳过（每次最多 ${MAX_DOCS_PER_BATCH} 个，可再次点扫描）`
+        reason: `Lần này bỏ qua (mỗi lần tối đa ${MAX_DOCS_PER_BATCH} tài liệu, có thể bấm quét lại)`
       });
     }
   }
@@ -129,7 +129,7 @@ export async function batchReviewMatterDocuments(input: {
       errors.push({
         documentId: d.id,
         documentName: d.name,
-        error: err instanceof Error ? err.message : "未知错误"
+        error: err instanceof Error ? err.message : "Lỗi không rõ"
       });
     }
   }

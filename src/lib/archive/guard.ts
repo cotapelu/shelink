@@ -55,7 +55,7 @@ async function findWritableMatter(
 }
 
 /**
- * 已归档案件视为只读。抛错（中文）由 UI catch 显示 toast。
+ * Vụ án đã lưu trữ coi là chỉ đọc. Ném lỗi (tiếng Việt) để UI catch hiện toast.
  */
 export async function assertMatterWritable(
   matterId: string | null | undefined,
@@ -84,7 +84,7 @@ export function isArchiveFolderName(name: string | null | undefined): boolean {
 }
 
 /**
- * 文档操作门禁：归档后只允许上传到 ARCHIVE 卷宗。删除/重命名/移动一律禁止。
+ * Cổng thao tác tài liệu: sau khi lưu trữ chỉ được tải lên hồ sơ ARCHIVE. Cấm mọi xoá/đổi tên/di chuyển.
  */
 export async function assertDocumentWritable(
   matterId: string | null | undefined,
@@ -92,13 +92,13 @@ export async function assertDocumentWritable(
 ): Promise<void> {
   if (!matterId) return;
   const matter = await findWritableMatter(matterId, opts);
-  if (!matter) throw new Error("案件不存在或无权处理");
+  if (!matter) throw new Error("Vụ án không tồn tại hoặc không có quyền xử lý");
   if (matter.status !== "ARCHIVED") return;
 
   if (opts.kind === "modify") {
-    throw new Error("案件已归档，材料不可修改或删除");
+    throw new Error("Vụ án đã lưu trữ, không được sửa hoặc xoá tài liệu");
   }
   if (opts.kind === "upload" && !isArchiveFolderName(opts.folderName)) {
-    throw new Error("案件已归档，仅允许补传材料到「结案」或「归档」卷宗");
+    throw new Error("Vụ án đã lưu trữ, chỉ được bổ sung tài liệu vào hồ sơ \"Kết thúc\" hoặc \"Lưu trữ\"");
   }
 }

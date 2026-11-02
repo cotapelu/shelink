@@ -47,7 +47,7 @@ export const procedureCreateSchema = z.object({
   panel: z.string().max(80).optional().or(z.literal("")),
   handler: z.string().max(40).optional().or(z.literal("")),
   acceptedAt: z.string().optional().nullable().transform(v => (!v ? undefined : new Date(v))),
-  // v0.44: 主办律师
+  // v0.44: Luật sư chủ trì
   leadLawyerId: z.string().cuid().optional().nullable(),
   isExternalLead: z.boolean().default(false)
 });
@@ -82,7 +82,7 @@ export const deadlineCategorySchema = z.enum([
 
 export const deadlineCreateSchema = z.object({
   procedureId: z.string().cuid(),
-  title: z.string().min(1, "期限名称必填").max(100),
+  title: z.string().min(1, "Tên thời hạn bắt buộc nhập").max(100),
   category: deadlineCategorySchema.default("CUSTOM"),
   dueAt: z.coerce.date(),
   basis: z.string().max(200).optional().or(z.literal("")),
@@ -91,7 +91,7 @@ export const deadlineCreateSchema = z.object({
 
 export const hearingCreateSchema = z.object({
   procedureId: z.string().cuid(),
-  title: z.string().min(1, "开庭主题必填").max(80),
+  title: z.string().min(1, "Chủ đề phiên tòa bắt buộc nhập").max(80),
   startsAt: z.coerce.date(),
   endsAt: z.coerce.date().optional(),
   room: z.string().max(40).optional().or(z.literal("")),

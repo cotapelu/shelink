@@ -18,18 +18,18 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * 把 search params 解析成 ReportPeriod，被 page 和 export route 共用。
+ * Phân tích search params thành ReportPeriod, dùng chung cho page và export route.
  *
- * 接受参数：
- *   ?period=month|quarter|year|lastYear   预设
- *   ?period=custom&start=yyyy-MM-dd&end=yyyy-MM-dd   自定义
- *   缺省 / 非法 → year
+ * Nhận tham số:
+ *   ?period=month|quarter|year|lastYear   định sẵn
+ *   ?period=custom&start=yyyy-MM-dd&end=yyyy-MM-dd   tuỳ chọn
+ *   Thiếu / không hợp lệ → year
  */
 import { customPeriod, periodPresets, type ReportPeriod } from "./queries";
 
 export type ResolvedPeriod = {
   period: ReportPeriod;
-  /** 用于回写 URL */
+  /** Dùng để ghi lại URL */
   periodKey: "month" | "quarter" | "year" | "lastYear" | "custom";
   startStr?: string;
   endStr?: string;
@@ -50,7 +50,7 @@ export function resolveReportPeriod(params: {
       return {
         period: presets.year,
         periodKey: "year",
-        error: "缺少 start / end，已回退本年"
+        error: "Thiếu start / end, đã quay về năm nay"
       };
     }
     try {
@@ -64,7 +64,7 @@ export function resolveReportPeriod(params: {
       return {
         period: presets.year,
         periodKey: "year",
-        error: err instanceof Error ? err.message : "自定义时间错误，已回退本年"
+        error: err instanceof Error ? err.message : "Thời gian tuỳ chọn lỗi, đã quay về năm nay"
       };
     }
   }

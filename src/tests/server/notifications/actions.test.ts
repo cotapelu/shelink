@@ -89,12 +89,12 @@ describe("notifications actions", () => {
 
     it("should throw if notification not found", async () => {
       mockPrisma.notification.findFirst.mockResolvedValue(null);
-      await expect(markNotificationRead("id1")).rejects.toThrow("通知不存在");
+      await expect(markNotificationRead("id1")).rejects.toThrow("Thông báo không tồn tại");
     });
 
     it("should reject if not owned (same as not found)", async () => {
       mockPrisma.notification.findFirst.mockResolvedValue(null);
-      await expect(markNotificationRead("id1")).rejects.toThrow("通知不存在");
+      await expect(markNotificationRead("id1")).rejects.toThrow("Thông báo không tồn tại");
     });
   });
 

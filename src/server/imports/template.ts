@@ -77,10 +77,10 @@ export async function buildMatterImportTemplate(): Promise<Buffer> {
   }, {}));
 
   // Sheet ghi chú
-  const notes = wb.addWorksheet("填写说明");
+  const notes = wb.addWorksheet("Hướng dẫn điền");
   notes.columns = [
-    { header: "列", key: "h", width: 16 },
-    { header: "说明", key: "d", width: 60 }
+    { header: "Cột", key: "h", width: 16 },
+    { header: "Diễn giải", key: "d", width: 60 }
   ];
   notes.getRow(1).font = { bold: true };
   notes.addRow({ h: "Cột bắt buộc", d: "Có dấu * ở header: Tên khách hàng/Số ID, Tên đối phương/Số ID, Loại vụ án, Trạng thái vụ án" });

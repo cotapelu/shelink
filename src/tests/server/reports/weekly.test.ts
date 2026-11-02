@@ -143,10 +143,10 @@ describe("formatWeeklyDigestContent", () => {
       receivedAmount: 1234.56
     };
     const text = formatWeeklyDigestContent(digest);
-    expect(text).toContain("新收 3 件");
-    expect(text).toContain("已结 2 件");
-    expect(text).toContain("已归档 1 件");
-    expect(text).toContain("收款 1,234.56 元");
+    expect(text).toContain("Tiếp nhận mới 3 vụ");
+    expect(text).toContain("Đã kết thúc 2 vụ");
+    expect(text).toContain("Đã lưu trữ 1 vụ");
+    expect(text).toContain("Thu 1.234,56 ₫");
   });
 
   it("formats with zero amounts", () => {
@@ -160,7 +160,7 @@ describe("formatWeeklyDigestContent", () => {
       receivedAmount: 0
     };
     const text = formatWeeklyDigestContent(digest);
-    expect(text).toBe("新收 0 件 · 已结 0 件 · 已归档 0 件 · 收款 0.00 元");
+    expect(text).toBe("Tiếp nhận mới 0 vụ · Đã kết thúc 0 vụ · Đã lưu trữ 0 vụ · Thu 0,00 ₫");
   });
 
   it("formats large numbers with locale", () => {
@@ -175,6 +175,6 @@ describe("formatWeeklyDigestContent", () => {
     };
     const text = formatWeeklyDigestContent(digest);
     // Vietnamese/zh-CN locale uses comma as thousand sep
-    expect(text).toContain("1,234,567.89");
+    expect(text).toContain("1.234.567,89");
   });
 });

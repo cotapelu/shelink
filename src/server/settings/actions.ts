@@ -43,7 +43,7 @@ export type TemplateUpdateInput = z.infer<typeof templateUpdateSchema>;
 
 async function requireAdmin() {
   const session = await requireSession();
-  if (session.user.role !== "ADMIN") throw new Error("仅管理员可执行");
+  if (session.user.role !== "ADMIN") throw new Error("Chỉ quản trị viên được thực hiện");
   return session;
 }
 

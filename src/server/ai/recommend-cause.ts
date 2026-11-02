@@ -20,11 +20,13 @@
 "use server";
 
 /**
- * v0.19: 案由 AI 推荐
+ * v0.19: Gợi ý nguyên nhân bằng AI
  *
- * 输入案情描述 → LLM 吐 3 个 4 级案由名 + 推荐理由 + 置信度
- * → 用 searchCauses 反查库内 id（找不到的丢弃）
- * → 返回带库内 cause 对象的候选列表
+ * Nhập mô tả tình hình → LLM trả về 3 tên nguyên nhân cấp 4 + lý do gợi ý + độ tin cậy
+ * → dùng searchCauses tra ngược id trong kho (không tìm thấy thì bỏ)
+ * → trả về danh sách ứng viên kèm object cause trong kho
+ * LƯU Ý: tên nguyên nhân trong DB đang là tiếng Trung (cụm seed prisma/seeds/causes-*) nên prompt
+ * vẫn yêu cầu model trả về tên案由 (nguyên nhân) tiếng Trung để khớp chính xác — xem glossary, chờ duyệt cùng cụm seed.
  */
 import type { MatterCategory } from "@prisma/client";
 import { aiChat, extractJson, AiNotConfiguredError } from "@/lib/ai/client";
@@ -45,36 +47,36 @@ type LlmCandidate = {
   confidence?: unknown;
 };
 
-const SYSTEM_PROMPT = `你是中国法律案由分类助手。
-基于用户给出的案件类别和案情描述，从《民事案件案由规定》/《行政案件案由规定》/刑事罪名体系中
-选出最贴近的 3 个**最末级**（三级或四级）案由。
+const SYSTEM_PROMPT = `Bạn là trợ lý phân loại案由 (nguyên nhân) pháp luật.
+Dựa trên loại vụ án và mô tả tình hình người dùng đưa ra, từ hệ thống《Quy định về案由 các vụ án dân sự》/《Quy định về案由 các vụ án hành chính》/ hệ thống tội danh hình sự,
+chọn ra 3案由**cấp cuối** (cấp 3 hoặc cấp 4) khớp nhất.
 
-严格按下方 JSON 数组返回（仅 JSON，不要任何解释文字）：
+Trả về nghiêm ngặt theo mảng JSON dưới đây (chỉ JSON, không kèm chữ giải thích):
 [
-  {"name": "案由全名（如：民间借贷纠纷）", "reason": "为什么贴合本案，30 字内", "confidence": "HIGH" | "MEDIUM" | "LOW"},
+  {"name": "Tên案由 (nguyên nhân) đầy đủ (vd: 民间借贷纠纷)", "reason": "Vì sao khớp với vụ này, trong 30 chữ", "confidence": "HIGH" | "MEDIUM" | "LOW"},
   ...
 ]
 
-规则：
-- 必须返回 3 条；按相关度从高到低排序
-- 案由名必须使用规范全称（如「民间借贷纠纷」而非「借贷」「借贷纠纷」）
-- 优先选最末级具体案由，避免「合同纠纷」这种二级笼统分类
-- confidence 自评：HIGH=案情要素完全对应；MEDIUM=主要要素匹配但有歧义；LOW=信息不足只能猜测`;
+Quy tắc:
+- Bắt buộc trả về 3 mục; sắp theo mức độ liên quan giảm dần
+- Tên案由 phải dùng tên chuẩn đầy đủ (vd「民间借贷纠纷」chứ không phải「借贷」「借贷纠纷」) — ví dụ là dữ liệu案由 DB đang có
+- Ưu tiên chọn nguyên nhân cụ thể cấp cuối, tránh phân loại chung chung cấp 2 như「合同纠纷」
+- confidence tự đánh giá: HIGH=các yếu tố tình hình tương ứng hoàn toàn; MEDIUM=yếu tố chính khớp nhưng còn mơ hồ; LOW=thông tin không đủ chỉ đoán được`;
 
 function categoryHint(category: MatterCategory): string {
   switch (category) {
     case "CIVIL_COMMERCIAL":
-      return "民商事";
+      return "Dân sự - Thương mại";
     case "CRIMINAL":
-      return "刑事";
+      return "Hình sự";
     case "ADMINISTRATIVE":
-      return "行政";
+      return "Hành chính";
     case "NON_LITIGATION":
-      return "非诉";
+      return "Phi tố tụng";
     case "LEGAL_COUNSEL":
-      return "常年法律顾问";
+      return "Tư vấn thường xuyên";
     case "SPECIAL_PROJECT":
-      return "专项";
+      return "Đặc biệt";
     default:
       return category;
   }
@@ -87,10 +89,10 @@ function normalizeConfidence(v: unknown): CauseConfidence {
 }
 
 /**
- * 反查：把 LLM 给的案由名映射到库内记录。
- * - 优先精确匹配 name
- * - 否则取 searchCauses 返回的第一条
- * - 过滤掉 level < 3 的（二级太笼统，宁可不推）
+ * Tra ngược: map tên案由 (nguyên nhân) LLM đưa ra sang bản ghi trong kho.
+ * - Ưu tiên khớp chính xác name
+ * - Nếu không thì lấy mục đầu tiên searchCauses trả về
+ * - Lọc bỏ level < 3 (cấp 2 quá chung chung, thà không gợi ý)
  */
 async function resolveCauseId(
   category: MatterCategory,
@@ -114,7 +116,7 @@ export async function recommendCause(input: {
 
   const situation = input.situation.trim();
   if (situation.length < 5) {
-    throw new Error("案情描述太短，至少 5 个字");
+    throw new Error("Mô tả tình hình quá ngắn, cần ít nhất 5 chữ");
   }
 
   let content = "";
@@ -124,7 +126,7 @@ export async function recommendCause(input: {
         { role: "system", content: SYSTEM_PROMPT },
         {
           role: "user",
-          content: `案件类别：${categoryHint(input.category)}\n\n案情：\n${situation.slice(0, 4000)}`
+          content: `Loại vụ án: ${categoryHint(input.category)}\n\nTình hình:\n${situation.slice(0, 4000)}`
         }
       ],
       maxTokens: 800,
@@ -133,12 +135,12 @@ export async function recommendCause(input: {
     content = res.content;
   } catch (err) {
     if (err instanceof AiNotConfiguredError) throw err;
-    throw new Error(err instanceof Error ? err.message : "AI 请求失败");
+    throw new Error(err instanceof Error ? err.message : "Yêu cầu AI thất bại");
   }
 
   const parsed = extractJson<LlmCandidate[]>(content);
   if (!Array.isArray(parsed)) {
-    throw new Error("AI 返回内容无法解析为候选列表");
+    throw new Error("Không phân tích được nội dung AI trả về thành danh sách ứng viên");
   }
 
   const results: CauseRecommendation[] = [];
@@ -154,7 +156,7 @@ export async function recommendCause(input: {
   }
 
   if (results.length === 0) {
-    throw new Error("AI 推荐的案由都不在案由库中，请手动选择");
+    throw new Error("Nguyên nhân AI gợi ý không có trong danh mục案由, hãy chọn thủ công");
   }
 
   return results;

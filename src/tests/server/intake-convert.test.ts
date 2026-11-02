@@ -114,11 +114,11 @@ beforeEach(() => {
 });
 
 describe("convertIntakeToMatter", () => {
-  it("按收案当前程序创建首程序，并同步当事人诉讼地位为程序当事人", async () => {
+  it("Tạo thủ tục đầu theo thủ tục hiện tại của tiếp nhận, đồng bộ lập trường các bên thành bên của thủ tục", async () => {
     prismaMock.intake.findUnique.mockResolvedValue({
       id: "intake-1",
       status: "PENDING_CONFIRMATION",
-      title: "甲与乙合同纠纷",
+      title: "Tranh chấp hợp đồng giữa甲 và乙",
       category: "CIVIL_COMMERCIAL",
       causeId: null,
       causeFreeText: null,
@@ -226,23 +226,23 @@ describe("convertIntakeToMatter", () => {
     });
   });
 
-  it("未运行利益冲突检索时拒绝转正式案件", async () => {
+  it("Từ chối chuyển thành vụ án chính thức khi chưa chạy kiểm tra xung đột lợi ích", async () => {
     prismaMock.intake.findUnique.mockResolvedValue({
       id: "intake-1",
       status: "PENDING_CONFIRMATION",
-      client: { name: "甲公司", idNumber: null },
+      client: { name: "Công ty Giáp", idNumber: null },
       parties: [],
       conflictChecks: [],
       documents: []
     });
 
     await expect(convertIntakeToMatter("intake-1")).rejects.toThrow(
-      "转为正式案件前必须先运行利益冲突检索"
+      "Phải chạy kiểm tra xung đột lợi ích trước khi chuyển thành vụ án chính thức"
     );
     expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });
 
-  it("高风险命中没有备注排除理由时拒绝转正式案件", async () => {
+  it("Từ chối chuyển thành vụ án chính thức khi có khớp rủi ro cao mà không ghi chú lý do loại trừ", async () => {
     prismaMock.intake.findUnique.mockResolvedValue({
       id: "intake-1",
       status: "PENDING_CONFIRMATION",
@@ -260,7 +260,7 @@ describe("convertIntakeToMatter", () => {
     });
 
     await expect(convertIntakeToMatter("intake-1")).rejects.toThrow(
-      "存在高风险或阻塞命中"
+      "Có kết quả khớp rủi ro cao hoặc chặn"
     );
     expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });

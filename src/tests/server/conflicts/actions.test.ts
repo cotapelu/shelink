@@ -65,7 +65,7 @@ describe("conflicts actions", () => {
       expect(createCall.data.conclusion).toBe("DIFFERENT");
       expect(createCall.data.decidedById).toBe("u1");
       expect(createCall.data.hits?.create).toEqual([]);
-      expect(createCall.data.note).toBe("系统自动标记：未命中历史案件冲突。");
+      expect(createCall.data.note).toBe("Hệ thống tự đánh dấu: không khớp xung đột lịch sử vụ án.");
       // audit should include hitCount 0 and autoConclusion DIFFERENT
       const auditCall = mockAudit.mock.calls[0][0];
       expect(auditCall.action).toBe("CONFLICT_CHECK_RUN");

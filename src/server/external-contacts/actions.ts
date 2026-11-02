@@ -20,12 +20,12 @@
 "use server";
 
 /**
- * v0.27: 服务中心 - 外部联系人通讯录
+ * v0.27: Trung tâm dịch vụ - danh bạ liên hệ ngoài
  *
- * 范围：法院 / 检察院 / 公证 / 仲裁 / 他所律师 / 鉴定专家 / 其他外部联系
- * 同事用 User 表，不在此（前端可一并展示）。
+ * Phạm vi: toà án / viện kiểm sát / công chứng / trọng tài / luật sư văn phòng khác / chuyên gia giám định / liên hệ ngoài khác
+ * Đồng nghiệp dùng bảng User, không nằm ở đây (frontend có thể hiển thị cùng).
  *
- * 权限：所有登录用户可看已通过联系人，可新建；普通成员新建后需管理层审核。
+ * Quyền: mọi người dùng đăng nhập xem được liên hệ đã duyệt, được tạo mới; thành viên thường tạo xong cần quản lý duyệt.
  */
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -49,7 +49,7 @@ const categories = [
 ] as const;
 
 const externalContactSchema = z.object({
-  name: z.string().min(1, "姓名必填").max(60),
+  name: z.string().min(1, "Họ tên bắt buộc nhập").max(60),
   category: z.enum(categories),
   organization: z.string().max(120).optional().or(z.literal("")),
   title: z.string().max(60).optional().or(z.literal("")),
@@ -126,10 +126,10 @@ async function assertCanModify(id: string, sessionUserId: string, role: string) 
     where: { id },
     select: { createdById: true }
   });
-  if (!c) throw new Error("联系人不存在");
+  if (!c) throw new Error("Liên hệ không tồn tại");
   const allowed =
     role === "ADMIN" || role === "PRINCIPAL_LAWYER" || c.createdById === sessionUserId;
-  if (!allowed) throw new Error("无权修改此联系人");
+  if (!allowed) throw new Error("Không có quyền sửa liên hệ này");
 }
 
 export async function createExternalContact(input: z.infer<typeof externalContactSchema>) {
@@ -163,8 +163,8 @@ export async function createExternalContact(input: z.infer<typeof externalContac
     await notifyRoleApprovers({
       roles: ["ADMIN", "PRINCIPAL_LAWYER"],
       excludeUserId: session.user.id,
-      title: "新的通讯录联系人待审核",
-      content: `${session.user.name ?? "同事"} 新增了外部联系人「${created.name}」`,
+      title: "Liên hệ danh bạ mới chờ duyệt",
+      content: `${session.user.name ?? "Đồng nghiệp"} đã thêm liên hệ ngoài "${created.name}"`,
       href: "/contacts",
       refType: "ExternalContact",
       refId: created.id,
@@ -207,14 +207,14 @@ export async function updateExternalContact(input: z.infer<typeof externalContac
 
 export async function approveExternalContact(input: z.infer<typeof externalContactReviewSchema>) {
   const session = await requireSession();
-  if (!isManager(session.user.role)) throw new Error("仅管理员可审核联系人");
+  if (!isManager(session.user.role)) throw new Error("Chỉ quản trị viên được duyệt liên hệ");
   const data = externalContactReviewSchema.parse(input);
   const current = await prisma.externalContact.findUnique({
     where: { id: data.id },
     select: { id: true, name: true, status: true, createdById: true }
   });
-  if (!current) throw new Error("联系人不存在");
-  if (current.status !== "PENDING_REVIEW") throw new Error("该联系人当前不在待审核状态");
+  if (!current) throw new Error("Liên hệ không tồn tại");
+  if (current.status !== "PENDING_REVIEW") throw new Error("Liên hệ này hiện không ở trạng thái chờ duyệt");
 
   const approved = await prisma.externalContact.update({
     where: { id: data.id },
@@ -235,8 +235,8 @@ export async function approveExternalContact(input: z.infer<typeof externalConta
   });
   if (current.createdById !== session.user.id) {
     await notifyRequester(current.createdById, {
-      title: "通讯录联系人已通过",
-      content: `外部联系人「${approved.name}」已通过审核并展示`,
+      title: "Liên hệ danh bạ đã duyệt",
+      content: `Liên hệ ngoài "${approved.name}" đã qua duyệt và được hiển thị`,
       refId: approved.id
     });
   }
@@ -246,14 +246,14 @@ export async function approveExternalContact(input: z.infer<typeof externalConta
 
 export async function rejectExternalContact(input: z.infer<typeof externalContactReviewSchema>) {
   const session = await requireSession();
-  if (!isManager(session.user.role)) throw new Error("仅管理员可审核联系人");
+  if (!isManager(session.user.role)) throw new Error("Chỉ quản trị viên được duyệt liên hệ");
   const data = externalContactReviewSchema.parse(input);
   const current = await prisma.externalContact.findUnique({
     where: { id: data.id },
     select: { id: true, name: true, status: true, createdById: true }
   });
-  if (!current) throw new Error("联系人不存在");
-  if (current.status !== "PENDING_REVIEW") throw new Error("该联系人当前不在待审核状态");
+  if (!current) throw new Error("Liên hệ không tồn tại");
+  if (current.status !== "PENDING_REVIEW") throw new Error("Liên hệ này hiện không ở trạng thái chờ duyệt");
 
   const rejected = await prisma.externalContact.update({
     where: { id: data.id },
@@ -274,8 +274,8 @@ export async function rejectExternalContact(input: z.infer<typeof externalContac
   });
   if (current.createdById !== session.user.id) {
     await notifyRequester(current.createdById, {
-      title: "通讯录联系人未通过",
-      content: `外部联系人「${rejected.name}」未通过审核${data.note ? `：${data.note}` : ""}`,
+      title: "Liên hệ danh bạ không đạt",
+      content: `Liên hệ ngoài "${rejected.name}" không qua duyệt${data.note ? `: ${data.note}` : ""}`,
       refId: rejected.id
     });
   }

@@ -49,7 +49,7 @@ export const MATTER_LIST_INCLUDE = {
     take: 3,
     select: { id: true, name: true, role: true, standing: true }
   },
-  // v0.16: Có申请 lưu trữ待审批 không?
+  // v0.16: Có yêu cầu lưu trữ đang chờ duyệt không?
   archiveRecords: {
     where: { status: "PENDING_REVIEW" },
     take: 1,

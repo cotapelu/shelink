@@ -29,7 +29,7 @@ import { saveFirmProfile, CATEGORY_WORD_DEFAULTS } from "./firm-profile";
 
 const CATEGORY_KEYS = Object.keys(CATEGORY_WORD_DEFAULTS) as MatterCategory[];
 
-/** 约 256KB（base64 编码后的字符长度上限）——律所 logo 应远小于此 */
+/** Khoảng 256KB (trần số ký tự sau khi base64) —— logo văn phòng phải nhỏ hơn nhiều */
 const MAX_LOGO_CHARS = 256 * 1024;
 
 const saveSchema = z.object({
@@ -38,7 +38,7 @@ const saveSchema = z.object({
   matterCodePrefix: z.string().trim().max(12).optional(),
   firmShortName: z.string().trim().max(8).optional(),
   caseNoTemplate: z.string().trim().max(60).optional(),
-  // undefined=不改 logo；null 或 "" =清除；data URL 字符串=替换
+  // undefined = không đổi logo; null hoặc "" = xoá; chuỗi data URL = thay
   logoDataUrl: z.string().nullable().optional(),
   categoryWords: z.record(z.string(), z.string().trim().max(12)).optional()
 });
@@ -46,7 +46,7 @@ const saveSchema = z.object({
 async function requireAdmin() {
   const session = await requireSession();
   if (session.user.role !== "ADMIN") {
-    throw new Error("仅管理员可修改律所信息配置");
+    throw new Error("Chỉ quản trị viên được sửa cấu hình thông tin văn phòng");
   }
   return session;
 }
@@ -55,17 +55,17 @@ export async function saveFirmProfileAction(input: z.infer<typeof saveSchema>) {
   const session = await requireAdmin();
   const data = saveSchema.parse(input);
 
-  // Logo 校验：必须是 image/* 的 base64 data URL，且体积受限
+  // Kiểm tra logo: phải là base64 data URL image/* và có giới hạn kích thước
   if (typeof data.logoDataUrl === "string" && data.logoDataUrl.length > 0) {
     if (!/^data:image\/(png|jpeg|jpg|webp|svg\+xml);base64,/.test(data.logoDataUrl)) {
-      throw new Error("Logo 必须是 PNG / JPG / WebP / SVG 图片");
+      throw new Error("Logo phải là ảnh PNG / JPG / WebP / SVG");
     }
     if (data.logoDataUrl.length > MAX_LOGO_CHARS) {
-      throw new Error("Logo 体积过大，请控制在约 180KB 以内");
+      throw new Error("Logo quá lớn, hãy giữ trong khoảng ~180KB");
     }
   }
 
-  // 只保留有效类别键的非空词
+  // Chỉ giữ từ không rỗng của các key loại hợp lệ
   let categoryWords: Partial<Record<MatterCategory, string>> | undefined;
   if (data.categoryWords) {
     categoryWords = {};
@@ -97,7 +97,7 @@ export async function saveFirmProfileAction(input: z.infer<typeof saveSchema>) {
     targetId: "firmProfile"
   });
 
-  // 侧栏品牌在所有 (app) 页面渲染 → 刷新整个布局
+  // Thương hiệu sidebar render ở mọi trang (app) → làm mới toàn layout
   revalidatePath("/", "layout");
   return { ok: true };
 }

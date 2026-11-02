@@ -18,7 +18,7 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.42 Cấu hình thông tin律所 / Hệ thống mã số (Mục 1 + Mục 11)
+ * v0.42 Cấu hình thông tin văn phòng / Hệ thống mã số (Mục 1 + Mục 11)
  *
  * Single SystemSetting key `firmProfile`, value là JSON:
  *   - firmName / firmSubtitle / logoDataUrl: Thương hiệu sidebar (mặc định LawLink / Lawyer Workspace)
@@ -26,7 +26,7 @@
  *   - firmShortName / caseNoTemplate / categoryWords: Template mã số nội bộ và ánh xạ từng phần
  *
  * Theo dõi mẫu "single key + typed CRUD" từ src/lib/ai/settings.ts. Logo lưu trực tiếp
- * dưới dạng base64 data URL (logo律所 nhỏ), tránh thêm storage/route phụ thuộc.
+ * dạng base64 data URL (logo văn phòng nhỏ), tránh phụ thuộc storage/route.
  */
 import type { MatterCategory } from "@prisma/client";
 
@@ -47,6 +47,7 @@ export const CATEGORY_WORD_DEFAULTS: Record<MatterCategory, string> = {
 };
 
 /** {Loại} từ viết tắt 1 ký tự (cố định, không chỉnh sửa được) */
+// Viết tắt loại vụ án — GIỮ nguyên giá trị ký tự gốc để tương thích mã đã lưu trong DB (xem glossary)
 export const CATEGORY_ABBR: Record<MatterCategory, string> = {
   CIVIL_COMMERCIAL: "民",
   LABOR_ARBITRATION: "劳",
@@ -74,7 +75,7 @@ export const FIRM_PROFILE_DEFAULTS: FirmProfile = {
   logoDataUrl: null,
   matterCodePrefix: "LL",
   firmShortName: "",
-  caseNoTemplate: "{年}-{所}{类词}-{序3}",
+  caseNoTemplate: "{年}-{所}{类词}-{序3}", // token giữ nguyên (hợp đồng cấu hình)
   categoryWords: CATEGORY_WORD_DEFAULTS
 };
 
