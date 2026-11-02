@@ -22,11 +22,11 @@ import type { LawyerWeeklyDigest } from "@/server/reports/weekly";
 
 export function MyWeeklyCard({ digest }: { digest: LawyerWeeklyDigest }) {
   const items = [
-    { label: "新收", value: digest.newIntake, color: "#5B8DEF", Icon: Briefcase },
-    { label: "已结", value: digest.closed, color: "#48BB78", Icon: CheckCircle2 },
-    { label: "已归档", value: digest.archived, color: "#9B7BF7", Icon: Archive },
+    { label: "Tiếp nhận mới", value: digest.newIntake, color: "#5B8DEF", Icon: Briefcase },
+    { label: "Đã kết thúc", value: digest.closed, color: "#48BB78", Icon: CheckCircle2 },
+    { label: "Đã lưu trữ", value: digest.archived, color: "#9B7BF7", Icon: Archive },
     {
-      label: "收款（元）",
+      label: "Thu (VNĐ)",
       value: digest.receivedAmount.toLocaleString("zh-CN", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
@@ -39,7 +39,7 @@ export function MyWeeklyCard({ digest }: { digest: LawyerWeeklyDigest }) {
   return (
     <section className="rounded-lg border border-border bg-card p-4">
       <header className="mb-3 flex items-baseline justify-between">
-        <h3 className="text-sm font-medium">{digest.userName} · 本周摘要</h3>
+        <h3 className="text-sm font-medium">{digest.userName} · Tóm tắt tuần này</h3>
         <span className="font-mono text-[10px] text-muted-foreground">{digest.period.label}</span>
       </header>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

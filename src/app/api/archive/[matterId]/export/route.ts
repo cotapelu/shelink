@@ -34,17 +34,17 @@ export async function GET(
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
-    return NextResponse.json({ error: "未登录" }, { status: 401 });
+    return NextResponse.json({ error: "Chưa đăng nhập" }, { status: 401 });
   }
 
-  // 权限：ADMIN / PRINCIPAL_LAWYER 或案件成员
+  // Quyền: ADMIN / PRINCIPAL_LAWYER hoặc thành viên vụ án
   const matter = await prisma.matter.findUnique({
     where: { id: params.matterId },
     select: { id: true, status: true, internalCode: true }
   });
-  if (!matter) return NextResponse.json({ error: "案件不存在" }, { status: 404 });
+  if (!matter) return NextResponse.json({ error: "Vụ án không tồn tại" }, { status: 404 });
   if (matter.status !== "ARCHIVED") {
-    return NextResponse.json({ error: "案件尚未归档" }, { status: 400 });
+    return NextResponse.json({ error: "Vụ án chưa lưu trữ" }, { status: 400 });
   }
 
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
@@ -52,7 +52,7 @@ export async function GET(
       where: { matterId_userId: { matterId: matter.id, userId: session.user.id } }
     });
     if (!member) {
-      return NextResponse.json({ error: "无权访问" }, { status: 403 });
+      return NextResponse.json({ error: "Không có quyền truy cập" }, { status: 403 });
     }
   }
 
@@ -60,14 +60,14 @@ export async function GET(
   try {
     result = await buildArchiveZip(params.matterId);
   } catch (err) {
-    console.error("[archive export] 构建失败：", err);
+    console.error("[archive export] Dựng thất bại:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "导出失败" },
+      { error: err instanceof Error ? err.message : "Xuất thất bại" },
       { status: 500 }
     );
   }
 
-  // 持久化路径 + checksum 回填到最新 ArchiveRecord
+  // Đường dẫn lưu bền + checksum ghi lại vào ArchiveRecord mới nhất
   try {
     const storagePath = await storage.writeFile(`archive_${matter.id}`, result.buffer);
     await prisma.archiveRecord.updateMany({
@@ -75,7 +75,7 @@ export async function GET(
       data: { exportPath: storagePath, checksum: result.checksum }
     });
   } catch (err) {
-    console.error("[archive export] 落盘失败（不阻断下载）：", err);
+    console.error("[archive export] Ghi đĩa thất bại (không chặn tải xuống):", err);
   }
 
   await audit({

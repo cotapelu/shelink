@@ -56,19 +56,19 @@ type FileEntry = {
 };
 
 const CATEGORY_META: Record<FirmFileCategory, { label: string; color: string }> = {
-  POLICY: { label: "制度", color: "#9B7BF7" },
-  GUIDE: { label: "指引", color: "#5B8DEF" },
-  TEMPLATE: { label: "参考模板", color: "#48BB78" },
-  REFERENCE: { label: "其他文件", color: "#F5A742" },
-  CONTRACT: { label: "合同", color: "#5B8DEF" },
-  LETTER: { label: "函件", color: "#48BB78" },
-  LICENSE: { label: "证照", color: "#F5A742" },
-  OTHER_FIRM: { label: "其他", color: "#9B7BF7" }
+  POLICY: { label: "Quy chế", color: "#9B7BF7" },
+  GUIDE: { label: "Hướng dẫn", color: "#5B8DEF" },
+  TEMPLATE: { label: "Mẫu tham khảo", color: "#48BB78" },
+  REFERENCE: { label: "Tệp khác", color: "#F5A742" },
+  CONTRACT: { label: "Hợp đồng", color: "#5B8DEF" },
+  LETTER: { label: "Công văn", color: "#48BB78" },
+  LICENSE: { label: "Giấy phép", color: "#F5A742" },
+  OTHER_FIRM: { label: "Khác", color: "#9B7BF7" }
 };
 
-/** 律所文书页展示的分类 */
+/** Phân loại hiển thị ở trang văn bản văn phòng */
 const FIRM_DOC_CATEGORIES: FirmFileCategory[] = ["CONTRACT", "LETTER", "LICENSE", "OTHER_FIRM"];
-/** 旧分类（兼容已有数据） */
+/** Phân loại cũ (tương thích dữ liệu đã có) */
 const LEGACY_CATEGORIES: FirmFileCategory[] = ["POLICY", "GUIDE", "TEMPLATE", "REFERENCE"];
 
 function formatBytes(n: number): string {
@@ -97,18 +97,18 @@ export function FirmFilesView({
   currentCategory?: FirmFileCategory;
   currentSearch: string;
   includeSuperseded: boolean;
-  /** v0.27: 让 service-center 复用同一组件且保留 ?tab= */
+  /** v0.27: để service-center tái dùng chung một component và giữ ?tab= */
   basePath?: string;
   preservedParams?: string[];
-  /** v0.37: 应用页内嵌——隐藏标题/介绍（tab 已标注）*/
+  /** v0.37: nhúng trong trang ứng dụng —— ẩn tiêu đề/giới thiệu (tab đã đánh dấu) */
   hideHeader?: boolean;
-  /** v0.37: 隐藏分类筛选条（如「制度规范」tab 只列 POLICY）*/
+  /** v0.37: ẩn thanh lọc phân loại (vd tab「quy chế」chỉ liệt kê POLICY) */
   hideCategoryNav?: boolean;
-  /** v0.44: 覆盖默认标题/副标题/图标 */
+  /** v0.44: đè tiêu đề/phụ đề/icon mặc định */
   headerTitle?: string;
   headerSubtitle?: string;
   headerIcon?: React.ReactNode;
-  /** v0.44: 分类集合（"firm"=律所文书新分类，默认旧分类） */
+  /** v0.44: tập phân loại ("firm"=phân loại mới văn bản VP, mặc định phân loại cũ) */
   categorySet?: "firm" | "legacy";
 }) {
   const router = useRouter();
@@ -123,12 +123,12 @@ export function FirmFilesView({
 
   function navigate(patch: Record<string, string | undefined>) {
     const next = new URLSearchParams();
-    // 保留指定的 query（如 tab=firm-files）
+    // Giữ query chỉ định (vd tab=firm-files)
     for (const k of preservedParams) {
       const v = sp.get(k);
       if (v) next.set(k, v);
     }
-    // 合并目前的 firm-file 相关 query（category / q / includeOld）
+    // Gộp query liên quan firm-file hiện tại (category / q / includeOld)
     for (const k of ["category", "q", "includeOld"]) {
       const v = sp.get(k);
       if (v) next.set(k, v);
@@ -147,15 +147,15 @@ export function FirmFilesView({
   }
 
   function handleDelete(f: FileEntry) {
-    if (!confirm(`确认删除「${f.name}」？\n（软删除，可在数据库找回）`)) return;
+    if (!confirm(`Xác nhận xoá「${f.name}」?\n (xoá mềm, tìm lại được trong database)`)) return;
     setPendingId(f.id);
     startTransition(async () => {
       try {
         await deleteFirmFile({ id: f.id });
-        toast.success("已删除");
+        toast.success("Đã xoá");
         router.refresh();
       } catch (err) {
-        toast.error("删除失败", { description: err instanceof Error ? err.message : "" });
+        toast.error("Xoá thất bại", { description: err instanceof Error ? err.message : "" });
       } finally {
         setPendingId(null);
       }
@@ -178,13 +178,13 @@ export function FirmFilesView({
           <div>
             <h1 className="flex items-center gap-2 text-xl">
               {headerIcon ?? <FolderArchive className="h-5 w-5 text-primary" strokeWidth={1.8} />}
-              {headerTitle ?? "律所文书"}
+              {headerTitle ?? "Văn bản văn phòng"}
             </h1>
             <p className="mt-0.5 text-[12px] text-muted-foreground">
               {headerSubtitle ?? (
                 <>
-                  合同 · 函件 · 证照 · 其他。全所共享，
-                  {canUpload ? "管理员可上传与版本替代" : "管理员上传"}
+                  Hợp đồng · Công văn · Giấy phép · Khác. Chia sẻ toàn văn phòng,
+                  {canUpload ? "Quản trị viên được tải lên và thay thế phiên bản" : "Quản trị viên tải lên"}
                 </>
               )}
             </p>
@@ -192,7 +192,7 @@ export function FirmFilesView({
           {canUpload && (
             <Button size="sm" onClick={() => setUploadOpen(true)} className="gap-1.5">
               <Upload className="h-3.5 w-3.5" />
-              上传资料
+              Tải tài liệu lên
             </Button>
           )}
         </header>
@@ -201,18 +201,18 @@ export function FirmFilesView({
           <div className="flex justify-end">
             <Button size="sm" onClick={() => setUploadOpen(true)} className="gap-1.5">
               <Upload className="h-3.5 w-3.5" />
-              上传资料
+              Tải tài liệu lên
             </Button>
           </div>
         )
       )}
 
-      {/* 筛选条 */}
+      {/* Thanh lọc */}
       <div className="space-y-3">
         {!hideCategoryNav && (
         <div className="flex flex-wrap items-center gap-1.5">
           <CategoryChip
-            label="全部"
+            label="Tất cả"
             color="#5B8DEF"
             count={files.length}
             active={!currentCategory}
@@ -237,7 +237,7 @@ export function FirmFilesView({
               }
               className="h-3.5 w-3.5 accent-primary"
             />
-            包含旧版
+            Gồm bản cũ
           </label>
         </div>
         )}
@@ -248,7 +248,7 @@ export function FirmFilesView({
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="按名称 / 描述 / 标签搜索"
+              placeholder="Tìm theo tên / mô tả / nhãn"
               className="pl-8 text-xs"
             />
             {currentSearch && (
@@ -265,21 +265,21 @@ export function FirmFilesView({
             )}
           </div>
           <Button type="submit" size="sm" variant="outline">
-            搜索
+            Tìm
           </Button>
         </form>
       </div>
 
-      {/* 列表 */}
+      {/* Danh sách */}
       {files.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-card py-16 text-center">
           <FolderArchive className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
           <p className="text-sm text-muted-foreground">
             {currentSearch
-              ? `没有匹配「${currentSearch}」的资料`
+              ? `Không có tài liệu nào khớp「${currentSearch}」`
               : currentCategory
-                ? `没有「${CATEGORY_META[currentCategory].label}」类资料`
-                : "还没有上传任何资料"}
+                ? `Không có tài liệu loại「${CATEGORY_META[currentCategory].label}」`
+                : "Chưa tải lên tài liệu nào"}
           </p>
         </div>
       ) : (
@@ -298,13 +298,13 @@ export function FirmFilesView({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 overflow-hidden">
-                    {/* 第一行：文件名 + 标签 + 大小 / 时间 */}
+                    {/* Hàng 1: tên tệp + nhãn + kích thước / thời gian */}
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setPreviewFile(f)}
                         className="truncate text-left text-sm font-medium text-foreground transition-colors hover:text-primary hover:underline"
-                        title="点击预览"
+                        title="Bấm để xem trước"
                       >
                         {f.name}
                       </button>
@@ -320,13 +320,13 @@ export function FirmFilesView({
                       </span>
                       {f.hasNewerVersion && (
                         <span className="shrink-0 rounded border border-amber-400 bg-amber-100 px-1 py-0.5 text-[9px] text-amber-700">
-                          旧版
+                          Bản cũ
                         </span>
                       )}
                       {f.supersedesCount > 0 && (
                         <span
                           className="shrink-0 inline-flex items-center gap-0.5 rounded border border-violet-300 bg-violet-50 px-1 py-0.5 text-[9px] text-violet-700"
-                          title={`已替代 ${f.supersedesCount} 个旧版`}
+                          title={`Đã thay thế ${f.supersedesCount} bản cũ`}
                         >
                           <History className="h-2.5 w-2.5" />v{f.supersedesCount + 1}
                         </span>
@@ -348,21 +348,21 @@ export function FirmFilesView({
                         )}
                       </span>
                     </div>
-                    {/* 第二行：简介；没填时给个 placeholder，避免视觉空缺 */}
+                    {/* Hàng 2: giới thiệu; không điền thì cho một placeholder, tránh hụt hình ảnh */}
                     <p
                       className={cn(
                         "mt-1.5 line-clamp-2 text-[11.5px] leading-relaxed",
                         f.description ? "text-muted-foreground" : "text-muted-foreground/50"
                       )}
                     >
-                      {f.description || "（未填写简介）"}
+                      {f.description || "(Chưa điền giới thiệu)"}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
                     <a
                       href={`/api/firm-files/${f.id}/download`}
                       className="rounded-md p-1.5 text-muted-foreground hover:bg-popover hover:text-primary"
-                      title="下载"
+                      title="Tải xuống"
                     >
                       <Download className="h-3.5 w-3.5" />
                     </a>
@@ -372,7 +372,7 @@ export function FirmFilesView({
                         onClick={() => handleDelete(f)}
                         disabled={pendingId === f.id || isPending}
                         className="rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-popover hover:text-destructive group-hover:opacity-100"
-                        title="删除"
+                        title="Xoá"
                       >
                         {pendingId === f.id ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />

@@ -143,10 +143,10 @@ export function ClientCombobox({
           )}
         >
           <span className="flex items-center gap-1.5 truncate text-xs">
-            {display || "搜索或直接输入名称"}
+            {display || "Tìm hoặc nhập trực tiếp tên"}
             {!clientId && clientName && (
               <span className="ml-1 rounded-sm bg-primary/10 px-1 text-[10px] text-primary/80">
-                新客户
+                Khách mới
               </span>
             )}
           </span>
@@ -159,13 +159,13 @@ export function ClientCombobox({
       >
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="输入姓名 / 公司名"
+            placeholder="Nhập họ tên / tên công ty"
             value={query}
             onValueChange={setQuery}
           />
           <CommandList>
             {query.trim() && !hasExactMatch && (
-              <CommandGroup heading="作为新客户使用">
+              <CommandGroup heading="Dùng làm khách mới">
                 <CommandItem
                   value={`__new__${query}`}
                   onSelect={() => {
@@ -176,14 +176,14 @@ export function ClientCombobox({
                 >
                   <Plus className="h-3.5 w-3.5 text-primary" />
                   <span>
-                    新建 <span className="text-primary">{query.trim()}</span> 为委托方
+                    Tạo <span className="text-primary">{query.trim()}</span> làm bên ủy quyền
                   </span>
                 </CommandItem>
               </CommandGroup>
             )}
 
             {filtered.length > 0 && (
-              <CommandGroup heading="已有客户">
+              <CommandGroup heading="Khách hiện có">
                 {filtered.map((o) => (
                   <CommandItem
                     key={o.id}
@@ -206,11 +206,11 @@ export function ClientCombobox({
             )}
 
             {(yuandianLoading || yuandianResults.length > 0) && yuandianConfigured && (
-              <CommandGroup heading="企业信息库（元典）">
+              <CommandGroup heading="Kho thông tin doanh nghiệp (元典)">
                 {yuandianLoading && yuandianResults.length === 0 && (
                   <div className="flex items-center gap-2 px-2 py-3 text-xs text-muted-foreground">
                     <Loader2 className="h-3 w-3 animate-spin" />
-                    搜索中…
+                    Đang tìm…
                   </div>
                 )}
                 {yuandianResults.map((c) => (
@@ -237,7 +237,7 @@ export function ClientCombobox({
 
             {!query && filtered.length === 0 && (
               <div className="py-4 text-center text-xs text-muted-foreground">
-                开始输入以搜索 / 新建
+                Bắt đầu nhập để tìm / tạo mới
               </div>
             )}
 
@@ -251,7 +251,7 @@ export function ClientCombobox({
                   }}
                   className="text-xs text-muted-foreground"
                 >
-                  清除选择
+                  Xoá lựa chọn
                 </CommandItem>
               </CommandGroup>
             )}

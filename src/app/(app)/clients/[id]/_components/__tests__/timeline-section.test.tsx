@@ -49,6 +49,6 @@ describe("TimelineSection", () => {
 
   it("formats the payment amount with its currency", () => {
     render(<TimelineSection events={events} />);
-    expect(screen.getByText(/¥250,000/)).toBeInTheDocument();
+    expect(screen.getByText(/250\.000\s*₫/)).toBeInTheDocument();
   });
 });

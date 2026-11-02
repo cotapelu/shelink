@@ -65,9 +65,9 @@ describe("ClientInfoSection", () => {
 
   it("displays finance stats", () => {
     render(<ClientInfoSection client={mockClient} finance={finance} />);
-    expect(screen.getByText("¥100,000")).toBeInTheDocument();
-    expect(screen.getByText("¥60,000")).toBeInTheDocument();
-    expect(screen.getByText("¥40,000")).toBeInTheDocument();
+    expect(screen.getByText(/100\.000\s*₫/)).toBeInTheDocument();
+    expect(screen.getByText(/60\.000\s*₫/)).toBeInTheDocument();
+    expect(screen.getByText(/40\.000\s*₫/)).toBeInTheDocument();
   });
 
   it("renders gender label when gender present", () => {

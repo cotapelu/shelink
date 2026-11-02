@@ -66,7 +66,7 @@ describe("ClientCombobox", () => {
 
   it("renders trigger button with placeholder", () => {
     render(<ClientCombobox {...defaultProps} />);
-    expect(screen.getByText("搜索或直接输入名称")).toBeInTheDocument();
+    expect(screen.getByText("Tìm hoặc nhập trực tiếp tên")).toBeInTheDocument();
   });
 
   it("displays clientName when provided", () => {
@@ -74,8 +74,8 @@ describe("ClientCombobox", () => {
     expect(screen.getByText("Test Client")).toBeInTheDocument();
   });
 
-  it("shows '新客户' tag when clientId empty and clientName exists", () => {
+  it("shows 'Khách mới' tag when clientId empty and clientName exists", () => {
     render(<ClientCombobox {...defaultProps} clientName="New Client" />);
-    expect(screen.getByText("新客户")).toBeInTheDocument();
+    expect(screen.getByText("Khách mới")).toBeInTheDocument();
   });
 });

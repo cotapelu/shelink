@@ -28,7 +28,7 @@ interface CitySelectProps {
 
 export function CitySelect({ province, value, onValueChange }: CitySelectProps) {
   const cities = citiesOf(province);
-  const placeholder = province ? "选择市" : "请先选省";
+  const placeholder = province ? "Chọn tỉnh" : "Hãy chọn vùng trước";
   const disabled = !province;
 
   return (

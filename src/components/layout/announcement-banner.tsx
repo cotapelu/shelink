@@ -20,10 +20,10 @@
 "use client";
 
 /**
- * v0.27: 顶部公告 banner
+ * v0.27: banner thông báo đầu trang
  *
- * 显示 pinned + 未归档 + 未过期 的公告。多条时用左右切换。
- * 关闭只对当前 tab session 生效（不持久化，避免错过新公告）。
+ * Hiện thông báo pinned + chưa lưu trữ + chưa hết hạn. Nhiều thông báo thì dùng nút trái/phải để chuyển.
+ * Đóng chỉ có hiệu lực với session tab hiện tại (không lưu bền, tránh bỏ sót thông báo mới).
  */
 import { useState } from "react";
 import Link from "next/link";
@@ -71,7 +71,7 @@ export function AnnouncementBanner({ banners }: { banners: Banner[] }) {
               type="button"
               onClick={() => setIdx((i) => (i - 1 + visible.length) % visible.length)}
               className="rounded p-1 hover:bg-amber-100"
-              aria-label="上一条"
+              aria-label="Thông báo trước"
             >
               <ChevronLeft className="h-3 w-3" />
             </button>
@@ -82,7 +82,7 @@ export function AnnouncementBanner({ banners }: { banners: Banner[] }) {
               type="button"
               onClick={() => setIdx((i) => (i + 1) % visible.length)}
               className="rounded p-1 hover:bg-amber-100"
-              aria-label="下一条"
+              aria-label="Thông báo sau"
             >
               <ChevronRight className="h-3 w-3" />
             </button>
@@ -92,7 +92,7 @@ export function AnnouncementBanner({ banners }: { banners: Banner[] }) {
           type="button"
           onClick={() => setDismissed((prev) => [...prev, current.id])}
           className="rounded p-1 hover:bg-amber-100"
-          aria-label="关闭"
+          aria-label="Đóng"
         >
           <X className="h-3 w-3" />
         </button>

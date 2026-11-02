@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   User,
@@ -19,7 +19,7 @@ const COOP_TONE: Record<string, string> = {
   TERMINATED: "bg-muted text-muted-foreground"
 };
 
-const yuan = (n: number) => `¥${n.toLocaleString()}`;
+const money = (n: number) => formatCurrency(n);
 const dash = <span className="text-muted-foreground/50">—</span>;
 
 
@@ -80,7 +80,7 @@ function renderFinanceStats({ finance }: { finance: { receivable: number; receiv
       {stats.map(stat => (
         <div key={stat.label}>
           <div className="text-[11px] text-muted-foreground">{stat.label}</div>
-          <div className={cn("mt-1 text-sm font-semibold", stat.className)}>{yuan(stat.value)}</div>
+          <div className={cn("mt-1 text-sm font-semibold", stat.className)}>{money(stat.value)}</div>
         </div>
       ))}
     </div>

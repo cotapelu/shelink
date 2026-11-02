@@ -33,8 +33,8 @@ export function ProcedureCoreSection({
 }: ProcedureCoreSectionProps) {
   return (
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
-      {/* 当前程序 */}
-      <Field label="当前程序" required error={errors.firstProcedureType?.message}>
+      {/* Thủ tục hiện tại */}
+      <Field label="Thủ tục hiện tại" required error={errors.firstProcedureType?.message}>
         <Select
           value={firstProcedureType ?? ""}
           onValueChange={(v) => {
@@ -44,7 +44,7 @@ export function ProcedureCoreSection({
           }}
         >
           <SelectTrigger className="h-10 bg-background">
-            <SelectValue placeholder="选择当前程序" />
+            <SelectValue placeholder="Chọn thủ tục hiện tại" />
           </SelectTrigger>
           <SelectContent>
             {procedureOptions.map((p) => (
@@ -56,8 +56,8 @@ export function ProcedureCoreSection({
         </Select>
       </Field>
 
-      {/* 管辖地 */}
-      <Field label="管辖地">
+      {/* Địa giới */}
+      <Field label="Địa giới">
         <Input
           value={jurisdiction}
           onChange={(e) => {
@@ -68,20 +68,20 @@ export function ProcedureCoreSection({
               setValue("firstAgency", "", { shouldDirty: true });
             }
           }}
-          placeholder="输入管辖地"
+          placeholder="Nhập địa giới"
           className="h-10"
         />
       </Field>
 
-      {/* 争议解决机构 */}
-      <Field label="争议解决机构">
+      {/* Cơ quan giải quyết tranh chấp */}
+      <Field label="Cơ quan giải quyết tranh chấp">
         <Select
           value={firstAgency || ""}
           onValueChange={(v) => setValue("firstAgency", v, { shouldDirty: true })}
           disabled={agencyOpts.length === 0}
         >
           <SelectTrigger className="h-10 bg-background">
-            <SelectValue placeholder={jurisdiction ? "选择机构" : "请先选管辖地"} />
+            <SelectValue placeholder={jurisdiction ? "Chọn cơ quan" : "Hãy chọn địa giới trước"} />
           </SelectTrigger>
           <SelectContent>
             {agencyOpts.map((a) => (

@@ -78,19 +78,19 @@ export function AddTaskDialog({
 
   function submit() {
     if (!matterId) {
-      toast.warning("请选择关联案件");
+      toast.warning("Hãy chọn vụ án liên kết");
       return;
     }
     if (!title.trim()) {
-      toast.warning("请填写事项标题");
+      toast.warning("Hãy nhập tiêu đề công việc");
       return;
     }
     if (!date) {
-      toast.warning("缺少日期");
+      toast.warning("Thiếu ngày");
       return;
     }
 
-    // 合成 dueAt：全天 → 23:59；有时间 → 解析 HH:MM
+    // Tổng hợp dueAt: cả ngày → 23:59; có giờ → phân tích HH:MM
     const dueAt = new Date(date);
     if (allDay) {
       dueAt.setHours(23, 59, 0, 0);
@@ -112,11 +112,11 @@ export function AddTaskDialog({
           assigneeId: "",
           stageId: ""
         });
-        toast.success("事项已添加");
+        toast.success("Đã thêm công việc");
         onOpenChange(false);
         router.refresh();
       } catch (err) {
-        toast.error("添加失败", {
+        toast.error("Thêm thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -129,7 +129,7 @@ export function AddTaskDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-4 w-4 text-primary" />
-            添加事项
+            Thêm công việc
           </DialogTitle>
           <DialogDescription className="text-xs">
             {date
@@ -146,11 +146,11 @@ export function AddTaskDialog({
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label className="text-xs">
-              关联案件 <span className="text-destructive">*</span>
+              Vụ án liên kết <span className="text-destructive">*</span>
             </Label>
             <Select value={matterId} onValueChange={setMatterId}>
               <SelectTrigger>
-                <SelectValue placeholder="请选择" />
+                <SelectValue placeholder="Chọn" />
               </SelectTrigger>
               <SelectContent className="max-h-64">
                 {matters.map((m) => (
@@ -167,10 +167,10 @@ export function AddTaskDialog({
 
           <div className="space-y-1.5">
             <Label className="text-xs">
-              事项标题 <span className="text-destructive">*</span>
+              Tiêu đề công việc <span className="text-destructive">*</span>
             </Label>
             <Input
-              placeholder="如：起草起诉状 / 提交证据清单"
+              placeholder="vd: soạn đơn khởi kiện / nộp danh mục chứng cứ"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -179,7 +179,7 @@ export function AddTaskDialog({
           <div className="space-y-1.5">
             <Label className="flex items-center gap-1 text-xs">
               <Clock className="h-3 w-3" />
-              时间
+              Giờ
             </Label>
             <div className="flex items-center gap-2">
               <input
@@ -197,28 +197,28 @@ export function AddTaskDialog({
                   onChange={(e) => setAllDay(e.target.checked)}
                   className="h-3.5 w-3.5"
                 />
-                全天
+                Cả ngày
               </label>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">描述（可选）</Label>
+            <Label className="text-xs">Mô tả (tuỳ chọn)</Label>
             <Textarea
               rows={2}
-              placeholder="事项详情、相关材料等"
+              placeholder="Chi tiết công việc, tài liệu liên quan..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">优先级</Label>
+            <Label className="text-xs">Mức ưu tiên</Label>
             <div className="flex gap-2">
               {[
-                { value: 0, label: "普通" },
-                { value: 1, label: "高" },
-                { value: 2, label: "紧急" }
+                { value: 0, label: "Thường" },
+                { value: 1, label: "Cao" },
+                { value: 2, label: "Khẩn cấp" }
               ].map((p) => (
                 <button
                   key={p.value}
@@ -243,11 +243,11 @@ export function AddTaskDialog({
             onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={isPending} className="gap-1.5">
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            添加
+            Thêm
           </Button>
         </DialogFooter>
       </DialogContent>

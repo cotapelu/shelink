@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    /* v0.15: 加大背景/卡片明暗对比 — page 改浅灰，card 仍为纯白形成浮起感 */
-    --background: 220 16% 95%;         /* #eef0f3 浅灰页面 */
+    /* v0.15: tăng tương phản sáng-tối nền/thẻ — page đổi xám nhạt, card vẫn trắng tinh tạo cảm giác nổi */
+    --background: 220 16% 95%;         /* #eef0f3 trang xám nhạt */
     --foreground: 215 25% 10%;         /* #151a21 */
 
-    --card: 0 0% 100%;                 /* #ffffff 卡片仍纯白 */
+    --card: 0 0% 100%;                 /* #ffffff thẻ vẫn trắng tinh */
     --card-foreground: 215 25% 10%;
 
     --popover: 0 0% 100%;
@@ -20,8 +20,8 @@
     --secondary: 220 14% 92%;
     --secondary-foreground: 215 25% 10%;
 
-    --muted: 220 14% 92%;              /* 加深 96% → 92%，hover/active 更明显 */
-    --muted-foreground: 210 8% 42%;    /* #5e6772 加深一档 */
+    --muted: 220 14% 92%;              /* đậm lại 96% → 92%, hover/active rõ hơn */
+    --muted-foreground: 210 8% 42%;    /* #5e6772 đậm thêm một mức */
     --muted-subtle: 210 8% 60%;
 
     --accent: 220 14% 92%;
@@ -30,7 +30,7 @@
     --destructive: 0 70% 50%;          /* #d4252f */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 14% 86%;             /* #d4d8de 加深，卡片边界更清晰 */
+    --border: 220 14% 86%;             /* #d4d8de đậm hơn, biên thẻ rõ hơn */
     --border-strong: 220 13% 72%;
     --hairline: 220 14% 88%;
     --input: 220 12% 78%;
@@ -49,10 +49,10 @@
     --shadow-high: 0 8px 24px rgba(15, 23, 42, 0.10), 0 4px 8px rgba(15, 23, 42, 0.05);
     --shadow-inset: inset 0 1px 0 rgba(255,255,255,0.6);
 
-    /* 侧边栏专用 - 比 page bg 略深 */
+    /* Riêng cho sidebar - đậm hơn page bg một chút */
     --sidebar-bg: 220 16% 92%;         /* #e5e8ec */
 
-    /* 状态色 */
+    /* Màu trạng thái */
     --status-green: 125 55% 36%;       /* #1aa126 */
     --status-green-bg: 125 55% 94%;
     --status-orange: 35 88% 45%;       /* #e18d00 */
@@ -78,7 +78,7 @@
 }
 
 @layer components {
-  /* 卡片 */
+  /* Thẻ */
   .ll-surface {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
@@ -99,13 +99,13 @@
     border-bottom: 1px solid hsl(var(--hairline));
   }
 
-  /* 分割线 */
+  /* Đường phân cách */
   .ll-rule {
     height: 1px;
     background: hsl(var(--border));
   }
 
-  /* stat 数字 */
+  /* Số stat */
   .ll-stat {
     font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
     font-variant-numeric: tabular-nums lining-nums;
@@ -130,13 +130,13 @@
     color: hsl(var(--primary));
   }
 
-  /* 状态严重度 */
+  /* Mức độ nghiêm trọng trạng thái */
   .ll-sev-low      { @apply text-[#1aa126] bg-[#e6f4ea]; }
   .ll-sev-medium   { @apply text-[#e18d00] bg-[#fef3e2]; }
   .ll-sev-high     { @apply text-[#d4252f] bg-[#fde8e8]; }
   .ll-sev-blocking { @apply text-[#d4252f] bg-[#fde8e8] font-semibold; }
 
-  /* 列表行 hover */
+  /* Hover dòng danh sách */
   .ll-row {
     position: relative;
     transition: background-color 0.15s ease;
@@ -166,15 +166,15 @@
   .scrollbar-none::-webkit-scrollbar { display: none; }
 }
 
-/* v0.22: 打印 / 保 PDF 样式 —— 律师 Cmd+P 直接出报告，不引 puppeteer */
+/* v0.22: kiểu in / lưu PDF —— luật sư Cmd+P ra báo cáo luôn, không cần puppeteer */
 @media print {
-  /* 隐藏 Sidebar / Topbar / 任何标 .ll-no-print 的 UI */
+  /* Ẩn Sidebar / Topbar / mọi UI đánh dấu .ll-no-print */
   aside,
   header,
   .ll-no-print {
     display: none !important;
   }
-  /* 移除 main 的左边距（无 sidebar 占位）+ 解开 max-width */
+  /* Bỏ lề trái của main (không có sidebar chiếm chỗ) + mở trần max-width */
   main {
     padding: 0 !important;
     max-width: none !important;
@@ -182,17 +182,17 @@
   body, html {
     background: white !important;
   }
-  /* 表格、卡片不被分页切断 */
+  /* Bảng, thẻ không bị cắt khi chia trang */
   section,
   table,
   tr {
     page-break-inside: avoid;
   }
-  /* 卡片去阴影 */
+  /* Bỏ bóng thẻ */
   .ll-surface {
     box-shadow: none !important;
   }
-  /* 链接的下划线在纸上多余 */
+  /* Gạch chân link trên giấy là thừa */
   a {
     color: inherit !important;
     text-decoration: none !important;

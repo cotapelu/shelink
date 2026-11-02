@@ -30,27 +30,27 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
-  // ?inline=1 时以 inline 方式返回，浏览器新标签内预览（PDF/图片/文本），否则下载
+  // Khi ?inline=1 thì trả về dạng inline, trình duyệt xem trước trong tab mới (PDF/ảnh/văn bản), không thì tải xuống
   const inline = new URL(req.url).searchParams.get("inline") === "1";
   const session = await getServerSession(authOptions);
   if (!session?.user) {
-    return NextResponse.json({ error: "未登录" }, { status: 401 });
+    return NextResponse.json({ error: "Chưa đăng nhập" }, { status: 401 });
   }
 
   const doc = await prisma.document.findFirst({
     where: { id: params.id, deletedAt: null }
   });
-  if (!doc) return NextResponse.json({ error: "材料不存在" }, { status: 404 });
+  if (!doc) return NextResponse.json({ error: "Tài liệu không tồn tại" }, { status: 404 });
 
-  // 权限检查：ADMIN / PRINCIPAL_LAWYER 可读全部；其他角色 —— 案件成员才能读案件材料；
-  // 仅 intakeId 的收案合同限收案创建人/主办/协办（含客户身份证号等隐私，不再对全所开放）
+  // Kiểm tra quyền: ADMIN / PRINCIPAL_LAWYER đọc được tất cả; vai trò khác —— thành viên vụ án mới đọc được tài liệu vụ án;
+  // Hợp đồng tiếp nhận chỉ có intakeId thì giới hạn người tạo/chủ trì/cộng tác tiếp nhận (chứa số giấy tờ khách các quyền riêng tư, không mở cho toàn văn phòng nữa)
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
     if (doc.matterId) {
       const member = await prisma.matterMember.findUnique({
         where: { matterId_userId: { matterId: doc.matterId, userId: session.user.id } }
       });
       if (!member) {
-        return NextResponse.json({ error: "无权访问" }, { status: 403 });
+        return NextResponse.json({ error: "Không có quyền truy cập" }, { status: 403 });
       }
     } else if (doc.intakeId) {
       const intake = await prisma.intake.findUnique({
@@ -64,7 +64,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
           intake.ownerUserId === uid ||
           intake.coUserIds.includes(uid));
       if (!allowed) {
-        return NextResponse.json({ error: "无权访问" }, { status: 403 });
+        return NextResponse.json({ error: "Không có quyền truy cập" }, { status: 403 });
       }
     }
   }
@@ -74,15 +74,15 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     const stored = await storage.readFile(doc.path);
     if (doc.encrypted) {
       if (!doc.iv || !doc.authTag) {
-        return NextResponse.json({ error: "加密元数据损坏" }, { status: 500 });
+        return NextResponse.json({ error: "Siêu dữ liệu mã hoá bị hỏng" }, { status: 500 });
       }
       buf = decryptBuffer(stored, doc.iv, doc.authTag);
     } else {
       buf = stored;
     }
   } catch (err) {
-    console.error("[download] 读取失败：", err);
-    return NextResponse.json({ error: "读取失败" }, { status: 500 });
+    console.error("[download] Đọc thất bại:", err);
+    return NextResponse.json({ error: "Đọc thất bại" }, { status: 500 });
   }
 
   await audit({

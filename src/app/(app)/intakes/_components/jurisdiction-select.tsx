@@ -25,8 +25,8 @@ import { CitySelect } from "./city-select";
 import { AreaSelect } from "./area-select";
 
 /**
- * 管辖地三级级联（省 / 市 / 区县）。value 为「省/市/区县」路径串。
- * 区县可不选（只到市）。选择即写回 value。
+ * Cấp dẫn 3 cấp địa giới (vùng / tỉnh / quận huyện). value là chuỗi đường dẫn「vùng/tỉnh/quận huyện」.
+ * Quận huyện có thể không chọn (chỉ đến tỉnh). Chọn là ghi lại value.
  */
 export function JurisdictionSelect({
   value,
@@ -44,18 +44,18 @@ export function JurisdictionSelect({
         <Button type="button" variant="outline" className="h-10 w-full justify-between rounded-sm font-normal">
           <span className="flex min-w-0 items-center gap-1.5">
             <MapPin className="h-3.5 w-3.5 shrink-0 opacity-50" />
-            {display ? <span className="truncate">{display}</span> : <span className="text-muted-foreground">选择管辖地</span>}
+            {display ? <span className="truncate">{display}</span> : <span className="text-muted-foreground">Chọn địa giới</span>}
           </span>
           <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" portalled={false} className="w-64 space-y-2 p-2">
-        <div className="space-y-1"><div className="text-[10px] text-muted-foreground">省 / 直辖市</div><ProvinceSelect value={province} onValueChange={(v) => onChange(joinJurisdiction(v))} /></div>
-        <div className="space-y-1"><div className="text-[10px] text-muted-foreground">市</div><CitySelect province={province} value={city} onValueChange={(v) => onChange(joinJurisdiction(province, v))} /></div>
-        <div className="space-y-1"><div className="text-[10px] text-muted-foreground">区 / 县（可选）</div><AreaSelect province={province} city={city} value={area} onValueChange={(v) => onChange(joinJurisdiction(province, city, v))} /></div>
+        <div className="space-y-1"><div className="text-[10px] text-muted-foreground">Vùng / TP trực thuộc</div><ProvinceSelect value={province} onValueChange={(v) => onChange(joinJurisdiction(v))} /></div>
+        <div className="space-y-1"><div className="text-[10px] text-muted-foreground">Tỉnh</div><CitySelect province={province} value={city} onValueChange={(v) => onChange(joinJurisdiction(province, v))} /></div>
+        <div className="space-y-1"><div className="text-[10px] text-muted-foreground">Quận / huyện (tuỳ chọn)</div><AreaSelect province={province} city={city} value={area} onValueChange={(v) => onChange(joinJurisdiction(province, city, v))} /></div>
         {value && (
           <button type="button" onClick={() => onChange("")} className="w-full rounded-sm border border-border py-1 text-[11px] text-muted-foreground hover:bg-muted">
-            清空
+            Xoá
           </button>
         )}
       </PopoverContent>

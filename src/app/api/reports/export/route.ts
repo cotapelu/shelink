@@ -30,10 +30,10 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
-    return NextResponse.json({ error: "未登录" }, { status: 401 });
+    return NextResponse.json({ error: "Chưa đăng nhập" }, { status: 401 });
   }
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
-    return NextResponse.json({ error: "无权访问" }, { status: 403 });
+    return NextResponse.json({ error: "Không có quyền truy cập" }, { status: 403 });
   }
 
   const url = new URL(req.url);
@@ -51,8 +51,8 @@ export async function GET(req: Request) {
   try {
     buf = await buildReportWorkbook(period);
   } catch (err) {
-    console.error("[reports/export] 生成失败：", err);
-    return NextResponse.json({ error: "导出失败" }, { status: 500 });
+    console.error("[reports/export] Sinh thất bại:", err);
+    return NextResponse.json({ error: "Xuất thất bại" }, { status: 500 });
   }
 
   await audit({

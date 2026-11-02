@@ -9,9 +9,9 @@ vi.mock("@/lib/utils", () => ({
 
 vi.mock("@/lib/enums", () => ({
   litigationStandingLabel: {
-    PLAINTIFF: "原告",
-    DEFENDANT: "被告",
-    THIRD_PARTY: "第三人"
+    PLAINTIFF: "Nguyên đơn",
+    DEFENDANT: "Bị đơn",
+    THIRD_PARTY: "Người thứ ba"
   }
 }));
 
@@ -95,14 +95,14 @@ describe("PartiesSection", () => {
 
   it("renders table header", () => {
     render(<PartiesSection {...defaultProps} />);
-    expect(screen.getByText("角色")).toBeInTheDocument();
-    expect(screen.getByText("主体类型")).toBeInTheDocument();
-    expect(screen.getByText("姓名 / 名称")).toBeInTheDocument();
-    expect(screen.getByText("证件号 / 信用代码")).toBeInTheDocument();
-    expect(screen.getByText(/诉讼地位/)).toBeInTheDocument();
-    expect(screen.getByText("联系人")).toBeInTheDocument();
-    expect(screen.getByText("联系电话")).toBeInTheDocument();
-    expect(screen.getByText("操作")).toBeInTheDocument();
+    expect(screen.getByText("Vai trò")).toBeInTheDocument();
+    expect(screen.getByText("Loại chủ thể")).toBeInTheDocument();
+    expect(screen.getByText("Họ tên / Tên")).toBeInTheDocument();
+    expect(screen.getByText("Số giấy tờ / Mã số doanh nghiệp")).toBeInTheDocument();
+    expect(screen.getByText(/Lập trường tố tụng/)).toBeInTheDocument();
+    expect(screen.getByText("Người liên hệ")).toBeInTheDocument();
+    expect(screen.getByText("Điện thoại liên hệ")).toBeInTheDocument();
+    expect(screen.getByText("Thao tác")).toBeInTheDocument();
   });
 
   it("renders party card for each party", () => {
@@ -151,12 +151,12 @@ describe("PartiesSection", () => {
 
   it("shows ourStanding select for client party in litigation mode", () => {
     render(<PartiesSection {...defaultProps} ourStanding="PLAINTIFF" />);
-    expect(screen.getByText("诉讼地位")).toBeInTheDocument();
+    expect(screen.getByText("Lập trường tố tụng")).toBeInTheDocument();
   });
 
   it("does not show ourStanding for non-litigation mode", () => {
     render(<PartiesSection {...defaultProps} mode="counsel" />);
-    expect(screen.queryByText("诉讼地位")).not.toBeInTheDocument();
+    expect(screen.queryByText("Lập trường tố tụng")).not.toBeInTheDocument();
   });
 
   it("passes errors prop down", () => {

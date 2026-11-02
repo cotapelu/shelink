@@ -27,7 +27,7 @@ export function ClientIdentityFields() {
       <Field label="Tên khách hàng" required error={errors.name?.message}>
         <Input
           placeholder={
-            watchedType === "INDIVIDUAL" ? "张三" : "上海某某有限Công ty"
+            watchedType === "INDIVIDUAL" ? "Nguyễn Văn A" : "Công ty TNHH Moux-Shanghai"
           }
           {...register("name")}
         />

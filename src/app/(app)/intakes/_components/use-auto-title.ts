@@ -16,11 +16,17 @@ interface UseAutoTitleProps {
 }
 
 /**
- * Hook to auto-generate intake title based on client and opposing party names + cause.
- * Rules: if user hasn't manually edited title, suggest "ClientVsOpponent Cause" without spaces.
+ * Hook tự sinh tiêu đề tiếp nhận theo tên khách hàng + bên đối phương + nguyên nhân.
+ * Quy tắc: nếu người dùng chưa tự sửa tiêu đề, gợi ý "Khách hàng và Bên đối phương - Nguyên nhân".
  */
 function buildAutoTitle(client: string | undefined, opponent: string | undefined, cause: string) {
-  return `${client ?? ""}${opponent ? `与${opponent}` : ""}${cause}`.replace(/\s+/g, "");
+  const c = (client ?? "").trim();
+  const o = (opponent ?? "").trim();
+  const cz = (cause ?? "").trim();
+  const parts = [c];
+  if (o) parts.push(`và ${o}`);
+  const head = parts.join(" ");
+  return cz ? `${head} - ${cz}` : head;
 }
 function extractNames(
   list: { role?: string; name?: string }[]

@@ -80,19 +80,19 @@ const makeBillingsMap = (
 describe("MattersSection", () => {
   it("renders empty state when no matters", () => {
     render(<MattersSection matters={[]} billingsMap={new Map()} />);
-    expect(screen.getByText("暂无关联案件")).toBeInTheDocument();
+    expect(screen.getByText("Chưa có vụ án liên quan")).toBeInTheDocument();
   });
 
   it("renders table with matters and billings", () => {
     const billingsMap = makeBillingsMap(mockBillings);
     render(<MattersSection matters={mockMatters} billingsMap={billingsMap} />);
-    expect(screen.getByText("关联案件")).toBeInTheDocument();
+    expect(screen.getByText("Vụ án liên quan")).toBeInTheDocument();
     // Headers
-    expect(screen.getByText("案件编号")).toBeInTheDocument();
-    expect(screen.getByText("案由")).toBeInTheDocument();
-    expect(screen.getByText("状态")).toBeInTheDocument();
-    expect(screen.getByText("签约合同")).toBeInTheDocument();
-    expect(screen.getByText("金额")).toBeInTheDocument();
+    expect(screen.getByText("Mã vụ án")).toBeInTheDocument();
+    expect(screen.getByText("Nguyên nhân")).toBeInTheDocument();
+    expect(screen.getByText("Trạng thái")).toBeInTheDocument();
+    expect(screen.getByText("Hợp đồng đã ký")).toBeInTheDocument();
+    expect(screen.getByText("Số tiền")).toBeInTheDocument();
     // Content – use getAllBy for duplicates (matter code, title, status appear once per billing row)
     const matterCodes = screen.getAllByText("M-001");
     expect(matterCodes.length).toBe(2);
@@ -101,8 +101,8 @@ describe("MattersSection", () => {
     expect(screen.getByText("Contract A")).toBeInTheDocument();
     expect(screen.getByText("Contract B")).toBeInTheDocument();
     // Amounts
-    expect(screen.getByText("¥50,000")).toBeInTheDocument();
-    expect(screen.getByText("¥30,000")).toBeInTheDocument();
+    expect(screen.getByText(/50\.000\s*₫/)).toBeInTheDocument();
+    expect(screen.getByText(/30\.000\s*₫/)).toBeInTheDocument();
   });
 
   it("displays matter status as raw enum", () => {
@@ -118,8 +118,8 @@ describe("MattersSection", () => {
     const emptyBillingsMap = new Map<string, Billing[]>();
     render(<MattersSection matters={matterNoBillings} billingsMap={emptyBillingsMap} />);
     // Table headers should be present
-    expect(screen.getByText("关联案件")).toBeInTheDocument();
-    expect(screen.getByText("案件编号")).toBeInTheDocument();
+    expect(screen.getByText("Vụ án liên quan")).toBeInTheDocument();
+    expect(screen.getByText("Mã vụ án")).toBeInTheDocument();
     // No data rows should be rendered
     const rows = screen.queryAllByRole("row");
     // Only header row exists

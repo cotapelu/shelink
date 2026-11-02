@@ -50,15 +50,15 @@ const typeIcons: Record<string, string> = {
 };
 
 const typeLabels: Record<string, string> = {
-  PRESERVATION_EXPIRY: "保全到期",
-  HEARING_REMINDER: "庭审",
-  DEADLINE_REMINDER: "期限",
-  SEAL_STATUS_CHANGE: "用章",
-  SMS_ARRIVAL: "短信",
-  TASK_ASSIGNED: "系统",
-  SYSTEM: "系统",
-  ARCHIVE_APPROVED: "归档",
-  ARCHIVE_REJECTED: "归档",
+  PRESERVATION_EXPIRY: "Hết hạn bảo toàn",
+  HEARING_REMINDER: "Phiên tòa",
+  DEADLINE_REMINDER: "Thời hạn",
+  SEAL_STATUS_CHANGE: "Dùng dấu",
+  SMS_ARRIVAL: "Tin nhắn",
+  TASK_ASSIGNED: "Hệ thống",
+  SYSTEM: "Hệ thống",
+  ARCHIVE_APPROVED: "Lưu trữ",
+  ARCHIVE_REJECTED: "Lưu trữ",
 };
 
 const priorityColors: Record<string, string> = {
@@ -75,11 +75,11 @@ export function NotificationPopover() {
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const router = useRouter();
 
-  // 已弹过桌面通知的 id（含挂载时已存在的，避免刷新页面就刷屏）
+  // id đã bắn thông báo desktop (gồm cả đã có lúc mount, tránh refresh trang là bắn ồnạt)
   const seenIds = useRef<Set<string>>(new Set());
   const seededRef = useRef(false);
 
-  // 轮询：刷新未读数 + 对新到的未读通知弹浏览器桌面通知
+  // Poll: làm mới số chưa đọc + bắn thông báo desktop của trình duyệt cho thông báo chưa đọc mới tới
   const poll = useCallback(async () => {
     try {
       const [count, list] = await Promise.all([
@@ -91,7 +91,7 @@ export function NotificationPopover() {
 
       const unreadList = list.filter((n) => !n.read);
       if (!seededRef.current) {
-        // 首次轮询：只记录现有 id，不弹（否则每次进站都炸一堆系统通知）
+        // Poll đầu: chỉ ghi lại id hiện có, không bắn (nếu không mỗi lần vào site đều nổ một loạt thông báo hệ thống)
         unreadList.forEach((n) => seenIds.current.add(n.id));
         seededRef.current = true;
         return;
@@ -122,7 +122,7 @@ export function NotificationPopover() {
   }, [router]);
 
   useEffect(() => {
-    // 请求桌面通知授权（用户可拒绝；拒绝后仅站内铃铛生效）
+    // Xin cấp quyền thông báo desktop (người dùng có thể từ chối; từ chối xong chỉ có chuông trong site có hiệu lực)
     if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().catch(() => {});
     }
@@ -163,7 +163,7 @@ export function NotificationPopover() {
             "relative flex h-8 w-8 items-center justify-center rounded-md border border-border",
             "text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           )}
-          aria-label="通知"
+          aria-label="Thông báo"
         >
           <Bell className="h-3.5 w-3.5" strokeWidth={1.8} />
           {unread > 0 && (
@@ -175,13 +175,13 @@ export function NotificationPopover() {
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between border-b px-3 py-2">
-          <span className="text-sm font-medium">通知</span>
+          <span className="text-sm font-medium">Thông báo</span>
           {unread > 0 && (
             <button
               onClick={handleMarkAllRead}
               className="text-xs text-muted-foreground hover:text-foreground"
             >
-              全部已读
+              Đã đọc tất cả
             </button>
           )}
         </div>
@@ -199,7 +199,7 @@ export function NotificationPopover() {
                     : "border-border text-muted-foreground hover:border-input"
                 )}
               >
-                全部
+                Tất cả
               </button>
               {presentTypes.map((t) => (
                 <button
@@ -226,7 +226,7 @@ export function NotificationPopover() {
             if (list.length === 0) {
               return (
                 <div className="px-3 py-8 text-center text-sm text-muted-foreground">
-                  {typeFilter ? `没有「${typeLabels[typeFilter] ?? typeFilter}」类通知` : "暂无通知"}
+                  {typeFilter ? `Không có thông báo loại「${typeLabels[typeFilter] ?? typeFilter}」` : "Chưa có thông báo"}
                 </div>
               );
             }
@@ -261,7 +261,7 @@ export function NotificationPopover() {
         {notifications.length > 0 && (
           <div className="border-t px-3 py-2">
             <Link href="/notifications" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setOpen(false)}>
-              查看全部通知
+              Xem tất cả thông báo
             </Link>
           </div>
         )}
@@ -275,11 +275,11 @@ function formatTime(date: Date | string): string {
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "刚刚";
-  if (diffMin < 60) return `${diffMin}分钟前`;
+  if (diffMin < 1) return "Vừa xong";
+  if (diffMin < 60) return `${diffMin} phút trước`;
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}小时前`;
+  if (diffHr < 24) return `${diffHr} giờ trước`;
   const diffDay = Math.floor(diffHr / 24);
-  if (diffDay < 7) return `${diffDay}天前`;
+  if (diffDay < 7) return `${diffDay} ngày trước`;
   return d.toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
 }

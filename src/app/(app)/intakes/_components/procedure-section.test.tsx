@@ -33,9 +33,9 @@ vi.mock("./field", () => ({
 }));
 
 vi.mock("@/lib/enums", () => ({
-  procedureTypeLabel: { LITIGATION: "诉讼", ARBITRATION: "仲裁" },
-  litigationStandingLabel: { PLAINTIFF: "原告", DEFENDANT: "被告" },
-  barFilingLabel: { YES: "是", NO: "否" },
+  procedureTypeLabel: { LITIGATION: "Tố tụng", ARBITRATION: "Trọng tài" },
+  litigationStandingLabel: { PLAINTIFF: "Nguyên đơn", DEFENDANT: "Bị đơn" },
+  barFilingLabel: { YES: "Có", NO: "Không" },
   BAR_FILING_OPTIONS: ["YES", "NO"]
 }));
 

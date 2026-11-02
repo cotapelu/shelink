@@ -2,6 +2,7 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/utils";
 import type { Matter, Billing } from "@prisma/client";
 
 interface MattersTableProps {
@@ -15,11 +16,11 @@ export function MattersTable({ matters, billingsMap }: MattersTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>案件编号</TableHead>
-            <TableHead>案由</TableHead>
-            <TableHead>状态</TableHead>
-            <TableHead>签约合同</TableHead>
-            <TableHead>金额</TableHead>
+            <TableHead>Mã vụ án</TableHead>
+            <TableHead>Nguyên nhân</TableHead>
+            <TableHead>Trạng thái</TableHead>
+            <TableHead>Hợp đồng đã ký</TableHead>
+            <TableHead>Số tiền</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -33,7 +34,7 @@ export function MattersTable({ matters, billingsMap }: MattersTableProps) {
                 </TableCell>
                 <TableCell className="font-mono text-xs">{b.title}</TableCell>
                 <TableCell className="text-right font-mono">
-                  ¥{Number(b.contractAmount).toLocaleString()}
+                  {formatCurrency(Number(b.contractAmount))}
                 </TableCell>
               </TableRow>
             ))

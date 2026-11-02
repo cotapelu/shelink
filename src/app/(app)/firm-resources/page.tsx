@@ -18,8 +18,8 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.38: 律所文书恢复独立页（v0.37 曾并入 /service-center，现拆回真实页面）
- * v0.44: 分类改为合同/函件/证照/其他
+ * v0.38: văn bản văn phòng trở lại trang độc lập (v0.37 từng gộp vào /service-center, nay tách về trang thật)
+ * v0.44: phân loại đổi thành hợp đồng/công văn/giấy phép/khác
  */
 import type { FirmFileCategory } from "@prisma/client";
 import { redirect } from "next/navigation";

@@ -34,20 +34,20 @@ export async function GET(
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
-    return NextResponse.json({ error: "未登录" }, { status: 401 });
+    return NextResponse.json({ error: "Chưa đăng nhập" }, { status: 401 });
   }
 
   const f = await prisma.firmFile.findUnique({
     where: { id: params.id, archivedAt: null }
   });
-  if (!f) return NextResponse.json({ error: "资料不存在" }, { status: 404 });
+  if (!f) return NextResponse.json({ error: "Tài liệu không tồn tại" }, { status: 404 });
 
   let buf: Buffer;
   try {
     buf = await storage.readFile(f.path);
   } catch (err) {
-    console.error("[firm-files/download] 读取失败：", err);
-    return NextResponse.json({ error: "读取失败" }, { status: 500 });
+    console.error("[firm-files/download] Đọc thất bại:", err);
+    return NextResponse.json({ error: "Đọc thất bại" }, { status: 500 });
   }
 
   const inline = new URL(req.url).searchParams.get("inline") === "1";
@@ -68,7 +68,7 @@ export async function GET(
       "Content-Type": f.mimeType ?? "application/octet-stream",
       "Content-Length": String(buf.byteLength),
       "Content-Disposition": `${inline ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(filename)}`,
-      // 允许在 iframe 内预览
+      // Cho phép xem trước trong iframe
       "X-Content-Type-Options": "nosniff",
       "Cache-Control": "private, max-age=60"
     }

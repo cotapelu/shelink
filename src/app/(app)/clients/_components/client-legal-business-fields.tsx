@@ -21,7 +21,7 @@ export function ClientLegalBusinessFields() {
     <>
       {watchedType !== "INDIVIDUAL" && (
         <Field label="Người đại diện pháp luật">
-          <Input placeholder="Người đại diện pháp luật姓名" {...register("legalRep")} />
+          <Input placeholder="Người đại diện theo pháp luật" {...register("legalRep")} />
         </Field>
       )}
 

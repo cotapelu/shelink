@@ -30,11 +30,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * v0.42: 案件材料在线预览。
- * - docx → mammoth 转 HTML
- * - xlsx/xls → exceljs 读单元格转 HTML 表
- * 返回完整 HTML 文档，前端 <iframe> 内嵌。
- * pdf/图片/文本等浏览器原生可预览的走 download?inline=1（本路由不处理）。
+ * v0.42: xem trước trực tuyến tài liệu vụ án.
+ * - docx → mammoth chuyển HTML
+ * - xlsx/xls → exceljs đọc ô chuyển bảng HTML
+ * Trả về tài liệu HTML đầy đủ, frontend nhúng bằng <iframe>.
+ * pdf/ảnh/văn bản trình duyệt xem trước được một cách gốc thì đi qua download?inline=1 (route này không xử lý).
  */
 function htmlShell(title: string, body: string): string {
   return `<!doctype html><html lang="zh"><head><meta charset="utf-8"/>
@@ -65,21 +65,21 @@ function escapeHtml(s: string): string {
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
-    return NextResponse.json({ error: "未登录" }, { status: 401 });
+    return NextResponse.json({ error: "Chưa đăng nhập" }, { status: 401 });
   }
 
   const doc = await prisma.document.findFirst({
     where: { id: params.id, deletedAt: null }
   });
-  if (!doc) return NextResponse.json({ error: "材料不存在" }, { status: 404 });
+  if (!doc) return NextResponse.json({ error: "Tài liệu không tồn tại" }, { status: 404 });
 
-  // 权限：与 download 路由一致（ADMIN/主任全看；案件成员看本案；收案合同限相关人）
+  // Quyền: giống route download (ADMIN/luật sư chính xem hết; thành viên vụ án xem vụ mình; hợp đồng tiếp nhận giới hạn người liên quan)
   if (session.user.role !== "ADMIN" && session.user.role !== "PRINCIPAL_LAWYER") {
     if (doc.matterId) {
       const member = await prisma.matterMember.findUnique({
         where: { matterId_userId: { matterId: doc.matterId, userId: session.user.id } }
       });
-      if (!member) return NextResponse.json({ error: "无权访问" }, { status: 403 });
+      if (!member) return NextResponse.json({ error: "Không có quyền truy cập" }, { status: 403 });
     } else if (doc.intakeId) {
       const intake = await prisma.intake.findUnique({
         where: { id: doc.intakeId },
@@ -91,14 +91,14 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         (intake.createdById === uid ||
           intake.ownerUserId === uid ||
           intake.coUserIds.includes(uid));
-      if (!allowed) return NextResponse.json({ error: "无权访问" }, { status: 403 });
+      if (!allowed) return NextResponse.json({ error: "Không có quyền truy cập" }, { status: 403 });
     }
   }
 
   const kind = officePreviewKind(doc.mimeType, doc.name);
   if (!kind) {
     return NextResponse.json(
-      { error: "该类型不支持在线预览，请下载查看" },
+      { error: "Loại này không hỗ trợ xem trước trực tuyến, hãy tải về xem" },
       { status: 415 }
     );
   }
@@ -108,15 +108,15 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     const stored = await storage.readFile(doc.path);
     if (doc.encrypted) {
       if (!doc.iv || !doc.authTag) {
-        return NextResponse.json({ error: "加密元数据损坏" }, { status: 500 });
+        return NextResponse.json({ error: "Siêu dữ liệu mã hoá bị hỏng" }, { status: 500 });
       }
       buf = decryptBuffer(stored, doc.iv, doc.authTag);
     } else {
       buf = stored;
     }
   } catch (err) {
-    console.error("[preview] 读取失败：", err);
-    return NextResponse.json({ error: "读取失败" }, { status: 500 });
+    console.error("[preview] Đọc thất bại:", err);
+    return NextResponse.json({ error: "Đọc thất bại" }, { status: 500 });
   }
 
   let html: string;
@@ -124,7 +124,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     if (kind === "docx") {
       const mammoth = (await import("mammoth")).default;
       const result = await mammoth.convertToHtml({ buffer: buf });
-      html = htmlShell(doc.name, result.value || "<p>（空文档）</p>");
+      html = htmlShell(doc.name, result.value || "<p>(Tài liệu rỗng)</p>");
     } else {
       const ExcelJS = (await import("exceljs")).default;
       const wb = new ExcelJS.Workbook();
@@ -150,11 +150,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         });
         parts.push(`<table>${rows.join("")}</table>`);
       });
-      html = htmlShell(doc.name, parts.join("") || "<p>（空表格）</p>");
+      html = htmlShell(doc.name, parts.join("") || "<p>(Bảng rỗng)</p>");
     }
   } catch (err) {
-    console.error("[preview] 转换失败：", err);
-    return NextResponse.json({ error: "文档转换失败，请下载查看" }, { status: 500 });
+    console.error("[preview] Chuyển đổi thất bại:", err);
+    return NextResponse.json({ error: "Chuyển đổi tài liệu thất bại, hãy tải về xem" }, { status: 500 });
   }
 
   await audit({

@@ -35,7 +35,7 @@ export function CategoryChart({ data }: { data: CategoryItem[] }) {
       className="ll-surface flex h-full flex-col"
     >
       <header className="px-5 pb-3 pt-4">
-        <h2 className="text-lg font-medium tracking-tight">案件类型分布</h2>
+        <h2 className="text-lg font-medium tracking-tight">Phân bố loại vụ án</h2>
       </header>
 
       <div className="border-t border-border grid flex-1 grid-cols-5 items-center gap-3 p-4">
@@ -63,7 +63,7 @@ export function CategoryChart({ data }: { data: CategoryItem[] }) {
             <span className="ll-stat text-[2rem] leading-none text-foreground">
               {total}
             </span>
-            <span className="mt-1 text-[10px] text-muted-foreground">总数</span>
+            <span className="mt-1 text-[10px] text-muted-foreground">Tổng số</span>
           </div>
         </div>
 

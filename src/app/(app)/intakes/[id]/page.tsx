@@ -47,7 +47,7 @@ export default async function IntakeDetailPage({ params }: { params: Promise<{ i
     select: { id: true, name: true }
   });
 
-  // 拉每条 hit 对应的 Matter 详情（编号 / 名 / 案由 / 主办 / 当事人角色）
+  // Kéo chi tiết Matter tương ứng mỗi hit (mã / tên / nguyên nhân / chủ trì / vai trò các bên)
   let latestCheck: Parameters<typeof ConflictSection>[0]["latestCheck"] = null;
   if (latestCheckRaw) {
     const matterIds = Array.from(
@@ -118,7 +118,7 @@ export default async function IntakeDetailPage({ params }: { params: Promise<{ i
       };
     });
 
-    // 兼容 V1 旧数据：queryPayload 没有 sameNameClients / idMatchedClients
+    // Tương thích dữ liệu cũ V1: queryPayload không có sameNameClients / idMatchedClients
     const payload = (latestCheckRaw.queryPayload ?? {}) as {
       sameNameClients?: { clientId: string; name: string }[];
       idMatchedClients?: { clientId: string; name: string; idNumber: string }[];
@@ -145,11 +145,11 @@ export default async function IntakeDetailPage({ params }: { params: Promise<{ i
           className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          返回收案列表
+          Về danh sách tiếp nhận
         </Link>
       </div>
 
-      {/* 头部 */}
+      {/* Đầu trang */}
       <header className="rounded-xl border border-border bg-card p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex-1">
@@ -175,7 +175,7 @@ export default async function IntakeDetailPage({ params }: { params: Promise<{ i
                   href={`/matters/${intake.matter.id}`}
                   className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary hover:bg-primary/15"
                 >
-                  已转为案件 {intake.matter.internalCode} →
+                  Đã chuyển thành vụ án {intake.matter.internalCode} →
                 </Link>
               )}
             </div>
@@ -189,12 +189,12 @@ export default async function IntakeDetailPage({ params }: { params: Promise<{ i
         <Separator className="my-5" />
 
         <dl className="grid grid-cols-2 gap-4 text-sm md:grid-cols-5">
-          <InfoItem label="案由">
+          <InfoItem label="Nguyên nhân">
             {intake.cause?.name ?? intake.causeFreeText ?? "—"}
           </InfoItem>
-          <InfoItem label="发起人">{createdBy?.name ?? "—"}</InfoItem>
-          <InfoItem label="主办律师">{intake.ownerUser?.name ?? "—"}</InfoItem>
-          <InfoItem label="客户">
+          <InfoItem label="Người tạo">{createdBy?.name ?? "—"}</InfoItem>
+          <InfoItem label="Luật sư chủ trì">{intake.ownerUser?.name ?? "—"}</InfoItem>
+          <InfoItem label="Khách hàng">
             {intake.client ? (
               <Link
                 href={`/clients/${intake.client.id}`}
@@ -206,7 +206,7 @@ export default async function IntakeDetailPage({ params }: { params: Promise<{ i
               "—"
             )}
           </InfoItem>
-          <InfoItem label="收案日期">
+          <InfoItem label="Ngày tiếp nhận">
             {new Date(intake.receivedAt).toLocaleDateString("zh-CN")}
           </InfoItem>
         </dl>
@@ -216,7 +216,7 @@ export default async function IntakeDetailPage({ params }: { params: Promise<{ i
             <Separator className="my-5" />
             <div>
               <div className="mb-1.5 text-xs uppercase tracking-wider text-muted-foreground">
-                描述
+                Mô tả
               </div>
               <p className="whitespace-pre-wrap text-sm text-foreground/90">
                 {intake.description}
@@ -231,7 +231,7 @@ export default async function IntakeDetailPage({ params }: { params: Promise<{ i
             <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm">
               <div className="mb-1 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-destructive">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                不接案原因
+                Lý do không tiếp nhận
               </div>
               <p className="text-foreground/90">{intake.declinedReason}</p>
             </div>
@@ -239,7 +239,7 @@ export default async function IntakeDetailPage({ params }: { params: Promise<{ i
         )}
       </header>
 
-      {/* 冲突检索 */}
+      {/* Kiểm tra xung đột */}
       <ConflictSection
         intakeId={intake.id}
         intakeClientName={intake.client?.name}
@@ -256,15 +256,15 @@ export default async function IntakeDetailPage({ params }: { params: Promise<{ i
         canEditConclusion={intake.status !== "CONVERTED" && intake.status !== "DECLINED"}
       />
 
-      {/* 当事人 */}
+      {/* Các bên */}
       <section className="rounded-xl border border-border bg-card p-6">
         <h2 className="mb-4 flex items-center gap-2 text-base font-semibold">
           <Users className="h-4 w-4 text-primary" />
-          当事人
+          Các bên
         </h2>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          <Column title="客户" color="#5B8DEF">
+          <Column title="Khách hàng" color="#5B8DEF">
             {intake.client ? (
               <PartyCard
                 name={intake.client.name}
@@ -275,14 +275,14 @@ export default async function IntakeDetailPage({ params }: { params: Promise<{ i
               <Empty />
             )}
           </Column>
-          <Column title="相对方" color="#FB923C">
+          <Column title="Bên đối phương" color="#FB923C">
             {opposing.length === 0 ? (
               <Empty />
             ) : (
               opposing.map((p) => <PartyCard key={p.id} name={p.name} sub={p.idNumber ?? undefined} />)
             )}
           </Column>
-          <Column title="第三人" color="#9B7BF7">
+          <Column title="Người thứ ba" color="#9B7BF7">
             {thirdParty.length === 0 ? (
               <Empty />
             ) : (

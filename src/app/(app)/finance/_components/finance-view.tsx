@@ -52,11 +52,11 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 
 const feeTypeLabel = {
-  RECEIVABLE: "应收",
-  RECEIVED: "实收",
-  REFUND: "退款",
-  COST: "成本",
-  COMMISSION: "分成"
+  RECEIVABLE: "Phải thu",
+  RECEIVED: "Đã thu",
+  REFUND: "Hoàn tiền",
+  COST: "Chi phí",
+  COMMISSION: "Phân chia"
 } as const;
 
 const feeTypeColor: Record<keyof typeof feeTypeLabel, string> = {
@@ -95,7 +95,7 @@ export type InvoiceRequestRow = {
   processNote: string | null;
   invoiceNo: string | null;
   issuedAt: Date | null;
-  // v0.42 开票类型 + 抬头 + 专票六要素（来自 InvoiceRequest 标量字段）
+  // v0.42 loại HĐ + đơn vị mua + sáu yếu tố HĐ GTGT (từ trường vô hướng InvoiceRequest)
   invoiceType: "PLAIN" | "SPECIAL" | null;
   invoiceItem: "LAWYER_FEE" | "CONSULTING_FEE" | "AGENCY_FEE" | "OTHER" | null;
   buyerName: string | null;
@@ -104,7 +104,7 @@ export type InvoiceRequestRow = {
   buyerPhone: string | null;
   buyerBank: string | null;
   buyerBankAccount: string | null;
-  // v0.43 项5：matter 可空（无关联案件开票）
+  // v0.43 mục 5: matter có thể rỗng (xuất HĐ không gắn vụ án)
   matter: { id: string; internalCode: string; title: string } | null;
   noMatterReason: string | null;
   requestedBy: { id: string; name: string };
@@ -170,17 +170,17 @@ export function FinanceView({
       <header className="space-y-2">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
-            <h1 className="text-xl font-medium tracking-tight">财务管理</h1>
+            <h1 className="text-xl font-medium tracking-tight">Quản lý tài chính</h1>
             <p className="text-[13px] text-muted-foreground">
-              可见范围内的收付流水 + 开票申请 ·{" "}
+              Dòng thu chi + yêu cầu xuất HĐ trong phạm vi được xem ·{" "}
               <Link href="/matters" className="text-primary hover:underline">
-                合同/流水/分成在各案件详情录入
+                Hợp đồng/dòng thu chi/phân chia nhập ở chi tiết từng vụ án
               </Link>
             </p>
           </div>
           <Button size="sm" className="w-fit gap-1.5" onClick={() => setInvoiceCreateOpen(true)}>
             <Receipt className="h-3.5 w-3.5" />
-            申请开票
+            Yêu cầu xuất HĐ
           </Button>
         </div>
         <div className="ll-rule" />
@@ -191,7 +191,7 @@ export function FinanceView({
       >
         <TabBtn active={tab === "overview"} onClick={() => setTab("overview")}>
           <Wallet className="h-3.5 w-3.5" strokeWidth={1.8} />
-          总览
+          Tổng quan
         </TabBtn>
         <TabBtn active={tab === "aging"} onClick={() => setTab("aging")}>
           <Clock className="h-3.5 w-3.5" strokeWidth={1.8} />
@@ -199,7 +199,7 @@ export function FinanceView({
         </TabBtn>
         <TabBtn active={tab === "invoices"} onClick={() => setTab("invoices")}>
           <Receipt className="h-3.5 w-3.5" strokeWidth={1.8} />
-          开票管理
+          Quản lý hóa đơn
           {stats.pendingInvoiceCount > 0 && (
             <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
               {stats.pendingInvoiceCount}
@@ -222,61 +222,61 @@ export function FinanceView({
       {/* KPI */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
         <StatCard
-          label="本月实收"
+          label="Đã thu tháng này"
           value={stats.monthlyReceived}
           icon={<Coins className="h-3.5 w-3.5" />}
           color="#4ADE80"
         />
         <StatCard
-          label="本月应收"
+          label="Phải thu tháng này"
           value={stats.monthlyReceivable}
           icon={<TrendingUp className="h-3.5 w-3.5" />}
           color="#FBBF24"
         />
         <StatCard
-          label="本月已开票"
+          label="Đã xuất HĐ tháng này"
           value={stats.monthlyIssued}
           icon={<FileText className="h-3.5 w-3.5" />}
           color="#5B8DEF"
         />
         <StatCard
-          label="本年实收"
+          label="Đã thu năm nay"
           value={stats.yearlyReceived}
           icon={<Receipt className="h-3.5 w-3.5" />}
           color="#5B8DEF"
         />
         <StatCard
-          label="我的本月分成"
+          label="Phân chia của tôi tháng này"
           value={stats.personalMonthly}
           icon={<Percent className="h-3.5 w-3.5" />}
           color="#9B7BF7"
         />
         <StatCard
-          label="我的本年分成"
+          label="Phân chia của tôi năm nay"
           value={stats.personalYearly}
           icon={<Percent className="h-3.5 w-3.5" />}
           color="#9B7BF7"
         />
       </div>
 
-      {/* 月度趋势图 */}
+      {/* Biểu đồ xu hướng tháng */}
       <section className="rounded-xl border border-border bg-card">
         <header className="flex items-center justify-between border-b border-border px-5 py-3">
-          <h2 className="text-sm font-semibold">近 6 个月趋势</h2>
+          <h2 className="text-sm font-semibold">Xu hướng 6 tháng gần đây</h2>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <span
                 className="h-0.5 w-3 rounded-full"
                 style={{ backgroundColor: "#5B8DEF", boxShadow: "0 0 8px #5B8DEF" }}
               />
-              实收
+              Đã thu
             </span>
             <span className="flex items-center gap-1.5">
               <span
                 className="h-0.5 w-3 rounded-full"
                 style={{ backgroundColor: "#4FD1C5", boxShadow: "0 0 8px #4FD1C5" }}
               />
-              应收
+              Phải thu
             </span>
           </div>
         </header>
@@ -305,7 +305,7 @@ export function FinanceView({
                 axisLine={false}
                 tickLine={false}
                 width={50}
-                tickFormatter={(v) => `${(v / 10000).toFixed(0)}万`}
+                tickFormatter={(v) => `${(v / 10000).toFixed(0)} tr`}
               />
               <Tooltip
                 contentStyle={{
@@ -319,7 +319,7 @@ export function FinanceView({
               <Area
                 type="monotone"
                 dataKey="receivable"
-                name="应收"
+                name="Phải thu"
                 stroke="#4FD1C5"
                 strokeWidth={1.5}
                 fill="url(#finance-receivable)"
@@ -327,7 +327,7 @@ export function FinanceView({
               <Area
                 type="monotone"
                 dataKey="received"
-                name="实收"
+                name="Đã thu"
                 stroke="#5B8DEF"
                 strokeWidth={2}
                 fill="url(#finance-received)"
@@ -337,11 +337,11 @@ export function FinanceView({
         </div>
       </section>
 
-      {/* 流水 */}
+      {/* Dòng thu chi */}
       <section className="rounded-xl border border-border bg-card">
         <header className="flex items-center justify-between border-b border-border px-5 py-3">
           <h2 className="flex items-center gap-2 text-sm font-semibold">
-            收付流水{" "}
+            Dòng thu chi{" "}
             <span className="text-muted-foreground">({filtered.length})</span>
           </h2>
           <Select
@@ -354,7 +354,7 @@ export function FinanceView({
             <SelectContent>
               {TYPE_FILTERS.map((t) => (
                 <SelectItem key={t} value={t}>
-                  {t === "ALL" ? "全部" : feeTypeLabel[t]}
+                  {t === "ALL" ? "Tất cả" : feeTypeLabel[t]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -362,7 +362,7 @@ export function FinanceView({
         </header>
 
         {filtered.length === 0 ? (
-          <p className="py-12 text-center text-xs text-muted-foreground">没有匹配的记录</p>
+          <p className="py-12 text-center text-xs text-muted-foreground">Không có bản ghi nào khớp</p>
         ) : (
           <ul className="divide-y divide-border max-h-[640px] overflow-y-auto">
             {filtered.map((e) => {
@@ -400,7 +400,7 @@ export function FinanceView({
                       {new Date(e.occurredAt).toLocaleDateString("zh-CN")}
                     </div>
                     <div className="text-[11px] text-muted-foreground">
-                      录入：{e.recordedBy.name}
+                      Người nhập: {e.recordedBy.name}
                     </div>
                   </div>
                 </li>

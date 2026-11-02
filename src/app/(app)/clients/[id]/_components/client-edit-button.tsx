@@ -25,8 +25,8 @@ import type { Client, Contact } from "@prisma/client";
 import { ClientSheet } from "@/app/(app)/clients/_components/client-sheet";
 
 /**
- * v0.39: 客户详情页「编辑信息」入口。
- * 详情页是服务端组件，这里包一层客户端 state 复用现有 ClientSheet（含编辑 + 联系人）。
+ * v0.39: cửa vào「sửa thông tin」ở trang chi tiết khách hàng.
+ * Trang chi tiết là component phía server, ở đây bọc một lớp state phía client để tái dùng ClientSheet hiện có (gồm sửa + người liên hệ).
  */
 export function ClientEditButton({
   client
@@ -42,7 +42,7 @@ export function ClientEditButton({
         className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-primary"
       >
         <Pencil className="h-3.5 w-3.5" />
-        编辑信息
+        Sửa thông tin
       </button>
       <ClientSheet open={open} onOpenChange={setOpen} editingClient={client} />
     </>

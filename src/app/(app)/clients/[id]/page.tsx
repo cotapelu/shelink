@@ -50,7 +50,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
     getClientTimeline(id)
   ]);
 
-  // 按案件分组合同，关联案件与签约合同合并展示（左案件 / 右合同）
+  // Nhóm hợp đồng theo vụ án, vụ án liên quan và hợp đồng đã ký hiển thị gộp (trái vụ án / phải hợp đồng)
   const billingsByMatter = new Map<string, typeof finance.billings>();
   for (const b of finance.billings) {
     const arr = billingsByMatter.get(b.matter.id) ?? [];
@@ -65,7 +65,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         className="inline-flex items-center gap-1 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        返回客户列表
+        Về danh sách khách hàng
       </Link>
 
       <ClientHeader client={client} actions={<ClientEditButton client={client} />} />

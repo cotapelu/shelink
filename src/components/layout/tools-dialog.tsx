@@ -35,9 +35,9 @@ import { DaysCalc } from "@/app/(app)/tools/calc/_components/days-calc";
 type Tab = "courtFee" | "lateInterest" | "days";
 
 const TABS: { key: Tab; label: string; icon: typeof Scale }[] = [
-  { key: "courtFee", label: "诉讼费", icon: Scale },
-  { key: "lateInterest", label: "迟延履行金", icon: Coins },
-  { key: "days", label: "天数计算", icon: CalendarDays }
+  { key: "courtFee", label: "Lệ phí tố tụng", icon: Scale },
+  { key: "lateInterest", label: "Tiền chậm thi hành", icon: Coins },
+  { key: "days", label: "Tính số ngày", icon: CalendarDays }
 ];
 
 export function ToolsDialog({
@@ -55,7 +55,7 @@ export function ToolsDialog({
         <DialogHeader className="border-b border-border px-5 py-3">
           <DialogTitle className="flex items-center gap-2">
             <Calculator className="h-4 w-4 text-primary" />
-            实务工具
+            Công cụ thực hành
           </DialogTitle>
         </DialogHeader>
 

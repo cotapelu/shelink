@@ -31,7 +31,7 @@ export function ClientAISearchSection() {
         const r = await searchEnterpriseCandidates(name);
         if (!r.configured) {
           toast.error("Chưa cấu hình API Yuandian", {
-            description: "Vui lòng cấu hình API Key trong Cài đặt → AI 请在 设置 → AI 与元典 中配置 API Key Yuandian"
+            description: "Vui lòng cấu hình API Key trong Cài đặt → AI"
           });
           return;
         }
@@ -69,7 +69,7 @@ export function ClientAISearchSection() {
   }
 
   const label = watchedType === "INDIVIDUAL" ? "Số CMND/CCCD" : "Mã số doanh nghiệp";
-  const placeholder = watchedType === "INDIVIDUAL" ? "18 位Số CMND/CCCD" : "18 số mã doanh nghiệp";
+  const placeholder = watchedType === "INDIVIDUAL" ? "Số CMND/CCCD 18 ký tự" : "18 số mã doanh nghiệp";
 
   return (
     <Field label={label}>
@@ -100,7 +100,7 @@ export function ClientAISearchSection() {
         {candidates && candidates.length > 0 && (
           <div className="rounded-md border border-border bg-muted/30 p-1.5">
             <div className="mb-1 flex items-center gap-1 text-[10px] text-muted-foreground">
-              <Search className="h-3 w-3" />共 {candidates.length} 条候选，点击回填
+              <Search className="h-3 w-3" />Có {candidates.length} ứng viên, bấm để điền lại
             </div>
             <ul className="space-y-1">
               {candidates.map((c) => (

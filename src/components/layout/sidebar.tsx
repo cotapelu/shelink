@@ -25,14 +25,14 @@ import { Scale } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { primaryNav, secondaryNav, type NavItem } from "./nav-config";
 
-/** v0.42 项1: 侧栏品牌（可在设置 → 律所信息配置） */
+/** v0.42 mục 1: thương hiệu sidebar (cấu hình được ở Cài đặt → Thông tin văn phòng) */
 export type FirmBrand = {
   name: string;
   subtitle: string;
   logoDataUrl: string | null;
 };
 
-/** 桌面侧边栏（md 以上显示） */
+/** Sidebar desktop (hiển thị từ md trở lên) */
 export function Sidebar({ firm }: { firm: FirmBrand }) {
   return (
     <aside className="fixed left-0 top-0 z-30 hidden h-screen w-60 flex-col border-r border-border bg-sidebar md:flex">
@@ -41,7 +41,7 @@ export function Sidebar({ firm }: { firm: FirmBrand }) {
   );
 }
 
-/** 导航内容 — 桌面侧边栏和移动 Sheet 共用 */
+/** Nội dung điều hướng — sidebar desktop và Sheet mobile dùng chung */
 export function NavContent({ firm }: { firm: FirmBrand }) {
   const pathname = usePathname();
 
@@ -50,7 +50,7 @@ export function NavContent({ firm }: { firm: FirmBrand }) {
       <Link
         href="/"
         className="flex h-14 items-center gap-2.5 px-5 transition-colors hover:bg-muted/50"
-        aria-label="返回工作台"
+        aria-label="Về bảng làm việc"
       >
         {firm.logoDataUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

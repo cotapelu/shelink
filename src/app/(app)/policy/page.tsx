@@ -18,8 +18,8 @@
  * Original author: 叶森 (Sen Ye) - Copyright 2026
  */
 /**
- * v0.38: 制度规范独立页（律所文书里的 POLICY 分类，只列文件、不显分类筛选）
- * v0.44: 标题与上传按钮同行（不再 hideHeader，改用 headerTitle 覆盖）
+ * v0.38: trang quy chế độc lập (phân loại POLICY trong văn bản văn phòng, chỉ liệt kê tệp, không hiển thị lọc phân loại)
+ * v0.44: tiêu đề và nút tải lên cùng một hàng (không còn hideHeader, đổi sang dùng headerTitle đè)
  */
 import { redirect } from "next/navigation";
 import { BookText } from "lucide-react";
@@ -53,8 +53,8 @@ export default async function PolicyPage({
       includeSuperseded={searchParams.includeOld === "1"}
       basePath="/policy"
       hideCategoryNav
-      headerTitle="制度规范"
-      headerSubtitle={`全所制度文件（员工手册、保密协议、薪酬制度等）。${isManager ? "管理员可上传与版本替代" : "管理员上传"}`}
+      headerTitle="Quy chế"
+      headerSubtitle={`Tệp quy chế toàn văn phòng (sổ tay nhân viên, thoả thuận bảo mật, chế độ lương...). ${isManager ? "Quản trị viên được tải lên và thay thế phiên bản" : "Quản trị viên tải lên"}`}
       headerIcon={<BookText className="h-5 w-5 text-primary" strokeWidth={1.8} />}
     />
   );

@@ -35,7 +35,7 @@ const mockContacts: any[] = [
 describe("ContactsSection", () => {
   it("renders empty state when no contacts", () => {
     render(<ContactsSection contacts={[]} />);
-    expect(screen.getByText("暂无联系人")).toBeInTheDocument();
+    expect(screen.getByText("Chưa có người liên hệ")).toBeInTheDocument();
   });
 
   it("renders table with contacts", () => {

@@ -40,11 +40,11 @@ export function RevenueChart({ data }: { data: { month: string; received: number
     >
       <header className="flex items-center justify-between px-5 pb-3 pt-4">
         <div>
-          <h2 className="text-lg font-medium tracking-tight">近 6 个月实收趋势</h2>
+          <h2 className="text-lg font-medium tracking-tight">Xu hướng thu 6 tháng gần đây</h2>
         </div>
         <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-          <Legend color="hsl(var(--primary))" label="实收" thick />
-          <Legend color="hsl(var(--muted-foreground))" label="应收" />
+          <Legend color="hsl(var(--primary))" label="Đã thu" thick />
+          <Legend color="hsl(var(--muted-foreground))" label="Phải thu" />
         </div>
       </header>
 
@@ -101,7 +101,7 @@ export function RevenueChart({ data }: { data: { month: string; received: number
             <Area
               type="monotone"
               dataKey="receivable"
-              name="应收"
+              name="Phải thu"
               stroke="hsl(var(--muted-foreground))"
               strokeWidth={1.2}
               strokeDasharray="3 3"
@@ -110,7 +110,7 @@ export function RevenueChart({ data }: { data: { month: string; received: number
             <Area
               type="monotone"
               dataKey="received"
-              name="实收"
+              name="Đã thu"
               stroke="hsl(var(--primary))"
               strokeWidth={2}
               fill="url(#received-fill)"

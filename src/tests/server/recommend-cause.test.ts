@@ -127,7 +127,7 @@ describe("recommendCause", () => {
     expect(res[0].cause.name).toBe("民间借贷纠纷");
   });
 
-  it("全部反查失败 → 抛错", async () => {
+  it("Tra ngược toàn bộ thất bại → ném lỗi", async () => {
     aiChatMock.mockResolvedValue({
       content: JSON.stringify([
         { name: "案由甲", reason: "x", confidence: "HIGH" },
@@ -139,23 +139,23 @@ describe("recommendCause", () => {
 
     await expect(
       recommendCause({ category: "CIVIL_COMMERCIAL", situation: "测试用案情描述" })
-    ).rejects.toThrow(/案由库/);
+    ).rejects.toThrow(/danh mục案由/);
   });
 
-  it("LLM 返回非 JSON → 抛错", async () => {
+  it("LLM trả về non-JSON → ném lỗi", async () => {
     aiChatMock.mockResolvedValue({
       content: "抱歉，我无法回答这个问题",
       raw: {}
     });
     await expect(
       recommendCause({ category: "CIVIL_COMMERCIAL", situation: "测试用案情描述" })
-    ).rejects.toThrow(/无法解析/);
+    ).rejects.toThrow(/Không phân tích được/);
   });
 
-  it("situation 太短 → 抛错", async () => {
+  it("situation quá ngắn → ném lỗi", async () => {
     await expect(
       recommendCause({ category: "CIVIL_COMMERCIAL", situation: "短" })
-    ).rejects.toThrow(/太短/);
+    ).rejects.toThrow(/quá ngắn/);
     expect(aiChatMock).not.toHaveBeenCalled();
   });
 

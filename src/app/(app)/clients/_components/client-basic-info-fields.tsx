@@ -20,7 +20,7 @@ function NameAndTypeFields() {
   return (
     <>
       <Field label="Tên khách hàng" required error={nameError}>
-        <Input placeholder={watchedType === "INDIVIDUAL" ? "张三" : "上海某某有限Công ty"} {...register("name")} />
+        <Input placeholder={watchedType === "INDIVIDUAL" ? "Nguyễn Văn A" : "Công ty TNHH Moux-Shanghai"} {...register("name")} />
       </Field>
       <Field label="Loại" required>
         <Select value={watchedType} onValueChange={(v) => setValue("type", v as ClientCreateInput["type"], { shouldDirty: true })}>
@@ -41,7 +41,7 @@ function IdNumberField() {
   const watchedType = useWatch({ name: "type" });
   return (
     <Field label={watchedType === "INDIVIDUAL" ? "Số CMND/CCCD" : "Mã số doanh nghiệp"}>
-      <Input className="font-mono" placeholder={watchedType === "INDIVIDUAL" ? "18 位Số CMND/CCCD" : "18 số mã doanh nghiệp"} {...register("idNumber")} />
+      <Input className="font-mono" placeholder={watchedType === "INDIVIDUAL" ? "Số CMND/CCCD 18 ký tự" : "18 số mã doanh nghiệp"} {...register("idNumber")} />
     </Field>
   );
 }
@@ -58,7 +58,7 @@ function ContactFields() {
         <Input type="email" placeholder="contact@example.com" {...register("email")} />
       </Field>
       <Field label="Địa chỉ">
-        <Input placeholder="详细Địa chỉ" {...register("address")} />
+        <Input placeholder="Địa chỉ chi tiết" {...register("address")} />
       </Field>
     </>
   );
@@ -71,7 +71,7 @@ function BusinessFields() {
     <>
       {watchedType !== "INDIVIDUAL" && (
         <Field label="Người đại diện pháp luật">
-          <Input placeholder="Người đại diện pháp luật姓名" {...register("legalRep")} />
+          <Input placeholder="Người đại diện theo pháp luật" {...register("legalRep")} />
         </Field>
       )}
       <Field label="Nguồn vụ án">

@@ -30,7 +30,7 @@ export function FeeSection({ kind, feeType, register, setValue, errors }: FeeSec
           kind === "counsel" ? "sm:grid-cols-2" : "sm:grid-cols-3"
         )}
       >
-        {/* 顾问费不含风险代理 */}
+        {/* Phí tư vấn không gồm theo kết quả */}
         {FEE_TYPES.filter((t) => kind !== "counsel" || t !== "CONTINGENCY").map((t) => (
           <button
             key={t}
@@ -50,7 +50,7 @@ export function FeeSection({ kind, feeType, register, setValue, errors }: FeeSec
 
       {feeType === "FIXED" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field label="总金额（元）" required>
+          <Field label="Tổng số tiền (VNĐ)" required>
             <Input
               type="number"
               inputMode="decimal"
@@ -60,9 +60,9 @@ export function FeeSection({ kind, feeType, register, setValue, errors }: FeeSec
               {...register("feeAmount", { valueAsNumber: true })}
             />
           </Field>
-          <Field label="付款节点 / 分期约定">
+          <Field label="Mốc thanh toán / Thoả thuận trả góp">
             <Input
-              placeholder="如：签约付 50%，开庭前付 30%，结案付 20%"
+              placeholder="vd: trả 50% khi ký, 30% trước phiên tòa, 20% khi kết thúc"
               {...register("feeSchedule")}
             />
           </Field>
@@ -71,7 +71,7 @@ export function FeeSection({ kind, feeType, register, setValue, errors }: FeeSec
 
       {feeType === "TIMED" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field label="小时费率（元 / 小时）" required>
+          <Field label="Phí theo giờ (VNĐ / giờ)" required>
             <Input
               type="number"
               inputMode="decimal"
@@ -81,9 +81,9 @@ export function FeeSection({ kind, feeType, register, setValue, errors }: FeeSec
               {...register("feeAmount", { valueAsNumber: true })}
             />
           </Field>
-          <Field label="计费说明 / 结算周期">
+          <Field label="Diễn giải tính phí / Chu kỳ quyết toán">
             <Input
-              placeholder="如：合伙人 2000 元/时、授薪律师 1000 元/时；按月结算"
+              placeholder="vd: cộng sự 2000 VNĐ/giờ, luật sư lương 1000 VNĐ/giờ; quyết toán theo tháng"
               {...register("feeSchedule")}
             />
           </Field>
@@ -92,7 +92,7 @@ export function FeeSection({ kind, feeType, register, setValue, errors }: FeeSec
 
       {feeType === "CONTINGENCY" && (
         <>
-          <Field label="基础办案费（元）" required>
+          <Field label="Phí xử lý cơ bản (VNĐ)" required>
             <Input
               type="number"
               inputMode="decimal"
@@ -102,16 +102,16 @@ export function FeeSection({ kind, feeType, register, setValue, errors }: FeeSec
               {...register("feeAmount", { valueAsNumber: true })}
             />
           </Field>
-          <Field label="风险代理收费方式" required hint="例：判决/调解执行到位后按到账金额 15% 收取；或：以胜诉金额阶梯计提：≤100 万部分 10%，>100 万部分 8%">
+          <Field label="Cách tính phí theo kết quả" required hint="vd: sau khi bản án/hòa giải thi hành xong thì thu 15% số tiền về; hoặc tính theo bậc số tiền thắng kiện: phần ≤100 triệu 10%, phần >100 triệu 8%">
             <Textarea
               rows={3}
-              placeholder="详细描述风险代理收费方式 / 触发条件 / 计提比例"
+              placeholder="Mô tả chi tiết cách tính phí theo kết quả / điều kiện kích hoạt / tỷ lệ tính"
               {...register("contingencyTerms")}
             />
           </Field>
-          <Field label="付款节点">
+          <Field label="Mốc thanh toán">
             <Input
-              placeholder="如：基础办案费签约付清；风险费执行到账后 7 日内支付"
+              placeholder="vd: phí xử lý cơ bản trả hết khi ký; phí theo kết quả trả trong 7 ngày sau khi thi hành xong"
               {...register("feeSchedule")}
             />
           </Field>
@@ -119,8 +119,8 @@ export function FeeSection({ kind, feeType, register, setValue, errors }: FeeSec
       )}
 
       {feeType && (
-        <Field label="费用备注（可选）">
-          <Input placeholder="如：含差旅 / 含诉讼费垫付" {...register("feeNote")} />
+        <Field label="Ghi chú phí (tuỳ chọn)">
+          <Input placeholder="vd: đã gồm công tác / đã tạm ứng lệ phí tố tụng" {...register("feeNote")} />
         </Field>
       )}
     </>

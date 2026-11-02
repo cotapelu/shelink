@@ -31,11 +31,11 @@ export function AppShell({
   userAvatar
 }: {
   children: React.ReactNode;
-  /** v0.27: 顶部公告 banner（服务端渲染好后注入） */
+  /** v0.27: banner thông báo đầu trang (render xong phía server rồi inject) */
   banner?: React.ReactNode;
-  /** v0.42 项1: 侧栏品牌（律所名 / 副标题 / Logo） */
+  /** v0.42 mục 1: thương hiệu sidebar (tên VP / phụ đề / Logo) */
   firm: FirmBrand;
-  /** v0.43: 当前用户头像（服务端读最新，供顶栏显示） */
+  /** v0.43: avatar người dùng hiện tại (phía server đọc mới nhất, để thanh top hiển thị) */
   userAvatar?: string | null;
 }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);

@@ -45,33 +45,33 @@ export type NavItem = {
   badge?: number;
 };
 
-// v0.4: 一级菜单收紧 —— 收案合并到案件、利益冲突进顶栏、材料只在案件详情
-// v0.8.1: 用章统一收口到"审批"（未来可扩文书内审等其他审批类型）
-// v0.9.3: 加"快递"
-// v0.11: 隐藏"收件箱"（短信解析使用率低，代码与路由保留以便恢复）
-// v0.37: 快递/工具/服务中心 移入顶栏「应用」菜单，不再占侧边
-// v0.45: 暂时隐藏"保全"一级入口，代码与路由保留以便恢复
+// v0.4: thu hẹp menu cấp 1 —— tiếp nhận gộp vào vụ án, xung đột lợi ích lên thanh top, tài liệu chỉ ở chi tiết vụ án
+// v0.8.1: dùng dấu thống nhất thu về "duyệt" (tương lai mở thêm các loại duyệt khác như duyệt nội bộ văn bản)
+// v0.9.3: thêm "chuyển phát"
+// v0.11: ẩn "hộp thư đến" (tỷ lệ dùng phân tích tin nhắn thấp, giữ code và route để khôi phục)
+// v0.37: chuyển phát/công cụ/trung tâm dịch vụ chuyển vào menu「ứng dụng」thanh top, không chiếm sidebar nữa
+// v0.45: tạm ẩn cửa vào cấp 1 "bảo toàn", giữ code và route để khôi phục
 export const primaryNav: NavItem[] = [
-  { label: "工作台", href: "/", icon: LayoutDashboard },
-  { label: "案件", href: "/matters", icon: FolderOpen },
+  { label: "Bảng làm việc", href: "/", icon: LayoutDashboard },
+  { label: "Vụ án", href: "/matters", icon: FolderOpen },
   { label: "Báo giá", href: "/quotes", icon: FileSpreadsheet },
   { label: "Hợp đồng", href: "/contracts", icon: FileSignature },
   { label: "Ghi giờ", href: "/time-tracking", icon: Timer },
   { label: "Chi phí", href: "/expenses", icon: Receipt },
   { label: "Nghỉ phép", href: "/leave", icon: Plane },
-  { label: "客户", href: "/clients", icon: Users },
-  { label: "财务", href: "/finance", icon: Wallet },
-  { label: "日程", href: "/schedule", icon: Calendar },
-  { label: "审批", href: "/approvals/seals", icon: ClipboardCheck }
+  { label: "Khách hàng", href: "/clients", icon: Users },
+  { label: "Tài chính", href: "/finance", icon: Wallet },
+  { label: "Lịch", href: "/schedule", icon: Calendar },
+  { label: "Duyệt", href: "/approvals/seals", icon: ClipboardCheck }
 ];
 
 export const secondaryNav: NavItem[] = [
   { label: "Sơ đồ tổ chức", href: "/org-chart", icon: Network },
-  { label: "归档", href: "/archive", icon: Archive },
-  { label: "报表", href: "/reports", icon: BarChart3 },
+  { label: "Lưu trữ", href: "/archive", icon: Archive },
+  { label: "Báo cáo", href: "/reports", icon: BarChart3 },
   // Genealogy domain
   { label: "Giáo Phả", href: "/genealogy", icon: UsersRound },
   // ERP domain
   { label: "ERP", href: "/erp", icon: Kanban },
-  { label: "设置", href: "/settings", icon: Settings }
+  { label: "Cài đặt", href: "/settings", icon: Settings }
 ];

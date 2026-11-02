@@ -38,7 +38,7 @@ export function ClientTagsNotes() {
       </Field>
 
       <Field label="Ghi chú" full>
-        <Textarea rows={3} placeholder="可选" {...register("notes")} />
+        <Textarea rows={3} placeholder="Tuỳ chọn" {...register("notes")} />
       </Field>
     </>
   );

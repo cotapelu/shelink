@@ -36,9 +36,9 @@ vi.mock("./field", () => ({
 // Mock enums
 vi.mock("@/lib/enums", () => ({
   procedureTypeLabel: {
-    LITIGATION: "诉讼",
-    ARBITRATION: "仲裁",
-    ADMINISTRATION: "行政"
+    LITIGATION: "Tố tụng",
+    ARBITRATION: "Trọng tài",
+    ADMINISTRATION: "Hành chính"
   }
 }));
 
@@ -56,9 +56,9 @@ describe("ProcedureCoreSection", () => {
 
   it("renders three fields with labels", () => {
     render(<ProcedureCoreSection {...defaultProps} />);
-    expect(screen.getByText(/当前程序\s*\*/)).toBeInTheDocument();
-    expect(screen.getByText("管辖地")).toBeInTheDocument();
-    expect(screen.getByText("争议解决机构")).toBeInTheDocument();
+    expect(screen.getByText(/Thủ tục hiện tại\s*\*/)).toBeInTheDocument();
+    expect(screen.getByText("Địa giới")).toBeInTheDocument();
+    expect(screen.getByText("Cơ quan giải quyết tranh chấp")).toBeInTheDocument();
   });
 
   it("renders procedure options", () => {
@@ -70,14 +70,14 @@ describe("ProcedureCoreSection", () => {
 
   it("renders procedure type labels from enums", () => {
     render(<ProcedureCoreSection {...defaultProps} />);
-    expect(screen.getByText("诉讼")).toBeInTheDocument();
-    expect(screen.getByText("仲裁")).toBeInTheDocument();
-    expect(screen.getByText("行政")).toBeInTheDocument();
+    expect(screen.getByText("Tố tụng")).toBeInTheDocument();
+    expect(screen.getByText("Trọng tài")).toBeInTheDocument();
+    expect(screen.getByText("Hành chính")).toBeInTheDocument();
   });
 
   it("renders jurisdiction input", () => {
     render(<ProcedureCoreSection {...defaultProps} jurisdiction="测试" />);
-    const input = screen.getByPlaceholderText("输入管辖地");
+    const input = screen.getByPlaceholderText("Nhập địa giới");
     expect(input).toHaveValue("测试");
   });
 

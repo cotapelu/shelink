@@ -28,7 +28,7 @@ export function LawyerSection({
 }: LawyerSectionProps) {
   return (
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
-      {/* 主办律师 */}
+      {/* Luật sư chủ trì */}
       <Field label="Luật sư phụ trách" required>
         <Select
           value={ownerUserId || ""}
@@ -49,7 +49,7 @@ export function LawyerSection({
         </Select>
       </Field>
 
-      {/* 协办人员 */}
+      {/* Nhân sự cộng tác */}
       <Field label="Nhân sự hỗ trợ (có thể chọn nhiều)">
         <Select
           multiple
@@ -71,7 +71,7 @@ export function LawyerSection({
         </Select>
       </Field>
 
-      {/* Cần备案 cho hiệp hội Luật sư? */}
+      {/* Cần ghi nhận cho Hiệp hội Luật sư? */}
       <Field label="Cần với Hiệp hội Luật sư không?">
         <Select
           value={barFiling ?? ""}

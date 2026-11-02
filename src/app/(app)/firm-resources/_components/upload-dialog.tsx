@@ -46,14 +46,14 @@ import {
 import { uploadFirmFile } from "@/server/firm-files/actions";
 
 const CATEGORY_OPTIONS: { value: FirmFileCategory; label: string }[] = [
-  { value: "CONTRACT", label: "合同" },
-  { value: "LETTER", label: "函件" },
-  { value: "LICENSE", label: "证照" },
-  { value: "OTHER_FIRM", label: "其他" },
-  { value: "POLICY", label: "制度" },
-  { value: "GUIDE", label: "指引" },
-  { value: "TEMPLATE", label: "参考模板" },
-  { value: "REFERENCE", label: "其他文件" }
+  { value: "CONTRACT", label: "Hợp đồng" },
+  { value: "LETTER", label: "Công văn" },
+  { value: "LICENSE", label: "Giấy phép" },
+  { value: "OTHER_FIRM", label: "Khác" },
+  { value: "POLICY", label: "Quy chế" },
+  { value: "GUIDE", label: "Hướng dẫn" },
+  { value: "TEMPLATE", label: "Mẫu tham khảo" },
+  { value: "REFERENCE", label: "Tệp khác" }
 ];
 
 const NONE_VALUE = "__none__";
@@ -100,11 +100,11 @@ export function UploadDialog({
 
   function submit() {
     if (!file) {
-      toast.warning("请选择文件");
+      toast.warning("Hãy chọn tệp");
       return;
     }
     if (!name.trim()) {
-      toast.warning("名称必填");
+      toast.warning("Tên bắt buộc nhập");
       return;
     }
     startTransition(async () => {
@@ -119,21 +119,21 @@ export function UploadDialog({
         const res = await uploadFirmFile(fd);
         toast.success(
           supersedesId !== NONE_VALUE
-            ? `已上传并替代旧版：${res.name}`
-            : `已上传：${res.name}`
+            ? `Đã tải lên và thay thế bản cũ: ${res.name}`
+            : `Đã tải lên: ${res.name}`
         );
         reset();
         onOpenChange(false);
         router.refresh();
       } catch (err) {
-        toast.error("上传失败", {
+        toast.error("Tải lên thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
     });
   }
 
-  // 可被替代的旧版：仅显示同分类且没有更新版本的
+  // Bản cũ có thể bị thay thế: chỉ hiện bản cùng phân loại và không có phiên bản mới hơn
   const replaceableFiles = existingFiles.filter(
     (f) => !f.hasNewerVersion
   );
@@ -144,16 +144,16 @@ export function UploadDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
             <Upload className="h-4 w-4 text-primary" />
-            上传律所资料
+            Tải tài liệu văn phòng lên
           </DialogTitle>
           <DialogDescription className="text-xs">
-            单文件 ≤ 50MB；全所共享可见
+            Mỗi tệp ≤ 50MB; toàn văn phòng đều thấy
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div>
-            <Label className="text-[11px]">文件 *</Label>
+            <Label className="text-[11px]">Tệp *</Label>
             <Input
               ref={fileRef}
               type="file"
@@ -169,16 +169,16 @@ export function UploadDialog({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <Label className="text-[11px]">名称 *</Label>
+              <Label className="text-[11px]">Tên *</Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="如：员工手册 v2.4"
+                placeholder="vd: Sổ tay nhân viên v2.4"
                 className="mt-1"
               />
             </div>
             <div>
-              <Label className="text-[11px]">分类 *</Label>
+              <Label className="text-[11px]">Phân loại *</Label>
               <Select
                 value={category}
                 onValueChange={(v) => setCategory(v as FirmFileCategory)}
@@ -198,36 +198,36 @@ export function UploadDialog({
           </div>
 
           <div>
-            <Label className="text-[11px]">描述（可选）</Label>
+            <Label className="text-[11px]">Mô tả (tuỳ chọn)</Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="简短说明用途、适用场景"
+              placeholder="Giải thích ngắn gọn mục đích, trường hợp dùng"
               rows={2}
               className="mt-1 resize-none text-sm"
             />
           </div>
 
           <div>
-            <Label className="text-[11px]">标签（逗号 / 空格分隔）</Label>
+            <Label className="text-[11px]">Nhãn (phân cách bằng dấu phẩy / dấu cách)</Label>
             <Input
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              placeholder="如：合伙人,薪酬,2024"
+              placeholder="vd: cộng sự,lương,2024"
               className="mt-1"
             />
           </div>
 
           <div>
             <Label className="text-[11px]">
-              替代哪个旧版？（可选；选了之后旧版会被标&ldquo;旧版&rdquo;）
+              Thay thế bản cũ nào? (tuỳ chọn; chọn xong bản cũ sẽ bị đánh dấu&ldquo;bản cũ&rdquo;)
             </Label>
             <Select value={supersedesId} onValueChange={setSupersedesId}>
               <SelectTrigger className="mt-1 h-9 text-xs">
-                <SelectValue placeholder="不替代任何文件（新增）" />
+                <SelectValue placeholder="Không thay thế tệp nào (thêm mới)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={NONE_VALUE}>不替代任何文件（新增）</SelectItem>
+                <SelectItem value={NONE_VALUE}>Không thay thế tệp nào (thêm mới)</SelectItem>
                 {replaceableFiles.map((f) => (
                   <SelectItem key={f.id} value={f.id}>
                     {f.name}
@@ -240,11 +240,11 @@ export function UploadDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            取消
+            Huỷ
           </Button>
           <Button onClick={submit} disabled={isPending || !file}>
             {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-            上传
+            Tải lên
           </Button>
         </DialogFooter>
       </DialogContent>

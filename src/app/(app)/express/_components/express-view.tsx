@@ -474,7 +474,7 @@ function NewExpressDialog({
               <Input
                 value={trackingNo}
                 onChange={(e) => onTrackingChange(e.target.value)}
-                placeholder="如 SF1234567890123"
+                placeholder="vd SF1234567890123"
                 className="mt-1 font-mono"
               />
             </div>

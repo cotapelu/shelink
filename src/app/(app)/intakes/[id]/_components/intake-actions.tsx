@@ -59,16 +59,16 @@ export function IntakeActions({
   const role = session?.user?.role;
   const canApprove = role === "ADMIN" || role === "PRINCIPAL_LAWYER";
 
-  // 律师端：待补正状态 → 显示"重新提交"按钮
+  // Phía luật sư: trạng thái chờ bổ sung → hiện nút "gửi lại"
   function handleResubmit() {
-    if (!confirm("确认重新提交审批？")) return;
+    if (!confirm("Xác nhận gửi lại duyệt?")) return;
     startTransition(async () => {
       try {
         await resubmitIntake(intakeId);
-        toast.success("已重新提交审批");
+        toast.success("Đã gửi lại duyệt");
         router.refresh();
       } catch (err) {
-        toast.error("操作失败", {
+        toast.error("Thao tác thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -80,7 +80,7 @@ export function IntakeActions({
       <div className="flex items-center gap-2">
         <div className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-700">
           <AlertCircle className="h-3.5 w-3.5" />
-          待补正：补充材料后可重新提交
+          Chờ bổ sung: bù đủ tài liệu có thể gửi lại
         </div>
         <Button size="sm" onClick={handleResubmit} disabled={isPending} className="gap-1.5">
           {isPending ? (
@@ -88,7 +88,7 @@ export function IntakeActions({
           ) : (
             <RotateCcw className="h-3.5 w-3.5" />
           )}
-          重新提交
+          Gửi lại
         </Button>
       </div>
     );
@@ -98,20 +98,20 @@ export function IntakeActions({
     return (
       <div className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/30 px-3 py-1.5 text-xs text-muted-foreground">
         <Clock className="h-3.5 w-3.5" />
-        等待管理员/主任律师审批
+        Chờ quản trị viên/luật sư chính duyệt
       </div>
     );
   }
 
   function handleConvert() {
-    if (!confirm("确认转为正式案件？将占用一个案件编号。")) return;
+    if (!confirm("Xác nhận chuyển thành vụ án chính thức? Sẽ chiếm một mã vụ án.")) return;
     startTransition(async () => {
       try {
         const res = await convertIntakeToMatter(intakeId);
-        toast.success(`已转化为案件 ${res.internalCode}`);
+        toast.success(`Đã chuyển thành vụ án ${res.internalCode}`);
         router.push(`/matters/${res.matterId}`);
       } catch (err) {
-        toast.error("转化失败", {
+        toast.error("Chuyển đổi thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -125,22 +125,22 @@ export function IntakeActions({
 
   function handleConfirm() {
     if (!reason.trim()) {
-      toast.warning(dialogKind === "decline" ? "请填写不接案原因" : "请填写补正说明");
+      toast.warning(dialogKind === "decline" ? "Hãy nhập lý do không tiếp nhận" : "Hãy nhập diễn giải bổ sung");
       return;
     }
     startTransition(async () => {
       try {
         if (dialogKind === "decline") {
           await declineIntake({ id: intakeId, reason });
-          toast.success("已标记为不接案");
+          toast.success("Đã đánh dấu không tiếp nhận");
         } else {
           await markIntakeNeedsRevision({ id: intakeId, reason });
-          toast.success("已标记待补正，律师可补充后重新提交");
+          toast.success("Đã đánh dấu chờ bổ sung, luật sư bù xong có thể gửi lại");
         }
         setDialogKind(null);
         router.refresh();
       } catch (err) {
-        toast.error("操作失败", {
+        toast.error("Thao tác thất bại", {
           description: err instanceof Error ? err.message : ""
         });
       }
@@ -160,7 +160,7 @@ export function IntakeActions({
           className="border-amber-500/40 text-amber-700 hover:bg-amber-500/10"
         >
           <AlertCircle className="mr-1.5 h-3.5 w-3.5" />
-          需补正
+          Cần bổ sung
         </Button>
         <Button
           variant="outline"
@@ -170,7 +170,7 @@ export function IntakeActions({
           className="border-destructive/40 text-destructive hover:bg-destructive/10"
         >
           <XCircle className="mr-1.5 h-3.5 w-3.5" />
-          不接案
+          Không tiếp nhận
         </Button>
         <Button
           size="sm"
@@ -183,24 +183,24 @@ export function IntakeActions({
           ) : (
             <ArrowRight className="h-3.5 w-3.5" />
           )}
-          转为正式案件
+          Chuyển thành vụ án chính thức
         </Button>
       </div>
 
       <Dialog open={dialogKind !== null} onOpenChange={(o) => !o && setDialogKind(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{isDecline ? "标记不接案" : "标记待补正"}</DialogTitle>
+            <DialogTitle>{isDecline ? "Đánh dấu không tiếp nhận" : "Đánh dấu chờ bổ sung"}</DialogTitle>
             <DialogDescription>
               {isDecline
-                ? "终态：此收案不会再转为正式案件。仍保留在历史中。"
-                : "律师补充材料后可点击「重新提交审批」，区别于真正的不接案。"}
+                ? "Trạng thái cuối: tiếp nhận này sẽ không chuyển thành vụ án chính thức nữa. Vẫn giữ trong lịch sử."
+                : "Luật sư bù đủ tài liệu có thể bấm「gửi lại duyệt」, khác với không tiếp nhận thật sự."}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-2">
             <Label htmlFor="reason" className="text-xs">
-              {isDecline ? "不接案原因" : "需补正项目"} *
+              {isDecline ? "Lý do không tiếp nhận" : "Mục cần bổ sung"} *
             </Label>
             <Textarea
               id="reason"
@@ -208,8 +208,8 @@ export function IntakeActions({
               onChange={(e) => setReason(e.target.value)}
               placeholder={
                 isDecline
-                  ? "如：与已有客户存在阻塞性冲突 / 客户已撤回 / 不在业务范围内 ..."
-                  : "如：缺身份证扫描件 / 委托代理合同未签字 / 利益冲突说明不充分 ..."
+                  ? "vd: có xung đột chặn với khách hiện có / khách đã rút / ngoài phạm vi nghiệp vụ..."
+                  : "vd: thiếu bản scan giấy tờ / hợp đồng ủy quyền chưa ký / diễn giải xung đột lợi ích chưa đầy đủ..."
               }
               rows={4}
             />
@@ -217,7 +217,7 @@ export function IntakeActions({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogKind(null)} disabled={isPending}>
-              取消
+              Huỷ
             </Button>
             <Button
               onClick={handleConfirm}
@@ -225,7 +225,7 @@ export function IntakeActions({
               variant={isDecline ? "destructive" : "default"}
             >
               {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-              {isDecline ? "确认不接案" : "标记待补正"}
+              {isDecline ? "Xác nhận không tiếp nhận" : "Đánh dấu chờ bổ sung"}
             </Button>
           </DialogFooter>
         </DialogContent>

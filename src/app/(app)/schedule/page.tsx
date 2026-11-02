@@ -27,7 +27,7 @@ export default async function SchedulePage() {
   const session = await getSession();
   if (!session?.user) return null;
 
-  // 拉前后各 3 个月覆盖月历前后翻页
+  // Lấy trước sau mỗi bên 3 tháng để phủ việc lật trang lịch tháng
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   const from = new Date(now.getFullYear(), now.getMonth() - 3, 1);

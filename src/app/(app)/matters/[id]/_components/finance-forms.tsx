@@ -24,6 +24,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Paperclip, FileText, Sparkles } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -384,7 +385,7 @@ export function AddFeeEntrySheet({
                     <SelectItem value="none">Không liên kết</SelectItem>
                     {invoiceRequests.map((r) => (
                       <SelectItem key={r.id} value={r.id}>
-                        ¥{Number(r.amount).toLocaleString()} ·{" "}
+                        {formatCurrency(Number(r.amount))} ·{" "}
                         {r.title ?? "Chưa đặt tên"} ·{" "}
                         {r.invoiceNo ? `Đã xuất ${r.invoiceNo}` : r.status}
                       </SelectItem>
@@ -708,7 +709,7 @@ function InvoiceOcrBlock({
           {preview.totalWithTax != null && (
             <div>
               Tổng cộng tiền thuế:
-              <span className="font-mono text-foreground/85">¥{preview.totalWithTax}</span>
+              <span className="font-mono text-foreground/85">{formatCurrency(Number(preview.totalWithTax))}</span>
             </div>
           )}
         </div>

@@ -38,10 +38,10 @@ import {
 } from "lucide-react";
 
 const groupConfig = [
-  { key: "matters" as const, label: "案件", icon: FolderOpen },
-  { key: "clients" as const, label: "客户", icon: Users },
-  { key: "intakes" as const, label: "收案", icon: Inbox },
-  { key: "documents" as const, label: "材料", icon: FileText },
+  { key: "matters" as const, label: "Vụ án", icon: FolderOpen },
+  { key: "clients" as const, label: "Khách hàng", icon: Users },
+  { key: "intakes" as const, label: "Tiếp nhận", icon: Inbox },
+  { key: "documents" as const, label: "Tài liệu", icon: FileText },
 ];
 
 export function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
@@ -50,7 +50,7 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Cmd+K / Ctrl+K 全局快捷键
+  // Phím tắt toàn cục Cmd+K / Ctrl+K
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -62,7 +62,7 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChan
     return () => document.removeEventListener("keydown", handler);
   }, [onOpenChange]);
 
-  // 防抖搜索
+  // Tìm có chống rung
   useEffect(() => {
     if (!query.trim()) {
       setResults(null);
@@ -96,13 +96,13 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <CommandInput
-        placeholder="搜索案件、客户、材料..."
+        placeholder="Tìm vụ án, khách hàng, tài liệu..."
         value={query}
         onValueChange={setQuery}
       />
       <CommandList>
         {query && !loading && !hasResults && (
-          <CommandEmpty>未找到相关结果</CommandEmpty>
+          <CommandEmpty>Không tìm thấy kết quả liên quan</CommandEmpty>
         )}
         {results && groupConfig.map(({ key, label, icon: Icon }) => {
           const items = results[key];

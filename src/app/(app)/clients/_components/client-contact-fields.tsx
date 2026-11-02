@@ -22,7 +22,7 @@ export function ClientContactFields() {
       </Field>
 
       <Field label="Địa chỉ">
-        <Input placeholder="详细Địa chỉ" {...register("address")} />
+        <Input placeholder="Địa chỉ chi tiết" {...register("address")} />
       </Field>
     </>
   );

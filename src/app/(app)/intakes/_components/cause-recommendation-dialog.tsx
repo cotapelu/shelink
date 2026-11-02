@@ -46,9 +46,9 @@ type Props = {
 };
 
 const confidenceStyle: Record<CauseConfidence, { label: string; cls: string }> = {
-  HIGH: { label: "高置信", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  MEDIUM: { label: "中置信", cls: "bg-amber-50 text-amber-700 border-amber-200" },
-  LOW: { label: "低置信", cls: "bg-slate-50 text-slate-600 border-slate-200" }
+  HIGH: { label: "Tin cậy cao", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  MEDIUM: { label: "Tin cậy trung bình", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+  LOW: { label: "Tin cậy thấp", cls: "bg-slate-50 text-slate-600 border-slate-200" }
 };
 
 export function CauseRecommendationDialog({
@@ -66,10 +66,10 @@ export function CauseRecommendationDialog({
         <DialogHeader className="border-b border-border px-5 py-3">
           <DialogTitle className="flex items-center gap-2 text-base">
             <Sparkles className="h-4 w-4 text-violet-500" />
-            AI 案由推荐
+            Gợi ý nguyên nhân bằng AI
           </DialogTitle>
           <DialogDescription className="text-xs">
-            基于起诉状内容生成，仅作参考，请人工核对后选用
+            Sinh theo nội dung đơn khởi kiện, chỉ để tham khảo, hãy đối chiếu thủ công rồi chọn
           </DialogDescription>
         </DialogHeader>
 
@@ -77,20 +77,20 @@ export function CauseRecommendationDialog({
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
-              正在分析案情
+              Đang phân tích tình hình
             </div>
           ) : errorMessage ? (
             <div className="flex flex-col items-center gap-3 py-8 text-sm">
               <p className="text-center text-rose-600">{errorMessage}</p>
               {onRetry && (
                 <Button size="sm" variant="outline" onClick={onRetry}>
-                  重试
+                  Thử lại
                 </Button>
               )}
             </div>
           ) : candidates.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">
-              暂无推荐
+              Chưa có gợi ý
             </p>
           ) : (
             candidates.map((c) => {
@@ -134,7 +134,7 @@ export function CauseRecommendationDialog({
             onClick={() => onOpenChange(false)}
           >
             <X className="h-3.5 w-3.5" />
-            不选用
+            Không chọn
           </Button>
         </DialogFooter>
       </DialogContent>

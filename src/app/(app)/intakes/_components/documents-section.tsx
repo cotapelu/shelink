@@ -30,7 +30,7 @@ export function DocumentsSection({
     const maxBytes = maxFileSizeMB * 1024 * 1024;
     const arr = Array.from(list).filter((f) => f.size <= maxBytes);
     if (arr.length < list.length) {
-      toast.warning(`跳过了超过 ${maxFileSizeMB}MB 的文件`);
+      toast.warning(`Đã bỏ qua các tệp vượt quá ${maxFileSizeMB}MB`);
     }
     onContractsChange([...contracts, ...arr]);
     if (fileRef.current) fileRef.current.value = "";
@@ -81,7 +81,7 @@ export function DocumentsSection({
       <div className="space-y-3.5">
         {contracts.length === 0 ? (
           <p className="rounded-md border border-dashed border-border bg-background py-3 text-center text-xs text-muted-foreground">
-            上传委托代理合同、授权委托书等（加密存储，单文件 ≤ {maxFileSizeMB}MB）
+            Tải lên hợp đồng ủy quyền, giấy ủy quyền... (lưu có mã hoá, mỗi tệp ≤ {maxFileSizeMB}MB)
           </p>
         ) : (
           <ul className="space-y-1.5">
@@ -118,10 +118,10 @@ export function DocumentsSection({
             <div className="text-xs text-muted-foreground">
               <div className="font-medium text-foreground">
                 <ScanLine className="mr-1 inline h-3 w-3 text-primary" />
-                识别起诉状 / 申请书
+                Nhận diện đơn khởi kiện / đơn yêu cầu
               </div>
               <p className="mt-0.5">
-                我方为被动方，可上传相对方起诉状 / 申请书（JPG / PNG / WebP / PDF，≤ {maxFileSizeMB}MB），AI 自动抽取相对方主体与诉求
+                Phía ta là bên bị động, có thể tải đơn khởi kiện / đơn yêu cầu của bên đối phương (JPG / PNG / WebP / PDF, ≤ {maxFileSizeMB}MB), AI tự trích chủ thể và yêu cầu của bên đối phương
               </p>
             </div>
             <input
@@ -147,7 +147,7 @@ export function DocumentsSection({
               ) : (
                 <ScanLine className="h-3 w-3" />
               )}
-              上传识别
+              Tải lên nhận diện
             </Button>
           </div>
         </div>

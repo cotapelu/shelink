@@ -50,12 +50,12 @@ import { procedureTypeLabel } from "@/lib/enums";
 import { AddTaskDialog } from "./add-task-dialog";
 
 const typeMeta = {
-  hearing: { icon: Gavel, label: "开庭", color: "#5B8DEF" },
-  deadline: { icon: AlertTriangle, label: "期限", color: "#FBBF24" },
-  task: { icon: ClipboardList, label: "事项", color: "#4FD1C5" }
+  hearing: { icon: Gavel, label: "Phiên tòa", color: "#5B8DEF" },
+  deadline: { icon: AlertTriangle, label: "Thời hạn", color: "#FBBF24" },
+  task: { icon: ClipboardList, label: "Công việc", color: "#4FD1C5" }
 } as const;
 
-const WEEKDAY_LABELS = ["一", "二", "三", "四", "五", "六", "日"];
+const WEEKDAY_LABELS = ["Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "CN"];
 const VISIBLE_ITEMS_PER_DAY = 4;
 
 export function ScheduleView({
@@ -114,14 +114,14 @@ export function ScheduleView({
       <header className="space-y-2">
         <div className="flex items-end justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-xl font-medium tracking-tight">日程</h1>
-            <p className="text-[13px] text-muted-foreground">未来 90 天的开庭与期限</p>
+            <h1 className="text-xl font-medium tracking-tight">Lịch làm việc</h1>
+            <p className="text-[13px] text-muted-foreground">Phiên tòa và thời hạn trong 90 ngày tới</p>
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-2">
             <Button size="sm" onClick={() => openAddDialog()} className="h-8 gap-1.5">
               <Plus className="h-3.5 w-3.5" strokeWidth={1.8} />
-              添加日程
+              Thêm lịch
             </Button>
             <div
               className="flex items-center gap-1 rounded-md border border-border bg-card p-0.5"
@@ -133,7 +133,7 @@ export function ScheduleView({
                 className="h-7 gap-1"
               >
                 <List className="h-3.5 w-3.5" strokeWidth={1.8} />
-                列表
+                Danh sách
               </Button>
               <Button
                 size="sm"
@@ -142,7 +142,7 @@ export function ScheduleView({
                 className="h-7 gap-1"
               >
                 <Grid3X3 className="h-3.5 w-3.5" strokeWidth={1.8} />
-                月历
+                Lịch tháng
               </Button>
             </div>
           </div>
@@ -152,10 +152,10 @@ export function ScheduleView({
 
       {/* KPI */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="今日" value={stats.todayCount} color="hsl(var(--primary))" icon={<Clock className="h-3.5 w-3.5" />} />
-        <Stat label="本周" value={stats.weekCount} color="#4FD1C5" icon={<Calendar className="h-3.5 w-3.5" />} />
-        <Stat label="开庭" value={stats.hearingCount} color="hsl(var(--primary))" icon={<Gavel className="h-3.5 w-3.5" />} />
-        <Stat label="期限" value={stats.deadlineCount} color="#EA580C" icon={<AlertTriangle className="h-3.5 w-3.5" />} />
+        <Stat label="Hôm nay" value={stats.todayCount} color="hsl(var(--primary))" icon={<Clock className="h-3.5 w-3.5" />} />
+        <Stat label="Tuần này" value={stats.weekCount} color="#4FD1C5" icon={<Calendar className="h-3.5 w-3.5" />} />
+        <Stat label="Phiên tòa" value={stats.hearingCount} color="hsl(var(--primary))" icon={<Gavel className="h-3.5 w-3.5" />} />
+        <Stat label="Thời hạn" value={stats.deadlineCount} color="#EA580C" icon={<AlertTriangle className="h-3.5 w-3.5" />} />
       </div>
 
       {view === "list" ? (
@@ -189,7 +189,7 @@ function ListView({
   items: (ScheduleItem & { dateKey: string })[];
   today: Date;
 }) {
-  // 按日分组
+  // Nhóm theo ngày
   const groups = useMemo(() => {
     const map = new Map<string, (ScheduleItem & { dateKey: string })[]>();
     for (const it of items) {
@@ -202,7 +202,7 @@ function ListView({
   if (items.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border bg-card py-16 text-center">
-        <p className="text-sm text-muted-foreground">未来 90 天没有日程</p>
+        <p className="text-sm text-muted-foreground">90 ngày tới chưa có lịch</p>
       </div>
     );
   }
@@ -232,15 +232,15 @@ function ListView({
                   {d.toLocaleDateString("zh-CN", { weekday: "long" })}
                 </span>
                 {isToday ? (
-                  <Badge className="bg-primary text-primary-foreground text-[10px]">今天</Badge>
+                  <Badge className="bg-primary text-primary-foreground text-[10px]">Hôm nay</Badge>
                 ) : (
                   <span className="text-xs text-muted-foreground">
-                    {days === 1 ? "明天" : days > 0 ? `${days} 天后` : `${-days} 天前`}
+                    {days === 1 ? "Ngày mai" : days > 0 ? `${days} ngày nữa` : `${-days} ngày trước`}
                   </span>
                 )}
               </div>
               <span className="font-mono text-xs tabular text-muted-foreground">
-                {group.length} 项
+                {group.length} mục
               </span>
             </header>
             <ul className="divide-y divide-border">
@@ -357,10 +357,10 @@ function CalendarView({
   const year = cursor.getFullYear();
   const month = cursor.getMonth();
 
-  // 一个月有多少天
+  // Một tháng có bao nhiêu ngày
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  // 当月第一天是周几（周一=1 ... 周日=7，转化为 0-6 让"周一在最左"）
-  const firstWeekday = ((new Date(year, month, 1).getDay() + 6) % 7); // 0=周一
+  // Ngày đầu tháng là thứ mấy (Thứ Hai=1 ... Chủ Nhật=7, đổi sang 0-6 để "Thứ Hai ở ngoài cùng bên trái")
+  const firstWeekday = ((new Date(year, month, 1).getDay() + 6) % 7); // 0=Thứ Hai
 
   const cells: { date: Date | null; key: string | null }[] = [];
   for (let i = 0; i < firstWeekday; i++) cells.push({ date: null, key: null });
@@ -368,10 +368,10 @@ function CalendarView({
     const d = new Date(year, month, day);
     cells.push({ date: d, key: dateKey(d) });
   }
-  // 补齐到 6 行 = 42 格
+  // Bù đủ 6 hàng = 42 ô
   while (cells.length < 42) cells.push({ date: null, key: null });
 
-  // 按 key 聚合 items
+  // Tổng hợp items theo key
   const itemsByKey = useMemo(() => {
     const map = new Map<string, (ScheduleItem & { dateKey: string })[]>();
     for (const it of items) {
@@ -400,7 +400,7 @@ function CalendarView({
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-base font-semibold tabular">
-            {year} 年 {month + 1} 月
+            Tháng {month + 1} {year}
           </span>
           <Button
             variant="ghost"
@@ -413,7 +413,7 @@ function CalendarView({
         </div>
         {monthOffset !== 0 && (
           <Button variant="outline" size="sm" onClick={() => onOffsetChange(0)} className="h-7 text-xs">
-            回到本月
+            Về tháng này
           </Button>
         )}
       </header>
@@ -453,7 +453,7 @@ function CalendarView({
               }}
               role="button"
               tabIndex={0}
-              aria-label={`${month + 1}月${cell.date.getDate()}日，${dayItems.length}项日程`}
+              aria-label={`${cell.date.getDate()}/${month + 1}, ${dayItems.length} mục lịch`}
               className={cn(
                 "group flex min-h-[8rem] flex-col rounded-md border p-1.5 text-left transition-colors sm:min-h-[9rem]",
                 isSelected
@@ -478,8 +478,8 @@ function CalendarView({
                     onAddDay(cell.date!);
                   }}
                   className="h-5 w-5 rounded-sm p-0 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-primary group-hover:opacity-100 group-focus-within:opacity-100"
-                  aria-label={`添加 ${month + 1} 月 ${cell.date.getDate()} 日的日程`}
-                  title="添加日程"
+                  aria-label={`Thêm lịch ngày ${cell.date.getDate()}/${month + 1}`}
+                  title="Thêm lịch"
                 >
                   <Plus className="mx-auto h-3 w-3" />
                 </button>
@@ -507,7 +507,7 @@ function CalendarView({
                 {formatDateKey(selectedDay)}
               </h3>
               <p className="text-xs text-muted-foreground">
-                {selectedItems.length} 项
+                {selectedItems.length} mục
               </p>
             </div>
             <div className="flex items-center gap-1">
@@ -519,7 +519,7 @@ function CalendarView({
                 className="h-7 gap-1 text-xs"
               >
                 <Plus className="h-3.5 w-3.5" />
-                添加
+                Thêm
               </Button>
               <Button
                 type="button"
@@ -534,7 +534,7 @@ function CalendarView({
           </header>
           {selectedItems.length === 0 ? (
             <p className="rounded-md border border-dashed border-border py-6 text-center text-xs text-muted-foreground">
-              这一天没有日程
+              Ngày này không có lịch
             </p>
           ) : (
             <ul className="grid grid-cols-1 gap-2 lg:grid-cols-2">
@@ -618,7 +618,7 @@ function ScheduleItemDialog({
                 </Badge>
                 {item.completed && (
                   <Badge variant="secondary" className="text-[10px]">
-                    已完成
+                    Đã hoàn tất
                   </Badge>
                 )}
               </div>
@@ -626,10 +626,10 @@ function ScheduleItemDialog({
             </DialogHeader>
 
             <div className="space-y-2 rounded-lg border border-border bg-muted/20 p-3">
-              <DetailLine label="时间" value={`${formatFullDate(item.occurredAt)} ${formatTime(item.occurredAt)}`} />
-              <DetailLine label="客户" value={item.clientName ?? "未填写客户"} />
+              <DetailLine label="Thời gian" value={`${formatFullDate(item.occurredAt)} ${formatTime(item.occurredAt)}`} />
+              <DetailLine label="Khách hàng" value={item.clientName ?? "Chưa điền khách hàng"} />
               <DetailLine
-                label="关联案件"
+                label="Vụ án liên kết"
                 value={
                   <Link
                     href={`/matters/${item.matter.id}`}
@@ -640,20 +640,20 @@ function ScheduleItemDialog({
                 }
               />
               {item.procedureLabel && (
-                <DetailLine label="程序" value={formatProcedureLabel(item.procedureLabel)} />
+                <DetailLine label="Thủ tục" value={formatProcedureLabel(item.procedureLabel)} />
               )}
               {item.type === "deadline" && item.category && (
-                <DetailLine label="期限类型" value={item.category} />
+                <DetailLine label="Loại thời hạn" value={item.category} />
               )}
               {item.type === "deadline" && item.remindDays !== undefined && (
-                <DetailLine label="提醒" value={`提前 ${item.remindDays} 天`} />
+                <DetailLine label="Nhắc" value={`Trước ${item.remindDays} ngày`} />
               )}
               {item.type === "task" && item.priority !== undefined && (
-                <DetailLine label="优先级" value={priorityLabel(item.priority)} />
+                <DetailLine label="Mức ưu tiên" value={priorityLabel(item.priority)} />
               )}
               {item.description && (
                 <div className="space-y-1 border-t border-border pt-2">
-                  <div className="text-[11px] text-muted-foreground">详情</div>
+                  <div className="text-[11px] text-muted-foreground">Chi tiết</div>
                   <p className="whitespace-pre-wrap text-sm leading-6">{item.description}</p>
                 </div>
               )}
@@ -661,10 +661,10 @@ function ScheduleItemDialog({
 
             <DialogFooter>
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                关闭
+                Đóng
               </Button>
               <Button asChild>
-                <Link href={`/matters/${item.matter.id}`}>查看案件</Link>
+                <Link href={`/matters/${item.matter.id}`}>Xem vụ án</Link>
               </Button>
             </DialogFooter>
           </>
@@ -749,9 +749,9 @@ function formatProcedureLabel(value: string) {
 }
 
 function priorityLabel(value: number) {
-  if (value >= 2) return "紧急";
-  if (value === 1) return "高";
-  return "普通";
+  if (value >= 2) return "Khẩn cấp";
+  if (value === 1) return "Cao";
+  return "Thường";
 }
 
 function displaySubject(item: ScheduleItem) {

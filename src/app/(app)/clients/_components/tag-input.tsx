@@ -23,7 +23,7 @@ export function TagInput({
             type="button"
             onClick={() => onRemove(t)}
             className="ml-1 hover:text-foreground"
-            aria-label={`移除 ${t}`}
+            aria-label={`Xoá ${t}`}
           >
             <X className="h-3 w-3" />
           </button>
@@ -31,7 +31,7 @@ export function TagInput({
       ))}
       <input
         type="text"
-        placeholder={tags.length === 0 ? "输入后回车ThêmNhãn" : ""}
+        placeholder={tags.length === 0 ? "Nhập rồi Enter để thêm nhãn" : ""}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();

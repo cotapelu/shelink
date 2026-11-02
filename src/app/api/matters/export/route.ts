@@ -32,7 +32,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
-    return NextResponse.json({ error: "未登录" }, { status: 401 });
+    return NextResponse.json({ error: "Chưa đăng nhập" }, { status: 401 });
   }
 
   const url = new URL(req.url);
@@ -45,8 +45,8 @@ export async function GET(req: Request) {
       role: session.user.role
     });
   } catch (err) {
-    console.error("[matters/export] 生成失败：", err);
-    return NextResponse.json({ error: "导出失败" }, { status: 500 });
+    console.error("[matters/export] Sinh thất bại:", err);
+    return NextResponse.json({ error: "Xuất thất bại" }, { status: 500 });
   }
 
   await audit({

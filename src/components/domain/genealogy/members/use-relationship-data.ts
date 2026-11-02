@@ -212,7 +212,7 @@ export function useRelationshipData({ personId }: UseRelationshipDataProps) {
   // Delete relationship
   const deleteRelationship = useCallback(
     async (id: string) => {
-      if (!confirm("确定删除这层关系？")) return;
+      if (!confirm("Xác nhận xoá lớp quan hệ này?")) return;
       try {
         await api.delete(`/api/relationships/${id}`);
         fetchRelationships();

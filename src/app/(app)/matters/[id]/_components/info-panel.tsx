@@ -24,7 +24,7 @@ import Link from "next/link";
 import { Pencil, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { matterCategoryLabel, matterCategoryKind } from "@/lib/enums";
-import { formatDate, cn } from "@/lib/utils";
+import { formatDate, cn, formatCurrency } from "@/lib/utils";
 import type { MatterPayload, UserOption } from "./matter-detail-tabs";
 import { TeamEditorDialog } from "./team-editor-dialog";
 import { RelatedMattersField } from "./related-matters-field";
@@ -100,7 +100,7 @@ export function InfoPanel({
   };
   // v0.42 mục 11: bảng thông tin vụ án hiển thị「mã nội bộ」(trạng thái đã thể hiện ở Pill đầu trang)
   const claimCell = matter.claimAmount ? (
-    <span className="font-mono tabular">¥{Number(matter.claimAmount).toLocaleString()}</span>
+    <span className="font-mono tabular">{formatCurrency(Number(matter.claimAmount))}</span>
   ) : (
     "—"
   );

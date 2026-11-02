@@ -7,8 +7,8 @@ import type { Contact } from "@prisma/client";
 function renderEmpty() {
   return (
     <section className="rounded-xl border border-border bg-card p-4">
-      <h2 className="mb-3 text-base font-semibold">联系人</h2>
-      <p className="text-sm text-muted-foreground">暂无联系人</p>
+      <h2 className="mb-3 text-base font-semibold">Người liên hệ</h2>
+      <p className="text-sm text-muted-foreground">Chưa có người liên hệ</p>
     </section>
   );
 }
@@ -19,11 +19,11 @@ function renderTable({ contacts }: { contacts: Contact[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>姓名</TableHead>
-            <TableHead>职务</TableHead>
-            <TableHead>电话</TableHead>
-            <TableHead>邮箱</TableHead>
-            <TableHead>微信</TableHead>
+            <TableHead>Họ tên</TableHead>
+            <TableHead>Chức danh</TableHead>
+            <TableHead>Điện thoại</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Zalo/chat</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -48,7 +48,7 @@ export function ContactsSection({ contacts }: { contacts: Contact[] }) {
   }
   return (
     <section className="rounded-xl border border-border bg-card p-4">
-      <h2 className="mb-3 text-base font-semibold">联系人</h2>
+      <h2 className="mb-3 text-base font-semibold">Người liên hệ</h2>
       {renderTable({ contacts })}
     </section>
   );

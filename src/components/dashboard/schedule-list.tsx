@@ -26,8 +26,8 @@ import { cn } from "@/lib/utils";
 import type { ScheduleItem } from "@/server/dashboard/actions";
 
 const typeMeta = {
-  deadline: { icon: AlertTriangle, color: "text-amber-600", label: "期限" },
-  hearing: { icon: Calendar, color: "text-primary", label: "开庭" }
+  deadline: { icon: AlertTriangle, color: "text-amber-600", label: "Thời hạn" },
+  hearing: { icon: Calendar, color: "text-primary", label: "Phiên tòa" }
 };
 
 export function ScheduleList({ data }: { data: ScheduleItem[] }) {
@@ -47,16 +47,16 @@ export function ScheduleList({ data }: { data: ScheduleItem[] }) {
     >
       <header className="flex items-center justify-between px-5 pb-3 pt-4">
         <div>
-          <h2 className="text-lg font-medium tracking-tight">近期日程</h2>
+          <h2 className="text-lg font-medium tracking-tight">Lịch sắp tới</h2>
           <p className="mt-0.5 text-[10.5px] text-muted-foreground">
-            未来 30 天 · 开庭 / 期限 · 按时间排序
+            30 ngày tới · Phiên tòa / Thời hạn · Sắp theo thời gian
           </p>
         </div>
         <Link
           href="/schedule"
           className="group inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
-          完整日历
+          Lịch đầy đủ
           <ArrowRight
             className="h-3 w-3 transition-transform group-hover:translate-x-0.5"
             strokeWidth={1.8}
@@ -94,7 +94,7 @@ function ScheduleRow({ item }: { item: ScheduleItem }) {
   const Icon = meta.icon;
   const subject = item.clientName ?? item.matter;
   const countdown =
-    item.daysUntil <= 0 ? "今天" : item.daysUntil === 1 ? "明天" : `${item.daysUntil}天后`;
+    item.daysUntil <= 0 ? "Hôm nay" : item.daysUntil === 1 ? "Ngày mai" : `${item.daysUntil} ngày nữa`;
   const urgent = item.daysUntil <= 3;
 
   const inner = (

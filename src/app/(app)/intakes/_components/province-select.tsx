@@ -29,7 +29,7 @@ export function ProvinceSelect({ value, onValueChange }: ProvinceSelectProps) {
   return (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger className="h-8 text-xs">
-        <SelectValue placeholder="选择省 / 直辖市" />
+        <SelectValue placeholder="Chọn vùng / thành phố trực thuộc" />
       </SelectTrigger>
       <SelectContent className="max-h-72">
         {provinces.map((p) => (

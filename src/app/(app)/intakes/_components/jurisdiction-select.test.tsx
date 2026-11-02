@@ -70,7 +70,7 @@ describe("JurisdictionSelect", () => {
 
   it("renders button with placeholder when no value", () => {
     render(<JurisdictionSelect {...defaultProps} />);
-    expect(screen.getByText("选择管辖地")).toBeInTheDocument();
+    expect(screen.getByText("Chọn địa giới")).toBeInTheDocument();
   });
 
   it("renders button with formatted display when value present", () => {
@@ -105,12 +105,12 @@ describe("JurisdictionSelect", () => {
 
   it("shows clear button when value is set", () => {
     render(<JurisdictionSelect {...defaultProps} value="北京市" />);
-    expect(screen.getByText("清空")).toBeInTheDocument();
+    expect(screen.getByText("Xoá")).toBeInTheDocument();
   });
 
   it("calls onChange with empty string when clear button clicked", () => {
     render(<JurisdictionSelect {...defaultProps} value="北京市" />);
-    const clearBtn = screen.getByText("清空");
+    const clearBtn = screen.getByText("Xoá");
     clearBtn.click();
     expect(defaultOnChange).toHaveBeenCalledWith("");
   });

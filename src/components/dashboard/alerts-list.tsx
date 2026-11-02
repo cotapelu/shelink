@@ -75,7 +75,7 @@ async function loadAlerts(userId: string | null, role: string | null): Promise<A
           }
         })
       : Promise.resolve([]),
-    // 待审批用章申请（仅管理员 / 主任律师可见，作为审批人提醒）
+    // Yêu cầu dùng dấu chờ duyệt (chỉ quản trị viên / luật sư chính thấy, làm nhắc cho người duyệt)
     isManager
       ? prisma.sealRequest.findMany({
           where: { status: "PENDING" },
@@ -96,14 +96,14 @@ async function loadAlerts(userId: string | null, role: string | null): Promise<A
 
   for (const p of preservations) {
     const days = Math.ceil((p.expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    const label = days < 0 ? `保全已过期 ${-days} 天` : days === 0 ? "保全今日到期" : `保全 ${days} 天后到期`;
+    const label = days < 0 ? `Bảo toàn đã hết hạn ${-days} ngày` : days === 0 ? "Bảo toàn đến hạn hôm nay" : `Bảo toàn còn ${days} ngày nữa đến hạn`;
     items.push({
       id: `pres-${p.id}`,
       source: "preservation",
       title: `${label} · ${p.respondent}`,
       detail: p.matter
         ? `${p.matter.internalCode} ${p.matter.title}`
-        : "未关联案件（诉前保全）",
+        : "Không liên kết vụ án (bảo toàn trước kiện)",
       href: p.matter ? `/matters/${p.matter.id}` : "/preservation",
       date: p.expiryDate,
       tone: classifyByDays(days)
@@ -115,7 +115,7 @@ async function loadAlerts(userId: string | null, role: string | null): Promise<A
     items.push({
       id: `sms-${m.id}`,
       source: "sms",
-      title: parsed.summary || "未处理法院短信",
+      title: parsed.summary || "Tin nhắn toà án chưa xử lý",
       detail: parsed.court ?? "—",
       href: "/inbox",
       date: m.receivedAt,
@@ -127,7 +127,7 @@ async function loadAlerts(userId: string | null, role: string | null): Promise<A
     items.push({
       id: `seal-${s.id}`,
       source: "approval",
-      title: `待审批用章 · ${s.documentTitle}`,
+      title: `Chờ duyệt dùng dấu · ${s.documentTitle}`,
       detail: s.matter ? `${s.matter.internalCode} ${s.matter.title}` : s.purpose,
       href: "/approvals/seals",
       date: s.requestedAt,
@@ -135,7 +135,7 @@ async function loadAlerts(userId: string | null, role: string | null): Promise<A
     });
   }
 
-  // 按 tone 优先（danger > warn > muted > ok），相同 tone 按时间近的优先
+  // Ưu tiên theo tone (danger > warn > muted > ok), cùng tone thì ưu tiên thời gian gần hơn
   const toneOrder = { danger: 0, warn: 1, muted: 2, ok: 3 };
   items.sort((a, b) => {
     if (toneOrder[a.tone] !== toneOrder[b.tone]) return toneOrder[a.tone] - toneOrder[b.tone];
@@ -147,9 +147,9 @@ async function loadAlerts(userId: string | null, role: string | null): Promise<A
 }
 
 const SOURCE_META: Record<AlertItem["source"], { icon: typeof Shield; label: string }> = {
-  preservation: { icon: Shield, label: "保全" },
-  sms: { icon: Inbox, label: "短信" },
-  approval: { icon: Stamp, label: "审批" }
+  preservation: { icon: Shield, label: "Bảo toàn" },
+  sms: { icon: Inbox, label: "Tin nhắn" },
+  approval: { icon: Stamp, label: "Duyệt" }
 };
 
 export async function AlertsList() {
@@ -160,16 +160,16 @@ export async function AlertsList() {
     <section className="ll-surface flex h-full flex-col">
       <header className="flex items-center justify-between px-5 pb-3 pt-4">
         <div>
-          <h2 className="text-lg font-medium tracking-tight">待我处理</h2>
+          <h2 className="text-lg font-medium tracking-tight">Chờ tôi xử lý</h2>
           <p className="mt-0.5 text-[10.5px] text-muted-foreground">
-            保全到期 / 未读法院短信 / 待审批用章
+            Bảo toàn đến hạn / tin nhắn toà án chưa đọc / chờ duyệt dùng dấu
           </p>
         </div>
         <Link
           href="/schedule"
           className="group inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
-          全部
+          Tất cả
           <ArrowRight
             className="h-3 w-3 transition-transform group-hover:translate-x-0.5"
             strokeWidth={1.8}
@@ -181,7 +181,7 @@ export async function AlertsList() {
         {alerts.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center py-10 text-center text-sm text-muted-foreground">
             <AlertTriangle className="mb-2 h-5 w-5 opacity-30" />
-            暂无待处理事项
+            Chưa có việc chờ xử lý
           </div>
         ) : (
           alerts.map((a) => {

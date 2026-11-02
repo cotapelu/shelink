@@ -24,11 +24,11 @@ function ContactHeader({ index, onRemove, canRemove }: ContactCardProps) {
   };
   return (
     <div className="mb-2 flex items-center justify-between">
-      <span className="text-xs font-medium text-muted-foreground">联系人 {index + 1}</span>
+      <span className="text-xs font-medium text-muted-foreground">Người liên hệ {index + 1}</span>
       <div className="flex items-center gap-2">
         <label className="flex cursor-pointer items-center gap-1 text-xs text-muted-foreground">
           <Checkbox checked={!!checked} onCheckedChange={onCheckedChange} />
-          <Star className="h-3 w-3" /> 主要联系人
+          <Star className="h-3 w-3" /> Người liên hệ chính
         </label>
         {canRemove && (
           <Button type="button" variant="ghost" size="sm" onClick={onRemove} className="h-7 w-7 p-0 text-destructive">
@@ -46,7 +46,7 @@ function ContactForm({ index }: { index: number }) {
   const emailError = errors.contacts?.[index]?.email?.message as string | undefined;
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <Field label="姓名" required error={nameError}><Input placeholder="姓名" {...register(`contacts.${index}.name`)} /></Field>
+      <Field label="Họ tên" required error={nameError}><Input placeholder="Họ tên" {...register(`contacts.${index}.name`)} /></Field>
       <Field label="Chức vụ"><Input placeholder="Ví dụ: Phòng KT" {...register(`contacts.${index}.title`)} /></Field>
       <Field label="SĐT"><Input className="font-mono" placeholder="11 số điện thoại" {...register(`contacts.${index}.phone`)} /></Field>
       <Field label="Email" error={emailError}><Input type="email" placeholder="contact@example.com" {...register(`contacts.${index}.email`)} /></Field>

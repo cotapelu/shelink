@@ -18,7 +18,7 @@ export function ClientContactsSection() {
 
   return (
     <Section
-      title="联系人"
+      title="Người liên hệ"
       action={
         <Button
           type="button"
@@ -38,7 +38,7 @@ export function ClientContactsSection() {
           className="h-7 gap-1"
         >
           <Plus className="h-3.5 w-3.5" />
-          Thêm联系人
+          Thêm người liên hệ
         </Button>
       }
     >

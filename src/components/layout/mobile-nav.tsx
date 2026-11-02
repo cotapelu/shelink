@@ -40,7 +40,7 @@ export function MobileNav({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-60 p-0">
         <SheetHeader className="sr-only">
-          <SheetTitle>导航菜单</SheetTitle>
+          <SheetTitle>Menu điều hướng</SheetTitle>
         </SheetHeader>
         <div className="h-full" onClick={() => onOpenChange(false)}>
           <NavContent firm={firm} />

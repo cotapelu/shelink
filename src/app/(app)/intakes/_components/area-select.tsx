@@ -29,7 +29,7 @@ interface AreaSelectProps {
 
 export function AreaSelect({ province, city, value, onValueChange }: AreaSelectProps) {
   const areas = areasOf(province, city);
-  const placeholder = city ? "选择区 / 县" : "请先选市";
+  const placeholder = city ? "Chọn quận / huyện" : "Hãy chọn tỉnh trước";
   const disabled = !city || areas.length === 0;
 
   return (
